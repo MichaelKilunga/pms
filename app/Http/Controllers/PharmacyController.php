@@ -1,0 +1,108 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Pharmacy;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class PharmacyController extends Controller
+{
+    /**
+     * Display a listing of pharmacies.
+     */
+    public function index()
+    {
+        // Fetch pharmacies owned by the authenticated user
+        $pharmacies = Pharmacy::where('owner_id', Auth::id())->get();
+        // dd($pharmacies);
+
+        // return view('pharmacies.index', compact('pharmacies'));
+    }
+
+    /**
+     * Show the form for creating a new pharmacy.
+     */
+    public function create()
+    {
+        return view('pharmacies.create');
+    }
+
+    /**
+     * Store a newly created pharmacy in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'location' => 'nullable|string|max:1000',
+        ]);
+
+        Pharmacy::create([
+            'name' => $request->name,
+            'location' => $request->location,
+            'owner_id' => Auth::id(),
+        ]);
+
+        return redirect()->route('pharmacies.index')->with('success', 'Pharmacy created successfully.');
+    }
+
+    /**
+     * Display the specified pharmacy.
+     */
+    public function show(Pharmacy $pharmacy)
+    {
+        $this->authorizeAccess($pharmacy);
+
+        return view('pharmacies.show', compact('pharmacy'));
+    }
+
+    /**
+     * Show the form for editing the specified pharmacy.
+     */
+    public function edit(Pharmacy $pharmacy)
+    {
+        $this->authorizeAccess($pharmacy);
+
+        return view('pharmacies.edit', compact('pharmacy'));
+    }
+
+    /**
+     * Update the specified pharmacy in storage.
+     */
+    public function update(Request $request, Pharmacy $pharmacy)
+    {
+        $this->authorizeAccess($pharmacy);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'location' => 'nullable|string|max:1000',
+        ]);
+
+        $pharmacy->update($request->only(['name', 'location']));
+
+        return redirect()->route('pharmacies.index')->with('success', 'Pharmacy updated successfully.');
+    }
+
+    /**
+     * Remove the specified pharmacy from storage.
+     */
+    public function destroy(Pharmacy $pharmacy)
+    {
+        $this->authorizeAccess($pharmacy);
+
+        $pharmacy->delete();
+
+        return redirect()->route('pharmacies.index')->with('success', 'Pharmacy deleted successfully.');
+    }
+
+    /**
+     * Check if the authenticated user is authorized to access the pharmacy.
+     */
+    private function authorizeAccess(Pharmacy $pharmacy)
+    {
+        if ($pharmacy->owner_id !== Auth::id()) {
+            abort(403, 'Unauthorized access');
+        }
+    }
+}
