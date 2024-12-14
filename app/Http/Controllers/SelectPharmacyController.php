@@ -12,16 +12,19 @@ class SelectPharmacyController extends Controller
     {
         // Get all businesses for the authenticated user
         $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
-        // If no businesses, redirect to dashboard
-        // dd($pharmacies);
-        // dd(Auth::user()->name);
-        // dd(Auth::user());
+        
         if (!$pharmacies) {
             // return redirect()->route('business.create');
             dd("You don't have pharmacy");
         }
         // dd(compact('businesses'));
         return view('pharmacies.selection', compact('pharmacies'));
+    }
+
+    public function switch()
+    {
+        session(['current_pharmacy_id'=>'']);
+        return redirect()->route('dashboard');
     }
 
     public function set(Request $request)

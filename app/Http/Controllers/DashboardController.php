@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pharmacy;
-Use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Staff;
 
 class DashboardController extends Controller
 {
@@ -13,9 +14,16 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
-        // dd($pharmacies); 
-        return view('dashboard', compact('pharmacies'));
+        if (Auth::user()->role == 'owner') {
+            $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
+            return view('dashboard', compact('pharmacies'));
+        } else {
+            $staff = Staff::where('user_id',Auth::user()->id)->first();
+            // dd($staff->pharmacy_id);
+            $pharmacy = Pharmacy::where('id',$staff->pharmacy_id)->first();
+            // dd($pharmacy);
+            return view('dashboard', compact('pharmacy'));
+        }
     }
 
     /**

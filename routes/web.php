@@ -39,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    // Route::get('/select', [SelectPharmacyController::class, 'show'])->name('pharmacies.selection');
+    Route::get('/select', [SelectPharmacyController::class, 'show'])->name('pharmacies.selection');
+    Route::get('/switch', [SelectPharmacyController::class, 'switch'])->name('pharmacies.switch');
     Route::post('/select', [SelectPharmacyController::class, 'set'])->name('pharmacies.set');
 });

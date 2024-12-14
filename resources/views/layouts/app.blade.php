@@ -12,11 +12,17 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+    {{-- styles --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Styles -->
-    @livewireStyles
+    {{-- @livewireStyles --}}
 </head>
 
 <body class="font-sans antialiased">
@@ -44,15 +50,16 @@
 
     @livewireScripts
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
             // Automatically show the modal if no pharmacy is selected
             @if (!session('current_pharmacy_id'))
-                var myModal = new bootstrap.Modal(document.getElementById('selectPharmacyModal'));
-                myModal.show();
+                $('#pharmacyModal').modal('show');
             @endif
         });
     </script>
+
 
 </body>
 
