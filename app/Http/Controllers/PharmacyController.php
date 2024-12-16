@@ -17,7 +17,7 @@ class PharmacyController extends Controller
         $pharmacies = Pharmacy::where('owner_id', Auth::id())->get();
         // dd($pharmacies);
 
-        // return view('pharmacies.index', compact('pharmacies'));
+         return view('pharmacies.index', compact('pharmacies'));
     }
 
     /**

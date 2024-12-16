@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Pharmacy;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Staff;
+use App\Models\Items;
+use App\Models\Sales;
 
 class DashboardController extends Controller
 {
@@ -14,15 +16,44 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        $totalMedicines = Items::count();
+        $totalSales = Sales::sum('amount'); // Adjust as needed
+        $lowStockCount = Items::where('stock', '<', 10)->count(); // Low stock threshold
+// dd($totalMedicines);
+        $medicines = Items::all(['name', 'stock']);
+        $medicineNames = $medicines->pluck('name');
+        $medicineStock = $medicines->pluck('stock');
+        $medicineSales = $medicines->map(function ($medicine) {
+            return $medicine->sales->sum('quantity'); // Assuming a `sales` relationship
+        });
+
         if (Auth::user()->role == 'owner') {
             $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
-            return view('dashboard', compact('pharmacies'));
+            return view('dashboard', compact(
+                'pharmacies',
+                'totalMedicines',
+                'totalSales',
+                'lowStockCount',
+                'medicines',
+                'medicineNames',
+                'medicineStock',
+                'medicineSales'
+            ));
         } else {
-            $staff = Staff::where('user_id',Auth::user()->id)->first();
+            $staff = Staff::where('user_id', Auth::user()->id)->first();
             // dd($staff->pharmacy_id);
-            $pharmacy = Pharmacy::where('id',$staff->pharmacy_id)->first();
-            // dd($pharmacy);
-            return view('dashboard', compact('pharmacy'));
+            $pharmacy = Pharmacy::where('id', $staff->pharmacy_id)->first();
+            // dd(Staff::all());
+            return view('dashboard', compact(
+                'pharmacy',
+                'totalMedicines',
+                'totalSales',
+                'lowStockCount',
+                'medicines',
+                'medicineNames',
+                'medicineStock',
+                'medicineSales'
+            ));
         }
     }
 

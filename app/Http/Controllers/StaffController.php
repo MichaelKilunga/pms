@@ -26,9 +26,9 @@ class StaffController extends Controller
 
         // Get staff for the pharmacy owned by the authenticated user
         $pharmacies = Pharmacy::where('owner_id', auth::id())->pluck('id');
-        $staff = Staff::whereIn('pharmacy_id', $pharmacies)->with('user', 'pharmacy')->get();
+        $staff = Staff::with(['user','pharmacy'])->where('pharmacy_id', session('current_pharmacy_id'))->get();
 
-        dd($staff);
+        // dd($staff);
 
         return view('staff.index', compact('staff'));
     }

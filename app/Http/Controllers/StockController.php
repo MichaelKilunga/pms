@@ -17,10 +17,8 @@ class StockController extends Controller
     public function index()
     {
         // Get stocks for pharmacies owned by the authenticated user
-        $pharmacies = Pharmacy::where('owner_id', auth::id())->pluck('id');
-        $stocks = Stock::whereIn('pharmacy_id', $pharmacies)
-            ->with('staff', 'pharmacy', 'item')
-            ->get();
+        // $pharmacies = Pharmacy::where('owner_id', auth::id())->pluck('id');
+        $stocks = Stock::with('staff', 'item')->where('pharmacy_id',session('current_pharmacy_id'))->get();
 
         return view('stock.index', compact('stocks'));
     }

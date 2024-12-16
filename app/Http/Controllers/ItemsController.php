@@ -5,23 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Items;
 use App\Models\Pharmacy;
 use App\Models\Category;
+use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ItemsController extends Controller
 {
     /**
-     * Display a listing of the items.
+     * Display a listing of the medicines
      */
     public function index()
     {
-        // Get items for pharmacies owned by the authenticated user
-        $pharmacies = Pharmacy::where('owner_id', auth::id())->pluck('id');
-        $items = Items::whereIn('pharmacy_id', $pharmacies)
-            ->with('category', 'pharmacy')
-            ->get();
-
-        return view('items.index', compact('items'));
+        $medicines = Items::with(['category', 'pharmacy'])->where('pharmacy_id', session('current_pharmacy_id'))->get();
+            // dd($medicines);
+        return view('medicines.index', compact('medicines'));
     }
 
     /**
@@ -32,7 +29,7 @@ class ItemsController extends Controller
         $pharmacies = Pharmacy::where('owner_id', auth::id())->get();
         $categories = Category::all();
 
-        return view('items.create', compact('pharmacies', 'categories'));
+        return view('medicines.create', compact('pharmacies', 'categories'));
     }
 
     /**
@@ -48,15 +45,17 @@ class ItemsController extends Controller
 
         Items::create($request->only('pharmacy_id', 'category_id', 'name'));
 
-        return redirect()->route('items.index')->with('success', 'Item added successfully.');
+        return redirect()->route('medicines')->with('success', 'Item added successfully.');
     }
 
     /**
      * Display the specified item.
      */
-    public function show(Items $item)
+    public function show($id)
     {
-        return view('items.show', compact('item'));
+// dd($id);
+        $medicine = Items::with(['category','pharmacy'])->where('id',$id)->first();
+        return view('medicines.show', compact('medicine'));
     }
 
     /**
@@ -67,7 +66,7 @@ class ItemsController extends Controller
         $pharmacies = Pharmacy::where('owner_id', auth::id())->get();
         $categories = Category::all();
 
-        return view('items.edit', compact('item', 'pharmacies', 'categories'));
+        return view('medicines.edit', compact('item', 'pharmacies', 'categories'));
     }
 
     /**
@@ -83,16 +82,18 @@ class ItemsController extends Controller
 
         $item->update($request->only('pharmacy_id', 'category_id', 'name'));
 
-        return redirect()->route('items.index')->with('success', 'Item updated successfully.');
+        return redirect()->route('medicines.index')->with('success', 'Item updated successfully.');
     }
 
     /**
      * Remove the specified item from storage.
      */
-    public function destroy(Items $item)
+    public function destroy(Request $request, Items $item)
     {
-        $item->delete();
+        // dd($request->id);
+        // $item->delete();
+        Items::destroy($request->id);
 
-        return redirect()->route('items.index')->with('success', 'Item deleted successfully.');
+        return redirect()->route('medicines')->with('success', 'Item deleted successfully.');
     }
 }

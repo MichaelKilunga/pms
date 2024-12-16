@@ -15,9 +15,7 @@ class CategoryController extends Controller
     public function index()
     {
         // Get categories for pharmacies owned by the authenticated user
-        $pharmacies = Pharmacy::where('owner_id', auth::id())->pluck('id');
-        $categories = Category::whereIn('pharmacy_id', $pharmacies)
-            ->with('pharmacy')
+        $categories = Category::where('pharmacy_id', session('current_pharmacy_id'))
             ->get();
 
         return view('categories.index', compact('categories'));

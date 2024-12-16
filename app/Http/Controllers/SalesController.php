@@ -17,9 +17,8 @@ class SalesController extends Controller
     public function index()
     {
         // Get sales data for the pharmacies owned by the authenticated user
-        $pharmacies = Pharmacy::where('owner_id', auth::id())->pluck('id');
-        $sales = Sales::whereIn('pharmacy_id', $pharmacies)
-            ->with('staff', 'pharmacy', 'item')
+        //    / $pharmacies = Pharmacy::whe(re('owner_id', auth::id())->pluck('id');
+        $sales = Sales::with('item')->where('pharmacy_id',session('current_pharmacy_id'))
             ->get();
 
         return view('sales.index', compact('sales'));

@@ -15,6 +15,24 @@
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
+                        {{ __('Medicine') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('stock') }}" :active="request()->routeIs('Stock')">
+                        {{ __('Stock') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('Sales')">
+                        {{ __('Sales') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
+                        {{ __('Staff') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('category') }}" :active="request()->routeIs('Categories')">
+                        {{ __('Categories') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('Pharmacies')">
+                        {{ __('Pharmacies') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -110,26 +128,26 @@
                                 {{ __('Profile') }}
                             </x-dropdown-link>
 
-                            @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
+                            {{-- @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
                                 <x-dropdown-link href="{{ route('api-tokens.index') }}">
                                     {{ __('API Tokens') }}
                                 </x-dropdown-link>
-                            @endif
+                            @endif --}}
 
                             {{-- Choose pharmacy --}}
                             @if (Auth::user()->role == 'owner')
                                 <x-dropdown-link href="{{ route('pharmacies.switch') }}">
-                                    <p class="btn btn-light text-danger" >{{ __('Switch Pharmacy') }} </p>
+                                    <p class="btn btn-light text-danger">{{ __('Switch Pharmacy') }} </p>
                                 </x-dropdown-link>
                             @endif
-                            
+
                             @if (Auth::user()->role != 'owner')
                                 <x-dropdown-link href="#">
                                     {{-- @foreach ($pharmacy as $pharmacy)
                                         {{$pharmacy->name}}
                                     @endforeach --}}
 
-                                    <p>Andre Pharmacy</p>
+                                    <p class=" btn-light text-danger disabled">Andre Pharmacy</p>
                                 </x-dropdown-link>
                             @endif
 
@@ -193,11 +211,47 @@
                 <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('medicine')">
+                    {{ __('Medicine') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Stock')">
+                    {{ __('Stock') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Sales')">
+                    {{ __('Sales') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Staff')">
+                    {{ __('Staff') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Categories')">
+                    {{ __('Categories') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Pharmacies')">
+                    {{ __('Pharmacies') }}
+                </x-responsive-nav-link>
 
-                @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
+                {{-- @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
                     <x-responsive-nav-link href="{{ route('api-tokens.index') }}" :active="request()->routeIs('api-tokens.index')">
                         {{ __('API Tokens') }}
                     </x-responsive-nav-link>
+                @endif --}}
+
+
+                {{-- Choose pharmacy --}}
+                @if (Auth::user()->role == 'owner')
+                    <x-dropdown-link href="{{ route('pharmacies.switch') }}">
+                        <p class="btn btn-light text-danger">{{ __('Switch Pharmacy') }} </p>
+                    </x-dropdown-link>
+                @endif
+
+                @if (Auth::user()->role != 'owner')
+                    <x-dropdown-link href="#">
+                        {{-- @foreach ($pharmacy as $pharmacy)
+                                        {{$pharmacy->name}}
+                                    @endforeach --}}
+
+                        <p class=" btn-light text-danger disabled">Andre Pharmacy</p>
+                    </x-dropdown-link>
                 @endif
 
                 <!-- Authentication -->
