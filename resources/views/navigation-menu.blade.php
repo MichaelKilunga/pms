@@ -119,7 +119,7 @@
                             {{-- Choose pharmacy --}}
                             @if (Auth::user()->role == 'owner')
                                 <x-dropdown-link href="{{ route('pharmacies.switch') }}">
-                                    {{ __('Switch Pharmacy') }}
+                                    <p class="btn btn-light text-danger" >{{ __('Switch Pharmacy') }} </p>
                                 </x-dropdown-link>
                             @endif
                             
