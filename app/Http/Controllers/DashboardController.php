@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Pharmacy;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use  Illuminate\Support\Carbon;
 use App\Models\Staff;
 use App\Models\Items;
 use App\Models\Sales;
+use App\Models\Stock;
+
+use function Pest\Laravel\get;
 
 class DashboardController extends Controller
 {
@@ -16,16 +21,44 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $totalMedicines = Items::count();
-        $totalSales = Sales::sum('amount'); // Adjust as needed
-        $lowStockCount = Items::where('stock', '<', 10)->count(); // Low stock threshold
-// dd($totalMedicines);
-        $medicines = Items::all(['name', 'stock']);
-        $medicineNames = $medicines->pluck('name');
-        $medicineStock = $medicines->pluck('stock');
-        $medicineSales = $medicines->map(function ($medicine) {
-            return $medicine->sales->sum('quantity'); // Assuming a `sales` relationship
-        });
+        $totalMedicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->count();
+        $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
+        $totalSales = Sales::sum('total_price'); // Adjust as needed
+        $totalStaff = Staff::where('pharmacy_id', session('current_pharmacy_id'))->count(); // Adjust as needed
+        $lowStockCount = Stock::where('quantity', '<', 10)->where('pharmacy_id', session('current_pharmacy_id'))->count(); // Low stock threshold
+        $stockExpired = Stock::where('expire_date', '<', now())->count();
+        // dd($lowStockCount);
+
+        $pharmacyId = session('current_pharmacy_id');
+        $itemsSummary = DB::table('items')
+            ->leftJoin('sales', function ($join) use ($pharmacyId) {
+                $join->on('items.id', '=', 'sales.item_id')
+                    ->where('sales.pharmacy_id', '=', $pharmacyId);
+            })
+            ->leftJoin('stocks', function ($join) use ($pharmacyId) {
+                $join->on('items.id', '=', 'stocks.item_id')
+                    ->where('stocks.pharmacy_id', '=', $pharmacyId);
+            })
+            ->select(
+                'items.name as medicine_name',
+                DB::raw('COALESCE(SUM(sales.quantity), 0) as total_sales'),
+                DB::raw('COALESCE(SUM(stocks.quantity), 0) as total_stock')
+            )
+            ->groupBy('items.id', 'items.name')
+            ->havingRaw('SUM(sales.quantity) > 0') // Exclude items with no sales
+            ->get();
+
+        $medicineNames = $itemsSummary->pluck('medicine_name');
+        $medicineStock = $itemsSummary->pluck('total_stock');
+        $medicineSales = $itemsSummary->pluck('total_sales');
+
+        $medicines = $itemsSummary;
+
+
+        $filter = 'day';
+        $query = Sales::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today());
+        $filteredTotalSales = $query->sum('total_price');
+        // dd($filteredTotalSales);
 
         if (Auth::user()->role == 'owner') {
             $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
@@ -37,7 +70,12 @@ class DashboardController extends Controller
                 'medicines',
                 'medicineNames',
                 'medicineStock',
-                'medicineSales'
+                'medicineSales',
+                'totalStaff',
+                'totalPharmacies',
+                'stockExpired',
+                'filteredTotalSales',
+                'filter'
             ));
         } else {
             $staff = Staff::where('user_id', Auth::user()->id)->first();
@@ -52,10 +90,43 @@ class DashboardController extends Controller
                 'medicines',
                 'medicineNames',
                 'medicineStock',
-                'medicineSales'
+                'medicineSales',
+                'totalStaff',
+                'totalPharmacies',
+                'stockExpired'
             ));
         }
     }
+
+    public function filterSales(Request $request)
+    {
+        $duration = $request->filter;
+        $query = Sales::where('pharmacy_id', session('current_pharmacy_id'));
+        // dd($duration);
+        switch ($duration) {
+            case 'day':
+                $query->whereDate('created_at', Carbon::today());
+                break;
+            case 'week':
+                $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                break;
+            case 'month':
+                $query->whereMonth('created_at', Carbon::now()->month);
+                break;
+            case 'year':
+                $query->whereYear('created_at', Carbon::now()->year);
+                break;
+            default:
+                return response()->json(['error' => 'Invalid filter'], 400);
+        }
+
+        $filteredTotalSales = $query->sum('total_price');
+
+        return response()->json([
+            'filteredTotalSales' => $filteredTotalSales  ?? 0
+        ]);
+    }
+
 
     /**
      * Show the form for creating a new resource.

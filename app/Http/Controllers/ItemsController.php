@@ -17,8 +17,10 @@ class ItemsController extends Controller
     public function index()
     {
         $medicines = Items::with(['category', 'pharmacy'])->where('pharmacy_id', session('current_pharmacy_id'))->get();
+        $categories = Category::where('pharmacy_id', session('current_pharmacy_id'))->get();
+        $pharmacy = Pharmacy::where('pharmacy_id', session('current_pharmacy_id'))->first();
             // dd($medicines);
-        return view('medicines.index', compact('medicines'));
+        return view('medicines.index', compact('medicines','categories','pharmacy'));
     }
 
     /**
@@ -80,9 +82,10 @@ class ItemsController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
+        $item = Items::where('pharmacy_id', $request->pharmacy_id)->where('id', $request->id);
         $item->update($request->only('pharmacy_id', 'category_id', 'name'));
 
-        return redirect()->route('medicines.index')->with('success', 'Item updated successfully.');
+        return redirect()->route('medicines')->with('success', 'Item updated successfully.');
     }
 
     /**
@@ -94,6 +97,6 @@ class ItemsController extends Controller
         // $item->delete();
         Items::destroy($request->id);
 
-        return redirect()->route('medicines')->with('success', 'Item deleted successfully.');
+        return redirect()->route('medicines')->with('success', 'Medicine deleted successfully!');
     }
 }

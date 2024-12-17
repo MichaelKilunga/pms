@@ -44,7 +44,7 @@ class CategoryController extends Controller
 
         Category::create($request->only('pharmacy_id', 'name', 'description'));
 
-        return redirect()->route('categories.index')->with('success', 'Category added successfully.');
+        return redirect()->route('category')->with('success', 'Category added successfully.');
     }
 
     /**
@@ -76,18 +76,20 @@ class CategoryController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        $category = Category::where('pharmacy_id', $request->pharmacy_id)->where('id', $request->id);
         $category->update($request->only('pharmacy_id', 'name', 'description'));
 
-        return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
+        return redirect()->route('category')->with('success', 'Category updated successfully.');
     }
 
     /**
      * Remove the specified category from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(Request $request)
     {
-        $category->delete();
+        Category::destroy($request->id);
+        // dd($request->id);
 
-        return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
+        return redirect()->route('category')->with('success', 'Category deleted successfully.');
     }
 }

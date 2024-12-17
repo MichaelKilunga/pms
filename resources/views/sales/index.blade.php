@@ -1,23 +1,19 @@
 @extends('sales.app')
 
 @section('content')
-@if (session('success'))
-<span class="bg-success">
-    {{session('success')}}!
-</span>
-@endif
-
     <div class="container mt-4">
+        <!-- Header -->
         <div class="d-flex justify-content-between mb-3">
-            <h2>Sales</h2>
-            <div>
-                <a href="{{ route('sales.create') }}" class="btn btn-success">Add New Sales</a>
-            </div>
+            <h2 class="text-primary fw-bold">Sales Management</h2>
+            <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createSalesModal">
+                <i class="bi bi-plus-lg"></i> Add New Sales
+            </a>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover" id="Table">
-                <thead>
+        <!-- Sales Table -->
+        <div class="table-responsive shadow-sm rounded-3">
+            <table class="table table-striped table-hover table-bordered align-middle" id="Table">
+                <thead class="table-primary">
                     <tr>
                         <th>#</th>
                         <th>Sales Name</th>
@@ -28,20 +24,100 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($sales as $sales)
+                    @foreach ($sales as $sale)
                         <tr>
-                            <td>{{ $sales->id }}</td>
-                            <td>{{ $sales->item->name }}</td>
-                            <td>{{ $sales->total_price }}</td>
-                            <td>{{ $sales->quantity }}</td>
-                            <td>{{ $sales->date }}</td>
+                            <td>{{ $sale->id }}</td>
+                            <td>{{ $sale->item->name }}</td>
+                            <td>{{ $sale->total_price }}</td>
+                            <td>{{ $sale->quantity }}</td>
+                            <td>{{ $sale->date }}</td>
                             <td>
-                                <a href="{{ route('sales.show', $sales->id) }}" class="btn btn-primary btn-sm"><i class="bi bi-eye" ></i></a>
-                                <a href="{{ route('sales.edit', $sales->id) }}" class="btn btn-success btn-sm"><i class="bi bi-pencil" ></i></a>
-                                <form action="{{ route('sales.destroy', $sales->id) }}" method="POST" style="display:inline;">
+                                <!-- View Modal -->
+                                <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#viewSaleModal{{ $sale->id }}">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                <!-- View Sale Modal -->
+                                <div class="modal fade" id="viewSaleModal{{ $sale->id }}" tabindex="-1"
+                                    aria-labelledby="viewSaleModalLabel{{ $sale->id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="viewSaleModalLabel{{ $sale->id }}">Sale
+                                                    Details</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div><strong>Sales Name:</strong> {{ $sale->item->name }}</div>
+                                                <div><strong>Price:</strong> {{ $sale->total_price }}</div>
+                                                <div><strong>Quantity:</strong> {{ $sale->quantity }}</div>
+                                                <div><strong>Date:</strong> {{ $sale->date }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Edit Modal -->
+                                <a href="#" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#editSaleModal{{ $sale->id }}">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                <!-- Edit Sale Modal -->
+                                <div class="modal fade" id="editSaleModal{{ $sale->id }}" tabindex="-1"
+                                    aria-labelledby="editSaleModalLabel{{ $sale->id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editSaleModalLabel{{ $sale->id }}">Edit
+                                                    Sale</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="{{ route('sales.update', $sale->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="number" name="id" class="form-control"
+                                                        value="{{ $sale->id }}" hidden readonly>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Sales Name</label>
+                                                        <input type="text" class="form-control"
+                                                            value="{{ $sale->item->name }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Price</label>
+                                                        <input type="number" class="form-control" name="total_price"
+                                                            value="{{ $sale->total_price }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Quantity</label>
+                                                        <input type="number" class="form-control" name="quantity"
+                                                            value="{{ $sale->quantity }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Date</label>
+                                                        <input type="text" class="form-control"
+                                                            value="{{ $sale->date }}" readonly  >
+                                                    </div>
+                                                    <button type="submit" class="btn btn-success">Update</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Delete Form -->
+                                <form action="{{ route('sales.destroy', $sale->id) }}" method="POST"
+                                    style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" onclick="confirm('Do you want to delete this sales?')" class="btn btn-danger btn-sm"><i class="bi bi-trash" ></i></button>
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Are you sure to delete this sale?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </form>
                             </td>
                         </tr>
@@ -50,7 +126,112 @@
             </table>
         </div>
     </div>
+
+    <!-- Create Sales Modal -->
+    <div class="modal fade" id="createSalesModal" tabindex="-1" aria-labelledby="createSalesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="createSalesModalLabel">Add New Sale</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ route('sales.store') }}" method="POST" id="salesForm">
+                        @csrf
+                        <div id="salesFields">
+                            <div class="row mb-3 sale-entry align-items-center">
+                                <div class="col-md-3">
+                                    <label class="form-label">Item</label>
+                                    <select name="item_id[]" class="form-select" required>
+                                        <option selected disabled value="">Select Item</option>
+                                        @foreach ($medicines as $medicine)
+                                            <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Price</label>
+                                    <input type="number" class="form-control" placeholder="Price" name="total_price[]"
+                                        required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" placeholder="Quantity" name="quantity[]"
+                                        required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Date</label>
+                                    <input type="date" class="form-control" name="date[]" required>
+                                </div>
+                                {{-- <div class="col-md-2 d-flex justify-content-center">
+                                    <button type="button" class="btn btn-danger btn-sm remove-sale-row">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div> --}}
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" id="addSaleRow" class="btn btn-outline-primary">
+                                <i class="bi bi-plus-lg"></i> Add Row
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Save Sales
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add Row Button
+            document.getElementById('addSaleRow').addEventListener('click', function() {
+                const salesFields = document.getElementById('salesFields');
+
+                const newRow = document.createElement('div');
+                newRow.classList.add('row', 'mb-3', 'sale-entry', 'align-items-center');
+
+                newRow.innerHTML = `
+                    <div class="col-md-3">
+                        <select name="item_id[]" class="form-select" required>
+                            <option selected disabled value="">Select Item</option>
+                            @foreach ($medicines as $medicine)
+                                <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" name="total_price[]" placeholder="Price" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" name="quantity[]" placeholder="Quantity" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" class="form-control" name="date[]" required>
+                    </div>
+                    <div class="col-md-2 d-flex justify-content-center">
+                        <button type="button" class="btn btn-danger btn-sm remove-sale-row">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                `;
+                salesFields.appendChild(newRow);
+
+                // Attach Remove Row Event to the New Button
+                newRow.querySelector('.remove-sale-row').addEventListener('click', function() {
+                    newRow.remove();
+                });
+            });
+
+            // Initial Remove Row Buttons
+            document.querySelectorAll('.remove-sale-row').forEach(button => {
+                button.addEventListener('click', function() {
+                    button.closest('.sale-entry').remove();
+                });
+            });
+        });
+    </script>
 @endsection
-
-
- {{-- {{$sales}} --}}

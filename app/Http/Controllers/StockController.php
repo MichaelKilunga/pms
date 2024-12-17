@@ -18,9 +18,10 @@ class StockController extends Controller
     {
         // Get stocks for pharmacies owned by the authenticated user
         // $pharmacies = Pharmacy::where('owner_id', auth::id())->pluck('id');
-        $stocks = Stock::with('staff', 'item')->where('pharmacy_id',session('current_pharmacy_id'))->get();
+        $stocks = Stock::with('staff', 'item')->where('pharmacy_id', session('current_pharmacy_id'))->get();
+        $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
 
-        return view('stock.index', compact('stocks'));
+        return view('stock.index', compact('stocks', 'medicines'));
     }
 
     /**
@@ -41,20 +42,46 @@ class StockController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pharmacy_id' => 'required|exists:pharmacies,id',
-            'item_id' => 'required|exists:items,id',
-            'staff_id' => 'required|exists:users,id',
-            'quantity' => 'required|integer|min:1',
-            'buying_price' => 'required|numeric',
-            'selling_price' => 'required|numeric',
-            'in_date' => 'required|date',
-            'expire_date' => 'required|date',
+            'item_id' => 'required|array',
+            'item_id.*' => 'required|exists:items,id',
+
+            'quantity' => 'required|array',
+            'quantity.*' => 'required|integer|min:1',
+
+            'buying_price' => 'required|array',
+            'buying_price.*' => 'required|numeric',
+
+            'selling_price' => 'required|array',
+            'selling_price.*' => 'required|numeric',
+
+            'in_date' => 'required|array',
+            'in_date.*' => 'required|date',
+            
+            'expire_date' => 'required|array',
+            'expire_date.*' => 'required|date',
         ]);
 
-        Stock::create($request->only('pharmacy_id', 'item_id', 'staff_id', 'quantity', 'buying_price', 'selling_price', 'in_date', 'expire_date'));
+        // Assuming 'pharmacy_id' and 'staff_id' are constants or come from the request
+        $pharmacy_id = session('current_pharmacy_id');
+        $staff_id = Auth::user()->id;
 
-        return redirect()->route('stock.index')->with('success', 'Stock added successfully.');
+        // Loop through the rows of input and create the stock records
+        foreach ($request->item_id as $index => $item_id) {
+            Stock::create([
+                'pharmacy_id' => $pharmacy_id,
+                'staff_id' => $staff_id,
+                'item_id' => $item_id,
+                'quantity' => $request->quantity[$index],
+                'buying_price' => $request->buying_price[$index],
+                'selling_price' => $request->selling_price[$index],
+                'in_date' => $request->in_date[$index],
+                'expire_date' => $request->expire_date[$index],
+            ]);
+        }
+
+        return redirect()->route('stock')->with('success', 'Stock added successfully.');
     }
+
 
     /**
      * Display the specified stock entry.
@@ -84,10 +111,10 @@ class StockController extends Controller
             'in_date' => 'required|date',
             'expire_date' => 'required|date',
         ]);
-
+        $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id',$request->id)->first();
         $stock->update($request->only('quantity', 'buying_price', 'selling_price', 'in_date', 'expire_date'));
 
-        return redirect()->route('stock.index')->with('success', 'Stock updated successfully.');
+        return redirect()->route('stock')->with('success', 'Stock updated successfully.');
     }
 
     /**
@@ -97,6 +124,6 @@ class StockController extends Controller
     {
         $stock->delete();
 
-        return redirect()->route('stock.index')->with('success', 'Stock deleted successfully.');
+        return redirect()->route('stock')->with('success', 'Stock deleted successfully.');
     }
 }
