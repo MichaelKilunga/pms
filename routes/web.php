@@ -41,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('medicines/create', [ItemsController::class, 'create'])->name('medicines.create');
     Route::post('medicines', [ItemsController::class, 'store'])->name('medicines.store');
     Route::get('medicines/{id}', [ItemsController::class, 'show'])->name('medicines.show');
-    Route::put('medicines/update/{id}', [ItemsController::class, 'destroy'])->name('medicines.edit');
+    Route::put('medicines/update/{id}', [ItemsController::class, 'update'])->name('medicines.update');
     Route::delete('medicines/delete/{id}', [ItemsController::class, 'destroy'])->name('medicines.destroy');
 
 
@@ -65,14 +65,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('stock/create', [StockController::class, 'create'])->name('stock.create');
     Route::post('stock', [StockController::class, 'store'])->name('stock.store');
     Route::get('stock/{id}', [StockController::class, 'show'])->name('stock.show');
-    Route::put('stock/update/{id}', [StockController::class, 'destroy'])->name('stock.edit');
+    Route::put('stock', [StockController::class, 'update'])->name('stock.update');
     Route::delete('stock/delete/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
 
     Route::get('sales', [SalesController::class, 'index'])->name('sales');
     Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');
     Route::post('sales', [SalesController::class, 'store'])->name('sales.store');
     Route::get('sales/{id}', [SalesController::class, 'show'])->name('sales.show');
-    Route::put('sales/update/{id}', [SalesController::class, 'destroy'])->name('sales.edit');
+    Route::put('sales', [SalesController::class, 'update'])->name('sales.update');
     Route::delete('sales/delete/{id}', [SalesController::class, 'destroy'])->name('sales.destroy');
 
 
@@ -80,7 +80,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('category/create', [CategoryController::class, 'create'])->name('category.create');
     Route::post('category', [CategoryController::class, 'store'])->name('category.store');
     Route::get('category/{id}', [CategoryController::class, 'show'])->name('category.show');
-    Route::put('category/update/{id}', [CategoryController::class, 'destroy'])->name('category.edit');
+    Route::put('category', [CategoryController::class, 'update'])->name('category.update');
     Route::delete('category/delete/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
 
     // Route::resource('categories', CategoryController::class);

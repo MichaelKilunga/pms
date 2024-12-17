@@ -19,7 +19,7 @@
     <link rel='stylesheet' href='https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css'>
     {{-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> --}}
 
-<!-- Add this in your <head> section for DataTables CSS -->
+    <!-- Add this in your <head> section for DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
     <!-- Scripts -->
@@ -47,7 +47,30 @@
 
         <!-- Page Content -->
         <main>
+            {{-- @if (session('success'))
+                <script>
+                    Swal.fire({
+                        // position: "top-end",
+                        icon: "success",
+                        title: {{session('success')}},
+                        // showConfirmButton: false,
+                        timer: 2000
+                    });
+                </script>
+            @endif
+            @if (session('error'))
+                <script>
+                    Swal.fire({
+                        // position: "top-end",
+                        icon: "error",
+                        title: {{session("error")}},
+                        // showConfirmButton: false,
+                        timer: 2000
+                    });
+                </script>
+            @endif --}}
             {{ $slot }}
+
         </main>
     </div>
 
@@ -62,9 +85,26 @@
             @if (!session('current_pharmacy_id'))
                 $('#pharmacyModal').modal('show');
             @endif
+
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: '{{ session('success') }}',
+                    timer: 2000
+                });
+            @endif
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: '{{ session('error') }}',
+                    timer: 2000
+                });
+            @endif
         });
     </script>
 
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Include DataTables and Buttons scripts -->
     {{-- <script>
@@ -93,32 +133,32 @@
         });
     </script> --}}
 
-    
-{{-- @push('scripts') --}}
-<script>
-    $(document).ready(function() {
-        $('#Table').DataTable({
-            paging: true,  // Enable paging
-            searching: true,  // Enable search bar
-            ordering: true,  // Enable column sorting
-            info: true  // Enable information display
+
+    {{-- @push('scripts') --}}
+    <script>
+        $(document).ready(function() {
+            $('#Table').DataTable({
+                paging: true, // Enable paging
+                searching: true, // Enable search bar
+                ordering: true, // Enable column sorting
+                info: true // Enable information display
+            });
         });
-    });
-</script>
-{{-- @endpush --}}
+    </script>
+    {{-- @endpush --}}
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     {{-- <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> --}}
-   {{-- <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script> --}}
+    {{-- <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script> --}}
 
-{{-- <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    {{-- <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script> --}}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
-{{-- 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- 
 <script src='https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js'></script>
 <script src='https://cdn.datatables.net/responsive/2.1.0/js/dataTables.responsive.min.js'></script>
 <script src='https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js'></script> 
@@ -128,10 +168,11 @@
 
     <!-- Add this before the closing </body> tag for DataTables JS -->
     <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js">
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
 
 
 </body>

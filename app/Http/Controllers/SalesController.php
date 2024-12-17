@@ -18,10 +18,11 @@ class SalesController extends Controller
     {
         // Get sales data for the pharmacies owned by the authenticated user
         //    / $pharmacies = Pharmacy::whe(re('owner_id', auth::id())->pluck('id');
-        $sales = Sales::with('item')->where('pharmacy_id',session('current_pharmacy_id'))
+        $sales = Sales::with('item')->where('pharmacy_id', session('current_pharmacy_id'))
             ->get();
+        $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
 
-        return view('sales.index', compact('sales'));
+        return view('sales.index', compact('sales', 'medicines'));
     }
 
     /**
@@ -41,19 +42,47 @@ class SalesController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request);
+        // Validate the incoming request data for all rows of sales
         $request->validate([
             'pharmacy_id' => 'required|exists:pharmacies,id',
-            'item_id' => 'required|exists:items,id',
             'staff_id' => 'required|exists:users,id',
-            'quantity' => 'required|integer|min:1',
-            'total_price' => 'required|numeric',
-            'date' => 'required|date',
+
+            'item_id' => 'required|array',         // Ensure it's an array of item IDs
+            'item_id.*' => 'required|exists:items,id', // Validate each item ID in the array
+
+            'quantity' => 'required|array',        // Ensure it's an array of quantities
+            'quantity.*' => 'required|integer|min:1', // Validate each quantity
+
+            'total_price' => 'required|array',     // Ensure it's an array of prices
+            'total_price.*' => 'required|numeric', // Validate each total price
+
+            'date' => 'required|array',            // Ensure it's an array of dates
+            'date.*' => 'required|date',           // Validate each date
         ]);
 
-        Sales::create($request->only('pharmacy_id', 'item_id', 'staff_id', 'quantity', 'total_price', 'date'));
+        // Retrieve the pharmacy_id and staff_id for the sale record
+        $pharmacyId = session('current_pharmacy_id'); // Ensure this is set correctly in your session
+        $staffId = Auth::user()->id;
 
-        return redirect()->route('sales.index')->with('success', 'Sale recorded successfully.');
+
+        // Loop through the arrays of item data and create individual sale records
+        foreach ($request->item_id as $key => $item_id) {
+            Sales::create([
+                'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
+                'staff_id' => $staffId,                // Use the staff_id from the authenticated user
+                'item_id' => $item_id,
+                'quantity' => $request->quantity[$key],
+                'total_price' => $request->total_price[$key],
+                'date' => $request->date[$key],
+            ]);
+        }
+
+        // Redirect with a success message
+        return redirect()->route('sales')->with('success', 'Sales recorded successfully.');
     }
+
+
 
     /**
      * Display the specified sale.
@@ -81,9 +110,10 @@ class SalesController extends Controller
             'total_price' => 'required|numeric',
         ]);
 
+        $sale = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $request->id)->first();
         $sale->update($request->only('quantity', 'total_price'));
 
-        return redirect()->route('sales.index')->with('success', 'Sale updated successfully.');
+        return redirect()->route('sales')->with('success', 'Sale updated successfully.');
     }
 
     /**
@@ -93,6 +123,6 @@ class SalesController extends Controller
     {
         Sales::destroy($request->id);
 
-        return redirect()->route('sales')->with('success', 'Sale deleted successfully.');
+        return redirect()->route('sales')->with('success', 'Sale deleted successfully!');
     }
 }
