@@ -42,7 +42,7 @@ class SalesController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request);
+        // dd($request);
         // Validate the incoming request data for all rows of sales
         $request->validate([
             'pharmacy_id' => 'required|exists:pharmacies,id',
