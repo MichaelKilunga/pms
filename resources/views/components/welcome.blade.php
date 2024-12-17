@@ -1,77 +1,117 @@
-{{-- <div
-    class="p-6 lg:p-8 bg-white dark:bg-gray-800 dark:bg-gradient-to-bl dark:from-gray-700/50 dark:via-transparent border-b border-gray-200 dark:border-gray-700">
-</div>
-
-<div class="bg-gray-200 dark:bg-gray-800 bg-opacity-25 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 p-6 lg:p-8"></div> --}}
-
-{{-- @extends('layouts.app') --}}
-
-{{-- @section('content') --}}
-    <div class="container mt-4">
-        <h1 class="mb-4">Dashboard</h1>
-
-        {{-- Summary Section --}}
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <h4>Total Medicines</h4>
-                        <p class="fs-4">{{ $totalMedicines }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <h4>Total Sales</h4>
-                        <p class="fs-4">{{ $totalSales }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-warning text-dark">
-                    <div class="card-body">
-                        <h4>Low Stock Medicines</h4>
-                        <p class="fs-4">{{ $lowStockCount }}</p>
-                    </div>
+<div class="container mt-4">
+    {{-- Summary Section --}}
+    <div class="row mb-4 g-4 justify-content-center text-center">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card bg-danger text-white shadow">
+                <div class="card-body">
+                    <h6>Medicines</h6>
+                    <p class="fs-5 fw-bold">{{ $totalMedicines }}</p>
                 </div>
             </div>
         </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <h6>Staff</h6>
+                    <p class="fs-5 fw-bold">{{ $totalStaff }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card bg-warning text-dark shadow">
+                <div class="card-body">
+                    <h6>Pharmacies</h6>
+                    <p class="fs-5 fw-bold">{{ $totalPharmacies }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card bg-danger text-white shadow">
+                <div class="card-body">
+                    <h6>Expired</h6>
+                    <p class="fs-5 fw-bold">{{ $stockExpired }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <h6>Total Sales</h6>
+                    <p class="fs-5 fw-bold">{{ $totalSales }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card bg-warning text-dark shadow">
+                <div class="card-body">
+                    <h6>Low Stock</h6>
+                    <p class="fs-5 fw-bold">{{ $lowStockCount }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        {{-- Quick Actions Section --}}
-        <div class="row mb-4">
-            <div class="col">
-                <div class="card">
-                    <div class="card-body">
-                        <h4>Quick Actions</h4>
-                        <div class="d-flex justify-content-start mt-3">
-                            <a href="{{ route('medicines.create') }}" class="btn btn-success me-2">Add Medicine</a>
-                            <a href="{{ route('sales') }}" class="btn btn-primary me-2">View Sales</a>
-                            <a href="{{ route('stock') }}" class="btn btn-warning">Low Stock</a>
+    {{-- Sales Filter Section --}}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h4 class="text-center mb-3">Total Sales</h4>
+                    <form id="filter-Form" class="row gy-2 gx-3 align-items-center justify-content-center">
+                        <div class="col-auto">
+                            <select name="filter" class="form-select" required>
+                                <option value="day" {{ $filter == 'day' ? 'selected' : '' }}>Today</option>
+                                <option value="week" {{ $filter == 'week' ? 'selected' : '' }}>This Week</option>
+                                <option value="month" {{ $filter == 'month' ? 'selected' : '' }}>This Month</option>
+                                <option value="year" {{ $filter == 'year' ? 'selected' : '' }}>This Year</option>
+                            </select>
                         </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Apply Filter</button>
+                        </div>
+                    </form>
+
+                    {{-- Total Sales in Selected Range --}}
+                    <div class="mt-3 text-center">
+                        <h5 class="fw-bold">
+                            Total Sales in Selected Range: <span
+                                class="text-success total-sales">{{ $filteredTotalSales }} TZS</span>
+                        </h5>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        {{-- Sales vs Medicine Bar Graph and Summary Stock Table --}}
-        <div class="row">
-            {{-- Sales vs Medicine Bar Graph --}}
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h4>Sales vs Medicines</h4>
-                        <canvas id="salesMedicineChart"></canvas>
-                    </div>
+    {{-- Graphs Section --}}
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <h4 class="text-center">Sales vs Medicines Graph</h4>
+                    <canvas id="salesGraph"></canvas>
                 </div>
             </div>
+        </div>
 
-            {{-- Summary Stock Table --}}
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h4>Stock Summary</h4>
-                        <table class="table table-striped" id="Table">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <h4 class="text-center">Stock vs Medicines Graph</h4>
+                    <canvas id="stockGraph"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Stock Summary Table --}}
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h4 class="text-center">Stock Summary</h4>
+                    <div class="table-responsive">
+                        <table id="Table" class="table table-striped table-hover text-center">
                             <thead>
                                 <tr>
                                     <th>Medicine</th>
@@ -81,8 +121,8 @@
                             <tbody>
                                 @foreach ($medicines as $medicine)
                                     <tr>
-                                        <td>{{ $medicine->name }}</td>
-                                        <td>{{ $medicine->stock }}</td>
+                                        <td>{{ $medicine->medicine_name }}</td>
+                                        <td>{{ $medicine->total_stock }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -92,49 +132,91 @@
             </div>
         </div>
     </div>
-{{-- @endsection --}}
+</div>
 
-{{-- @push('scripts') --}}
-    {{-- Include Chart.js --}}
-    {{-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const ctx = document.getElementById('salesMedicineChart').getContext('2d');
-            const salesMedicineChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: {!! json_encode($medicineNames) !!}, // Pass medicine names from the controller
-                    datasets: [
-                        {
-                            label: 'Sales',
-                            data: {!! json_encode($medicineSales) !!}, // Pass sales data from the controller
-                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Stock',
-                            data: {!! json_encode($medicineStock) !!}, // Pass stock data from the controller
-                            backgroundColor: 'rgba(255, 206, 86, 0.6)',
-                            borderColor: 'rgba(255, 206, 86, 1)',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+{{-- Script for Two Separate Graphs --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sales Graph
+        const salesCtx = document.getElementById('salesGraph').getContext('2d');
+        new Chart(salesCtx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($medicineNames) !!},
+                datasets: [{
+                    label: 'Sales',
+                    data: {!! json_encode($medicineSales) !!},
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
                     }
+                }
+            }
+        });
+
+        // Stock Graph
+        const stockCtx = document.getElementById('stockGraph').getContext('2d');
+        new Chart(stockCtx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($medicineNames) !!},
+                datasets: [{
+                    label: 'Stock',
+                    data: {!! json_encode($medicineStock) !!},
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Listen for form submission
+        $('#filter-Form').on('submit', function(event) {
+            event.preventDefault(); // Prevent page reload
+
+            var filterValue = $('select[name="filter"]').val(); // Get selected filter value
+            // $('.total-sales').text(filterValue);
+            // Perform AJAX request
+            $.ajax({
+                url: '{{ route('sales.filter') }}',
+                method: 'GET',
+                data: {
+                    filter: filterValue
+                },
+                dataType: 'json',
+                success: function(response) {
+                    // Update the total sales value in the DOM
+                    $('.total-sales').addClass('text-success');
+                    $('.total-sales').text((response.filteredTotalSales) +" "+"TZS");
+
+                    console.log('Sales data updated successfully.');
+                },
+                error: function(error) {
+                    console.error('Error fetching sales data:', error);
+                    $('.total-sales').text("There is an Error!");
+                    $('.total-sales').removeClass('text-success');
+                    $('.total-sales').addClass('text-danger');
                 }
             });
         });
-    </script>
-{{-- @endpush --}}
+    });
+</script>

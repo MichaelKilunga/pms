@@ -30,10 +30,11 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     // Route::resource('dashboard', DashboardController::class);
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('pharmacy', PharmacyController::class);
-    Route::resource('staff', StaffController::class);
-    Route::resource('sales', SalesController::class);
-    Route::resource('stock', StockController::class);
+    Route::get('/sales/filter', [DashboardController::class, 'filterSales'])->name('sales.filter');
+    // Route::resource('pharmacy', PharmacyController::class);
+    // Route::resource('staff', StaffController::class);
+    // Route::resource('sales', SalesController::class);
+    // Route::resource('stock', StockController::class);
 
     // Route::resource('medicines', ItemsController::class);
     Route::get('medicines', [ItemsController::class, 'index'])->name('medicines');
@@ -74,6 +75,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('sales/update/{id}', [SalesController::class, 'destroy'])->name('sales.edit');
     Route::delete('sales/delete/{id}', [SalesController::class, 'destroy'])->name('sales.destroy');
 
+
     Route::get('category', [CategoryController::class, 'index'])->name('category');
     Route::get('category/create', [CategoryController::class, 'create'])->name('category.create');
     Route::post('category', [CategoryController::class, 'store'])->name('category.store');
@@ -81,7 +83,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('category/update/{id}', [CategoryController::class, 'destroy'])->name('category.edit');
     Route::delete('category/delete/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
 
-    Route::resource('categories', CategoryController::class);
+    // Route::resource('categories', CategoryController::class);
 });
 
 Route::middleware(['auth'])->group(function () {
