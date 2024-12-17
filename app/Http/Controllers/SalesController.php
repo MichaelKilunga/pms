@@ -89,10 +89,10 @@ class SalesController extends Controller
     /**
      * Remove the specified sale from storage.
      */
-    public function destroy(Sales $sale)
+    public function destroy(Request $request, Sales $sale)
     {
-        $sale->delete();
+        Sales::destroy($request->id);
 
-        return redirect()->route('sales.index')->with('success', 'Sale deleted successfully.');
+        return redirect()->route('sales')->with('success', 'Sale deleted successfully.');
     }
 }

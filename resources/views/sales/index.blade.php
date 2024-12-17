@@ -1,6 +1,12 @@
 @extends('sales.app')
 
 @section('content')
+@if (session('success'))
+<span class="bg-success">
+    {{session('success')}}!
+</span>
+@endif
+
     <div class="container mt-4">
         <div class="d-flex justify-content-between mb-3">
             <h2>Sales</h2>
@@ -35,7 +41,7 @@
                                 <form action="{{ route('sales.destroy', $sales->id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash" ></i></button>
+                                    <button type="submit" onclick="confirm('Do you want to delete this sales?')" class="btn btn-danger btn-sm"><i class="bi bi-trash" ></i></button>
                                 </form>
                             </td>
                         </tr>
