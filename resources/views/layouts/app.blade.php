@@ -61,19 +61,22 @@
             @if (!session('current_pharmacy_id'))
                 $('#pharmacyModal').modal('show');
             @endif
+            @if (session('guest-owner'))
+                $('#guestPharmacyModal').modal('show');
+            @endif
 
             @if(session('success'))
             Swal.fire({
                 icon: 'success',
                 title: '{{ session('success') }}',
-                timer: 2000
+                // timer: 2000
             });
             @endif
             @if(session('error'))
             Swal.fire({
                 icon: 'error',
                 title: '{{ session('error') }}',
-                timer: 2000
+                // timer: 2000
             });
             @endif
 

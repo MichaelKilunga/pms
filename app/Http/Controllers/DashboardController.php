@@ -13,6 +13,7 @@ use App\Models\Sales;
 use App\Models\Stock;
 
 use function Pest\Laravel\get;
+use function PHPUnit\Framework\isEmpty;
 
 class DashboardController extends Controller
 {
@@ -23,13 +24,15 @@ class DashboardController extends Controller
     {
         $totalMedicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->count();
         $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
-        $totalSales = Sales::sum('total_price'); // Adjust as needed
+        $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->sum('total_price'); // Adjust as needed
         $totalStaff = Staff::where('pharmacy_id', session('current_pharmacy_id'))->count(); // Adjust as needed
         $lowStockCount = Stock::where('quantity', '<', 10)->where('pharmacy_id', session('current_pharmacy_id'))->count(); // Low stock threshold
         $stockExpired = Stock::where('expire_date', '<', now())->count();
         // dd($lowStockCount);
 
         $pharmacyId = session('current_pharmacy_id');
+        session(['pharmacy_name' => Pharmacy::where('id', session('current_pharmacy_id'))->value('name')]);
+
         $itemsSummary = DB::table('items')
             ->leftJoin('sales', function ($join) use ($pharmacyId) {
                 $join->on('items.id', '=', 'sales.item_id')
@@ -62,26 +65,30 @@ class DashboardController extends Controller
 
         if (Auth::user()->role == 'owner') {
             $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
-            return view('dashboard', compact(
-                'pharmacies',
-                'totalMedicines',
-                'totalSales',
-                'lowStockCount',
-                'medicines',
-                'medicineNames',
-                'medicineStock',
-                'medicineSales',
-                'totalStaff',
-                'totalPharmacies',
-                'stockExpired',
-                'filteredTotalSales',
-                'filter'
-            ));
+            // dd($pharmacies->count());
+            if ($pharmacies->count() > 0) {
+                return view('dashboard', compact(
+                    'pharmacies',
+                    'totalMedicines',
+                    'totalSales',
+                    'lowStockCount',
+                    'medicines',
+                    'medicineNames',
+                    'medicineStock',
+                    'medicineSales',
+                    'totalStaff',
+                    'totalPharmacies',
+                    'stockExpired',
+                    'filteredTotalSales',
+                    'filter'
+                ));
+            } else {
+                session(['guest-owner' => true]);
+                return view('guest-dashboard');
+            }
         } else {
             $staff = Staff::where('user_id', Auth::user()->id)->first();
-            // dd($staff->pharmacy_id);
             $pharmacy = Pharmacy::where('id', $staff->pharmacy_id)->first();
-            // dd(Staff::all());
             return view('dashboard', compact(
                 'pharmacy',
                 'totalMedicines',

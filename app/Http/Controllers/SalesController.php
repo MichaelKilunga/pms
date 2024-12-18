@@ -6,6 +6,7 @@ use App\Models\Sales;
 use App\Models\Pharmacy;
 use App\Models\Items;
 use App\Models\Staff;
+use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,11 +18,12 @@ class SalesController extends Controller
     public function index()
     {
         // Get sales data for the pharmacies owned by the authenticated user
-        //    / $pharmacies = Pharmacy::whe(re('owner_id', auth::id())->pluck('id');
+        
         $sales = Sales::with('item')->where('pharmacy_id', session('current_pharmacy_id'))
             ->get();
-        $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
-
+            
+        $medicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->with('item')->get();
+        // dd($medicines);
         return view('sales.index', compact('sales', 'medicines'));
     }
 
@@ -42,7 +44,7 @@ class SalesController extends Controller
      */
     public function store(Request $request)
     {
- 
+
         // Validate the incoming request data for all rows of sales
         $request->validate([
             //NIMEIGNORE HIVI DATA NDIO IKAFANYA KAZI
@@ -61,12 +63,12 @@ class SalesController extends Controller
             'date' => 'required|array',            // Ensure it's an array of dates
             'date.*' => 'required|date',           // Validate each date
         ]);
-       
+
 
         // Retrieve the pharmacy_id and staff_id for the sale record
         $pharmacyId = session('current_pharmacy_id'); // Ensure this is set correctly in your session
         $staffId = Auth::user()->id;
-     
+
 
 
         // Loop through the arrays of item data and create individual sale records

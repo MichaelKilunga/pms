@@ -30,7 +30,7 @@
                     <x-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
                         {{ __('Categories') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('Pharmacies')">
+                    <x-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
                         {{ __('Pharmacies') }}
                     </x-nav-link>
                 </div>
@@ -104,6 +104,9 @@
                                 </button>
                             @else
                                 <span class="inline-flex rounded-md">
+                                    <h4
+                                        class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
+                                        {{ session('pharmacy_name') }}</h4>
                                     <button type="button"
                                         class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
                                         {{ Auth::user()->name }}

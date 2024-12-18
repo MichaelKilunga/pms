@@ -148,8 +148,9 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="pharmacy" class="form-label">Pharmacy: {{ $medicine->pharmacy->name }}</label>
-                            <input type="number" name="pharmacy_id" value="{{ $medicine->pharmacy_id }}" hidden>
+                            <label for="pharmacy" class="form-label">Pharmacy: {{ session('pharmacy_name') }}</label>
+                            <input type="number" name="pharmacy_id" value="{{ session('current_pharmacy_id') }}"
+                                hidden>
                         </div>
                         <button type="submit" class="btn mb-2 btn-success">Save Medicine</button>
                 </div>

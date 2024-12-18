@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pharmacy;
 use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class PharmacyController extends Controller
@@ -17,7 +18,7 @@ class PharmacyController extends Controller
         $pharmacies = Pharmacy::where('owner_id', Auth::id())->get();
         // dd($pharmacies);
 
-         return view('pharmacies.index', compact('pharmacies'));
+        return view('pharmacies.index', compact('pharmacies'));
     }
 
     /**
@@ -38,13 +39,15 @@ class PharmacyController extends Controller
             'location' => 'nullable|string|max:1000',
         ]);
 
-        Pharmacy::create([
+        $pharmacy = Pharmacy::create([
             'name' => $request->name,
             'location' => $request->location,
             'owner_id' => Auth::id(),
         ]);
 
-        return redirect()->route('pharmacies.index')->with('success', 'Pharmacy created successfully.');
+        session()->forget('guest-owner');
+        session(['current_pharmacy_id' => $pharmacy->id]);
+        return redirect()->route('dashboard')->with('success', 'Pharmacy created successfully!');
     }
 
     /**

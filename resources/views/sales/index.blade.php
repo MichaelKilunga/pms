@@ -31,7 +31,8 @@
                             <td>{{ $sale->item->name }}</td>
                             <td>{{ $sale->total_price }}</td>
                             <td>{{ $sale->quantity }}</td>
-                            <td class="amount-cell">{{ $sale->total_price * $sale->quantity }}</td> <!-- Display calculated amount -->
+                            <td class="amount-cell">{{ $sale->total_price * $sale->quantity }}</td>
+                            <!-- Display calculated amount -->
                             <td>{{ $sale->date }}</td>
                             <td>
                                 <!-- View Modal -->
@@ -55,7 +56,8 @@
                                                 <div><strong>Sales Name:</strong> {{ $sale->item->name }}</div>
                                                 <div><strong>Price:</strong> {{ $sale->total_price }}</div>
                                                 <div><strong>Quantity:</strong> {{ $sale->quantity }}</div>
-                                                <div><strong>Amount:</strong> {{ $sale->total_price * $sale->quantity }}</div> <!-- Display amount here -->
+                                                <div><strong>Amount:</strong> {{ $sale->total_price * $sale->quantity }}
+                                                </div> <!-- Display amount here -->
                                                 <div><strong>Date:</strong> {{ $sale->date }}</div>
                                             </div>
                                         </div>
@@ -148,14 +150,15 @@
                                     <select name="item_id[]" class="form-select" required>
                                         <option selected disabled value="">Select Item</option>
                                         @foreach ($medicines as $medicine)
-                                            <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
+                                            <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">Price</label>
-                                    <input type="number" class="form-control" placeholder="Price" name="total_price[]"
-                                        required>
+                                    <label class="form-label">Unit Price</label>
+                                    <input type="text" class="form-control" placeholder="Price" name="total_price[]"
+                                        value="0 TZS" readonly required>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Quantity</label>
@@ -168,7 +171,8 @@
                                 </div>
                                 <div class="col-md-0" hidden>
                                     <label class="form-label">Date</label>
-                                    <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
+                                    <input type="text" class="form-control date" name="date[]"
+                                        value="{{ now() }}" required>
                                 </div>
                             </div>
                         </div>
@@ -177,7 +181,8 @@
                                 <strong>Total Amount:</strong>
                             </div>
                             <div class="col-md-3 text-end">
-                                <input type="text" class="form-control text-danger" id="totalAmount" value="0" readonly>
+                                <input type="text" class="form-control text-danger" id="totalAmount" value="0"
+                                    readonly>
                             </div>
                             <div class="col-md-1 text-end">
                                 <!-- <input class="btn btn-outline-danger" id="totalAmount" value="0" disabled> -->
@@ -185,12 +190,12 @@
                         </div>
                         <div class="mt-3">
                             <div class="col-md-11 d-flex justify-content-between ">
-                            <button type="button" id="addSaleRow" class="btn btn-outline-primary">
-                                <i class="bi bi-plus-lg"></i> Add Row
-                            </button>
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-save"></i> Save Sales
-                            </button>
+                                <button type="button" id="addSaleRow" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-lg"></i> Add Row
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-save"></i> Save Sales
+                                </button>
                             </div>
                             <div class="col-md-1">
 
@@ -216,6 +221,19 @@
                 updateTotalAmount();
             }
 
+            function tellPrice(row) {
+                let medicines = @json($medicines); // Convert medicines to a JS array
+                const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
+
+                // Find the selected medicine
+                const selectedMedicine = medicines.find(medicine => medicine.item.id == selectedMedicineId);
+
+                if (selectedMedicine) {
+                    // Set the total price to the medicine price (formatted with "TZS")
+                    row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price} TZS`;
+                }
+            }
+
             // Update the total amount across all rows
             function updateTotalAmount() {
                 let total = 0;
@@ -235,14 +253,14 @@
                 newRow.innerHTML = `
                     <div class="col-md-3">
                         <select name="item_id[]" class="form-select" required>
-                            <option selected disabled value="">Select Item</option>
                             @foreach ($medicines as $medicine)
-                                <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
+                                <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <input type="number" class="form-control" name="total_price[]" placeholder="Price" required>
+                        <input type="text" class="form-control" name="total_price[]" value="0 TZS" readonly required>
                     </div>
                     <div class="col-md-2">
                         <input type="number" class="form-control" name="quantity[]" placeholder="Quantity" required>
@@ -291,6 +309,10 @@
                     calculateAmount(row);
                 });
 
+                row.querySelector('[name="item_id[]"]').addEventListener('change', function() {
+                    tellPrice(row);
+                });
+
                 row.querySelector('[name="quantity[]"]').addEventListener('input', function() {
                     calculateAmount(row);
                 });
@@ -298,5 +320,4 @@
             document.getElementsByClassName('.date').value = new Date();
         });
     </script>
-
 @endsection

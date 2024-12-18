@@ -183,7 +183,7 @@
                                 </div>
                                 <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
                                     <label class="form-label fw-bold">In Date</label>
-                                    <input type="date" class="form-control  shadow-sm" name="in_date[]" value="{{now()}}"
+                                    <input type="text" class="form-control  shadow-sm" name="in_date[]" value="{{now()}}"
                                         required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
@@ -201,7 +201,7 @@
                                 <i class="bi bi-plus-lg"></i> Add Row
                             </button>
                             <button type="submit" class="btn btn-success ">
-                                <i class="bi bi-save"></i> Save Stock
+                                <i class="bi bi-save"></i> Save
                             </button>
                             </div>
                             <div class="col-md-2">
@@ -243,7 +243,7 @@
             </div>
            <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
                 <label class="form-label fw-bold">In Date</label>
-              <input type="date" class="form-control  shadow-sm" name="in_date[]" value="{{now()}}"
+              <input type="text" class="form-control  shadow-sm" name="in_date[]" value="{{now()}}"
               required>
             </div>
             <div class="col-12 col-sm-6 col-md-4 col-lg-2">

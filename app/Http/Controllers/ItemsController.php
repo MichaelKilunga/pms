@@ -31,7 +31,7 @@ class ItemsController extends Controller
         $pharmacies = Pharmacy::where('owner_id', auth::id())->get();
         $categories = Category::all();
 
-        return view('medicines.create', compact('pharmacies', 'categories'));
+        return view('medicines.create', compact('pharmacies','medicines', 'categories'));
     }
 
     /**
@@ -47,7 +47,7 @@ class ItemsController extends Controller
 
         Items::create($request->only('pharmacy_id', 'category_id', 'name'));
 
-        return redirect()->route('medicines')->with('success', 'Item added successfully.');
+        return redirect()->route('medicines')->with('success', 'Medicine added successfully.');
     }
 
     /**
