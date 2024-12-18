@@ -159,7 +159,7 @@
                             <div class="row mb-3 stock-entry align-items-end gx-2 gy-2">
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label for="item_id" class="form-label fw-bold">Medicine Name</label>
-                                    <select name="item_id[]" class="form-select rounded-3 shadow-sm" required>
+                                    <select name="item_id[]" class="form-select  shadow-sm" required>
                                         <option selected value="">Select medicine..</option>
                                         @foreach ($medicines as $medicine)
                                             <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
@@ -168,45 +168,44 @@
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Selling Price</label>
-                                    <input type="number" class="form-control rounded-3 shadow-sm" name="selling_price[]"
+                                    <input type="number" class="form-control  shadow-sm" name="selling_price[]"
                                         required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Buying Price</label>
-                                    <input type="number" class="form-control rounded-3 shadow-sm" name="buying_price[]"
+                                    <input type="number" class="form-control  shadow-sm" name="buying_price[]"
                                         required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Quantity</label>
-                                    <input type="number" class="form-control rounded-3 shadow-sm" name="quantity[]"
+                                    <input type="number" class="form-control  shadow-sm" name="quantity[]"
                                         required>
                                 </div>
-                                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                                <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
                                     <label class="form-label fw-bold">In Date</label>
-                                    <input type="date" class="form-control rounded-3 shadow-sm" name="in_date[]"
+                                    <input type="date" class="form-control  shadow-sm" name="in_date[]" value="{{now()}}"
                                         required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Expire Date</label>
-                                    <input type="date" class="form-control rounded-3 shadow-sm" name="expire_date[]"
+                                    <input type="date" class="form-control  shadow-sm" name="expire_date[]"
                                         required>
                                 </div>
-                                <!-- Remove Button -->
-                                {{-- <div class="col-12 col-sm-6 col-md-4 col-lg-2 d-flex justify-content-center">
-                                <button type="button" class="btn btn-danger btn-sm rounded-3 shadow-sm remove-stock-entry">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div> --}}
+                        
                             </div>
                         </div>
                         <!-- Buttons -->
-                        <div class="d-flex justify-content-between mt-3">
-                            <button type="button" id="addStockBtn" class="btn btn-outline-primary rounded-3">
+                        <div class="mt-3">
+                           <div class=" col-md-10  d-flex justify-content-between">
+                            <button type="button" id="addStockBtn" class="btn btn-outline-primary ">
                                 <i class="bi bi-plus-lg"></i> Add Row
                             </button>
-                            <button type="submit" class="btn btn-success rounded-3">
-                                <i class="bi bi-save"></i> Save
+                            <button type="submit" class="btn btn-success ">
+                                <i class="bi bi-save"></i> Save Stock
                             </button>
+                            </div>
+                            <div class="col-md-2">
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -223,7 +222,7 @@
             newStockEntry.innerHTML = `
             <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                 <label class="form-label fw-bold">Medicine Name</label>
-                <select name="item_id[]" class="form-select rounded-3 shadow-sm" required>
+                <select name="item_id[]" class="form-select  shadow-sm" required>
                     <option selected value="">Select medicine...</option>
                     @foreach ($medicines as $medicine)
                         <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
@@ -232,26 +231,27 @@
             </div>
             <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                 <label class="form-label fw-bold">Selling Price</label>
-                <input type="number" class="form-control rounded-3 shadow-sm" name="selling_price[]" required>
+                <input type="number" class="form-control  shadow-sm" name="selling_price[]" required>
             </div>
             <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                 <label class="form-label fw-bold">Buying Price</label>
-                <input type="number" class="form-control rounded-3 shadow-sm" name="buying_price[]" required>
+                <input type="number" class="form-control  shadow-sm" name="buying_price[]" required>
             </div>
             <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                 <label class="form-label fw-bold">Quantity</label>
-                <input type="number" class="form-control rounded-3 shadow-sm" name="quantity[]" required>
+                <input type="number" class="form-control  shadow-sm" name="quantity[]" required>
             </div>
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+           <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
                 <label class="form-label fw-bold">In Date</label>
-                <input type="date" class="form-control rounded-3 shadow-sm" name="in_date[]" required>
+              <input type="date" class="form-control  shadow-sm" name="in_date[]" value="{{now()}}"
+              required>
             </div>
             <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                 <label class="form-label fw-bold">Expire Date</label>
-                <input type="date" class="form-control rounded-3 shadow-sm" name="expire_date[]" required>
+                <input type="date" class="form-control  shadow-sm" name="expire_date[]" required>
             </div>
             <div class="col-12 col-sm-6 col-md-4 col-lg-2 d-flex justify-content-center">
-                <button type="button" class="btn btn-danger btn-sm rounded-3 shadow-sm remove-stock-entry">
+                <button type="button" class="btn btn-danger btn-sm  shadow-sm remove-stock-entry">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>

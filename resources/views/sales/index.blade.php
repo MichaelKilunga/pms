@@ -152,7 +152,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <label class="form-label">Price</label>
                                     <input type="number" class="form-control" placeholder="Price" name="total_price[]"
                                         required>
@@ -162,13 +162,13 @@
                                     <input type="number" class="form-control" placeholder="Quantity" name="quantity[]"
                                         required>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <label class="form-label">Amount</label>
                                     <input type="number" class="form-control amount" placeholder="Amount" readonly>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-0" hidden>
                                     <label class="form-label">Date</label>
-                                    <input type="date" class="form-control date" name="date[]"  required>
+                                    <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
                                 </div>
                             </div>
                         </div>
@@ -176,17 +176,25 @@
                             <div class="col-md-8 text-end">
                                 <strong>Total Amount:</strong>
                             </div>
-                            <div class="col-md-4 text-end">
-                                <input class="btn btn-outline-danger" id="totalAmount" value="0" disabled>
+                            <div class="col-md-3 text-end">
+                                <input type="text" class="form-control text-danger" id="totalAmount" value="0" readonly>
+                            </div>
+                            <div class="col-md-1 text-end">
+                                <!-- <input class="btn btn-outline-danger" id="totalAmount" value="0" disabled> -->
                             </div>
                         </div>
-                        <div class="d-flex justify-content-between mt-3">
+                        <div class="mt-3">
+                            <div class="col-md-11 d-flex justify-content-between ">
                             <button type="button" id="addSaleRow" class="btn btn-outline-primary">
                                 <i class="bi bi-plus-lg"></i> Add Row
                             </button>
                             <button type="submit" class="btn btn-success">
                                 <i class="bi bi-save"></i> Save Sales
                             </button>
+                            </div>
+                            <div class="col-md-1">
+
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -233,19 +241,19 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <input type="number" class="form-control" name="total_price[]" placeholder="Price" required>
                     </div>
                     <div class="col-md-2">
                         <input type="number" class="form-control" name="quantity[]" placeholder="Quantity" required>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <input type="number" class="form-control amount" placeholder="Amount" readonly>
                     </div>
-                    <div class="col-md-3">
-                        <input type="date" class="date form-control" name="date[]" required>
+                    <div class="col-md-0" hidden>
+                       <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
                     </div>
-                    <div class="col-md-2 d-flex justify-content-center">
+                    <div class="col-md-1 d-flex justify-content-center">
                         <button type="button" class="btn btn-danger btn-sm remove-sale-row">
                             <i class="bi bi-trash"></i>
                         </button>
