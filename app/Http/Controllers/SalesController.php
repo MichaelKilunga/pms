@@ -42,11 +42,12 @@ class SalesController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request);
+ 
         // Validate the incoming request data for all rows of sales
         $request->validate([
-            'pharmacy_id' => 'required|exists:pharmacies,id',
-            'staff_id' => 'required|exists:users,id',
+            //NIMEIGNORE HIVI DATA NDIO IKAFANYA KAZI
+            // 'pharmacy_id' => 'required|exists:pharmacies,id',
+            // 'staff_id' => 'required|exists:users,id',
 
             'item_id' => 'required|array',         // Ensure it's an array of item IDs
             'item_id.*' => 'required|exists:items,id', // Validate each item ID in the array
@@ -60,14 +61,17 @@ class SalesController extends Controller
             'date' => 'required|array',            // Ensure it's an array of dates
             'date.*' => 'required|date',           // Validate each date
         ]);
+       
 
         // Retrieve the pharmacy_id and staff_id for the sale record
         $pharmacyId = session('current_pharmacy_id'); // Ensure this is set correctly in your session
         $staffId = Auth::user()->id;
+     
 
 
         // Loop through the arrays of item data and create individual sale records
         foreach ($request->item_id as $key => $item_id) {
+            // dd($request);
             Sales::create([
                 'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
                 'staff_id' => $staffId,                // Use the staff_id from the authenticated user

@@ -8,6 +8,10 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
+    <!-- Add in the <head> section -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> -->
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -38,11 +42,11 @@
 
         <!-- Page Heading -->
         @if (isset($header))
-            <header class="bg-white dark:bg-gray-800 shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
+        <header class="bg-white dark:bg-gray-800 shadow">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                {{ $header }}
+            </div>
+        </header>
         @endif
 
         <!-- Page Content -->
@@ -53,21 +57,25 @@
                         // position: "top-end",
                         icon: "success",
                         title: {{session('success')}},
-                        // showConfirmButton: false,
-                        timer: 2000
-                    });
-                </script>
+            // showConfirmButton: false,
+            timer: 2000
+            });
+            </script>
             @endif
             @if (session('error'))
-                <script>
-                    Swal.fire({
-                        // position: "top-end",
-                        icon: "error",
-                        title: {{session("error")}},
-                        // showConfirmButton: false,
-                        timer: 2000
-                    });
-                </script>
+            <script>
+                Swal.fire({
+                    // position: "top-end",
+                    icon: "error",
+                    title: {
+                        {
+                            session("error")
+                        }
+                    },
+                    // showConfirmButton: false,
+                    timer: 2000
+                });
+            </script>
             @endif --}}
             {{ $slot }}
 
@@ -82,23 +90,25 @@
     <script>
         $(document).ready(function() {
             // Automatically show the modal if no pharmacy is selected
-            @if (!session('current_pharmacy_id'))
-                $('#pharmacyModal').modal('show');
+            @if(!session('current_pharmacy_id'))
+            $('#pharmacyModal').modal('show');
             @endif
 
-            @if (session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: '{{ session('success') }}',
-                    timer: 2000
-                });
+            @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: '{{ session('
+                success ') }}',
+                timer: 2000
+            });
             @endif
-            @if (session('error'))
-                Swal.fire({
-                    icon: 'error',
-                    title: '{{ session('error') }}',
-                    timer: 2000
-                });
+            @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: '{{ session('
+                error ') }}',
+                timer: 2000
+            });
             @endif
         });
     </script>
@@ -158,7 +168,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
-    {{-- 
+    {{--
 <script src='https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js'></script>
 <script src='https://cdn.datatables.net/responsive/2.1.0/js/dataTables.responsive.min.js'></script>
 <script src='https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js'></script> 
@@ -172,6 +182,8 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
 
 

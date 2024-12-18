@@ -64,9 +64,11 @@ class StockController extends Controller
         // Assuming 'pharmacy_id' and 'staff_id' are constants or come from the request
         $pharmacy_id = session('current_pharmacy_id');
         $staff_id = Auth::user()->id;
+        
 
         // Loop through the rows of input and create the stock records
         foreach ($request->item_id as $index => $item_id) {
+
             Stock::create([
                 'pharmacy_id' => $pharmacy_id,
                 'staff_id' => $staff_id,

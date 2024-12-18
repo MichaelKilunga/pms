@@ -19,6 +19,7 @@
                         <th>Sales Name</th>
                         <th>Price</th>
                         <th>Quantity</th>
+                        <th>Amount</th> <!-- New column for calculated amount -->
                         <th>Date</th>
                         <th>Actions</th>
                     </tr>
@@ -30,6 +31,7 @@
                             <td>{{ $sale->item->name }}</td>
                             <td>{{ $sale->total_price }}</td>
                             <td>{{ $sale->quantity }}</td>
+                            <td class="amount-cell">{{ $sale->total_price * $sale->quantity }}</td> <!-- Display calculated amount -->
                             <td>{{ $sale->date }}</td>
                             <td>
                                 <!-- View Modal -->
@@ -53,6 +55,7 @@
                                                 <div><strong>Sales Name:</strong> {{ $sale->item->name }}</div>
                                                 <div><strong>Price:</strong> {{ $sale->total_price }}</div>
                                                 <div><strong>Quantity:</strong> {{ $sale->quantity }}</div>
+                                                <div><strong>Amount:</strong> {{ $sale->total_price * $sale->quantity }}</div> <!-- Display amount here -->
                                                 <div><strong>Date:</strong> {{ $sale->date }}</div>
                                             </div>
                                         </div>
@@ -100,7 +103,7 @@
                                                     <div class="mb-3">
                                                         <label class="form-label">Date</label>
                                                         <input type="text" class="form-control"
-                                                            value="{{ $sale->date }}" readonly  >
+                                                            value="{{ $sale->date }}" readonly>
                                                     </div>
                                                     <button type="submit" class="btn btn-success">Update</button>
                                                 </form>
@@ -159,18 +162,25 @@
                                     <input type="number" class="form-control" placeholder="Quantity" name="quantity[]"
                                         required>
                                 </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Amount</label>
+                                    <input type="number" class="form-control amount" placeholder="Amount" readonly>
+                                </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Date</label>
-                                    <input type="date" class="form-control" name="date[]" required>
+                                    <input type="date" class="form-control date" name="date[]"  required>
                                 </div>
-                                {{-- <div class="col-md-2 d-flex justify-content-center">
-                                    <button type="button" class="btn btn-danger btn-sm remove-sale-row">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div> --}}
                             </div>
                         </div>
-                        <div class="d-flex justify-content-between">
+                        <div class="row mt-3">
+                            <div class="col-md-8 text-end">
+                                <strong>Total Amount:</strong>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <input class="btn btn-outline-danger" id="totalAmount" value="0" disabled>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
                             <button type="button" id="addSaleRow" class="btn btn-outline-primary">
                                 <i class="bi bi-plus-lg"></i> Add Row
                             </button>
@@ -187,10 +197,30 @@
     <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Function to calculate Amount
+            function calculateAmount(row) {
+                const price = parseFloat(row.querySelector('[name="total_price[]"]').value) || 0;
+                const quantity = parseFloat(row.querySelector('[name="quantity[]"]').value) || 0;
+                const amount = price * quantity;
+                row.querySelector('.amount').value = amount;
+
+                // Update total amount
+                updateTotalAmount();
+            }
+
+            // Update the total amount across all rows
+            function updateTotalAmount() {
+                let total = 0;
+                document.querySelectorAll('.sale-entry').forEach(row => {
+                    const amount = parseFloat(row.querySelector('.amount').value) || 0;
+                    total += amount;
+                });
+                document.getElementById('totalAmount').value = total;
+            }
+
             // Add Row Button
             document.getElementById('addSaleRow').addEventListener('click', function() {
                 const salesFields = document.getElementById('salesFields');
-
                 const newRow = document.createElement('div');
                 newRow.classList.add('row', 'mb-3', 'sale-entry', 'align-items-center');
 
@@ -209,8 +239,11 @@
                     <div class="col-md-2">
                         <input type="number" class="form-control" name="quantity[]" placeholder="Quantity" required>
                     </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control amount" placeholder="Amount" readonly>
+                    </div>
                     <div class="col-md-3">
-                        <input type="date" class="form-control" name="date[]" required>
+                        <input type="date" class="date form-control" name="date[]" required>
                     </div>
                     <div class="col-md-2 d-flex justify-content-center">
                         <button type="button" class="btn btn-danger btn-sm remove-sale-row">
@@ -223,6 +256,16 @@
                 // Attach Remove Row Event to the New Button
                 newRow.querySelector('.remove-sale-row').addEventListener('click', function() {
                     newRow.remove();
+                    updateTotalAmount();
+                });
+
+                // Attach Calculation for the new row
+                newRow.querySelector('[name="total_price[]"]').addEventListener('input', function() {
+                    calculateAmount(newRow);
+                });
+
+                newRow.querySelector('[name="quantity[]"]').addEventListener('input', function() {
+                    calculateAmount(newRow);
                 });
             });
 
@@ -230,8 +273,22 @@
             document.querySelectorAll('.remove-sale-row').forEach(button => {
                 button.addEventListener('click', function() {
                     button.closest('.sale-entry').remove();
+                    updateTotalAmount();
                 });
             });
+
+            // Initial Calculation for existing rows
+            document.querySelectorAll('.sale-entry').forEach(row => {
+                row.querySelector('[name="total_price[]"]').addEventListener('input', function() {
+                    calculateAmount(row);
+                });
+
+                row.querySelector('[name="quantity[]"]').addEventListener('input', function() {
+                    calculateAmount(row);
+                });
+            });
+            document.getElementsByClassName('.date').value = new Date();
         });
     </script>
+
 @endsection
