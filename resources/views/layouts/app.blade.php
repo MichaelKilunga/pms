@@ -66,7 +66,6 @@
                 $('#pharmacyModal').modal('show');
             @endif
 
-<<<<<<< HEAD
             @if(session('success'))
             Swal.fire({
                 icon: 'success',
@@ -80,21 +79,6 @@
                 title: '{{ session('error') }}',
                 timer: 2000
             });
-=======
-            @if (session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: '{{ session('success ') }}',
-                    timer: 2000
-                });
-            @endif
-            @if (session('error'))
-                Swal.fire({
-                    icon: 'error',
-                    title: '{{ session('error ') }}',
-                    timer: 2000
-                });
->>>>>>> 4166c37ab7231376153fa642ad9e8ab07fab0200
             @endif
 
             $(document).ready(function() {
