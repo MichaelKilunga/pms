@@ -19,7 +19,7 @@ class SalesFactory extends Factory
             'pharmacy_id' => Pharmacy::factory(),
             'item_id' => Items::factory(),
             'quantity' => $this->faker->numberBetween(1, 100),
-            'total_price' => $this->faker->randomFloat(2, 5, 100),
+            'total_price' => $this->faker->randomFloat(0, 500, 100000),
             'date' => $this->faker->dateTimeThisYear(),
         ];
     }

@@ -19,8 +19,8 @@ class StockFactory extends Factory
             'pharmacy_id' => Pharmacy::factory(),
             'item_id' => Items::factory(),
             'quantity' => $this->faker->numberBetween(1000, 5000),
-            'buying_price' => $this->faker->randomFloat(0, 500, 100000),
-            'selling_price' => $this->faker->randomFloat(2, 1000, 200000),
+            'buying_price' => $this->faker->randomFloat(0, 5000, 100000),
+            'selling_price' => $this->faker->randomFloat(0, 10000, 200000),
             'in_date' => $this->faker->date(),
             'expire_date' => $this->faker->dateTimeBetween('now', '+2 years'),
         ];
