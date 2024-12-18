@@ -45,12 +45,8 @@
             </header>
         @endif
 
-<<<<<<< HEAD
         <!-- Page Content -->
         <main> 
-=======
-        <main>
->>>>>>> 4166c37ab7231376153fa642ad9e8ab07fab0200
             {{ $slot }}
         </main>
     </div>
