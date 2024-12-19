@@ -58,7 +58,7 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         $request['pharmacy_id'] = session('current_pharmacy_id');
-    
+
         // Validate the incoming request
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
@@ -66,36 +66,41 @@ class StaffController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email',
             'role' => 'required|string', // Ensure role is provided
         ]);
-    
+
         // Check if a user with the same phone or email already exists
         $existingUser = User::where('phone', $request->phone)
             ->orWhere('email', $request->email)
             ->first();
-    
+
         if ($existingUser) {
             return redirect()->route('staff')->with('error', 'User with this phone or email already exists.');
         }
-    
+
         try {
             // Add the hashed password to the request data
             $validatedData['password'] = Hash::make('password');
-    
+
             // Create the user
             $user = User::create($validatedData);
-    
+
+
+            // if ($request->role == 'admin') {
+            //     Pharmacy::where('pharmacy_id',$request->pharmacy_id)->update(['admin_id' => $user->id]);
+            // }
+
             // Create the staff record
             $staff = Staff::create([
                 'user_id' => $user->id,
                 'pharmacy_id' => $request->pharmacy_id,
             ]);
-    
+
             return redirect()->route('staff')->with('success', 'Staff added successfully.');
         } catch (\Exception $e) {
             // Handle any errors during user or staff creation
             return redirect()->route('staff')->with('error', 'Failed to add staff. Please try again.');
         }
     }
-    
+
 
     /**
      * Display the specified staff member.

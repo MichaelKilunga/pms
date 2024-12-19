@@ -30,6 +30,11 @@ class DashboardController extends Controller
         $stockExpired = Stock::where('expire_date', '<', now())->count();
         // dd($lowStockCount);
 
+        if (Auth::user()->role == "staff" || Auth::user()->role == "admin") {
+            $staff = Staff::where('user_id', Auth::user()->id)->first();
+            $pharmacy = Pharmacy::where('id', $staff->pharmacy_id)->first();
+            session(['current_pharmacy_id' => $pharmacy->id]);
+        }
         $pharmacyId = session('current_pharmacy_id');
         session(['pharmacy_name' => Pharmacy::where('id', session('current_pharmacy_id'))->value('name')]);
 
@@ -64,6 +69,7 @@ class DashboardController extends Controller
         // dd($filteredTotalSales);
 
         if (Auth::user()->role == 'owner') {
+
             $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
             // dd($pharmacies->count());
             if ($pharmacies->count() > 0) {
@@ -87,8 +93,9 @@ class DashboardController extends Controller
                 return view('guest-dashboard');
             }
         } else {
-            $staff = Staff::where('user_id', Auth::user()->id)->first();
-            $pharmacy = Pharmacy::where('id', $staff->pharmacy_id)->first();
+            // $staff = Staff::where('user_id', Auth::user()->id)->first();
+            // $pharmacy = Pharmacy::where('id', $staff->pharmacy_id)->get();
+            // session(['current_pharmacy_id'=>$pharmacy->id]);
             return view('dashboard', compact(
                 'pharmacy',
                 'totalMedicines',
@@ -100,6 +107,8 @@ class DashboardController extends Controller
                 'medicineSales',
                 'totalStaff',
                 'totalPharmacies',
+                'filteredTotalSales',
+                'filter',
                 'stockExpired'
             ));
         }

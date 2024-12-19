@@ -69,7 +69,12 @@ class User extends Authenticatable
     
     public function pharmaciesOwned()
     {
-        return $this->hasMany(Pharmacy::class, 'owner_id');
+        return $this->hasMany(Pharmacy::class);
+    }
+    
+    public function manage()
+    {
+        return $this->hasMany(Pharmacy::class);
     }
 
     public function staff()

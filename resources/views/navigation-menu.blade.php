@@ -15,13 +15,13 @@
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
-                        {{ __('Medicine') }}
-                    </x-nav-link>
                     <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
                         {{ __('Sales') }}
                     </x-nav-link>
                     @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
+                        <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
+                            {{ __('Medicine') }}
+                        </x-nav-link>
                         <x-nav-link href="{{ route('stock') }}" :active="request()->routeIs('Stock')">
                             {{ __('Stock') }}
                         </x-nav-link>
@@ -151,8 +151,7 @@
                                     {{-- @foreach ($pharmacy as $pharmacy)
                                         {{$pharmacy->name}}
                                     @endforeach --}}
-
-                                    <p class=" btn-light text-danger disabled">Andre Pharmacy</p>
+                                    <p class=" btn-light text-danger disabled">{{ session('pharmacy_name') }}</p>
                                 </x-dropdown-link>
                             @endif
 
@@ -216,13 +215,13 @@
                 <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('medicine')">
-                    {{ __('Medicine') }}
-                </x-responsive-nav-link>
                 <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Sales')">
                     {{ __('Sales') }}
                 </x-responsive-nav-link>
                 @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
+                    <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('medicine')">
+                        {{ __('Medicine') }}
+                    </x-responsive-nav-link>
                     <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Stock')">
                         {{ __('Stock') }}
                     </x-responsive-nav-link>
