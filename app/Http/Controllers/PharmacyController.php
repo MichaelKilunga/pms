@@ -73,30 +73,33 @@ class PharmacyController extends Controller
     /**
      * Update the specified pharmacy in storage.
      */
-    public function update(Request $request, Pharmacy $pharmacy)
+    public function update(Request $request)
     {
-        $this->authorizeAccess($pharmacy);
+        // $this->authorizeAccess($pharmacy);
 
         $request->validate([
+            'pharmacy_id' => 'required|exists:pharmacies,id',
             'name' => 'required|string|max:255',
             'location' => 'nullable|string|max:1000',
         ]);
-
+        // dd($request->id);
+        $pharmacy = Pharmacy::where('id',$request->id);
         $pharmacy->update($request->only(['name', 'location']));
 
-        return redirect()->route('pharmacies.index')->with('success', 'Pharmacy updated successfully.');
+
+        return redirect()->route('pharmacies')->with('success', 'Pharmacy updated successfully.');
     }
 
     /**
      * Remove the specified pharmacy from storage.
      */
-    public function destroy(Pharmacy $pharmacy)
+
+    public function destroy(Request $request)
     {
-        $this->authorizeAccess($pharmacy);
+        Pharmacy::destroy($request->id);
+        // dd($request->id);
 
-        $pharmacy->delete();
-
-        return redirect()->route('pharmacies.index')->with('success', 'Pharmacy deleted successfully.');
+        return redirect()->route('pharmacies')->with('success', 'Pharmacy deleted successfully.');
     }
 
     /**

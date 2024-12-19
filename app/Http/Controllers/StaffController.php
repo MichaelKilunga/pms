@@ -100,15 +100,20 @@ class StaffController extends Controller
     /**
      * Remove the specified staff member from storage.
      */
-    public function destroy(Staff $staff)
+    // public function destroy(Staff $staff)
+    // {
+    //     $this->authorizeAccess($staff);
+
+    //     $staff->delete();
+
+    //     return redirect()->route('staff')->with('success', 'Staff removed successfully.');
+    // }
+    public function destroy(Request $request)
     {
-        $this->authorizeAccess($staff);
-
-        $staff->delete();
-
-        return redirect()->route('staff.index')->with('success', 'Staff removed successfully.');
+        User::destroy($request->id);
+        
+        return redirect()->route('staff')->with('success', 'Staff deleted successfully!');
     }
-
     /**
      * Authorize access to the staff member.
      */

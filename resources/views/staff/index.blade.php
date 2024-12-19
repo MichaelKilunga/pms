@@ -28,10 +28,10 @@
                             <td>
                                 <a href="{{ route('staff.show', $staff->id) }}" class="btn btn-primary btn-sm"><i class="bi bi-eye" ></i></a>
                                 <a href="{{ route('staff.edit', $staff->id) }}" class="btn btn-success btn-sm"><i class="bi bi-pencil" ></i></a>
-                                <form action="{{ route('staff.destroy', $staff->id) }}" method="POST" style="display:inline;">
+                                <form action="{{ route('staff.destroy', $staff->user_id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash" ></i></button>
+                                    <button type="submit" onclick="return confirm('Are you sure you want to delete this staff?')" class="btn btn-danger btn-sm"><i class="bi bi-trash" ></i></button>
                                 </form>
                             </td>
                         </tr>
