@@ -29,6 +29,7 @@
                             <td>
                                 <a href="#" class="btn btn-primary btn-sm"  data-bs-toggle="modal" data-bs-target="#viewCategoryModal{{ $category->id }}" ><i
                                         class="bi bi-eye"></i></a>
+                                        
                                 <div class="modal fade" id="viewCategoryModal{{ $category->id }}" tabindex="-1"
                                     aria-labelledby="viewCategoryModalLabel{{ $category->id }}" aria-hidden="true">
                                     <div class="modal-dialog">

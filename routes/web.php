@@ -49,7 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('pharmacies/create', [PharmacyController::class, 'create'])->name('pharmacies.create');
     Route::post('pharmacies', [PharmacyController::class, 'store'])->name('pharmacies.store');
     Route::get('pharmacies/{id}', [PharmacyController::class, 'show'])->name('pharmacies.show');
-    Route::put('pharmacies/update/{id}', [PharmacyController::class, 'destroy'])->name('pharmacies.edit');
+    Route::put('pharmacies', [PharmacyController::class, 'update'])->name('pharmacies.update');
     Route::delete('pharmacies/delete/{id}', [PharmacyController::class, 'destroy'])->name('pharmacies.destroy');
 
     

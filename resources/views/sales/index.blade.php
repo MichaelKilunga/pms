@@ -158,7 +158,7 @@
                                 <div class="col-md-3">
                                     <label class="form-label">Unit Price</label>
                                     <input type="text" class="form-control" placeholder="Price" name="total_price[]"
-                                        value="0 TZS" readonly required>
+                                        value="0" readonly required>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Quantity</label>
@@ -230,7 +230,7 @@
 
                 if (selectedMedicine) {
                     // Set the total price to the medicine price (formatted with "TZS")
-                    row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price} TZS`;
+                    row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price}`;
                 }
             }
 
