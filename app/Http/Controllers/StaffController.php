@@ -5,15 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Staff;
 use App\Models\User;
 use App\Models\Pharmacy;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Unique;
 
 class StaffController extends Controller
 {
     /**
      * Display a listing of staff.
      */
-    public function index() 
+    public function index()
     {
         // // Get the current business ID from the session
         // if (Auth::user()->role == "owner") {
@@ -26,7 +28,7 @@ class StaffController extends Controller
 
         // Get staff for the pharmacy owned by the authenticated user
         $pharmacies = Pharmacy::where('owner_id', auth::id())->pluck('id');
-        $staff = Staff::with(['user','pharmacy'])->where('pharmacy_id', session('current_pharmacy_id'))->get();
+        $staff = Staff::with(['user', 'pharmacy'])->where('pharmacy_id', session('current_pharmacy_id'))->get();
 
         // dd($staff);
 
@@ -46,17 +48,54 @@ class StaffController extends Controller
     /**
      * Store a newly created staff member in storage.
      */
+    // public function store(Request $request)
+    // {
+    // $request->validate([
+    //     'user_id' => 'required|exists:users,id',
+    //     'pharmacy_id' => 'required|exists:pharmacies,id',
+    // ]);
+
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'pharmacy_id' => 'required|exists:pharmacies,id',
+        $request['pharmacy_id'] = session('current_pharmacy_id');
+    
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:255|unique:users,phone',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'role' => 'required|string', // Ensure role is provided
         ]);
-
-        Staff::create($request->only('user_id', 'pharmacy_id'));
-
-        return redirect()->route('staff.index')->with('success', 'Staff added successfully.');
+    
+        // Check if a user with the same phone or email already exists
+        $existingUser = User::where('phone', $request->phone)
+            ->orWhere('email', $request->email)
+            ->first();
+    
+        if ($existingUser) {
+            return redirect()->route('staff')->with('error', 'User with this phone or email already exists.');
+        }
+    
+        try {
+            // Add the hashed password to the request data
+            $validatedData['password'] = Hash::make('password');
+    
+            // Create the user
+            $user = User::create($validatedData);
+    
+            // Create the staff record
+            $staff = Staff::create([
+                'user_id' => $user->id,
+                'pharmacy_id' => $request->pharmacy_id,
+            ]);
+    
+            return redirect()->route('staff')->with('success', 'Staff added successfully.');
+        } catch (\Exception $e) {
+            // Handle any errors during user or staff creation
+            return redirect()->route('staff')->with('error', 'Failed to add staff. Please try again.');
+        }
     }
+    
 
     /**
      * Display the specified staff member.
@@ -85,9 +124,9 @@ class StaffController extends Controller
      */
     public function update(Request $request)
     {
-        
+
         // $this->authorizeAccess($staff);
-    //    dd($request);
+        //    dd($request);
         $request->validate([
             // 'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
@@ -95,8 +134,8 @@ class StaffController extends Controller
             'email' => 'required|string|max:255',
         ]);
 
-        $user = User::where('id',$request->id);
-        $user->update($request->only(['name', 'email','phone']));
+        $user = User::where('id', $request->id);
+        $user->update($request->only(['name', 'email', 'phone']));
 
         return redirect()->route('staff')->with('success', 'Staff updated successfully.');
     }
@@ -104,7 +143,7 @@ class StaffController extends Controller
     /**
      * Remove the specified staff member from storage.
      */
-    
+
     public function destroy(Request $request)
     {
         User::destroy($request->id);
