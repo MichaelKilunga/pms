@@ -72,6 +72,7 @@
                 // timer: 2000
             });
             @endif
+            
             @if(session('error'))
             Swal.fire({
                 icon: 'error',

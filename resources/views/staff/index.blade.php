@@ -5,7 +5,10 @@
     <div class="d-flex justify-content-between mb-3">
         <h2>Staff</h2>
         <div>
-            <a href="{{ route('staff.create') }}" class="btn btn-success">Add New staff</a>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                Add New Staff
+            </button>
+            <!-- <a href="{{ route('staff.create') }}" class="btn btn-success">Add New staff</a> -->
         </div>
     </div>
 
@@ -136,7 +139,49 @@
         </table>
     </div>
 </div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Add New Staff</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm" method="POST" action="{{ route('staff.store') }}">
+                    @csrf
+                    <input type="number" class="form-control" id="pharmacy_id" value="{{ session('current_pharmacy_id')}}" name="pharmacy_id" hidden>
+                    <input type="number" class="form-control" id="user_id" value="0" name="user_id" hidden>
+                    <input type="password" class="form-control" id="password" value="0" name="password" hidden>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Staff Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Staff Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Staff Phone</label>
+                        <input type="text" class="form-control" id="phone" name="phone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="" disabled selected>Select Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="staff">Staff</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Staff</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
+
 
 
 {{-- {{$staff}} --}}
