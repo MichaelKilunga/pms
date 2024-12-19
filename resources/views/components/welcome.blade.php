@@ -4,48 +4,48 @@
         <div class="col-6 col-md-4 col-lg-2">
             <a href="{{ route('medicines') }}" class="card bg-primary text-white shadow text-decoration-none">
                 <div class="card-body">
-                    <h6>Add Medicine</h6>
-                    <i class="bi bi-plus-circle fs-1"></i>
+                    <h6><i class="bi bi-plus-circle fs-1#"></i> Add Medicine</h6>
+
                 </div>
             </a>
         </div>
         <div class="col-6 col-md-4 col-lg-2">
             <a href="{{ route('staff') }}" class="card bg-success text-white shadow text-decoration-none">
                 <div class="card-body">
-                    <h6>Manage Staff</h6>
-                    <i class="bi bi-people-fill fs-1"></i>
+                    <h6><i class="bi bi-people-fill fs-1#"></i> Manage Staff</h6>
+
                 </div>
             </a>
         </div>
         <div class="col-6 col-md-4 col-lg-2">
             <a href="{{ route('pharmacies') }}" class="card bg-warning text-dark shadow text-decoration-none">
                 <div class="card-body">
-                    <h6>View Pharmacies</h6>
-                    <i class="bi bi-hospital fs-1"></i>
+                    <h6><i class="bi bi-hospital fs-1#"></i> View Pharmacies</h6>
+
                 </div>
             </a>
         </div>
         <div class="col-6 col-md-4 col-lg-2">
             <a href="{{ route('sales') }}" class="card bg-danger text-white shadow text-decoration-none">
                 <div class="card-body">
-                    <h6>Create Sale</h6>
-                    <i class="bi bi-cart-plus fs-1"></i>
+                    <h6><i class="bi bi-cart-plus fs-1#"></i> Create new Sales</h6>
+
                 </div>
             </a>
         </div>
         <div class="col-6 col-md-4 col-lg-2">
             <a href="{{ route('sales') }}" class="card bg-info text-white shadow text-decoration-none">
                 <div class="card-body">
-                    <h6>Generate Report</h6>
-                    <i class="bi bi-file-earmark-bar-graph fs-1"></i>
+                    <h6><i class="bi bi-file-earmark-bar-graph fs-1#"></i> Generate Report</h6>
+
                 </div>
             </a>
         </div>
         <div class="col-6 col-md-4 col-lg-2">
-            <a href="{{ route('stock.index') }}" class="card bg-secondary text-white shadow text-decoration-none">
+            <a href="{{ route('stock') }}" class="card bg-secondary text-white shadow text-decoration-none">
                 <div class="card-body">
-                    <h6>Check Stock</h6>
-                    <i class="bi bi-box-seam fs-1"></i>
+                    <h6><i class="bi bi-box-seam fs-1#"></i> Check Stocks</h6>
+
                 </div>
             </a>
         </div>
@@ -56,7 +56,9 @@
         <div class="col-6 col-md-4 col-lg-2">
             <div class="card bg-danger text-white shadow">
                 <div class="card-body">
-                    <h6>Medicines</h6>
+                    <h6>
+                        <i class="bi bi-capsule fs-3# me-2"></i>Medicines
+                    </h6>
                     <p class="fs-5 fw-bold">{{ $totalMedicines }}</p>
                 </div>
             </div>
@@ -64,7 +66,9 @@
         <div class="col-6 col-md-4 col-lg-2">
             <div class="card bg-success text-white shadow">
                 <div class="card-body">
-                    <h6>Staff</h6>
+                    <h6>
+                        <i class="bi bi-people-fill fs-3# me-2"></i>Staff
+                    </h6>
                     <p class="fs-5 fw-bold">{{ $totalStaff }}</p>
                 </div>
             </div>
@@ -72,7 +76,9 @@
         <div class="col-6 col-md-4 col-lg-2">
             <div class="card bg-warning text-dark shadow">
                 <div class="card-body">
-                    <h6>Pharmacies</h6>
+                    <h6>
+                        <i class="bi bi-hospital fs-2# me-2"></i>Pharmacies
+                    </h6>
                     <p class="fs-5 fw-bold">{{ $totalPharmacies }}</p>
                 </div>
             </div>
@@ -80,7 +86,9 @@
         <div class="col-6 col-md-4 col-lg-2">
             <div class="card bg-danger text-white shadow">
                 <div class="card-body">
-                    <h6>Expired</h6>
+                    <h6>
+                        <i class="bi bi-exclamation-triangle fs-3# me-2"></i>Expired
+                    </h6>
                     <p class="fs-5 fw-bold">{{ $stockExpired }}</p>
                 </div>
             </div>
@@ -88,7 +96,9 @@
         <div class="col-6 col-md-4 col-lg-2">
             <div class="card bg-success text-white shadow">
                 <div class="card-body">
-                    <h6>Total Sales</h6>
+                    <h6>
+                        <i class="bi bi-currency-exchange fs-3# me-2"></i>Total Sales
+                    </h6>
                     <p class="fs-5 fw-bold">{{ $totalSales }}</p>
                 </div>
             </div>
@@ -96,12 +106,15 @@
         <div class="col-6 col-md-4 col-lg-2">
             <div class="card bg-warning text-dark shadow">
                 <div class="card-body">
-                    <h6>Low Stock</h6>
+                    <h6>
+                        <i class="bi bi-box-seam fs-3# me-2"></i>Low Stock
+                    </h6>
                     <p class="fs-5 fw-bold">{{ $lowStockCount }}</p>
                 </div>
             </div>
         </div>
     </div>
+
 
     {{-- Sales Filter Section --}}
     <div class="row mb-4">
