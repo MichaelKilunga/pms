@@ -29,9 +29,9 @@
                         <tr>
                             <td>{{ $sale->id }}</td>
                             <td>{{ $sale->item->name }}</td>
-                            <td>{{  (($sale->total_price)/($sale->quantity))  }}</td>
+                            <td>{{ $sale->total_price / $sale->quantity }}</td>
                             <td>{{ $sale->quantity }}</td>
-                            <td class="amount-cell">{{ $sale->total_price}}</td>
+                            <td class="amount-cell">{{ $sale->total_price }}</td>
                             <!-- Display calculated amount -->
                             <td>{{ $sale->date }}</td>
                             <td>
@@ -54,9 +54,10 @@
                                             </div>
                                             <div class="modal-body">
                                                 <div><strong>Sales Name:</strong> {{ $sale->item->name }}</div>
-                                                <div><strong>Price:</strong> {{ (($sale->total_price)/($sale->quantity)) }}</div>
+                                                <div><strong>Price:</strong> {{ $sale->total_price / $sale->quantity }}
+                                                </div>
                                                 <div><strong>Quantity:</strong> {{ $sale->quantity }}</div>
-                                                <div><strong>Amount:</strong> {{ $sale->total_price}}
+                                                <div><strong>Amount:</strong> {{ $sale->total_price }}
                                                 </div> <!-- Display amount here -->
                                                 <div><strong>Date:</strong> {{ $sale->date }}</div>
                                             </div>
@@ -167,7 +168,8 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Amount</label>
-                                    <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
+                                    <input type="number" class="form-control amount" name="amount[]"
+                                        placeholder="Amount" readonly>
                                 </div>
                                 <div class="col-md-0" hidden>
                                     <label class="form-label">Date</label>
@@ -241,7 +243,10 @@
                     const amount = parseFloat(row.querySelector('.amount').value) || 0;
                     total += amount;
                 });
-                document.getElementById('totalAmount').value = total;
+                document.getElementById('totalAmount').value = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'TZS',
+                }).format(total);
             }
 
             // Add Row Button
@@ -251,9 +256,9 @@
                 newRow.classList.add('row', 'mb-3', 'sale-entry', 'align-items-center');
 
                 newRow.innerHTML = `
-                        <div class="row mb-3 sale-entry align-items-center">
                             <div class="col-md-3">
                                 <select name="item_id[]" class="form-select" required>
+                                    <option selected disabled value="">Select Item</option>
                                     @foreach ($medicines as $medicine)
                                         <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}
                                         </option>
@@ -277,7 +282,6 @@
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
-                        </div>
                 `;
                 salesFields.appendChild(newRow);
 
@@ -295,7 +299,7 @@
                 newRow.querySelector('[name="quantity[]"]').addEventListener('input', function() {
                     calculateAmount(newRow);
                 });
-                
+
                 newRow.querySelector('[name="item_id[]"]').addEventListener('change', function() {
                     tellPrice(newRow);
                     calculateAmount(newRow);
