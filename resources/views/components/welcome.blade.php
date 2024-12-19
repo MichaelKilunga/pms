@@ -1,4 +1,56 @@
 <div class="container mt-4">
+    {{-- Quick Actions Section --}}
+    <div class="row mb-4 g-4 justify-content-center text-center">
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ route('medicines') }}" class="card bg-primary text-white shadow text-decoration-none">
+                <div class="card-body">
+                    <h6>Add Medicine</h6>
+                    <i class="bi bi-plus-circle fs-1"></i>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ route('staff') }}" class="card bg-success text-white shadow text-decoration-none">
+                <div class="card-body">
+                    <h6>Manage Staff</h6>
+                    <i class="bi bi-people-fill fs-1"></i>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ route('pharmacies') }}" class="card bg-warning text-dark shadow text-decoration-none">
+                <div class="card-body">
+                    <h6>View Pharmacies</h6>
+                    <i class="bi bi-hospital fs-1"></i>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ route('sales') }}" class="card bg-danger text-white shadow text-decoration-none">
+                <div class="card-body">
+                    <h6>Create Sale</h6>
+                    <i class="bi bi-cart-plus fs-1"></i>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ route('sales') }}" class="card bg-info text-white shadow text-decoration-none">
+                <div class="card-body">
+                    <h6>Generate Report</h6>
+                    <i class="bi bi-file-earmark-bar-graph fs-1"></i>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ route('stock.index') }}" class="card bg-secondary text-white shadow text-decoration-none">
+                <div class="card-body">
+                    <h6>Check Stock</h6>
+                    <i class="bi bi-box-seam fs-1"></i>
+                </div>
+            </a>
+        </div>
+    </div>
+
     {{-- Summary Section --}}
     <div class="row mb-4 g-4 justify-content-center text-center">
         <div class="col-6 col-md-4 col-lg-2">
@@ -206,7 +258,7 @@
                 success: function(response) {
                     // Update the total sales value in the DOM
                     $('.total-sales').addClass('text-success');
-                    $('.total-sales').text((response.filteredTotalSales) +" "+"TZS");
+                    $('.total-sales').text((response.filteredTotalSales) + " " + "TZS");
 
                     console.log('Sales data updated successfully.');
                 },
