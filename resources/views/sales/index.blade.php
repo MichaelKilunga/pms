@@ -29,9 +29,9 @@
                         <tr>
                             <td>{{ $sale->id }}</td>
                             <td>{{ $sale->item->name }}</td>
-                            <td>{{ $sale->total_price }}</td>
+                            <td>{{  (($sale->total_price)/($sale->quantity))  }}</td>
                             <td>{{ $sale->quantity }}</td>
-                            <td class="amount-cell">{{ $sale->total_price * $sale->quantity }}</td>
+                            <td class="amount-cell">{{ $sale->total_price}}</td>
                             <!-- Display calculated amount -->
                             <td>{{ $sale->date }}</td>
                             <td>
@@ -54,9 +54,9 @@
                                             </div>
                                             <div class="modal-body">
                                                 <div><strong>Sales Name:</strong> {{ $sale->item->name }}</div>
-                                                <div><strong>Price:</strong> {{ $sale->total_price }}</div>
+                                                <div><strong>Price:</strong> {{ (($sale->total_price)/($sale->quantity)) }}</div>
                                                 <div><strong>Quantity:</strong> {{ $sale->quantity }}</div>
-                                                <div><strong>Amount:</strong> {{ $sale->total_price * $sale->quantity }}
+                                                <div><strong>Amount:</strong> {{ $sale->total_price}}
                                                 </div> <!-- Display amount here -->
                                                 <div><strong>Date:</strong> {{ $sale->date }}</div>
                                             </div>
@@ -156,7 +156,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">Unit Price</label>
+                                    <label class="form-label">Unit Price(TZS)</label>
                                     <input type="text" class="form-control" placeholder="Price" name="total_price[]"
                                         value="0" readonly required>
                                 </div>
@@ -167,7 +167,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Amount</label>
-                                    <input type="number" class="form-control amount" placeholder="Amount" readonly>
+                                    <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
                                 </div>
                                 <div class="col-md-0" hidden>
                                     <label class="form-label">Date</label>
@@ -251,31 +251,33 @@
                 newRow.classList.add('row', 'mb-3', 'sale-entry', 'align-items-center');
 
                 newRow.innerHTML = `
-                    <div class="col-md-3">
-                        <select name="item_id[]" class="form-select" required>
-                            @foreach ($medicines as $medicine)
-                                <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" name="total_price[]" value="0 TZS" readonly required>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="number" class="form-control" name="quantity[]" placeholder="Quantity" required>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="number" class="form-control amount" placeholder="Amount" readonly>
-                    </div>
-                    <div class="col-md-0" hidden>
-                       <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
-                    </div>
-                    <div class="col-md-1 d-flex justify-content-center">
-                        <button type="button" class="btn btn-danger btn-sm remove-sale-row">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
+                        <div class="row mb-3 sale-entry align-items-center">
+                            <div class="col-md-3">
+                                <select name="item_id[]" class="form-select" required>
+                                    @foreach ($medicines as $medicine)
+                                        <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" VALUE="0" name="total_price[]" readonly required>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="number" class="form-control" name="quantity[]" placeholder="Quantity" required>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
+                            </div>
+                            <div class="col-md-0" hidden>
+                            <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
+                            </div>
+                            <div class="col-md-1 d-flex justify-content-center">
+                                <button type="button" class="btn btn-danger btn-sm remove-sale-row">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
                 `;
                 salesFields.appendChild(newRow);
 
@@ -293,6 +295,11 @@
                 newRow.querySelector('[name="quantity[]"]').addEventListener('input', function() {
                     calculateAmount(newRow);
                 });
+                
+                newRow.querySelector('[name="item_id[]"]').addEventListener('change', function() {
+                    tellPrice(newRow);
+                    calculateAmount(newRow);
+                });
             });
 
             // Initial Remove Row Buttons
@@ -307,10 +314,12 @@
             document.querySelectorAll('.sale-entry').forEach(row => {
                 row.querySelector('[name="total_price[]"]').addEventListener('input', function() {
                     calculateAmount(row);
+                    tellPrice(row);
                 });
 
                 row.querySelector('[name="item_id[]"]').addEventListener('change', function() {
                     tellPrice(row);
+                    calculateAmount(row);
                 });
 
                 row.querySelector('[name="quantity[]"]').addEventListener('input', function() {

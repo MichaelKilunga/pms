@@ -108,8 +108,10 @@ class DashboardController extends Controller
     public function filterSales(Request $request)
     {
         $duration = $request->filter;
-        $query = Sales::where('pharmacy_id', session('current_pharmacy_id'));
-        // dd($duration);
+        $pharmacyId = session('current_pharmacy_id');
+
+        $query = Sales::where('pharmacy_id', $pharmacyId);
+
         switch ($duration) {
             case 'day':
                 $query->whereDate('created_at', Carbon::today());
@@ -129,10 +131,27 @@ class DashboardController extends Controller
 
         $filteredTotalSales = $query->sum('total_price');
 
+        // Fetch filtered sales data grouped by medicine
+        $filteredSales = DB::table('items')
+            ->leftJoin('sales', function ($join) use ($pharmacyId, $query) {
+                $join->on('items.id', '=', 'sales.item_id')
+                    ->where('sales.pharmacy_id', '=', $pharmacyId)
+                    ->whereIn('sales.id', $query->pluck('id')); // Use filtered sales IDs
+            })
+            ->select(
+                'items.name as medicine_name',
+                DB::raw('COALESCE(SUM(sales.quantity), 0) as total_sales')
+            )
+            ->groupBy('items.id', 'items.name')
+            ->get();
+
         return response()->json([
-            'filteredTotalSales' => $filteredTotalSales  ?? 0
+            'filteredTotalSales' => $filteredTotalSales ?? 0,
+            'medicineNames' => $filteredSales->pluck('medicine_name'),
+            'medicineSales' => $filteredSales->pluck('total_sales')
         ]);
     }
+
 
 
     /**

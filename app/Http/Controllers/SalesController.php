@@ -60,6 +60,9 @@ class SalesController extends Controller
             'total_price' => 'required|array',     // Ensure it's an array of prices
             'total_price.*' => 'required|numeric', // Validate each total price
 
+            'amount' => 'required|array',     // Ensure it's an array of prices
+            'amount.*' => 'required|numeric', // Validate each total price
+
             'date' => 'required|array',            // Ensure it's an array of dates
             'date.*' => 'required|date',           // Validate each date
         ]);
@@ -79,7 +82,8 @@ class SalesController extends Controller
                 'staff_id' => $staffId,                // Use the staff_id from the authenticated user
                 'item_id' => $item_id,
                 'quantity' => $request->quantity[$key],
-                'total_price' => $request->total_price[$key],
+                // 'total_price' => $request->total_price[$key],
+                'total_price' => $request->amount[$key],
                 'date' => $request->date[$key],
             ]);
         }
