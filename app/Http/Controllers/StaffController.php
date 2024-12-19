@@ -71,47 +71,44 @@ class StaffController extends Controller
     /**
      * Show the form for editing the specified staff member.
      */
-    public function edit(Staff $staff)
-    {
-        $this->authorizeAccess($staff);
+    // public function edit(Staff $staff)
+    // {
+    //     $this->authorizeAccess($staff);
 
-        $pharmacies = Pharmacy::where('owner_id', auth::id())->get();
+    //     $pharmacies = Pharmacy::where('owner_id', auth::id())->get();
 
-        return view('staff.edit', compact('staff', 'pharmacies'));
-    }
+    //     return view('staff.edit', compact('staff', 'pharmacies'));
+    // }
 
     /**
      * Update the specified staff member in storage.
      */
-    public function update(Request $request, Staff $staff)
+    public function update(Request $request)
     {
-        $this->authorizeAccess($staff);
-
+        
+        // $this->authorizeAccess($staff);
+    //    dd($request);
         $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'pharmacy_id' => 'required|exists:pharmacies,id',
+            // 'user_id' => 'required|exists:users,id',
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:255',
+            'email' => 'required|string|max:255',
         ]);
 
-        $staff->update($request->only('user_id', 'pharmacy_id'));
+        $user = User::where('id',$request->id);
+        $user->update($request->only(['name', 'email','phone']));
 
-        return redirect()->route('staff.index')->with('success', 'Staff updated successfully.');
+        return redirect()->route('staff')->with('success', 'Staff updated successfully.');
     }
 
     /**
      * Remove the specified staff member from storage.
      */
-    // public function destroy(Staff $staff)
-    // {
-    //     $this->authorizeAccess($staff);
-
-    //     $staff->delete();
-
-    //     return redirect()->route('staff')->with('success', 'Staff removed successfully.');
-    // }
+    
     public function destroy(Request $request)
     {
         User::destroy($request->id);
-        
+
         return redirect()->route('staff')->with('success', 'Staff deleted successfully!');
     }
     /**
