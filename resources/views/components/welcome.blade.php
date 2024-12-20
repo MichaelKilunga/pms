@@ -176,7 +176,7 @@
         {{-- Sales Vs medicine graph --}}
         <div class="col-md-6 mb-4">
             <div class="card shadow h-100">
-                <div class="card-body">
+                <div class="card-body salesGraph">
                     <h4 class="text-center">Sales vs Medicines Graph</h4>
                     <canvas id="salesGraph"></canvas>
                 </div>
@@ -184,24 +184,24 @@
         </div>
 
         <div class="col-md-6 mb-4 mb-4">
-            {{-- Search   Medicine filter --}}
+            {{-- Search   Medicine --}}
             <div class="row m-2">
                 <div class="col-12">
                     <div class="card shadow">
                         <div class="card-body">
                             <h4 class="text-center mb-3">Search Medicine</h4>
-                            <form id="filter-Form" class="row gy-2 gx-3 align-items-center justify-content-center">
+                            <form id="search-Form" class="row gy-2 gx-3 align-items-center justify-content-center">
                                 <div class="col-auto">
-                                <input type="text" class="search">
+                                    <input type="text" class="search">
                                 </div>
                                 <div class="col-auto">
-                                    <button type="submit" class="btn btn-primary"><i class="bi bi-search" ></i></button>
+                                    <button type="submit" class="btn btn-primary"><i
+                                            class="bi bi-search"></i></button>
                                 </div>
                             </form>
                             <div class="mt-3 text-center">
                                 <h5 class="fw-bold">
-                                    Status: <span
-                                        class="text-success total-sales">available</span>
+                                    Status: <span class="text-success avaiable-medicine">available</span>
                                 </h5>
                             </div>
                         </div>
@@ -291,121 +291,74 @@
 
 {{-- Script for Two Separate Graphs --}}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Sales Graph
-        const salesCtx = document.getElementById('salesGraph').getContext('2d');
-        new Chart(salesCtx, {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode($medicineNames) !!},
-                datasets: [{
-                    label: 'Sales',
-                    data: {!! json_encode($medicineSales) !!},
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Stock Graph
-        const stockCtx = document.getElementById('stockGraph').getContext('2d');
-        new Chart(stockCtx, {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode($medicineNames) !!},
-                datasets: [{
-                    label: 'Stock',
-                    data: {!! json_encode($medicineStock) !!},
-                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    });
-</script>
-
-{{-- Script for sales filter --}}
-{{-- <script>
     $(document).ready(function() {
-        // Listen for form submission
-        $('#filter-Form').on('submit', function(event) {
-            event.preventDefault(); // Prevent page reload
-
-            var filterValue = $('select[name="filter"]').val(); // Get selected filter value
-            // $('.total-sales').text(filterValue);
-            // Perform AJAX request
-            $.ajax({
-                url: '{{ route('sales.filter') }}',
-                method: 'GET',
+        // Sales Graph Initialization
+        function initializeGraph(context, labels, data, label, backgroundColor, borderColor) {
+            return new Chart(context, {
+                type: 'bar',
                 data: {
-                    filter: filterValue
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
+                        borderWidth: 1
+                    }]
                 },
-                dataType: 'json',
-                success: function(response) {
-                    // Update the total sales value in the DOM
-                    $('.total-sales').addClass('text-success');
-                    $('.total-sales').text((response.filteredTotalSales) + " " + "TZS");
-
-                    console.log('Sales data updated successfully.');
-                },
-                error: function(error) {
-                    console.error('Error fetching sales data:', error);
-                    $('.total-sales').text("There is an Error!");
-                    $('.total-sales').removeClass('text-success');
-                    $('.total-sales').addClass('text-danger');
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
                 }
             });
-        });
-    });
-</script> --}}
-<script>
-    $(document).ready(function() {
-        const salesCtx = document.getElementById('salesGraph').getContext('2d');
-        let salesChart = new Chart(salesCtx, {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode($medicineNames) !!}, // Initial data
-                datasets: [{
-                    label: 'Sales',
-                    data: {!! json_encode($medicineSales) !!}, // Initial data
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
+        }
 
-        // Listen for form submission
+        // Initialize Sales Graph
+        const salesGraphCtx = $('#salesGraph')[0].getContext('2d');
+        const salesChart = initializeGraph(
+            salesGraphCtx,
+            {!! json_encode($medicineNames) !!},
+            {!! json_encode($medicineSales) !!},
+            'Sales',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(54, 162, 235, 1)'
+        );
+
+        // Initialize Stock Graph
+        const stockGraphCtx = $('#stockGraph')[0].getContext('2d');
+        initializeGraph(
+            stockGraphCtx,
+            {!! json_encode($medicineNames) !!},
+            {!! json_encode($medicineStock) !!},
+            'Stock',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(255, 99, 132, 1)'
+        );
+
+        // Filter Form Submission
         $('#filter-Form').on('submit', function(event) {
-            event.preventDefault(); // Prevent page reload
+            event.preventDefault();
 
-            var filterValue = $('select[name="filter"]').val(); // Get selected filter value
+            var filterValue = $('select[name="filter"]').val();
+
+            // Update loading state
+            $('.total-sales')
+                .removeClass('text-success')
+                .addClass('text-muted')
+                .html(
+                    '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>'
+                    );
+
+            $('#salesGraph').attr('hidden', true);
+            $('.salesGraph')
+                .addClass('text-muted')
+                .append(
+                    '<div class="spinner-border remove-spinner spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>'
+                    );
 
             // Perform AJAX request
             $.ajax({
@@ -417,19 +370,27 @@
                 dataType: 'json',
                 success: function(response) {
                     // Update total sales text
-                    $('.total-sales').addClass('text-success').text(response
-                        .filteredTotalSales + " TZS");
+                    $('.total-sales')
+                        .removeClass('text-muted')
+                        .addClass('text-success')
+                        .text(new Intl.NumberFormat('en-TZ', {
+                            style: 'currency',
+                            currency: 'TZS'
+                        }).format(response.filteredTotalSales));
+
+                    $('.salesGraph').removeClass('text-muted');
+                    $('#salesGraph').removeAttr('hidden');
+                    $('.remove-spinner ').remove();
 
                     // Update the graph
                     salesChart.data.labels = response.medicineNames;
                     salesChart.data.datasets[0].data = response.medicineSales;
                     salesChart.update();
-
-                    console.log('Graph updated successfully.');
                 },
                 error: function(error) {
                     console.error('Error fetching sales data:', error);
-                    $('.total-sales').text("There is an Error!")
+                    $('.total-sales')
+                        .text('There is an Error!')
                         .removeClass('text-success')
                         .addClass('text-danger');
                 }

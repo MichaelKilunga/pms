@@ -19,7 +19,7 @@
                         <th>Sales Name</th>
                         <th>Price</th>
                         <th>Quantity</th>
-                        <th>Amount</th> <!-- New column for calculated amount -->
+                        <th>Total Price</th> <!-- New column for calculated amount -->
                         <th>Date</th>
                         <th>Actions</th>
                     </tr>
@@ -66,13 +66,13 @@
                                 </div>
 
                                 <!-- Edit Modal -->
-                                <a href="#" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                <a href="#" class="btn btn-success btn-sm" data-bs-toggle="modal" hidden
                                     data-bs-target="#editSaleModal{{ $sale->id }}">
                                     <i class="bi bi-pencil"></i>
                                 </a>
 
                                 <!-- Edit Sale Modal -->
-                                <div class="modal fade" id="editSaleModal{{ $sale->id }}" tabindex="-1"
+                                <div class="modal fade" hidden id="editSaleModal{{ $sale->id }}" tabindex="-1"
                                     aria-labelledby="editSaleModalLabel{{ $sale->id }}" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
@@ -94,9 +94,9 @@
                                                             value="{{ $sale->item->name }}" readonly>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label class="form-label">Price</label>
+                                                        <label class="form-label">Total Price</label>
                                                         <input type="number" class="form-control" name="total_price"
-                                                            value="{{ $sale->total_price }}" required>
+                                                            value="{{ $sale->total_price }}" readonly required>
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Quantity</label>
@@ -120,7 +120,7 @@
                                     style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger"
+                                    <button type="submit" hidden disabled="true" class="btn btn-sm btn-danger"
                                         onclick="return confirm('Are you sure to delete this sale?')">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -150,9 +150,15 @@
                                     <label class="form-label">Item</label>
                                     <select name="item_id[]" class="form-select" required>
                                         <option selected disabled value="">Select Item</option>
+                                        @php $x = 0; @endphp
                                         @foreach ($medicines as $medicine)
-                                            <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}
-                                            </option>
+                                            @if ($x % 4 == 0)
+                                                <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }} <span class="badge bg-danger" > &darr;14</span></option>
+                                            @endif
+                                            @if ($x % 4 != 0)
+                                            <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}</option>
+                                        @endif
+                                            @php $x++; @endphp                                            
                                         @endforeach
                                     </select>
                                 </div>
@@ -163,7 +169,8 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Quantity</label>
-                                    <input type="number" class="form-control" placeholder="Quantity" name="quantity[]"
+                                    <input type="number" class="form-control" min="1" max="10"
+                                        title="Only 10 has remained in stock!" placeholder="Quantity" name="quantity[]"
                                         required>
                                 </div>
                                 <div class="col-md-3">
