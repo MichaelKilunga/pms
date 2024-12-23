@@ -150,15 +150,15 @@
                                     <label class="form-label">Item</label>
                                     <select name="item_id[]" class="form-select" required>
                                         <option selected disabled value="">Select Item</option>
-                                        @php $x = 0; @endphp
+                                        {{-- @php $x = 0; @endphp --}}
                                         @foreach ($medicines as $medicine)
-                                            @if ($x % 4 == 0)
+                                            {{-- @if ($x % 4 == 0)
                                                 <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }} <span class="badge bg-danger" > &darr;14</span></option>
                                             @endif
-                                            @if ($x % 4 != 0)
+                                            @if ($x % 4 != 0) --}}
                                             <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}</option>
-                                        @endif
-                                            @php $x++; @endphp                                            
+                                        {{-- @endif --}}
+                                            {{-- @php $x++; @endphp                                             --}}
                                         @endforeach
                                     </select>
                                 </div>
