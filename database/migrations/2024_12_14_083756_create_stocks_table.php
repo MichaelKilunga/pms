@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->timestamp('in_date');
             $table->integer('quantity');
-            $table->integer('remain_Quantity');
-            $table->integer('low_stock_percentage');
+            $table->integer('remain_Quantity')->nullable(false);  // Shouldn't be nullable
+            $table->integer('low_stock_percentage')->nullable(false);  // Shouldn't be nullable            
             $table->timestamp('expire_date');
             $table->decimal('buying_price', 10, 2);
             $table->decimal('selling_price', 10, 2);
