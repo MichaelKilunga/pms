@@ -142,18 +142,18 @@
                             {{-- Choose pharmacy --}}
                             @if (Auth::user()->role == 'owner')
                                 <x-dropdown-link href="{{ route('pharmacies.switch') }}">
-                                    <p class="btn btn-light text-danger">{{ __('Switch Pharmacy') }} </p>
+                                    <p class="btn# btn-light text-danger">{{ __('Switch Pharmacy') }} </p>
                                 </x-dropdown-link>
                             @endif
 
-                            @if (Auth::user()->role != 'owner')
-                                <x-dropdown-link href="#">
+                            {{-- @if (Auth::user()->role != 'owner')
+                                <x-dropdown-link href="#"> --}}
                                     {{-- @foreach ($pharmacy as $pharmacy)
                                         {{$pharmacy->name}}
                                     @endforeach --}}
-                                    <p class=" btn-light text-danger disabled">{{ session('pharmacy_name') }}</p>
+                                    {{-- <p class=" btn-light text-danger disabled">{{ session('pharmacy_name') }}</p>
                                 </x-dropdown-link>
-                            @endif
+                            @endif --}}
 
                             <div class="border-t border-gray-200 dark:border-gray-600"></div>
 

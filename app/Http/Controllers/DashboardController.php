@@ -22,6 +22,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        $sellMedicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->with('item')->get();
         $totalMedicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->count();
         $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
         $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today())->sum('total_price');
@@ -33,7 +34,7 @@ class DashboardController extends Controller
 
         $totalStaff = Staff::where('pharmacy_id', session('current_pharmacy_id'))->count(); // Adjust as needed
         $lowStockCount = Stock::where('low_stock_percentage', '<', 10)->where('pharmacy_id', session('current_pharmacy_id'))->count(); // Low stock threshold
-        $stockExpired = Stock::where('expire_date', '<', now())->count();
+        $stockExpired = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '<', now())->count();
         // dd($lowStockCount);
 
         if (Auth::user()->role == "staff" || Auth::user()->role == "admin") {
@@ -56,8 +57,9 @@ class DashboardController extends Controller
             ->select(
                 'items.name as medicine_name',
                 DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales'),
-                DB::raw('COALESCE(SUM(stocks.remain_Quantity), 0) as total_stock')
+                DB::raw('COALESCE(stocks.remain_Quantity, 0) as total_stock')
             )
+            // ->whereDate('sales.created_at', Carbon::today())
             ->groupBy('items.id', 'items.name')
             ->havingRaw('SUM(sales.quantity) > 0') // Exclude items with no sales
             ->get();
@@ -71,11 +73,11 @@ class DashboardController extends Controller
 
         $filter = 'day';
         $query = Sales::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today());
-        $filteredTotalSales = $query->sum('total_price');
 
+        $filteredTotalSales = $query->sum('total_price');
         if (Auth::user()->role == "staff") {
-            $staff = Staff::where('user_id', Auth::user()->id)->first();
-            $filteredTotalSales = $query->where('staff_id', $staff->id)->sum('total_price');
+            // $staff = Staff::where('user_id', Auth::user()->id)->first();
+            $filteredTotalSales = $query->where('staff_id', Auth::user()->id)->sum('total_price');
             // dd($filteredTotalSales);
         }
 
@@ -98,7 +100,8 @@ class DashboardController extends Controller
                     'totalPharmacies',
                     'stockExpired',
                     'filteredTotalSales',
-                    'filter'
+                    'filter',
+                    'sellMedicines'
                 ));
             } else {
                 session(['guest-owner' => true]);
@@ -106,9 +109,7 @@ class DashboardController extends Controller
             }
         } else {
             $staff = Staff::where('user_id', Auth::user()->id)->first();
-            // $pharmacy = Pharmacy::where('id', $staff->pharmacy_id)->get();
-            // session(['current_pharmacy_id'=>$pharmacy->id]);
-        $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id', $staff->id)->whereDate('created_at', Carbon::today())->sum('total_price');
+            $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id',  Auth::user()->id)->whereDate('created_at', Carbon::today())->sum('total_price');
             return view('dashboard', compact(
                 'pharmacy',
                 'totalMedicines',
@@ -122,7 +123,8 @@ class DashboardController extends Controller
                 'totalPharmacies',
                 'filteredTotalSales',
                 'filter',
-                'stockExpired'
+                'stockExpired',
+                'sellMedicines'
             ));
         }
     }
@@ -135,9 +137,9 @@ class DashboardController extends Controller
         $query = Sales::where('pharmacy_id', $pharmacyId);
 
         if (Auth::user()->role == "staff") {
-            $staff = Staff::where('user_id', Auth::user()->id)->first();
+            // $staff = Staff::where('user_id', Auth::user()->id)->first();
             // dd($staff);
-            $query->where('staff_id', $staff->id);
+            $query->where('staff_id', Auth::user()->id);
         }
 
         switch ($duration) {
@@ -152,7 +154,7 @@ class DashboardController extends Controller
                         'items.name as medicine_name',
                         DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales')
                     )
-                    ->where('sales.created_at', Carbon::today()) // Exclude items with no sales
+                    ->whereDate('sales.created_at', Carbon::today()) // Correctly filter by date
                     ->groupBy('items.id', 'items.name')
                     ->get();
                 break;

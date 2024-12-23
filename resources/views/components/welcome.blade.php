@@ -27,10 +27,10 @@
                 </a>
             </div>
             <div class="col-6 col-md-4 col-lg-2">
-                <a href="{{ route('sales') }}" class="card bg-danger text-white shadow text-decoration-none">
+                <a href="" data-bs-toggle="modal" data-bs-target="#createSalesModal"
+                    class="card bg-danger text-white shadow text-decoration-none">
                     <div class="card-body">
                         <h6><i class="bi bi-cart-plus fs-1#"></i> Create new Sales</h6>
-
                     </div>
                 </a>
             </div>
@@ -120,7 +120,8 @@
         {{-- Quick Actions Section --}}
         <div class="row mb-4 g-4 justify-content-center text-center">
             <div class="col-6 col-md-4 col-lg-2">
-                <a href="{{ route('sales') }}" class="card bg-danger text-white shadow text-decoration-none">
+                <a href="" data-bs-toggle="modal" data-bs-target="#createSalesModal"
+                    class="card bg-danger text-white shadow text-decoration-none">
                     <div class="card-body">
                         <h6><i class="bi bi-cart-plus fs-1#"></i> Create new Sales</h6>
 
@@ -171,6 +172,22 @@
         </div>
     @endif
 
+
+    {{-- Profit Made --}}
+    {{-- <div class="row m-2">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h4 class="text-center mb-3">Total Profit Made:
+                        <span id="totalProfitMade" type="text" name="totalProfitMade"
+                            class="badge badge-succee totalProfitMade text-success"></span>
+                    </h4>
+                    <hr>
+                </div>
+            </div>
+        </div>
+    </div> --}}
+    
     {{-- Sales Filter Section --}}
     <div class="row mb-4">
         {{-- Sales Vs medicine graph --}}
@@ -182,7 +199,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-6 mb-4 mb-4">
             {{-- Search   Medicine --}}
             <div class="row m-2">
@@ -291,6 +307,84 @@
     </div>
 
 
+</div>
+
+<!-- Create Sales Modal -->
+<div class="modal fade" id="createSalesModal" tabindex="-1" aria-labelledby="createSalesModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="createSalesModalLabel">Add New Sale</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('sales.store') }}" method="POST" id="salesForm">
+                    @csrf
+                    <div id="salesFields">
+                        <div class="row mb-3 sale-entry align-items-center">
+                            <div class="col-md-3">
+                                <label class="form-label">Medicine</label>
+                                <select name="item_id[]" class="form-select chosen" required>
+                                    <option selected disabled value="">Select Item</option>
+                                    @foreach ($sellMedicines as $sellMedicine)
+                                        <option value="{{ $sellMedicine->item->id }}">{{ $sellMedicine->item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Unit Price(TZS)</label>
+                                <input type="text" class="form-control" placeholder="Price" name="total_price[]"
+                                    value="0" readonly required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label" for="label[]">Quantity</label>
+                                <input type="number" class="form-control" min="1"
+                                    title="Only 10 has remained in stock!" placeholder="Quantity" name="quantity[]"
+                                    required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Amount</label>
+                                <input type="number" class="form-control amount" name="amount[]"
+                                    placeholder="Amount" readonly>
+                            </div>
+                            <div class="col-md-0" hidden>
+                                <label class="form-label">Date</label>
+                                <input type="text" class="form-control date" name="date[]"
+                                    value="{{ now() }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-8 text-end">
+                            <strong>Total Amount:</strong>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <input type="text" class="form-control text-danger" id="totalAmount" value="0"
+                                readonly>
+                        </div>
+                        <div class="col-md-1 text-end">
+                            <!-- <input class="btn btn-outline-danger" id="totalAmount" value="0" disabled> -->
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="col-md-11 d-flex justify-content-between ">
+                            <button type="button" id="addSaleRow" class="btn btn-outline-primary">
+                                <i class="bi bi-plus-lg"></i> Add Row
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Save Sales
+                            </button>
+                        </div>
+                        <div class="col-md-1">
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 {{-- Script for Two Separate Graphs --}}
@@ -411,7 +505,7 @@
             var similar_medicine = $('#similar_medicine');
             var spinner =
                 '<div class="spinner-border spinner-border-sm" id="spinner" role="status"><span class="visually-hidden">Loading...</span></div>';
-                var spinnerId = $('#spinner');
+            var spinnerId = $('#spinner');
 
             // Update loading state
             avaiable_medicine.removeClass('text-success').addClass('text-muted').html(spinner);
@@ -427,16 +521,157 @@
                 dataType: 'json',
                 success: function(response) {
                     spinnerId.remove();
-                    avaiable_medicine.addClass('text-success').removeClass('text-muted').text(response.availableMedicine);
-                    similar_medicine.addClass('text-success').removeClass('text-muted').text(response.similarMedicines.join(', '));
+                    avaiable_medicine.addClass('text-success').removeClass('text-muted')
+                        .text(response.availableMedicine);
+                    similar_medicine.addClass('text-success').removeClass('text-muted')
+                        .text(response.similarMedicines.join(', '));
                 },
                 error: function(error) {
                     console.error('Error fetching sales data:', error);
                     spinnerId.remove();
-                    avaiable_medicine.text('There is an Error!').removeClass('text-success').addClass('text-danger').html();
-                    similar_medicine.text('There is an Error!').removeClass('text-success').addClass('text-danger').html();
+                    avaiable_medicine.text('There is an Error!').removeClass('text-success')
+                        .addClass('text-danger').html();
+                    similar_medicine.text('There is an Error!').removeClass('text-success')
+                        .addClass('text-danger').html();
                 }
             });
         });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Chosen for dynamically added rows
+        function initializeChosen() {
+            $(".chosen").chosen({
+                width: "100%",
+                no_results_text: "No matches found!",
+                allow_single_deselect: true,
+            }).on("change", function() {
+                const row = $(this).closest(".sale-entry")[0];
+                tellPrice(row);
+                calculateAmount(row);
+            });
+        }
+
+        // Reusable Functions
+        function calculateAmount(row) {
+            const price = parseFloat(row.querySelector('[name="total_price[]"]').value) || 0;
+            const quantity = parseFloat(row.querySelector('[name="quantity[]"]').value) || 0;
+            const amount = price * quantity;
+            row.querySelector('.amount').value = amount;
+
+            // Update total amount
+            updateTotalAmount();
+        }
+
+        function tellPrice(row) {
+            let medicines = @json($sellMedicines); // Convert medicines to a JS array
+            const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
+
+            // Find the selected medicine
+            const selectedMedicine = medicines.find(medicine => medicine.item.id == selectedMedicineId);
+
+            if (selectedMedicine) {
+                // Set the total price to the medicine price (formatted with "TZS")
+                row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price}`;
+                row.querySelector('[name="quantity[]"]').setAttribute('max',
+                    `${selectedMedicine.remain_Quantity}`);
+
+                const labelElement = row.querySelector('[for="label[]"]');
+                // Clear any existing content in the labelElement
+                labelElement.innerHTML = '';
+                // Create a span element to hold the appended text
+                const appendedText = document.createElement('small');
+                // Set the text content and add the class
+                appendedText.innerHTML = 'In stock (&darr;' + selectedMedicine.remain_Quantity + ')';
+                if (selectedMedicine.remain_Quantity < selectedMedicine.low_stock_percentage) {
+                    appendedText.classList.add('text-danger');
+                } else {
+                    appendedText.classList.add('text-success');
+                }
+                // Append the span to the label element
+                labelElement.appendChild(appendedText);
+
+            }
+        }
+
+        function updateTotalAmount() {
+            let total = 0;
+            document.querySelectorAll('.sale-entry').forEach(row => {
+                const amount = parseFloat(row.querySelector('.amount').value) || 0;
+                total += amount;
+            });
+            document.getElementById('totalAmount').value = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'TZS',
+            }).format(total);
+        }
+
+        // Add Row Functionality
+        document.getElementById('addSaleRow').addEventListener('click', function() {
+            const salesFields = document.getElementById('salesFields');
+            const newRow = document.createElement('div');
+            newRow.classList.add('row', 'mb-3', 'sale-entry', 'align-items-center');
+
+            newRow.innerHTML = `
+                            <div class="col-md-3">
+                                <select name="item_id[]" data-row-id="item_id[]" class="form-select chosen" required>
+                                    <option selected disabled value="">Select Item</option>
+                                    @foreach ($sellMedicines as $medicine)
+                                        <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" VALUE="0" name="total_price[]" readonly required>
+                            </div>
+                            <div class="col-md-2">
+                                    <label class="form-label" for="label[]"></label>
+                                <input type="number" class="form-control" name="quantity[]" min="1" placeholder="Quantity" required>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
+                            </div>
+                            <div class="col-md-0" hidden>
+                            <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
+                            </div>
+                            <div class="col-md-1 d-flex justify-content-center">
+                                <button type="button" class="btn btn-danger btn-sm remove-sale-row">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                `;
+
+
+            salesFields.appendChild(newRow);
+
+            // Initialize Chosen for the new row
+            initializeChosen();
+
+            // Add Event Listeners for the new row
+            newRow.querySelector('.remove-sale-row').addEventListener('click', function() {
+                newRow.remove();
+                updateTotalAmount();
+            });
+
+            newRow.querySelector('[name="quantity[]"]').addEventListener('input', function() {
+                calculateAmount(newRow);
+            });
+        });
+
+        // Initial Setup for Existing Rows
+        document.querySelectorAll('.sale-entry').forEach(row => {
+            row.querySelector('[name="item_id[]"]').addEventListener('change', function() {
+                tellPrice(row);
+                calculateAmount(row);
+            });
+
+            row.querySelector('[name="quantity[]"]').addEventListener('input', function() {
+                calculateAmount(row);
+            });
+        });
+
+        // Initialize Chosen on Page Load
+        initializeChosen();
     });
 </script>

@@ -22,7 +22,7 @@ class SalesController extends Controller
         $sales = Sales::with('item')->where('pharmacy_id', session('current_pharmacy_id'))
             ->get();
             
-        $medicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->with('item')->get();
+        $medicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->with('item')->get();
         // dd($medicines);
         return view('sales.index', compact('sales', 'medicines'));
     }
