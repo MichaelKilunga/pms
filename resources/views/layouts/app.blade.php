@@ -21,13 +21,28 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css">
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Styles -->
     {{-- @livewireStyles --}}
+    <style>
+         .chosen-container .chosen-single {
+            height: calc(2.5rem + 2px); /* Match Bootstrap's default input height */
+            line-height: calc(2.5rem + 2px);
+            /* border: 1px solid #ced4da; */
+            border-radius: 0;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            color: black;
+            background-color: white;
+            /* background-clip: padding-box; */
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+    </style>
 </head>
 
 <body class="font-sans antialiased">
@@ -88,6 +103,12 @@
                     ordering: true, // Enable column sorting
                     info: true // Enable information display
                 });
+
+                $(".chosen").chosen({
+                width: "100%",
+                no_results_text: "No matches found!",
+            });
+
             });
         });
     </script>
@@ -99,6 +120,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js"></script>
 
 </body>
 
