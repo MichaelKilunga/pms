@@ -98,7 +98,7 @@
                 <div class="card bg-success text-white shadow">
                     <div class="card-body">
                         <h6>
-                            <i class="bi bi-currency-exchange fs-3# me-2"></i>Total Sales
+                            <i class="bi bi-currency-exchange fs-3# me-2"></i>Today Sales
                         </h6>
                         <p class="fs-5 fw-bold">{{ $totalSales }}</p>
                     </div>
@@ -152,7 +152,7 @@
                 <div class="card bg-success text-white shadow">
                     <div class="card-body">
                         <h6>
-                            <i class="bi bi-currency-exchange fs-3# me-2"></i>Total Sales
+                            <i class="bi bi-currency-exchange fs-3# me-2"></i>Today Sales
                         </h6>
                         <p class="fs-5 fw-bold">{{ $totalSales }}</p>
                     </div>
@@ -378,7 +378,7 @@
                             currency: 'TZS'
                         }).format(response.filteredTotalSales));
 
-                    $('.salesGraph').removeClass('text-muted');
+                    $('.salesGraph').removeClass('text-muted').removeClass('text-danger').addClass('text-success');
                     $('#salesGraph').removeAttr('hidden');
                     $('.remove-spinner ').remove();
 

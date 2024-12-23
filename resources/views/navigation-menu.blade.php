@@ -16,7 +16,7 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
-                        {{ __('Sales') }}
+                        {{ __('Sell medicine') }}
                     </x-nav-link>
                     @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
                         <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
@@ -215,23 +215,23 @@
                 <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Sales')">
-                    {{ __('Sales') }}
+                <x-responsive-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
+                    {{ __('Sell medicine') }}
                 </x-responsive-nav-link>
                 @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
-                    <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('medicine')">
+                    <x-responsive-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
                         {{ __('Medicine') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Stock')">
+                    <x-responsive-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
                         {{ __('Stock') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Staff')">
+                    <x-responsive-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
                         {{ __('Staff') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Categories')">
+                    <x-responsive-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
                         {{ __('Categories') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('Pharmacies')">
+                    <x-responsive-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
                         {{ __('Pharmacies') }}
                     </x-responsive-nav-link>
                 @endif
