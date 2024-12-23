@@ -176,7 +176,7 @@
                         <div class="row mb-3 stock-entry align-items-end gx-2 gy-2">
                             <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                 <label for="item_id" class="form-label fw-bold">Medicine Name</label>
-                                <select name="item_id[]" class="form-select shadow-sm" required>
+                                <select name="item_id[]" class="form-select shadow-sm chosen" required>
                                     <option selected value="">Select medicine..</option>
                                     @foreach ($medicines as $medicine)
                                     <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
@@ -236,7 +236,7 @@
         newStockEntry.innerHTML = `
             <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                 <label class="form-label fw-bold">Medicine Name</label>
-                <select name="item_id[]" class="form-select  shadow-sm" required>
+                <select name="item_id[]" class="form-select  shadow-sm chosen" required>
                     <option selected value="">Select medicine...</option>
                     @foreach ($medicines as $medicine)
                         <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
@@ -276,6 +276,11 @@
         `;
 
         stockFields.appendChild(newStockEntry);
+
+        // $(".chosen").chosen({
+        //         width: "100%",
+        //         no_results_text: "No matches found!",
+        //     });
 
         newStockEntry.querySelector('.remove-stock-entry').addEventListener('click', function() {
             newStockEntry.remove();
