@@ -169,7 +169,7 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Quantity</label>
-                                    <input type="number" class="form-control" min="1" max="10"
+                                    <input type="number" class="form-control" min="1" 
                                         title="Only 10 has remained in stock!" placeholder="Quantity" name="quantity[]"
                                         required>
                                 </div>
@@ -240,6 +240,7 @@
                 if (selectedMedicine) {
                     // Set the total price to the medicine price (formatted with "TZS")
                     row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price}`;
+                    row.querySelector('[name="quantity[]"]').setAttribute('max',`${selectedMedicine.remain_Quantity}`);
                 }
             }
 
@@ -276,7 +277,7 @@
                                 <input type="text" class="form-control" VALUE="0" name="total_price[]" readonly required>
                             </div>
                             <div class="col-md-2">
-                                <input type="number" class="form-control" name="quantity[]" placeholder="Quantity" required>
+                                <input type="number" class="form-control" name="quantity[]" min="1" placeholder="Quantity" required>
                             </div>
                             <div class="col-md-3">
                                 <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
@@ -310,6 +311,7 @@
                 newRow.querySelector('[name="item_id[]"]').addEventListener('change', function() {
                     tellPrice(newRow);
                     calculateAmount(newRow);
+                    // setMaxQuantity(newRow);
                 });
             });
 
@@ -331,6 +333,7 @@
                 row.querySelector('[name="item_id[]"]').addEventListener('change', function() {
                     tellPrice(row);
                     calculateAmount(row);
+                    // setMaxQuantity(row);
                 });
 
                 row.querySelector('[name="quantity[]"]').addEventListener('input', function() {

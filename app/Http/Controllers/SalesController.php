@@ -76,6 +76,7 @@ class SalesController extends Controller
 
         // Loop through the arrays of item data and create individual sale records
         foreach ($request->item_id as $key => $item_id) {
+            
             // dd($request);
             Sales::create([
                 'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
