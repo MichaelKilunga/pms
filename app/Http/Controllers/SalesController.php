@@ -76,6 +76,11 @@ class SalesController extends Controller
 
         // Loop through the arrays of item data and create individual sale records
         foreach ($request->item_id as $key => $item_id) {
+
+            //update remaning stock
+            $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('item_id', $item_id)->first();
+            $remainQuantity = $stock->remain_Quantity - $request->quantity[$key];
+            $stock->update(['remain_Quantity'=> $remainQuantity ]);
             
             // dd($request);
             Sales::create([
