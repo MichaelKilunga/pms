@@ -80,7 +80,7 @@
                                                     </div>
                                                     <div class="mb-3">
                                                         <label for="category" class="form-label">Category</label>
-                                                        <select name="category_id" class="form-select" required>
+                                                        <select name="category_id" class="chosen form-select" required>
                                                             @foreach ($categories as $category)
                                                                 <option value="{{ $category->id }}"
                                                                     {{ $medicine->category_id == $category->id ? 'selected' : '' }}>
