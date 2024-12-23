@@ -40,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('medicines', [ItemsController::class, 'index'])->name('medicines');
     Route::get('medicines/create', [ItemsController::class, 'create'])->name('medicines.create');
     Route::post('medicines', [ItemsController::class, 'store'])->name('medicines.store');
+    Route::get('medicines/search', [ItemsController::class, 'search'])->name('medicines.search');
     Route::get('medicines/{id}', [ItemsController::class, 'show'])->name('medicines.show');
     Route::put('medicines/update/{id}', [ItemsController::class, 'update'])->name('medicines.update');
     Route::delete('medicines/delete/{id}', [ItemsController::class, 'destroy'])->name('medicines.destroy');

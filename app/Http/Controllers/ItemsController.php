@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ItemsController extends Controller
 {
@@ -19,9 +20,40 @@ class ItemsController extends Controller
         $medicines = Items::with(['category', 'pharmacy'])->where('pharmacy_id', session('current_pharmacy_id'))->get();
         $categories = Category::where('pharmacy_id', session('current_pharmacy_id'))->get();
         $pharmacy = Pharmacy::where('pharmacy_id', session('current_pharmacy_id'))->first();
-            // dd($medicines);
-        return view('medicines.index', compact('medicines','categories','pharmacy'));
+        // dd($medicines);
+        return view('medicines.index', compact('medicines', 'categories', 'pharmacy'));
     }
+
+    public function search(Request $request)
+{
+    // Get the search term from the request
+    $search = $request->input('search');
+    $currentPharmacyId = session('current_pharmacy_id'); // Fetch the current pharmacy ID from the session
+
+    // Query to find if exact medicine is available in the current pharmacy
+    $availableMedicine = DB::table('items')
+        ->join('stocks', 'items.id', '=', 'stocks.item_id')
+        ->where('items.name', $search)
+        ->where('stocks.remain_Quantity', '>', 0)
+        ->where('stocks.pharmacy_id', '=', $currentPharmacyId) // Filter by pharmacy ID
+        ->exists();
+
+    // Query to find similar medicines in the current pharmacy
+    $similarMedicines = DB::table('items')
+        ->join('stocks', 'items.id', '=', 'stocks.item_id')
+        ->where('items.name', 'LIKE', '%' . $search . '%')
+        ->where('items.name', '!=', $search)
+        ->where('stocks.remain_Quantity', '>', 0)
+        ->where('stocks.pharmacy_id', '=', $currentPharmacyId) // Filter by pharmacy ID
+        ->pluck('items.name');
+
+    // Prepare the response
+    return response()->json([
+        'availableMedicine' => $availableMedicine ? 'Available' : 'Not Available',
+        'similarMedicines' => $similarMedicines,
+    ]);
+}
+
 
     /**
      * Show the form for creating a new item.
@@ -31,7 +63,7 @@ class ItemsController extends Controller
         $pharmacies = Pharmacy::where('owner_id', auth::id())->get();
         $categories = Category::all();
 
-        return view('medicines.create', compact('pharmacies','medicines', 'categories'));
+        return view('medicines.create', compact('pharmacies', 'medicines', 'categories'));
     }
 
     /**
@@ -55,8 +87,8 @@ class ItemsController extends Controller
      */
     public function show($id)
     {
-// dd($id);
-        $medicine = Items::with(['category','pharmacy'])->where('id',$id)->first();
+        // dd($id);
+        $medicine = Items::with(['category', 'pharmacy'])->where('id', $id)->first();
         return view('medicines.show', compact('medicine'));
     }
 
