@@ -190,18 +190,21 @@
                     <div class="card shadow">
                         <div class="card-body">
                             <h4 class="text-center mb-3">Search Medicine</h4>
-                            <form id="search-Form" class="row gy-2 gx-3 align-items-center justify-content-center">
+                            <form id="search_form" class="row gy-2 gx-3 align-items-center justify-content-center">
+                                <hr>
                                 <div class="col-auto">
-                                    <input type="text" class="search">
+                                    <input id="medicine" type="text" name="searchValue" class="search">
                                 </div>
                                 <div class="col-auto">
                                     <button type="submit" class="btn btn-primary"><i
                                             class="bi bi-search"></i></button>
                                 </div>
                             </form>
-                            <div class="mt-3 text-center">
-                                <h5 class="fw-bold">
-                                    Status: <span class="text-success avaiable-medicine">available</span>
+                            <div class="mt-3 ml-5   ">
+                                <h5 class="fw-bold ml-7">
+                                    Status: <span id="avaiable_medicine" class="text-success"></span>
+                                    <br>Similar Medicines Available: <span id="similar_medicine"
+                                        class="text-warning "></span>
                                 </h5>
                             </div>
                         </div>
@@ -215,6 +218,7 @@
                         <div class="card-body">
                             <h4 class="text-center mb-3">Total Sales</h4>
                             <form id="filter-Form" class="row gy-2 gx-3 align-items-center justify-content-center">
+                                <hr>
                                 <div class="col-auto">
                                     <select name="filter" class="form-select" required>
                                         <option value="day" {{ $filter == 'day' ? 'selected' : '' }}>Today</option>
@@ -351,14 +355,14 @@
                 .addClass('text-muted')
                 .html(
                     '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>'
-                    );
+                );
 
             $('#salesGraph').attr('hidden', true);
             $('.salesGraph')
                 .addClass('text-muted')
                 .append(
                     '<div class="spinner-border remove-spinner spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>'
-                    );
+                );
 
             // Perform AJAX request
             $.ajax({
@@ -378,7 +382,8 @@
                             currency: 'TZS'
                         }).format(response.filteredTotalSales));
 
-                    $('.salesGraph').removeClass('text-muted').removeClass('text-danger').addClass('text-success');
+                    $('.salesGraph').removeClass('text-muted').removeClass('text-danger')
+                        .addClass('text-success');
                     $('#salesGraph').removeAttr('hidden');
                     $('.remove-spinner ').remove();
 
@@ -393,6 +398,43 @@
                         .text('There is an Error!')
                         .removeClass('text-success')
                         .addClass('text-danger');
+                }
+            });
+        });
+
+        // Search Form Submission
+        $('#medicine').on('input', function(event) {
+            event.preventDefault();
+
+            var searchValue = $('#medicine').val();
+            var avaiable_medicine = $('#avaiable_medicine');
+            var similar_medicine = $('#similar_medicine');
+            var spinner =
+                '<div class="spinner-border spinner-border-sm" id="spinner" role="status"><span class="visually-hidden">Loading...</span></div>';
+                var spinnerId = $('#spinner');
+
+            // Update loading state
+            avaiable_medicine.removeClass('text-success').addClass('text-muted').html(spinner);
+            similar_medicine.removeClass('text-success').addClass('text-muted').html(spinner);
+
+            // Perform AJAX request
+            $.ajax({
+                url: '{{ route('medicines.search') }}',
+                method: 'GET',
+                data: {
+                    search: searchValue
+                },
+                dataType: 'json',
+                success: function(response) {
+                    spinnerId.remove();
+                    avaiable_medicine.addClass('text-success').removeClass('text-muted').text(response.availableMedicine);
+                    similar_medicine.addClass('text-success').removeClass('text-muted').text(response.similarMedicines.join(', '));
+                },
+                error: function(error) {
+                    console.error('Error fetching sales data:', error);
+                    spinnerId.remove();
+                    avaiable_medicine.text('There is an Error!').removeClass('text-success').addClass('text-danger').html();
+                    similar_medicine.text('There is an Error!').removeClass('text-success').addClass('text-danger').html();
                 }
             });
         });
