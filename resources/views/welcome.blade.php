@@ -50,7 +50,9 @@
         }
 
         @keyframes bounce {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translate(-50%, 0);
             }
 
@@ -61,16 +63,23 @@
 
         @keyframes slideshow {
             0% {
-                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/1.jpg') }}');
+                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('{{ asset(' images/background/1.jpg') }}');
             }
+
             33% {
-                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/2.jpg') }}');
+                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('{{ asset(' images/background/2.jpg') }}');
             }
+
             66% {
-                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/3.jpg') }}');
+                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('{{ asset(' images/background/3.jpg') }}');
             }
+
             100% {
-                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/1.jpg') }}');
+                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('{{ asset(' images/background/1.jpg') }}');
             }
         }
 
@@ -109,10 +118,10 @@
             <h1 class="display-4 fw-bold">Welcome to Pharmacy Management System</h1>
             <p class="lead">A powerful solution for managing your Pharmacies</p>
             @auth
-                <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg me-2">Go to Dashboard</a>
+            <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg me-2">Go to Dashboard</a>
             @else
-                <a href="{{ route('register') }}" class="btn btn-primary btn-lg me-2">Get Started</a>
-                <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg">Login</a>
+            <a href="{{ route('register') }}" class="btn btn-primary btn-lg me-2">Get Started</a>
+            <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg">Login</a>
             @endauth
         </div>
         <div class="scroll-indicator" onclick="scrollToContent()">⬇ Scroll to Learn More</div>
@@ -156,6 +165,33 @@
         <div class="container text-center">
             <h2 class="mb-4">Our Subscription Plans</h2>
             <div class="row g-4">
+
+                <div class="col-md-4">
+                    <div class="card h-100 border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h5>Basic Plan</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-success">10,000Tsh/month</h6>
+                            <p class="card-text">Perfect for startups and small businesses.</p>
+                            <ul class="list-unstyled">
+                                <li>✔ Tshs. 0 / Month </li>
+                                <li>✔ Security Manager plus SSL</li>
+                                <li>✔ 1 pharmacist per 1 Pharmacy</li>
+                                <li>✔ 2 pharmacy</li>
+                                <li>✔ 14 Days Free Trial</li>
+                                <li>✔ Limited Medicine</li>
+                                <li>✔ In App Notification </li>
+                                <li>✔ Free Online support</li>
+                                <li>✔ Works on PC, Mac, mobile and Tablet</li>
+                                <li>✔ Pharmacy Only supported</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary">Choose Plan</a>
+                        </div>
+                    </div>
+                </div>
+
+
                 <div class="col-md-4">
                     <div class="card h-100 border-primary">
                         <div class="card-header bg-primary text-white">
@@ -173,6 +209,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-4">
                     <div class="card h-100 border-success">
                         <div class="card-header bg-success text-white">
