@@ -10,12 +10,17 @@ class Sales extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'staff_id', 'pharmacy_id', 'item_id', 'quantity', 'total_price', 'date',
+        'staff_id', 'pharmacy_id', 'item_id', 'quantity', 'total_price', 'date','stock_id',
     ];
 
     public function staff()
     {
         return $this->belongsTo(Staff::class,'staff_id');
+    }
+
+    public function stock()
+    {
+        return $this->belongsTo(Stock::class,'stock_id');
     }
 
     public function pharmacy()

@@ -12,13 +12,21 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                    <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
-                        {{ __('Sell medicine') }}
-                    </x-nav-link>
+                    @if (Auth::user()->role == 'staff')
+                        <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
+                            {{ __('Sell medicine') }}
+                        </x-nav-link>
+                    @endif
                     @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
+                        <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
+                            {{ __('Sell medicine') }}
+                        </x-nav-link>
                         <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
                             {{ __('Medicine') }}
                         </x-nav-link>
@@ -35,12 +43,26 @@
                             {{ __('Pharmacies') }}
                         </x-nav-link>
                     @endif
+                    @if (Auth::user()->role == 'super')
+                        <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link href="{{ route('superadmin.users') }}" :active="request()->routeIs('superadmin.users')">
+                            {{ __('System Users') }}
+                        </x-nav-link>
+                        <x-nav-link href="{{ route('superadmin.pharmacies') }}" :active="request()->routeIs('superadmin.pharmacies')">
+                            {{ __('Pharmacies') }}
+                        </x-nav-link>
+                        <x-nav-link href="{{ route('packages') }}" :active="request()->routeIs('packages')">
+                            {{ __('Packages') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <!-- Teams Dropdown -->
-                @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
+                {{-- @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
                     <div class="ms-3 relative">
                         <x-dropdown align="right" width="60">
                             <x-slot name="trigger">
@@ -54,7 +76,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
                                         </svg>
-                                            {{-- <svg id="Layer_1" class="ms-2 -me-0.5 size-4" data-name="Layer 1"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500">
+                                        <svg id="Layer_1" class="ms-2 -me-0.5 size-4" data-name="Layer 1"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500">
                                                 <defs>
                                                     <style>
                                                         .cls-1 {
@@ -87,8 +109,8 @@
                                                     d="M1077.76,550.14,642.66,1111.4a356.41,356.41,0,0,1-80.52-93.06,352.71,352.71,0,0,1-47.29-135.92,358.15,358.15,0,0,1-3-46.36q0-8,.35-15.86a354,354,0,0,1,13.67-83.26h0a356,356,0,0,1,160-206.46h0a352.59,352.59,0,0,1,138.21-47A357.12,357.12,0,0,1,867,480.89c3.31,0,6.6.05,9.89.14a357.71,357.71,0,0,1,47.43,4.46A352.85,352.85,0,0,1,1044,528.06,356,356,0,0,1,1077.76,550.14Z" />
                                                 <path class="cls-3"
                                                     d="M1222.19,836.06a357.1,357.1,0,0,1-4.92,59.25,352.9,352.9,0,0,1-48.58,128.29l0,0A355.78,355.78,0,0,1,1124.2,1081l0,0a355.75,355.75,0,0,1-112.51,79.51h0A353,353,0,0,1,886.5,1190.7q-9.68.52-19.48.53-15.56,0-30.79-1.32A352.81,352.81,0,0,1,749,1171.15,351.66,351.66,0,0,1,710.62,1155l426.26-549.87A353.72,353.72,0,0,1,1222,823.61Q1222.19,829.81,1222.19,836.06Z" />
-                                            </svg> --}}
-                                    </a>
+                                            </svg>
+                                        </a>
                                     </button>
                                 </span>
                             </x-slot>
@@ -127,7 +149,7 @@
                             </x-slot>
                         </x-dropdown>
                     </div>
-                @endif
+                @endif --}}
 
                 <!-- Settings Dropdown -->
                 <div class="ms-3 relative">
@@ -143,7 +165,11 @@
                                 <span class="inline-flex rounded-md">
                                     <h4
                                         class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
-                                        {{ session('pharmacy_name') }}</h4>
+                                        {{ session('pharmacy_name') }}
+                                        @if (Auth::user()->role == 'super')
+                                            SUPER ADMIN
+                                        @endif
+                                    </h4>
                                     <button type="button"
                                         class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
                                         {{ Auth::user()->name }}
@@ -183,10 +209,10 @@
 
                             {{-- @if (Auth::user()->role != 'owner')
                                 <x-dropdown-link href="#"> --}}
-                                    {{-- @foreach ($pharmacy as $pharmacy)
+                            {{-- @foreach ($pharmacy as $pharmacy)
                                         {{$pharmacy->name}}
                                     @endforeach --}}
-                                    {{-- <p class=" btn-light text-danger disabled">{{ session('pharmacy_name') }}</p>
+                            {{-- <p class=" btn-light text-danger disabled">{{ session('pharmacy_name') }}</p>
                                 </x-dropdown-link>
                             @endif --}}
 

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('pharmacy_id')->constrained('pharmacies')->onDelete('cascade');
             $table->foreignId('item_id')->constrained('items')->onDelete('cascade');
             $table->foreignId('staff_id')->constrained('users')->onDelete('cascade'); // User making the sale
+            $table->foreignId('stock_id')->constrained('stocks')->onDelete('cascade'); // User making the sale
             $table->integer('quantity');
             $table->decimal('total_price', 8, 0);
             $table->timestamp('date');

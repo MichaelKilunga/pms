@@ -10,17 +10,17 @@ class Pharmacy extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'name', 'location', 'owner_id',
+        'name', 'location', 'owner_id', 'package_id',
     ];
 
     public function owner()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
-    public function manager()
+    public function package()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(Package::class, 'package_id');
     }
 
     public function category()

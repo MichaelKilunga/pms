@@ -9,6 +9,8 @@ use App\Http\Controllers\ItemsController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SelectPharmacyController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\PackageController;
 use Illuminate\Http\Request;
 use App\Models\Pharmacy;
 use Illuminate\Support\Facades\Auth;
@@ -17,24 +19,38 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Route::middleware([
-//     'auth:sanctum',
-//     config('jetstream.auth_session'),
-//     'verified',
-// ])->group(function () {
-//     Route::get('/dashboard', function () {
-//         return view('dashboard', compact('pharmacies'));
-//     })->name('dashboard');
-// });
+Route::middleware(['auth'])->group(function () {
+    // Route::get('/superadmin', [SuperAdminController::class, 'dashboard'])->name('superadmin.dashboard');
+
+    //USERS
+    Route::get('/superadmin/users', [SuperAdminController::class, 'manageUsers'])->name('superadmin.users');
+    Route::get('/superadmin/users/{id}/edit', [SuperAdminController::class, 'editUser'])->name('superadmin.users.edit');
+    Route::put('/superadmin/users/{id}', [SuperAdminController::class, 'updateUser'])->name('superadmin.users.update');
+    Route::get('/superadmin/users/{id}', [SuperAdminController::class, 'showUser'])->name('superadmin.users.show');
+    Route::delete('/superadmin/users/{id}', [SuperAdminController::class, 'deleteUser'])->name('superadmin.users.delete');
+
+    //PHARMACIES
+    Route::get('/superadmin/pharmacies', [SuperAdminController::class, 'managePharmacies'])->name('superadmin.pharmacies');
+    Route::get('/superadmin/pharmacies/{id}/edit', [SuperAdminController::class, 'editPharmacy'])->name('superadmin.pharmacies.edit');
+    Route::put('/superadmin/pharmacies/{id}', [SuperAdminController::class, 'updatePharmacy'])->name('superadmin.pharmacies.update');
+    Route::get('/superadmin/pharmacies/{id}', [SuperAdminController::class, 'showPharmacy'])->name('superadmin.pharmacies.show');
+    Route::delete('/superadmin/pharmacies/{id}', [SuperAdminController::class, 'deletePharmacy'])->name('superadmin.pharmacies.delete');
+
+    //PACKAGES
+    Route::get('packages', [PackageController::class, 'index'])->name('packages');
+    Route::get('packages/create', [PackageController::class, 'create'])->name('packages.create');
+    Route::post('packages', [PackageController::class, 'store'])->name('packages.store');
+    Route::get('packages/edit/{id}', [PackageController::class, 'edit'])->name('packages.edit');
+    Route::get('packages/{package}', [PackageController::class, 'show'])->name('packages.show');
+    Route::put('packages/update/{id}', [PackageController::class, 'update'])->name('packages.update');
+    Route::delete('packages/delete/{id}', [PackageController::class, 'destroy'])->name('packages.destroy');
+
+});
 
 Route::middleware(['auth'])->group(function () {
     // Route::resource('dashboard', DashboardController::class);
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/sales/filter', [DashboardController::class, 'filterSales'])->name('sales.filter');
-    // Route::resource('pharmacy', PharmacyController::class);
-    // Route::resource('staff', StaffController::class);
-    // Route::resource('sales', SalesController::class);
-    // Route::resource('stock', StockController::class);
 
     // Route::resource('medicines', ItemsController::class);
     Route::get('medicines', [ItemsController::class, 'index'])->name('medicines');

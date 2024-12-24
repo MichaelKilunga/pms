@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('staff', function (Blueprint $table) {
             $table->id();
+            $table->string('status')->default('active');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // User who owns the pharmacy
             $table->foreignId('pharmacy_id')->constrained('pharmacies')->onDelete('cascade');
             $table->timestamps();

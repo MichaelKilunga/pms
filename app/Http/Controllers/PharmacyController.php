@@ -43,6 +43,8 @@ class PharmacyController extends Controller
             'name' => $request->name,
             'location' => $request->location,
             'owner_id' => Auth::id(),
+            'status' => 'active',
+            'package_id' => 1,
         ]);
 
         session()->forget('guest-owner');
