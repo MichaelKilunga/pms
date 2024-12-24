@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->text('location')->nullable();
             $table->text('status')->nullable();
-            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade'); // User who owns the pharmacy
             $table->foreignId('package_id')->constrained('packages')->onDelete('cascade'); // User who owns the pharmacy
+            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade'); // User who owns the pharmacy
             $table->timestamps();
         });
     }

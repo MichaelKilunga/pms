@@ -22,11 +22,9 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        if(Auth::user()->role == "super"){            
+        if (Auth::user()->role == "super") {
             return view('superAdmin.index');
         }
-
-
         $sellMedicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->with('item')->get();
         $totalMedicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->count();
         $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
@@ -69,6 +67,26 @@ class DashboardController extends Controller
             ->havingRaw('SUM(sales.quantity) > 0') // Exclude items with no sales
             ->get();
 
+        if (Auth::user()->role == "staff") {
+            $itemsSummary = DB::table('items')
+                ->leftJoin('sales', function ($join) use ($pharmacyId) {
+                    $join->on('items.id', '=', 'sales.item_id')
+                        ->where('sales.pharmacy_id', '=', $pharmacyId);
+                })
+                ->leftJoin('stocks', function ($join) use ($pharmacyId) {
+                    $join->on('items.id', '=', 'stocks.item_id')
+                        ->where('stocks.pharmacy_id', '=', $pharmacyId);
+                })
+                ->select(
+                    'items.name as medicine_name',
+                    DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales'),
+                    DB::raw('COALESCE(stocks.remain_Quantity, 0) as total_stock')
+                )
+                ->where('sales.staff_id', Auth::user()->id)
+                ->groupBy('items.id', 'items.name')
+                ->havingRaw('SUM(sales.quantity) > 0') // Exclude items with no sales
+                ->get();
+        }
         $medicineNames = $itemsSummary->pluck('medicine_name');
         $medicineStock = $itemsSummary->pluck('total_stock');
         $medicineSales = $itemsSummary->pluck('total_sales');
