@@ -8,6 +8,9 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <!-- Bootstrap Icons CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -128,31 +131,70 @@
     </div>
 
     <!-- Features Section -->
-    <section class="features bg-light" id="features">
+    <section class="features bg-light py-5" id="features">
         <div class="container text-center">
-            <h2 class="mb-4">Why Choose Our System?</h2>
+            <h2 class="mb-5 fw-bold text-primary">Why Choose Our System?</h2>
             <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="card h-100">
+                    <div class="card h-100 shadow-sm border-0">
                         <div class="card-body">
-                            <h5 class="card-title">Efficient Client Management</h5>
-                            <p class="card-text">Manage your clients and services easily in one platform.</p>
+                            <h5 class="card-title text-success d-flex align-items-center">
+                                <i class="bi bi-cart-check text-danger me-2 fs-4"></i>Point of Sale (POS) Integration
+                            </h5>
+                            <p class="card-text text-muted">Facilitates seamless billing and checkout processes, Tracks sales transactions and generates receipts, Supports multiple payment methods (cash, Mobile payments).</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card h-100">
+                    <div class="card h-100 shadow-sm border-0">
                         <div class="card-body">
-                            <h5 class="card-title">Comprehensive Analytics</h5>
-                            <p class="card-text">Gain valuable insights into your business operations.</p>
+                            <h5 class="card-title text-success d-flex align-items-center">
+                                <i class="bi bi-bar-chart-line text-danger me-2 fs-4"></i>Reporting and Analytics
+                            </h5>
+                            <p class="card-text text-muted">Provides real-time sales, profit, and inventory reports, Analyzes customer buying patterns for targeted marketing, Generates custom reports for business insights.</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card h-100">
+                    <div class="card h-100 shadow-sm border-0">
                         <div class="card-body">
-                            <h5 class="card-title">Flexible Solutions</h5>
-                            <p class="card-text">Tailored to suit industries like healthcare, real estate, and more.</p>
+                            <h5 class="card-title text-success d-flex align-items-center">
+                                <i class="bi bi-box-seam text-danger me-2 fs-4"></i>Expiry and Batch Tracking
+                            </h5>
+                            <p class="card-text text-muted">Ensures tracking of medicines based on batch numbers and expiry dates, Flags products nearing expiry for timely action, Helps prevent the sale of expired medicines.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-4">
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="card-title text-success d-flex align-items-center">
+                                <i class="bi bi-shop text-danger me-2 fs-4"></i>Multi-Store Management
+                            </h5>
+                            <p class="card-text text-muted">Synchronizes data across multiple pharmacy locations, Centralizes inventory, sales, and financial records, Facilitates inter-branch stock transfers.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="card-title text-success d-flex align-items-center">
+                                <i class="bi bi-archive text-danger me-2 fs-4"></i>Inventory Management
+                            </h5>
+                            <p class="card-text text-muted">Tracks stock levels of medicines, Sends alerts for low stock and expiry dates, Supports batch tracking for accurate inventory handling.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="card-title text-success d-flex align-items-center">
+                                <i class="bi bi-cloud-upload text-danger me-2 fs-4"></i>Cloud Integration
+                            </h5>
+                            <p class="card-text text-muted">Allows access to the system remotely, Ensures secure storage of sensitive data, Facilitates system updates and backups automatically.</p>
                         </div>
                     </div>
                 </div>
@@ -160,24 +202,43 @@
         </div>
     </section>
 
+
     <!-- Subscription Plans Section -->
     <section class="subscription-plans" id="plans">
-        <div class="container text-center">
-            <h2 class="mb-4">Our Subscription Plans</h2>
+        <div class="container">
+            <h2 class="mb-4 text-center">Our Subscription Plans</h2>
+
+            <div class="row g-4">
+                <div class="col-md-12">
+                    <div class="d-flex align-items-center">
+                        <a href="#" class="btn btn-primary">Try Plan</a>
+                        <h5 class="mb-0 me-2 px-2">Trial Plan free 14 Days!</h5>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row g-4">
+                <div class="col-md-12 text-center">
+                    <hr />
+                </div>
+            </div>
+
             <div class="row g-4">
 
-                <div class="col-md-4">
+
+                <div class="col-md-3">
                     <div class="card h-100 border-primary">
-                        <div class="card-header bg-primary text-white">
+                        <div class="card-header bg-primary text-white text-center">
                             <h5>Basic Plan</h5>
                         </div>
                         <div class="card-body">
-                            <h6 class="card-title text-success">10,000Tsh/month</h6>
-                            <p class="card-text">Perfect for startups and small businesses.</p>
-                            <ul class="list-unstyled">
-                                <li>✔ Tshs. 0 / Month </li>
+                            <h6 class="card-title text-success text-center">Tshs. 10,000 / Month</h6>
+                            <p class="card-text text-center">Perfect for startups and small businesses.</p>
+                            <ul class="list-unstyled ">
                                 <li>✔ Security Manager plus SSL</li>
                                 <li>✔ 1 pharmacist per 1 Pharmacy</li>
+                                <li>✔ 1 Owner/Admin account</li>
                                 <li>✔ 2 pharmacy</li>
                                 <li>✔ 14 Days Free Trial</li>
                                 <li>✔ Limited Medicine</li>
@@ -186,64 +247,101 @@
                                 <li>✔ Works on PC, Mac, mobile and Tablet</li>
                                 <li>✔ Pharmacy Only supported</li>
                             </ul>
-                            <a href="#" class="btn btn-primary">Choose Plan</a>
+
+                            <div class="text-center">
+                                <a href="#" class="btn btn-primary">Choose Plan</a>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-
-                <div class="col-md-4">
-                    <div class="card h-100 border-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h5>Basic Plan</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-success">10,000Tsh/month</h6>
-                            <p class="card-text">Perfect for startups and small businesses.</p>
-                            <ul class="list-unstyled">
-                                <li>✔ Client Management</li>
-                                <li>✔ Basic Analytics</li>
-                                <li>✔ Email Support</li>
-                            </ul>
-                            <a href="#" class="btn btn-primary">Choose Plan</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="card h-100 border-success">
-                        <div class="card-header bg-success text-white">
-                            <h5>Pro Plan</h5>
+                        <div class="card-header bg-success text-white text-center">
+                            <h5>Profesional Plan</h5>
                         </div>
                         <div class="card-body">
-                            <h6 class="card-title text-success">20,000Tsh/month</h6>
-                            <p class="card-text">For growing businesses with advanced needs.</p>
-                            <ul class="list-unstyled">
-                                <li>✔ Everything in Basic</li>
-                                <li>✔ Advanced Analytics</li>
-                                <li>✔ Priority Support</li>
+                            <h6 class="card-title text-success text-center">Tshs 20,000 / Month</h6>
+                            <p class="card-text text-center">Perfect for startups and small businesses.</p>
+                            <ul class="list-unstyled ">
+                                <li>✔ Security Manager plus SSL</li>
+                                <li>✔ 2 pharmacist per 1 Pharmacy</li>
+                                <li>✔ 1 Owner/Admin account</li>
+                                <li>✔ 2 pharmacy</li>
+                                <li>✔ 14 Days Free Trial</li>
+                                <li>✔ Limited Medicine</li>
+                                <li>✔ In App Notification </li>
+                                <li>✔ Free Online support</li>
+                                <li>✔ Works on PC, Mac, mobile and Tablet</li>
+                                <li>✔ Pharmacy Only supported</li>
                             </ul>
-                            <a href="#" class="btn btn-success">Choose Plan</a>
+
+                            <div class="text-center">
+                                <a href="#" class="btn btn-success">Choose Plan</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+
+                <div class="col-md-3">
                     <div class="card h-100 border-warning">
-                        <div class="card-header bg-warning text-dark">
+                        <div class="card-header bg-warning text-white text-center">
+                            <h5>Premium Plan</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-success text-center">Tshs. 30,000 / Month</h6>
+                            <p class="card-text text-center">Perfect for startups and small businesses.</p>
+                            <ul class="list-unstyled ">
+                                <li>✔ Security Manager plus SSL</li>
+                                <li>✔ 2 pharmacist per 1 Pharmacy</li>
+                                <li>✔ 1 Owner account</li>
+                                <li>✔ 1 1 Admin account</li>
+                                <li>✔ 3 pharmacy</li>
+                                <li>✔ Limited Medicine</li>
+                                <li>✔ In App Notification </li>
+                                <li>✔ Free Online support</li>
+                                <li>✔ Works on PC, Mac, mobile and Tablet</li>
+                                <li>✔ Pharmacy Only supported</li>
+                            </ul>
+
+                            <div class="text-center">
+                                <a href="#" class="btn btn-warning">Choose Plan</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card h-100 border-danger">
+                        <div class="card-header bg-danger text-white text-center">
                             <h5>Enterprise Plan</h5>
                         </div>
                         <div class="card-body">
-                            <h6 class="card-title text-success">30,000Tsh/month</h6>
-                            <p class="card-text">Best for large organizations with custom needs.</p>
-                            <ul class="list-unstyled">
-                                <li>✔ Everything in Pro</li>
-                                <li>✔ Custom Integrations</li>
-                                <li>✔ Dedicated Support</li>
+                            <h6 class="card-title text-success text-center">Tshs. 60,000 / Month</h6>
+                            <p class="card-text text-center">Perfect for startups and small businesses.</p>
+                            <ul class="list-unstyled ">
+                                <li>✔ Security Manager plus SSL</li>
+                                <li>✔ 1 Owner account</li>
+                                <li>✔ Unlimited Admin account</li>
+                                <li>✔ Unlimited pharmacy</li>
+                                <li>✔ Unlimited Medicine</li>
+                                <!-- <li>✔ In App Notification </li> -->
+                                <li>✔ SMS & Email Notification </li>
+                                <!-- <li>✔ Live on platform </li> -->
+                                <li>✔ Free Online support</li>
+                                <li>✔ Works on PC, Mac, mobile and Tablet</li>
+                                <li>✔ Pharmacy Only supported</li>
+                                <!-- <li>✔ Online Sales via Platform </li> -->
+                                <li>✔ WhatsApp Chart </li>
                             </ul>
-                            <a href="#" class="btn btn-warning">Choose Plan</a>
+
+                            <div class="text-center">
+                                <a href="#" class="btn btn-danger">Choose Plan</a>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
