@@ -540,83 +540,84 @@
     });
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize Chosen for dynamically added rows
-        function initializeChosen() {
-            $(".chosen").chosen({
-                width: "100%",
-                no_results_text: "No matches found!",
-                allow_single_deselect: true,
-            }).on("change", function() {
-                const row = $(this).closest(".sale-entry")[0];
-                tellPrice(row);
-                calculateAmount(row);
-            });
-        }
-
-        // Reusable Functions
-        function calculateAmount(row) {
-            const price = parseFloat(row.querySelector('[name="total_price[]"]').value) || 0;
-            const quantity = parseFloat(row.querySelector('[name="quantity[]"]').value) || 0;
-            const amount = price * quantity;
-            row.querySelector('.amount').value = amount;
-
-            // Update total amount
-            updateTotalAmount();
-        }
-
-        function tellPrice(row) {
-            let medicines = @json($sellMedicines); // Convert medicines to a JS array
-            const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
-
-            // Find the selected medicine
-            const selectedMedicine = medicines.find(medicine => medicine.item.id == selectedMedicineId);
-
-            row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
-            // console.log(selectedMedicine.id);
-
-            if (selectedMedicine) {
-                // Set the total price to the medicine price (formatted with "TZS")
-                row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price}`;
-                row.querySelector('[name="quantity[]"]').setAttribute('max',
-                    `${selectedMedicine.remain_Quantity}`);
-
-                const labelElement = row.querySelector('[for="label[]"]');
-                // Clear any existing content in the labelElement
-                labelElement.innerHTML = '';
-                // Create a span element to hold the appended text
-                const appendedText = document.createElement('small');
-                // Set the text content and add the class
-                appendedText.innerHTML = 'In stock (&darr;' + selectedMedicine.remain_Quantity + ')';
-                if (selectedMedicine.remain_Quantity < selectedMedicine.low_stock_percentage) {
-                    appendedText.classList.add('text-danger');
-                } else {
-                    appendedText.classList.add('text-success');
-                }
-                // Append the span to the label element
-                labelElement.appendChild(appendedText);
-
+            // Initialize Chosen for dynamically added rows
+            function initializeChosen() {
+                $(".chosen").chosen({
+                    width: "100%",
+                    no_results_text: "No matches found!",
+                    allow_single_deselect: true,
+                }).on("change", function() {
+                    const row = $(this).closest(".sale-entry")[0];
+                    tellPrice(row);
+                    calculateAmount(row);
+                });
             }
-        }
 
-        function updateTotalAmount() {
-            let total = 0;
-            document.querySelectorAll('.sale-entry').forEach(row => {
-                const amount = parseFloat(row.querySelector('.amount').value) || 0;
-                total += amount;
-            });
-            document.getElementById('totalAmount').value = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'TZS',
-            }).format(total);
-        }
+            // Reusable Functions
+            function calculateAmount(row) {
+                const price = parseFloat(row.querySelector('[name="total_price[]"]').value) || 0;
+                const quantity = parseFloat(row.querySelector('[name="quantity[]"]').value) || 0;
+                const amount = price * quantity;
+                row.querySelector('.amount').value = amount;
 
-        // Add Row Functionality
-        document.getElementById('addSaleRow').addEventListener('click', function() {
-            const salesFields = document.getElementById('salesFields');
-            const newRow = document.createElement('div');
-            newRow.classList.add('row', 'mb-3', 'sale-entry', 'align-items-center');
+                // Update total amount
+                updateTotalAmount();
+            }
 
-            newRow.innerHTML = `
+            function tellPrice(row) {
+                let medicines = @json($sellMedicines); // Convert medicines to a JS array
+                const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
+
+                // Find the selected medicine
+                const selectedMedicine = medicines.find(medicine => medicine.item.id == selectedMedicineId);
+
+                row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
+                // console.log(selectedMedicine.id);
+
+                if (selectedMedicine) {
+                    // Set the total price to the medicine price (formatted with "TZS")
+                    row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price}`;
+                    row.querySelector('[name="quantity[]"]').setAttribute('max',
+                        `${selectedMedicine.remain_Quantity}`);
+
+                    const labelElement = row.querySelector('[for="label[]"]');
+                    // Clear any existing content in the labelElement
+                    labelElement.innerHTML = '';
+                    // Create a span element to hold the appended text
+                    const appendedText = document.createElement('small');
+                    // Set the text content and add the class
+                    appendedText.innerHTML = 'In stock (&darr;' + selectedMedicine.remain_Quantity + ')';
+                    if (selectedMedicine.remain_Quantity < selectedMedicine.low_stock_percentage) {
+                        appendedText.classList.add('text-danger');
+                    } else {
+                        appendedText.classList.add('text-success');
+                    }
+                    // Append the span to the label element
+                    labelElement.appendChild(appendedText);
+
+                }
+            }
+
+            function updateTotalAmount() {
+                let total = 0;
+                document.querySelectorAll('.sale-entry').forEach(row => {
+                    const amount = parseFloat(row.querySelector('.amount').value) || 0;
+                    total += amount;
+                });
+                document.getElementById('totalAmount').value = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'TZS',
+                }).format(total);
+            }
+
+            // Add Row Functionality
+            document.getElementById('addSaleRow').addEventListener('click', function() {
+                const salesFields = document.getElementById('salesFields');
+                const newRow = document.createElement('div');
+                newRow.classList.add('row', 'mb-3', 'sale-entry', 'align-items-center');
+
+                newRow.innerHTML = `
+                            <input type="text" name="stock_id[]" hidden required>
                             <div class="col-md-3">
                                 <select name="item_id[]" data-row-id="item_id[]" class="form-select chosen" required>
                                     <option selected disabled value="">Select Item</option>
@@ -647,35 +648,35 @@
                 `;
 
 
-            salesFields.appendChild(newRow);
+                salesFields.appendChild(newRow);
 
-            // Initialize Chosen for the new row
+                // Initialize Chosen for the new row
+                initializeChosen();
+
+                // Add Event Listeners for the new row
+                newRow.querySelector('.remove-sale-row').addEventListener('click', function() {
+                    newRow.remove();
+                    updateTotalAmount();
+                });
+
+                newRow.querySelector('[name="quantity[]"]').addEventListener('input', function() {
+                    calculateAmount(newRow);
+                });
+            });
+
+            // Initial Setup for Existing Rows
+            document.querySelectorAll('.sale-entry').forEach(row => {
+                row.querySelector('[name="item_id[]"]').addEventListener('change', function() {
+                    tellPrice(row);
+                    calculateAmount(row);
+                });
+
+                row.querySelector('[name="quantity[]"]').addEventListener('input', function() {
+                    calculateAmount(row);
+                });
+            });
+
+            // Initialize Chosen on Page Load
             initializeChosen();
-
-            // Add Event Listeners for the new row
-            newRow.querySelector('.remove-sale-row').addEventListener('click', function() {
-                newRow.remove();
-                updateTotalAmount();
-            });
-
-            newRow.querySelector('[name="quantity[]"]').addEventListener('input', function() {
-                calculateAmount(newRow);
-            });
         });
-
-        // Initial Setup for Existing Rows
-        document.querySelectorAll('.sale-entry').forEach(row => {
-            row.querySelector('[name="item_id[]"]').addEventListener('change', function() {
-                tellPrice(row);
-                calculateAmount(row);
-            });
-
-            row.querySelector('[name="quantity[]"]').addEventListener('input', function() {
-                calculateAmount(row);
-            });
-        });
-
-        // Initialize Chosen on Page Load
-        initializeChosen();
-    });
 </script>

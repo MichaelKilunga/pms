@@ -12,8 +12,7 @@ use App\Models\Items;
 use App\Models\Sales;
 use App\Models\Stock;
 use App\Models\User;
-use App\Notifications\WelcomeNotification;
-use Illuminate\Support\Facades\Notification;
+// use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\get;
 use function PHPUnit\Framework\isEmpty;
@@ -26,8 +25,8 @@ class DashboardController extends Controller
     public function index()
     {
 
-        $notifyUser = Auth::user();
-        Notification::send($notifyUser, new WelcomeNotification);
+        // $notifyUser = Auth::user();
+        // Notification::send($notifyUser, new WelcomeNotification);
         // dd('done');
 
         if (Auth::user()->role == "super") {
