@@ -2,9 +2,10 @@
 
 @section('content')
     <div class="container mt-4">
-        <div class="container">
+        <div class="container table-reponsive">
             <h1 class="text-center m-2">Manage Users</h1>
             <hr class="my-2">
+            <div class="table-responsive">
             <table class="table table-striped" id="Table">
                 <thead>
                     <tr>
@@ -44,6 +45,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 @endsection
