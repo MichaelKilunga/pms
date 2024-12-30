@@ -44,9 +44,9 @@
                 <x-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
                     {{ __('Pharmacies') }}
                 </x-nav-link>
-                <!-- <x-nav-link href="{{ route('reports.index') }}" :active="request()->routeIs('reports.index')">
+                <x-nav-link href="{{ route('reports.index') }}" :active="request()->routeIs('reports.index')">
                     {{ __('Reports') }}
-                </x-nav-link> -->
+                </x-nav-link>
                 @endif
 
                 @if (Auth::user()->role == 'super')
@@ -356,6 +356,10 @@
             <x-responsive-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
                 {{ __('Pharmacies') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('reports.index') }}" :active="request()->routeIs('reports.index')">
+                {{ __('Reports') }}
+            </x-responsive-nav-link>
+
             @endif
         </div>
 

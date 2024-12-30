@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Sale;
+use App\Models\Sales;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SalesReportExport;
 use PDF;
@@ -20,7 +20,7 @@ class ReportPrintController extends Controller
     public function generateReport(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:day,month,year',
+            'type' => 'required|in:day,week,month,year',
             'value' => 'required|date',
             'format' => 'required|in:pdf,excel',
         ]);
@@ -30,12 +30,21 @@ class ReportPrintController extends Controller
         $format = $request->format;
 
         // Filter sales based on the selected type
+        // $sales = Sales::join('stocks', 'sales.stock_id', '=', 'stocks.id')
+        //      ->join('items', 'sales.item_id', '=', 'items.id')
+        //      ->select('sales.*', 'stocks.*', 'items.*')
+        //      ->get();
+
         $sales = match ($type) {
-            'day' => Sale::whereDate('date', $value)->get(),
-            'month' => Sale::whereMonth('date', date('m', strtotime($value)))
-                           ->whereYear('date', date('Y', strtotime($value)))
-                           ->get(),
-            'year' => Sale::whereYear('date', date('Y', strtotime($value)))->get(),
+            'day' => Sales::whereDate('date', $value)->get(),
+            'week' => Sales::whereBetween('date', [
+                date('Y-m-d', strtotime('monday this week', strtotime($value))),
+                date('Y-m-d', strtotime('sunday this week', strtotime($value)))
+            ])->get(),
+            'month' => Sales::whereMonth('date', date('m', strtotime($value)))
+                            ->whereYear('date', date('Y', strtotime($value)))
+                            ->get(),
+            'year' => Sales::whereYear('date', date('Y', strtotime($value)))->get(),
             default => collect(),
         };
 
@@ -49,5 +58,6 @@ class ReportPrintController extends Controller
             // Generate Excel
             return Excel::download(new SalesReportExport($sales), "sales_report_{$type}_{$value}.xlsx");
         }
+        
     }
 }
