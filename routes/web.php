@@ -16,6 +16,7 @@ use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 use App\Models\Pharmacy;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ReportPrintController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -111,6 +112,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('category/delete/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
 
     // Route::resource('categories', CategoryController::class);
+     //for report printing
+    Route::get('/reports', [ReportPrintController::class, 'index'])->name('reports.index');
+    Route::post('/reports', [ReportPrintController::class, 'generateReport'])->name('reports.generate');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -124,4 +128,3 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifications/readAll', [NotificationController::class, 'readAll'])->name('notifications.readAll');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 });
-
