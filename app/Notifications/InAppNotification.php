@@ -7,16 +7,19 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class WelcomeNotification extends Notification implements ShouldQueue
+class InAppNotification extends Notification
 {
     use Queueable;
+    public $notification;
+    // public $user;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($notification)
     {
-        //
+        $this->notification = $notification;
+        // $this->user = $user;
     }
 
     /**
@@ -26,19 +29,19 @@ class WelcomeNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-                    ->line('Welcome to PILLPOINT, your number one application for managing pharmacies.')
-                    ->action('Login Now', url('/dashboard'))
-                    ->line('Thank you for trusting  to PILLPOINT!');
-    }
+    // public function toMail(object $notifiable): MailMessage
+    // {
+    //     return (new MailMessage)
+    //                 ->line('The introduction to the notification.')
+    //                 ->action('Notification Action', url('/'))
+    //                 ->line('Thank you for using our application!');
+    // }
 
     /**
      * Get the array representation of the notification.
@@ -48,7 +51,8 @@ class WelcomeNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'message'=>$this->notification['message'],
+            'type'=>$this->notification['type'],
         ];
     }
 }

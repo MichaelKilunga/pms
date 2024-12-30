@@ -267,19 +267,16 @@
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                        {{ __('Notifications') }}
-                    </x-nav-link>
                     <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
                         {{ __('Sell medicine') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
+                        {{ __('Notifications') }}
                     </x-nav-link>
                 @endif
                 @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
-                    </x-nav-link>
-                    <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                        {{ __('Notifications') }}
                     </x-nav-link>
                     <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
                         {{ __('Sell medicine') }}
@@ -299,13 +296,13 @@
                     <x-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
                         {{ __('Pharmacies') }}
                     </x-nav-link>
+                    <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
+                        {{ __('Notifications') }}
+                    </x-nav-link>
                 @endif
                 @if (Auth::user()->role == 'super')
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
-                    </x-nav-link>
-                    <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                        {{ __('Notifications') }}
                     </x-nav-link>
                     <x-nav-link href="{{ route('superadmin.users') }}" :active="request()->routeIs('superadmin.users')">
                         {{ __('System Users') }}
@@ -318,6 +315,9 @@
                     </x-nav-link>
                     <x-nav-link href="{{ route('allMedicines.all') }}" :active="request()->routeIs('allMedicines.all')">
                         {{ __('All medicines') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
+                        {{ __('Notifications') }}
                     </x-nav-link>
                 @endif
             </div>

@@ -35,9 +35,9 @@ class GeneralNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        dd($this->notification);
         return (new MailMessage)
-                    ->line($this->notification['subject'])
-                    ->line($this->notification['body'])
+                    ->line($this->notification['subject'].'<br>'.$this->notification['body'])
                     ->action($this->notification['action'], url('/'.$this->notification['path']))
                     ->line('Thank you for trusting  PILLPOINT!');
     }

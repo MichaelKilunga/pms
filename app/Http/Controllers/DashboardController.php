@@ -12,7 +12,9 @@ use App\Models\Items;
 use App\Models\Sales;
 use App\Models\Stock;
 use App\Models\User;
-// use Illuminate\Support\Facades\Notification;
+use App\Notifications\InAppNotification;
+use App\Notifications\WelcomeNotification;
+use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\get;
 use function PHPUnit\Framework\isEmpty;
@@ -25,9 +27,21 @@ class DashboardController extends Controller
     public function index()
     {
 
+        // $notification = [
+        //     'data'=>'Hello!',
+        // ];
+        $user = User::whereId(Auth::user()->id)->first();   
+        // $user = Auth::user();
+        $notification = [
+            'message'=>'Final trial message!',
+            'type'=>'success',
+        ];
+        // $user->notify(new WelcomeNotification);
+        $user->notify(new InAppNotification( $notification));
+
         // $notifyUser = Auth::user();
         // Notification::send($notifyUser, new WelcomeNotification);
-        // dd('done');
+        // // dd('done');
 
         if (Auth::user()->role == "super") {
             return view('superAdmin.index');
