@@ -7,16 +7,17 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class WelcomeNotification extends Notification implements ShouldQueue
+class GeneralNotification extends Notification
 {
     use Queueable;
+    public $notification;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($notification)
     {
-        //
+        $this->notification = $notification;
     }
 
     /**
@@ -35,9 +36,10 @@ class WelcomeNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('Welcome PILLPOINT, your number one application for managing pharmacies.')
-                    ->action('Login Now', url('/dashboard'))
-                    ->line('Thank you for trusting  to PILLPOINT!');
+                    ->line($this->notification['subject'])
+                    ->line($this->notification['body'])
+                    ->action($this->notification['action'], url('/'.$this->notification['path']))
+                    ->line('Thank you for trusting  PILLPOINT!');
     }
 
     /**

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Pharmacy;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Notifications\GeneralNotification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class PharmacyController extends Controller
 {
@@ -49,6 +51,16 @@ class PharmacyController extends Controller
 
         session()->forget('guest-owner');
         session(['current_pharmacy_id' => $pharmacy->id]);
+
+        //SEND EMAIL
+        $notification = [
+            'subject' => `NEW PHARMACY CREATED | $pharmacy->name`,
+            'body'=>'You\'ve created your pharmacy successfully',
+            'action' => 'Manage Pharmacy',
+            'path' => 'dashboard',
+        ];
+        Notification::send(Auth::user(), new GeneralNotification($notification));
+
         return redirect()->route('dashboard')->with('success', 'Pharmacy created successfully!');
     }
 
