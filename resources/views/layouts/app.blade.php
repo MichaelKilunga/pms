@@ -21,7 +21,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css">
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -30,8 +30,9 @@
     <!-- Styles -->
     {{-- @livewireStyles --}}
     <style>
-         .chosen-container .chosen-single {
-            height: calc(2.5rem + 2px); /* Match Bootstrap's default input height */
+        .chosen-container .chosen-single {
+            height: calc(2.5rem + 2px);
+            /* Match Bootstrap's default input height */
             line-height: calc(2.5rem + 2px);
             /* border: 1px solid #ced4da; */
             border-radius: 0;
@@ -42,12 +43,35 @@
             /* background-clip: padding-box; */
             transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
+
+        /* Loader Overlay */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            /* Slightly transparent background */
+            display: none;
+            /* Initially hidden */
+            z-index: 9999;
+
+            /* Flexbox to center the spinner */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
     </style>
 </head>
 
 <body class="font-sans antialiased">
-    <x-banner />
-
+    {{-- <x-banner /> --}}
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
         @livewire('navigation-menu')
 
@@ -61,9 +85,17 @@
         @endif
 
         <!-- Page Content -->
-        <main> 
+
+        <main>
             {{ $slot }}
         </main>
+        <!-- Loader Overlay -->
+        <div id="loader-overlay" class="loader-overlay">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
     </div>
 
     @stack('modals')
@@ -80,20 +112,20 @@
                 $('#guestPharmacyModal').modal('show');
             @endif
 
-            @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: '{{ session('success') }}',
-                // timer: 2000
-            });
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: '{{ session('success') }}',
+                    // timer: 2000
+                });
             @endif
-            
-            @if(session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: '{{ session('error') }}',
-                // timer: 2000
-            });
+
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: '{{ session('error') }}',
+                    // timer: 2000
+                });
             @endif
 
             $(document).ready(function() {
@@ -104,19 +136,82 @@
                     info: true // Enable information display
                 });
 
-                $(".chosen").chosen({
-                width: "100%",
-                no_results_text: "No matches found!",
+                // $(".chosen").chosen({
+                $("select").chosen({
+                    width: "100%",
+                    no_results_text: "No matches found!",
+                });
             });
 
+            $(document).ready(function() {
+                $('#loader-overlay').hide(); // Hide loader initially
+
+                // Show the loader before a new page is requested (e.g., on link click)
+                $('a').on('click', function(event) {
+                    // Prevent loader for modal triggers
+                    if ($(this).attr('data-bs-toggle') === 'modal') {
+                        return; // Exit if the link is for opening a modal
+                    }
+
+
+
+                    // Skip showing loader if the target is a select field (including chosen dropdown)
+                    if ($(this).closest('select, .chosen-container').length) {
+                        return; // Exit if the link is associated with a select or chosen field
+                    }
+
+
+                    $('#loader-overlay').show();
+                });
+
+                // Show the loader when an AJAX request starts
+                $(document).ajaxStart(function() {
+                    $('#loader-overlay').show();
+                });
+
+                // Hide the loader when the AJAX request completes
+                $(document).ajaxStop(function() {
+                    $('#loader-overlay').hide();
+                });
+
+                // Hide the loader when the page is fully loaded
+                $(window).on('load', function() {
+                    $('#loader-overlay').hide();
+                });
+
+                // Hide the loader if a modal is opened
+                $('[data-bs-toggle="modal"]').on('click', function() {
+                    $('#loader-overlay').hide();
+                });
             });
         });
     </script>
 
+    {{-- CLOCK TIMER --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the clock with server time
+            let serverTime = new Date('{{ Date::now() }}');
+
+            // Function to update the clock
+            function updateClock() {
+                const clockElement = document.getElementById('clock');
+                clockElement.textContent = serverTime.toLocaleString(); // Display date and time
+                serverTime.setSeconds(serverTime.getSeconds() + 1); // Increment by 1 second
+            }
+
+            // Update the clock every second
+            setInterval(updateClock, 1000);
+
+            // Initial call to display the time immediately
+            updateClock();
+        });
+    </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     {{-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> --}}
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js">
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

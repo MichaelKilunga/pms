@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Stock;
 use App\Models\Pharmacy;
 use App\Models\Items;
+use App\Models\Medicine;
+use App\Models\MedicineStore;
 use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +23,10 @@ class StockController extends Controller
         // $pharmacies = Pharmacy::where('owner_id', auth::id())->pluck('id');
         $stocks = Stock::with('staff', 'item')->where('pharmacy_id', session('current_pharmacy_id'))->get();
         $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
-
+        
+        // $medicines = Medicine::where('name', '!=', 'name')->get();
+        // dd($medicines);
+    
         return view('stock.index', compact('stocks', 'medicines'));
     }
 
@@ -37,56 +42,56 @@ class StockController extends Controller
         return view('stock.create', compact('pharmacies', 'items', 'staff'));
     }
 
-public function store(Request $request)
-{
-    $request->validate([
-        'item_id' => 'required|array',
-        'item_id.*' => 'required|exists:items,id',
+    public function store(Request $request)
+    {
+        $request->validate([
+            'item_id' => 'required|array',
+            'item_id.*' => 'required|exists:items,id',
 
-        'quantity' => 'required|array',
-        'quantity.*' => 'required|integer|min:1',
+            'quantity' => 'required|array',
+            'quantity.*' => 'required|integer|min:1',
 
-        // 'remain_Quantity' => 'required|array',
-        // 'remain_Quantity.*' => 'required|integer|min:1',
+            // 'remain_Quantity' => 'required|array',
+            // 'remain_Quantity.*' => 'required|integer|min:1',
 
-        'low_stock_percentage' => 'required|array',
-        'low_stock_percentage.*' => 'required|integer|min:1|max:100',
+            'low_stock_percentage' => 'required|array',
+            'low_stock_percentage.*' => 'required|integer|min:1|max:100',
 
-        'buying_price' => 'required|array',
-        'buying_price.*' => 'required|numeric',
+            'buying_price' => 'required|array',
+            'buying_price.*' => 'required|numeric',
 
-        'selling_price' => 'required|array',
-        'selling_price.*' => 'required|numeric',
+            'selling_price' => 'required|array',
+            'selling_price.*' => 'required|numeric',
 
-        'in_date' => 'required|array',
-        'in_date.*' => 'required|date',
+            'in_date' => 'required|array',
+            'in_date.*' => 'required|date',
 
-        'expire_date' => 'required|array',
-        'expire_date.*' => 'required|date',
-    ]);
-
-    // dd($request);
-
-    $pharmacy_id = session('current_pharmacy_id');
-    $staff_id = Auth::user()->id;
-
-    foreach ($request->item_id as $index => $item_id) {
-        Stock::create([
-            'pharmacy_id' => $pharmacy_id,
-            'staff_id' => $staff_id,
-            'item_id' => $item_id,
-            'quantity' => $request->quantity[$index],
-            'buying_price' => $request->buying_price[$index],
-            'selling_price' => $request->selling_price[$index],
-            'remain_Quantity' =>  $request->quantity[$index],
-            'low_stock_percentage' => $request->low_stock_percentage[$index],
-            'in_date' => $request->in_date[$index],
-            'expire_date' => $request->expire_date[$index],
+            'expire_date' => 'required|array',
+            'expire_date.*' => 'required|date',
         ]);
-    }
 
-    return redirect()->route('stock')->with('success', 'Stock added successfully!');
-}
+        // dd($request);
+
+        $pharmacy_id = session('current_pharmacy_id');
+        $staff_id = Auth::user()->id;
+
+        foreach ($request->item_id as $index => $item_id) {
+            Stock::create([
+                'pharmacy_id' => $pharmacy_id,
+                'staff_id' => $staff_id,
+                'item_id' => $item_id,
+                'quantity' => $request->quantity[$index],
+                'buying_price' => $request->buying_price[$index],
+                'selling_price' => $request->selling_price[$index],
+                'remain_Quantity' =>  $request->quantity[$index],
+                'low_stock_percentage' => $request->low_stock_percentage[$index],
+                'in_date' => $request->in_date[$index],
+                'expire_date' => $request->expire_date[$index],
+            ]);
+        }
+
+        return redirect()->route('stock')->with('success', 'Stock added successfully!');
+    }
 
 
 
@@ -133,7 +138,7 @@ public function store(Request $request)
      */
     public function destroy(Request $request)
     {
-        $stock=Stock::destroy($request->id);
+        $stock = Stock::destroy($request->id);
 
         return redirect()->route('stock')->with('success', 'Stock deleted successfully.');
     }

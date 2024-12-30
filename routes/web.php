@@ -11,6 +11,7 @@ use App\Http\Controllers\SelectPharmacyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\PackageController;
+use App\Http\Controllers\MedicineImportController;
 use Illuminate\Http\Request;
 use App\Models\Pharmacy;
 use Illuminate\Support\Facades\Auth;
@@ -45,6 +46,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('packages/update/{id}', [PackageController::class, 'update'])->name('packages.update');
     Route::delete('packages/delete/{id}', [PackageController::class, 'destroy'])->name('packages.destroy');
 
+    Route::get('allMedicines', [MedicineImportController::class, 'all'])->name('allMedicines.all');
+    Route::get('allMedicines/{id}/edit', [MedicineImportController::class, 'edit'])->name('allMedicines.edit');
+    Route::put('allMedicines/{id}', [MedicineImportController::class, 'update'])->name('allMedicines.update');
+    Route::delete('allMedicines/{id}', [MedicineImportController::class, 'destroy'])->name('allMedicines.destroy');
+    Route::get('/medicines/import', [MedicineImportController::class, 'showImportForm'])->name('medicines.import-form');
+    Route::post('/medicines/import', [MedicineImportController::class, 'import'])->name('medicines.import');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -60,6 +67,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('medicines/{id}', [ItemsController::class, 'show'])->name('medicines.show');
     Route::put('medicines/update/{id}', [ItemsController::class, 'update'])->name('medicines.update');
     Route::delete('medicines/delete/{id}', [ItemsController::class, 'destroy'])->name('medicines.destroy');
+    Route::post('/import', [ItemsController::class, 'importStore'])->name('importStore');
+    Route::get('/import', [ItemsController::class, 'import'])->name('import');
 
 
     Route::get('pharmacies', [PharmacyController::class, 'index'])->name('pharmacies');
@@ -69,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('pharmacies', [PharmacyController::class, 'update'])->name('pharmacies.update');
     Route::delete('pharmacies/delete/{id}', [PharmacyController::class, 'destroy'])->name('pharmacies.destroy');
 
-    
+
     Route::get('staff', [StaffController::class, 'index'])->name('staff');
     Route::get('staff/create', [StaffController::class, 'create'])->name('staff.create');
     Route::post('staff', [StaffController::class, 'store'])->name('staff.store');
@@ -77,7 +86,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('staff', [StaffController::class, 'update'])->name('staff.update');
     Route::delete('staff/delete/{id}', [StaffController::class, 'destroy'])->name('staff.destroy');
 
-     
+
     Route::get('stock', [StockController::class, 'index'])->name('stock');
     Route::get('stock/create', [StockController::class, 'create'])->name('stock.create');
     Route::post('stock', [StockController::class, 'store'])->name('stock.store');

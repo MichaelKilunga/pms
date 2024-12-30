@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Items;
 use App\Models\Pharmacy;
 use App\Models\Category;
+use App\Models\Medicine;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,39 +21,77 @@ class ItemsController extends Controller
         $medicines = Items::with(['category', 'pharmacy'])->where('pharmacy_id', session('current_pharmacy_id'))->get();
         $categories = Category::where('pharmacy_id', session('current_pharmacy_id'))->get();
         $pharmacy = Pharmacy::where('pharmacy_id', session('current_pharmacy_id'))->first();
+
         // dd($medicines);
         return view('medicines.index', compact('medicines', 'categories', 'pharmacy'));
     }
 
+    public function import(Request $request)
+    {
+        $onlineMedicines = Medicine::where('name', '!=', 'name')->get();
+        return view('medicines.import', compact('onlineMedicines'));
+    }
+
+
+    public function importStore(Request $request)
+    {
+        $request->validate([
+            'medicine_id' => 'required|exists:medicines,id',
+        ]);
+
+        try {
+            $medicine = Medicine::findOrFail($request->medicine_id);
+
+            // Get the current pharmacy ID (assuming it's stored in the session or user context)
+            $pharmacyId = session('current_pharmacy_id');
+
+            if (!$pharmacyId) {
+                return response()->json(['message' => 'Pharmacy not selected.'], 400);
+            }
+
+            // Insert the medicine into the items table
+            Items::create([
+                'name' => $medicine->name,
+                'pharmacy_id' => $pharmacyId,
+                'category_id' => 5,
+            ]);
+
+            return response()->json(['message' => 'Medicine imported successfully!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to import medicine.'], 500);
+        }
+    }
+
+
     public function search(Request $request)
-{
-    // Get the search term from the request
-    $search = $request->input('search');
-    $currentPharmacyId = session('current_pharmacy_id'); // Fetch the current pharmacy ID from the session
+    {
+        // Get the search term from the request
+        $search = $request->input('search');
+        $currentPharmacyId = session('current_pharmacy_id'); // Fetch the current pharmacy ID from the session
 
-    // Query to find if exact medicine is available in the current pharmacy
-    $availableMedicine = DB::table('items')
-        ->join('stocks', 'items.id', '=', 'stocks.item_id')
-        ->where('items.name', $search)
-        ->where('stocks.remain_Quantity', '>', 0)
-        ->where('stocks.pharmacy_id', '=', $currentPharmacyId) // Filter by pharmacy ID
-        ->exists();
+        // Query to find if exact medicine is available in the current pharmacy
+        $availableMedicine = DB::table('items')
+            ->join('stocks', 'items.id', '=', 'stocks.item_id')
+            ->where('items.name', $search)
+            ->where('stocks.remain_Quantity', '>', 0)
+            ->where('stocks.pharmacy_id', '=', $currentPharmacyId) // Filter by pharmacy ID
+            ->exists();
 
-    // Query to find similar medicines in the current pharmacy
-    $similarMedicines = DB::table('items')
-        ->join('stocks', 'items.id', '=', 'stocks.item_id')
-        ->where('items.name', 'LIKE', '%' . $search . '%')
-        ->where('items.name', '!=', $search)
-        ->where('stocks.remain_Quantity', '>', 0)
-        ->where('stocks.pharmacy_id', '=', $currentPharmacyId) // Filter by pharmacy ID
-        ->pluck('items.name');
+        // Query to find similar medicines in the current pharmacy
+        $similarMedicines = DB::table('items')
+            ->join('stocks', 'items.id', '=', 'stocks.item_id')
+            ->where('items.name', 'LIKE', '%' . $search . '%')
+            ->where('items.name', '!=', $search)
+            ->where('stocks.remain_Quantity', '>', 0)
+            ->where('stocks.pharmacy_id', '=', $currentPharmacyId) // Filter by pharmacy ID
+            ->pluck('items.name');
 
-    // Prepare the response
-    return response()->json([
-        'availableMedicine' => $availableMedicine ? 'Available' : 'Not Available',
-        'similarMedicines' => $similarMedicines,
-    ]);
-}
+        // Prepare the response
+        return response()->json([
+            'availableMedicine' => $availableMedicine ? 'Available' : 'Not Available',
+            'similarMedicines' => $similarMedicines,
+        ]);
+    }
 
 
     /**

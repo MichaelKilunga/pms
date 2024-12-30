@@ -5,9 +5,9 @@
         <!-- Header -->
         <div class="d-flex justify-content-between mb-3">
             <h2 class="text-primary fw-bold">Sales Management</h2>
-            <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createSalesModal">
-                <i class="bi bi-plus-lg"></i> Add New Sales
-            </a>
+                <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createSalesModal">
+                    <i class="bi bi-plus-lg"></i> Add New Sales
+                </a>
         </div>
 
         <!-- Sales Table -->
@@ -19,6 +19,7 @@
                         <th>Sales Name</th>
                         <th>Price</th>
                         <th>Quantity</th>
+                        {{-- <th>Stock Id</th> --}}
                         <th>Total Price</th> <!-- New column for calculated amount -->
                         <th>Date</th>
                         <th>Actions</th>
@@ -31,6 +32,7 @@
                             <td>{{ $sale->item->name }}</td>
                             <td>{{ $sale->total_price / $sale->quantity }}</td>
                             <td>{{ $sale->quantity }}</td>
+                            {{-- <td>{{ $sale->stock_id }}</td> --}}
                             <td class="amount-cell">{{ $sale->total_price }}</td>
                             <!-- Display calculated amount -->
                             <td>{{ $sale->date }}</td>
@@ -146,6 +148,7 @@
                         @csrf
                         <div id="salesFields">
                             <div class="row mb-3 sale-entry align-items-center">
+                                <input type="text" name="stock_id[]" hidden required>
                                 <div class="col-md-3">
                                     <label class="form-label">Medicine</label>
                                     <select name="item_id[]" class="form-select chosen" required>
@@ -244,6 +247,9 @@
                 // Find the selected medicine
                 const selectedMedicine = medicines.find(medicine => medicine.item.id == selectedMedicineId);
 
+                row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
+                // console.log(selectedMedicine.id);
+
                 if (selectedMedicine) {
                     // Set the total price to the medicine price (formatted with "TZS")
                     row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price}`;
@@ -287,6 +293,7 @@
                 newRow.classList.add('row', 'mb-3', 'sale-entry', 'align-items-center');
 
                 newRow.innerHTML = `
+                            <input type="text" name="stock_id[]" hidden required>
                             <div class="col-md-3">
                                 <select name="item_id[]" data-row-id="item_id[]" class="form-select chosen" required>
                                     <option selected disabled value="">Select Item</option>

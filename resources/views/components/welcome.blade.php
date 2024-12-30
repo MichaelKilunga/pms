@@ -1,4 +1,4 @@
-<div class="container mt-4">
+<div class="container mt-2">
     @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
         {{-- Quick Actions Section --}}
         <div class="row mb-4 g-4 justify-content-center text-center">
@@ -187,7 +187,7 @@
             </div>
         </div>
     </div> --}}
-    
+
     {{-- Sales Filter Section --}}
     <div class="row mb-4">
         {{-- Sales Vs medicine graph --}}
@@ -323,6 +323,7 @@
                     @csrf
                     <div id="salesFields">
                         <div class="row mb-3 sale-entry align-items-center">
+                            <input type="text" name="stock_id[]" hidden required>
                             <div class="col-md-3">
                                 <label class="form-label">Medicine</label>
                                 <select name="item_id[]" class="form-select chosen" required>
@@ -569,6 +570,9 @@
 
             // Find the selected medicine
             const selectedMedicine = medicines.find(medicine => medicine.item.id == selectedMedicineId);
+
+            row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
+            // console.log(selectedMedicine.id);
 
             if (selectedMedicine) {
                 // Set the total price to the medicine price (formatted with "TZS")

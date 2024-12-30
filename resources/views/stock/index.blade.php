@@ -2,6 +2,9 @@
 
 @section('content')
     <div class="container mt-4">
+        {{-- @foreach ($medicines as $x)
+            {{$x->id}}
+        @endforeach --}}
         <div class="d-flex justify-content-between mb-3">
             <h2>Stock</h2>
             <div>
@@ -208,9 +211,9 @@
                                     <input type="number" class="form-control shadow-sm" name="quantity[]" required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                                    <label class="form-label fw-bold">Low stock percentage (%)</label>
+                                    <label class="form-label fw-bold">Low stock</label>
                                     <input type="number" class="form-control shadow-sm" name="low_stock_percentage[]"
-                                        min="1" max="100" required>
+                                        min="1" required>
                                 </div>
                                 <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
                                     <label class="form-label fw-bold">In Date</label>
@@ -291,10 +294,10 @@
 
             stockFields.appendChild(newStockEntry);
 
-            // $(".chosen").chosen({
-            //         width: "100%",
-            //         no_results_text: "No matches found!",
-            //     });
+            $(".chosen").chosen({
+                    width: "100%",
+                    no_results_text: "No matches found!",
+                });
 
             newStockEntry.querySelector('.remove-stock-entry').addEventListener('click', function() {
                 newStockEntry.remove();

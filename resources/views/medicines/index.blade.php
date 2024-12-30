@@ -3,10 +3,17 @@
 @section('content')
     <div class="container mt-4">
         <div class="d-flex justify-content-between mb-3">
-            <h2>Medicines</h2>
-            <div>
-                <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createMedicineModal">Add New
-                    Medicine</a>
+            <h2 class="m-2">Medicines</h2>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="#" class="btn btn-success m-1" data-bs-toggle="modal"
+                        data-bs-target="#createMedicineModal">Add
+                        New
+                        Medicine</a>
+                </div>
+                <div>
+                    <a href="import" class="btn btn-danger m-1">Import from online</a>
+                </div>
             </div>
         </div>
 
@@ -24,7 +31,8 @@
                 <tbody>
                     @foreach ($medicines as $medicine)
                         <tr>
-                            <td>{{ $medicine->id }}</td>
+                            <td>{{ $loop->iteration }}</td>
+                            {{-- <td>{{ $medicine->id }}</td> --}}
                             <td>{{ $medicine->name }}</td>
                             <td>{{ $medicine->category->name }}</td>
                             <td>{{ $medicine->pharmacy->name }}</td>
@@ -157,6 +165,5 @@
                 </form>
             </div>
         </div>
-    </div>
     </div>
 @endsection

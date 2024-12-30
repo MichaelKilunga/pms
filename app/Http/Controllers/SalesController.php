@@ -45,6 +45,7 @@ class SalesController extends Controller
     public function store(Request $request)
     {
 
+        // dd($request->stock_id);
         // Validate the incoming request data for all rows of sales
         $request->validate([
             //NIMEIGNORE HIVI DATA NDIO IKAFANYA KAZI
@@ -88,7 +89,7 @@ class SalesController extends Controller
                 'staff_id' => $staffId,                // Use the staff_id from the authenticated user
                 'item_id' => $item_id,
                 'quantity' => $request->quantity[$key],
-                // 'total_price' => $request->total_price[$key],
+                'stock_id' => $request->stock_id[$key],
                 'total_price' => $request->amount[$key],
                 'date' => $request->date[$key],
             ]);

@@ -13,7 +13,7 @@ class SuperAdminController extends Controller
      */
     public function dashboard()
     {
-        return view('superadmin.dashboard');
+        return view('superAdmin.dashboard');
     }
 
     /**
@@ -22,13 +22,13 @@ class SuperAdminController extends Controller
     public function manageUsers()
     {
         $users = User::all(); // Fetch all users
-        return view('superadmin.users.index', compact('users'));
+        return view('superAdmin.users.index', compact('users'));
     }
 
     public function managePharmacies(){
         $pharmacies = Pharmacy::with('owner')->get();
         // dd($pharmacies);
-        return view('superadmin.pharmacies.index', compact('pharmacies'));
+        return view('superAdmin.pharmacies.index', compact('pharmacies'));
     }
     /**
      * Edit a user.
@@ -36,7 +36,7 @@ class SuperAdminController extends Controller
     public function editUser($id)
     {
         $user = User::findOrFail($id);
-        return view('superadmin.users.edit', compact('user'));
+        return view('superAdmin.users.edit', compact('user'));
     }
 
     /**

@@ -4,17 +4,22 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PMS - Business and Client Management</title>
+    <title>{{ env('APP_NAME') }}</title>
+
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"> -->
     <!-- Bootstrap Icons CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
+            /*background-color: #f8f9fa;*/
+            background-color: white;
         }
 
         .hero {
@@ -66,23 +71,18 @@
 
         @keyframes slideshow {
             0% {
-                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                url('{{ asset(' images/background/1.jpg') }}');
+                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/1.jpg') }}');
             }
 
-            33% {
-                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                url('{{ asset(' images/background/2.jpg') }}');
-            }
-
+            /*33% {*/
+            /*    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/2.jpg') }}');*/
+            /*}*/
             66% {
-                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                url('{{ asset(' images/background/3.jpg') }}');
+                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/3.jpg') }}');
             }
 
             100% {
-                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                url('{{ asset(' images/background/1.jpg') }}');
+                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/1.jpg') }}');
             }
         }
 
@@ -118,13 +118,13 @@
     <!-- Hero Section -->
     <div class="hero">
         <div class="container">
-            <h1 class="display-4 fw-bold">Welcome to Pharmacy Management System</h1>
+            <h1 class="display-4 fw-bold">Welcome to Pharmacy Management System (PILLPOINT)</h1>
             <p class="lead">A powerful solution for managing your Pharmacies</p>
             @auth
-            <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg me-2">Go to Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg me-2">Go to Dashboard</a>
             @else
-            <a href="{{ route('register') }}" class="btn btn-primary btn-lg me-2">Get Started</a>
-            <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg">Login</a>
+                <a href="{{ route('register') }}" class="btn btn-primary btn-lg me-2">Get Started</a>
+                <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg">Login</a>
             @endauth
         </div>
         <div class="scroll-indicator" onclick="scrollToContent()">⬇ Scroll to Learn More</div>
@@ -133,6 +133,8 @@
     <!-- Features Section -->
     <section class="features bg-light py-5" id="features">
         <div class="container text-center">
+            <div class="shrink-0 flex items-center">
+            </div>
             <h2 class="mb-5 fw-bold text-primary">Why Choose Our System?</h2>
             <div class="row g-4">
                 <div class="col-md-4">
@@ -141,7 +143,9 @@
                             <h5 class="card-title text-success d-flex align-items-center">
                                 <i class="bi bi-cart-check text-danger me-2 fs-4"></i>Point of Sale (POS) Integration
                             </h5>
-                            <p class="card-text text-muted">Facilitates seamless billing and checkout processes, Tracks sales transactions and generates receipts, Supports multiple payment methods (cash, Mobile payments).</p>
+                            <p class="card-text text-muted">Facilitates seamless billing and checkout processes, Tracks
+                                sales transactions and generates receipts, Supports multiple payment methods (cash,
+                                Mobile payments).</p>
                         </div>
                     </div>
                 </div>
@@ -151,7 +155,9 @@
                             <h5 class="card-title text-success d-flex align-items-center">
                                 <i class="bi bi-bar-chart-line text-danger me-2 fs-4"></i>Reporting and Analytics
                             </h5>
-                            <p class="card-text text-muted">Provides real-time sales, profit, and inventory reports, Analyzes customer buying patterns for targeted marketing, Generates custom reports for business insights.</p>
+                            <p class="card-text text-muted">Provides real-time sales, profit, and inventory reports,
+                                Analyzes customer buying patterns for targeted marketing, Generates custom reports for
+                                business insights.</p>
                         </div>
                     </div>
                 </div>
@@ -161,11 +167,26 @@
                             <h5 class="card-title text-success d-flex align-items-center">
                                 <i class="bi bi-box-seam text-danger me-2 fs-4"></i>Expiry and Batch Tracking
                             </h5>
-                            <p class="card-text text-muted">Ensures tracking of medicines based on batch numbers and expiry dates, Flags products nearing expiry for timely action, Helps prevent the sale of expired medicines.</p>
+                            <p class="card-text text-muted">Ensures tracking of medicines based on batch numbers and
+                                expiry dates, Flags products nearing expiry for timely action, Helps prevent the sale of
+                                expired medicines.</p>
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- VIDEO -->
+            {{-- <div class="mt-4">
+                    <iframe 
+                        width="560" 
+                        height="315" 
+                        src="https://www.youtube.com/embed/YOUR_VIDEO_ID" 
+                        title="YouTube video player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen>
+                    </iframe>
+                </div> --}}
+
 
             <div class="row g-4 mt-4">
                 <div class="col-md-4">
@@ -174,7 +195,9 @@
                             <h5 class="card-title text-success d-flex align-items-center">
                                 <i class="bi bi-shop text-danger me-2 fs-4"></i>Multi-Store Management
                             </h5>
-                            <p class="card-text text-muted">Synchronizes data across multiple pharmacy locations, Centralizes inventory, sales, and financial records, Facilitates inter-branch stock transfers.</p>
+                            <p class="card-text text-muted">Synchronizes data across multiple pharmacy locations,
+                                Centralizes inventory, sales, and financial records, Facilitates inter-branch stock
+                                transfers.</p>
                         </div>
                     </div>
                 </div>
@@ -184,7 +207,8 @@
                             <h5 class="card-title text-success d-flex align-items-center">
                                 <i class="bi bi-archive text-danger me-2 fs-4"></i>Inventory Management
                             </h5>
-                            <p class="card-text text-muted">Tracks stock levels of medicines, Sends alerts for low stock and expiry dates, Supports batch tracking for accurate inventory handling.</p>
+                            <p class="card-text text-muted">Tracks stock levels of medicines, Sends alerts for low stock
+                                and expiry dates, Supports batch tracking for accurate inventory handling.</p>
                         </div>
                     </div>
                 </div>
@@ -194,7 +218,8 @@
                             <h5 class="card-title text-success d-flex align-items-center">
                                 <i class="bi bi-cloud-upload text-danger me-2 fs-4"></i>Cloud Integration
                             </h5>
-                            <p class="card-text text-muted">Allows access to the system remotely, Ensures secure storage of sensitive data, Facilitates system updates and backups automatically.</p>
+                            <p class="card-text text-muted">Allows access to the system remotely, Ensures secure storage
+                                of sensitive data, Facilitates system updates and backups automatically.</p>
                         </div>
                     </div>
                 </div>
@@ -211,7 +236,7 @@
             <div class="row g-4">
                 <div class="col-md-12">
                     <div class="d-flex align-items-center">
-                        <a href="#" class="btn btn-primary">Try Plan</a>
+                        <a href="/register" class="btn btn-primary">Start</a>
                         <h5 class="mb-0 me-2 px-2">Trial Plan free 14 Days!</h5>
                     </div>
                 </div>
@@ -234,22 +259,19 @@
                         </div>
                         <div class="card-body">
                             <h6 class="card-title text-success text-center">Tshs. 10,000 / Month</h6>
-                            <p class="card-text text-center">Perfect for startups and small businesses.</p>
+                            <p class="card-text text-center">Ideal for individuals and small teams starting out.</p>
                             <ul class="list-unstyled ">
-                                <li>✔ Security Manager plus SSL</li>
                                 <li>✔ 1 pharmacist per 1 Pharmacy</li>
                                 <li>✔ 1 Owner/Admin account</li>
                                 <li>✔ 2 pharmacy</li>
-                                <li>✔ 14 Days Free Trial</li>
                                 <li>✔ Limited Medicine</li>
                                 <li>✔ In App Notification </li>
                                 <li>✔ Free Online support</li>
                                 <li>✔ Works on PC, Mac, mobile and Tablet</li>
-                                <li>✔ Pharmacy Only supported</li>
                             </ul>
 
                             <div class="text-center">
-                                <a href="#" class="btn btn-primary">Choose Plan</a>
+                                <a href="/register" class="btn btn-primary">Choose Plan</a>
                             </div>
                         </div>
                     </div>
@@ -262,22 +284,19 @@
                         </div>
                         <div class="card-body">
                             <h6 class="card-title text-success text-center">Tshs 20,000 / Month</h6>
-                            <p class="card-text text-center">Perfect for startups and small businesses.</p>
+                            <p class="card-text text-center">Designed for growing businesses with advanced needs.</p>
                             <ul class="list-unstyled ">
-                                <li>✔ Security Manager plus SSL</li>
                                 <li>✔ 2 pharmacist per 1 Pharmacy</li>
                                 <li>✔ 1 Owner/Admin account</li>
                                 <li>✔ 2 pharmacy</li>
-                                <li>✔ 14 Days Free Trial</li>
                                 <li>✔ Limited Medicine</li>
                                 <li>✔ In App Notification </li>
                                 <li>✔ Free Online support</li>
                                 <li>✔ Works on PC, Mac, mobile and Tablet</li>
-                                <li>✔ Pharmacy Only supported</li>
                             </ul>
 
                             <div class="text-center">
-                                <a href="#" class="btn btn-success">Choose Plan</a>
+                                <a href="/register" class="btn btn-success">Choose Plan</a>
                             </div>
                         </div>
                     </div>
@@ -290,22 +309,20 @@
                         </div>
                         <div class="card-body">
                             <h6 class="card-title text-success text-center">Tshs. 30,000 / Month</h6>
-                            <p class="card-text text-center">Perfect for startups and small businesses.</p>
+                            <p class="card-text text-center">Perfect for scaling businesses with enhanced features.</p>
                             <ul class="list-unstyled ">
-                                <li>✔ Security Manager plus SSL</li>
                                 <li>✔ 2 pharmacist per 1 Pharmacy</li>
                                 <li>✔ 1 Owner account</li>
-                                <li>✔ 1 1 Admin account</li>
+                                <li>✔ 1 Admin account</li>
                                 <li>✔ 3 pharmacy</li>
                                 <li>✔ Limited Medicine</li>
                                 <li>✔ In App Notification </li>
                                 <li>✔ Free Online support</li>
                                 <li>✔ Works on PC, Mac, mobile and Tablet</li>
-                                <li>✔ Pharmacy Only supported</li>
                             </ul>
 
                             <div class="text-center">
-                                <a href="#" class="btn btn-warning">Choose Plan</a>
+                                <a href="/register" class="btn btn-warning">Choose Plan</a>
                             </div>
                         </div>
                     </div>
@@ -318,9 +335,9 @@
                         </div>
                         <div class="card-body">
                             <h6 class="card-title text-success text-center">Tshs. 60,000 / Month</h6>
-                            <p class="card-text text-center">Perfect for startups and small businesses.</p>
+                            <p class="card-text text-center">Customized for large organizations with enterprise-level
+                                solutions.</p>
                             <ul class="list-unstyled ">
-                                <li>✔ Security Manager plus SSL</li>
                                 <li>✔ 1 Owner account</li>
                                 <li>✔ Unlimited Admin account</li>
                                 <li>✔ Unlimited pharmacy</li>
@@ -332,11 +349,11 @@
                                 <li>✔ Works on PC, Mac, mobile and Tablet</li>
                                 <li>✔ Pharmacy Only supported</li>
                                 <!-- <li>✔ Online Sales via Platform </li> -->
-                                <li>✔ WhatsApp Chart </li>
+                                <li>✔ WhatsApp Chat </li>
                             </ul>
 
                             <div class="text-center">
-                                <a href="#" class="btn btn-danger">Choose Plan</a>
+                                <a href="/register" class="btn btn-danger">Choose Plan</a>
                             </div>
                         </div>
                     </div>
@@ -357,8 +374,8 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p class="mb-0">&copy; 2024 Your System. All rights reserved.</p>
-            <p>Built by <a href="https://yourwebsite.com" class="text-light">Your Company</a></p>
+            <p class="mb-0">&copy; 2024 {{ env('APP_NAME') }}. All rights reserved.</p>
+            <p>Built by <a href="https://skylinksolutions.com" class="text-light">SKYLINK SOLUTIONS</a></p>
         </div>
     </footer>
 

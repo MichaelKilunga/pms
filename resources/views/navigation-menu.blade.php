@@ -9,7 +9,7 @@
                         <x-application-mark class="block h-9 w-auto" />
                     </a>
                 </div>
-
+                {{-- 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     @if (Auth::user()->role == 'staff')
@@ -28,7 +28,7 @@
                             {{ __('Sell medicine') }}
                         </x-nav-link>
                         <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
-                            {{ __('Medicine') }}
+                            {{ __('All medicine') }}
                         </x-nav-link>
                         <x-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
                             {{ __('Stock') }}
@@ -37,7 +37,7 @@
                             {{ __('Staff') }}
                         </x-nav-link>
                         <x-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
-                            {{ __('Categories') }}
+                            {{ __('Category') }}
                         </x-nav-link>
                         <x-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
                             {{ __('Pharmacies') }}
@@ -56,8 +56,11 @@
                         <x-nav-link href="{{ route('packages') }}" :active="request()->routeIs('packages')">
                             {{ __('Packages') }}
                         </x-nav-link>
+                        <x-nav-link href="{{ route('allMedicines.all') }}" :active="request()->routeIs('allMedicines.all')">
+                            {{ __('All medicines') }}
+                        </x-nav-link>
                     @endif
-                </div>
+                </div> --}}
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -163,6 +166,13 @@
                                 </button>
                             @else
                                 <span class="inline-flex rounded-md">
+                                    <p id="clock"
+                                        class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
+                                    </p>
+                                    <p
+                                        class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
+                                        <i class="bi bi-bell"></i>
+                                    </p>
                                     <h4
                                         class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
                                         {{ session('pharmacy_name') }}
@@ -245,6 +255,62 @@
                 </button>
             </div>
         </div>
+        <hr>
+        {{-- SECONOD ROW --}}
+        <div class="flex justify-between h-16">
+
+            <!-- Navigation Links -->
+            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                @if (Auth::user()->role == 'staff')
+                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
+                        {{ __('Sell medicine') }}
+                    </x-nav-link>
+                @endif
+                @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
+                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
+                        {{ __('Sell medicine') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
+                        {{ __('All medicine') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
+                        {{ __('Stock') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
+                        {{ __('Staff') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
+                        {{ __('Category') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
+                        {{ __('Pharmacies') }}
+                    </x-nav-link>
+                @endif
+                @if (Auth::user()->role == 'super')
+                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('superadmin.users') }}" :active="request()->routeIs('superadmin.users')">
+                        {{ __('System Users') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('superadmin.pharmacies') }}" :active="request()->routeIs('superadmin.pharmacies')">
+                        {{ __('Pharmacies') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('packages') }}" :active="request()->routeIs('packages')">
+                        {{ __('Packages') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('allMedicines.all') }}" :active="request()->routeIs('allMedicines.all')">
+                        {{ __('All medicines') }}
+                    </x-nav-link>
+                @endif
+            </div>
+        </div>
     </div>
 
     <!-- Responsive Navigation Menu -->
@@ -253,6 +319,26 @@
             <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
+                {{ __('Sell medicine') }}
+            </x-responsive-nav-link>
+            @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
+                <x-responsive-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
+                    {{ __('All medicine') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
+                    {{ __('Stock') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
+                    {{ __('Staff') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
+                    {{ __('Category') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
+                    {{ __('Pharmacies') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
@@ -276,26 +362,6 @@
                 <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
-                    {{ __('Sell medicine') }}
-                </x-responsive-nav-link>
-                @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
-                    <x-responsive-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
-                        {{ __('Medicine') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
-                        {{ __('Stock') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
-                        {{ __('Staff') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
-                        {{ __('Categories') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
-                        {{ __('Pharmacies') }}
-                    </x-responsive-nav-link>
-                @endif
 
                 {{-- @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
                     <x-responsive-nav-link href="{{ route('api-tokens.index') }}" :active="request()->routeIs('api-tokens.index')">
@@ -311,7 +377,7 @@
                     </x-dropdown-link>
                 @endif
 
-                {{-- @if (Auth::user()->role != 'owner') --}}
+                @if (Auth::user()->role != 'owner')
                 <x-dropdown-link href="#">
                     {{-- <h4
                             class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
@@ -323,7 +389,7 @@
 
                     <p class=" btn-light text-danger disabled">{{ session('pharmacy_name') }}</p>
                 </x-dropdown-link>
-                {{-- @endif --}}
+                @endif
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}" x-data>
