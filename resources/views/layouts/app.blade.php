@@ -136,11 +136,13 @@
                     info: true // Enable information display
                 });
 
-                $(".chosen").chosen({
-                // $("select").chosen({
-                    width: "100%",
-                    no_results_text: "No matches found!",
-                });
+                @if (!session('success') && !session('error'))
+                    // $(".chosen").chosen({
+                    $("select").chosen({
+                        width: "100%",
+                        no_results_text: "No matches found!",
+                    });
+                @endif
             });
 
             $(document).ready(function() {
