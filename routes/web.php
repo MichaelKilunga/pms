@@ -12,6 +12,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\MedicineImportController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 use App\Models\Pharmacy;
 use Illuminate\Support\Facades\Auth;
@@ -117,3 +118,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/switch', [SelectPharmacyController::class, 'switch'])->name('pharmacies.switch');
     Route::post('/select', [SelectPharmacyController::class, 'set'])->name('pharmacies.set');
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+});
+

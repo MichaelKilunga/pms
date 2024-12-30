@@ -136,8 +136,8 @@
                     info: true // Enable information display
                 });
 
-                // $(".chosen").chosen({
-                $("select").chosen({
+                $(".chosen").chosen({
+                // $("select").chosen({
                     width: "100%",
                     no_results_text: "No matches found!",
                 });
