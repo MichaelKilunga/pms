@@ -54,12 +54,13 @@ class PharmacyController extends Controller
 
         //SEND EMAIL
         $notification = [
-            'subject' => `NEW PHARMACY CREATED | $pharmacy->name`,
+            'subject' => 'NEW PHARMACY CREATED '.$pharmacy->name,
             'body'=>'You\'ve created your pharmacy successfully',
             'action' => 'Manage Pharmacy',
             'path' => 'dashboard',
         ];
-        Notification::send(Auth::user(), new GeneralNotification($notification));
+        $user = User::where('id', Auth::user()->id)->first();
+        $user->notify( new GeneralNotification($notification));
 
         return redirect()->route('dashboard')->with('success', 'Pharmacy created successfully!');
     }

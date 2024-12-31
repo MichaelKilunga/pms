@@ -17,6 +17,8 @@ use Illuminate\Http\Request;
 use App\Models\Pharmacy;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ReportPrintController;
+use App\Http\Controllers\SmsPush;
+use App\Notifications\SmsNotification;
 
 Route::get('/', function () {
     return view('welcome');
@@ -112,7 +114,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('category/delete/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
 
     // Route::resource('categories', CategoryController::class);
-     //for report printing
+    //for report printing
     Route::get('/reports', [ReportPrintController::class, 'index'])->name('reports.index');
     Route::post('/reports', [ReportPrintController::class, 'generateReport'])->name('reports.generate');
 });
@@ -125,5 +127,15 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::get('/notifications/readAll', [NotificationController::class, 'readAll'])->name('notifications.readAll');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+
+    Route::get('/notifications/unread_count', function () {
+        return response()->json([
+            'unreadCount' => Auth::user()->unreadNotifications->count()
+        ]);
+    });
+
+    Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
+    Route::get('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
 });

@@ -67,11 +67,11 @@
                 </x-nav-link>
                 @endif
             </div> --}}
-        </div>
+            </div>
 
-        <div class="hidden sm:flex sm:items-center sm:ms-6">
-            <!-- Teams Dropdown -->
-            {{-- @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
+            <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <!-- Teams Dropdown -->
+                {{-- @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
                     <div class="ms-3 relative">
                         <x-dropdown align="right" width="60">
                             <x-slot name="trigger">
@@ -160,175 +160,189 @@
         </div>
         @endif --}}
 
-        <!-- Settings Dropdown -->
-        <div class="ms-3 relative">
-            <x-dropdown align="right" width="48">
-                <x-slot name="trigger">
-                    @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-                    <button
-                        class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
-                        <img class="size-8 rounded-full object-cover"
-                            src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
-                    </button>
-                    @else
-                    <span class="inline-flex rounded-md">
-                        <p id="clock"
-                            class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
-                        </p>
-                        <p
-                            class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
-                            <i class="bi bi-bell"></i>
-                        </p>
-                        <h4
-                            class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
-                            {{ session('pharmacy_name') }}
-                            @if (Auth::user()->role == 'super')
-                            SUPER ADMIN
+                <!-- Settings Dropdown -->
+                <div class="ms-3 relative">
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
+                                <button
+                                    class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
+                                    <img class="size-8 rounded-full object-cover"
+                                        src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
+                                </button>
+                            @else
+                                <span class="inline-flex rounded-md">
+                                    <p id="clock"
+                                        class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
+                                    </p>
+                                    <a href="{{ route('notifications') }}"
+                                        class="inline-flex items-center px-2# mx-2# py-2# text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150 position-relative">
+                                        <i class="bi bi-bell fs-4"></i>
+                                        {{-- @if (Auth::user()->unreadNotifications->count() > 0) --}}
+                                        <sup
+                                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-light">
+                                            {{ Auth::user()->unreadNotifications->count() }}
+                                        </sup>
+                                        {{-- @endif --}}
+                                    </a>
+                                    <h4
+                                        class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
+                                        {{ session('pharmacy_name') }}
+                                        @if (Auth::user()->role == 'super')
+                                            SUPER ADMIN
+                                        @endif
+                                    </h4>
+                                    <button type="button"
+                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
+                                        {{ Auth::user()->name }}
+
+                                        <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg"
+                                            fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                </span>
                             @endif
-                        </h4>
-                        <button type="button"
-                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
-                            {{ Auth::user()->name }}
+                        </x-slot>
 
-                            <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                            </svg>
-                        </button>
-                    </span>
-                    @endif
-                </x-slot>
+                        <x-slot name="content">
+                            <!-- Account Management -->
+                            <div class="block px-4 py-2 text-xs text-gray-400">
+                                {{ __('Manage Account') }}
+                            </div>
 
-                <x-slot name="content">
-                    <!-- Account Management -->
-                    <div class="block px-4 py-2 text-xs text-gray-400">
-                        {{ __('Manage Account') }}
-                    </div>
+                            <x-dropdown-link href="{{ route('profile.show') }}">
+                                {{ __('Profile') }}
+                            </x-dropdown-link>
 
-                    <x-dropdown-link href="{{ route('profile.show') }}">
-                        {{ __('Profile') }}
-                    </x-dropdown-link>
-
-                    {{-- @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
+                            {{-- @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
                                 <x-dropdown-link href="{{ route('api-tokens.index') }}">
                     {{ __('API Tokens') }}
                     </x-dropdown-link>
                     @endif --}}
 
-                    {{-- Choose pharmacy --}}
-                    @if (Auth::user()->role == 'owner')
-                    <x-dropdown-link href="{{ route('pharmacies.switch') }}">
-                        <p class="btn# btn-light text-danger">{{ __('Switch Pharmacy') }} </p>
-                    </x-dropdown-link>
-                    @endif
+                            {{-- Choose pharmacy --}}
+                            @if (Auth::user()->role == 'owner')
+                                <x-dropdown-link href="{{ route('pharmacies.switch') }}">
+                                    <p class="btn# btn-light text-danger">{{ __('Switch Pharmacy') }} </p>
+                                </x-dropdown-link>
+                            @endif
 
-                    {{-- @if (Auth::user()->role != 'owner')
+                            {{-- @if (Auth::user()->role != 'owner')
                                 <x-dropdown-link href="#"> --}}
-                    {{-- @foreach ($pharmacy as $pharmacy)
+                            {{-- @foreach ($pharmacy as $pharmacy)
                                         {{$pharmacy->name}}
                     @endforeach --}}
-                    {{-- <p class=" btn-light text-danger disabled">{{ session('pharmacy_name') }}</p>
+                            {{-- <p class=" btn-light text-danger disabled">{{ session('pharmacy_name') }}</p>
                     </x-dropdown-link>
                     @endif --}}
 
-                    <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                            <div class="border-t border-gray-200 dark:border-gray-600"></div>
 
-                    <!-- Authentication -->
-                    <form method="POST" action="{{ route('logout') }}" x-data>
-                        @csrf
+                            <!-- Authentication -->
+                            <form method="POST" action="{{ route('logout') }}" x-data>
+                                @csrf
 
-                        <x-dropdown-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
-                            {{ __('Log Out') }}
-                        </x-dropdown-link>
-                    </form>
-                </x-slot>
-            </x-dropdown>
+                                <x-dropdown-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+            </div>
+
+            <div class="-me-2 flex items-center sm:hidden">
+                <a href="{{ route('notifications') }}"
+                    class="inline-flex items-center mx-2 px-2# mx-2# py-2# text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150 position-relative">
+                    <i class="bi bi-bell fs-4"></i>
+                    {{-- @if (Auth::user()->unreadNotifications->count() > 0) --}}
+                    <sup
+                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-light">
+                        {{ Auth::user()->unreadNotifications->count() }}
+                    </sup>
+                    {{-- @endif --}}
+                </a>
+            </div>
+            <!-- Hamburger -->
+            <div class="-me-2 flex items-center sm:hidden">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
+                    <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
+                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
         </div>
-    </div>
+        <hr>
+        {{-- SECOND ROW --}}
+        <div class="flex justify-between h-16">
 
-    <!-- Hamburger -->
-    <div class="-me-2 flex items-center sm:hidden">
-        <button @click="open = ! open"
-            class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
-            <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
-                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 6h16M4 12h16M4 18h16" />
-                <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
-                    stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
-    </div>
-    </div>
-    <hr>
-    {{-- SECONOD ROW --}}
-    <div class="flex justify-between h-16">
-
-        <!-- Navigation Links -->
-        <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-            @if (Auth::user()->role == 'staff')
-            <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                {{ __('Notifications') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
-                {{ __('Sell medicine') }}
-            </x-nav-link>
-            @endif
-            @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
-            <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                {{ __('Notifications') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
-                {{ __('Sell medicine') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
-                {{ __('All medicine') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
-                {{ __('Stock') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
-                {{ __('Staff') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
-                {{ __('Category') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
-                {{ __('Pharmacies') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('reports.index') }}" :active="request()->routeIs('reports.index')">
-                {{ __('Reports') }}
-            </x-nav-link>
-            @endif
-            @if (Auth::user()->role == 'super')
-            <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                {{ __('Notifications') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('superadmin.users') }}" :active="request()->routeIs('superadmin.users')">
-                {{ __('System Users') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('superadmin.pharmacies') }}" :active="request()->routeIs('superadmin.pharmacies')">
-                {{ __('Pharmacies') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('packages') }}" :active="request()->routeIs('packages')">
-                {{ __('Packages') }}
-            </x-nav-link>
-            <x-nav-link href="{{ route('allMedicines.all') }}" :active="request()->routeIs('allMedicines.all')">
-                {{ __('All medicines') }}
-            </x-nav-link>
-            @endif
+            <!-- Navigation Links -->
+            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                @if (Auth::user()->role == 'staff')
+                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
+                        {{ __('Sell medicine') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
+                        {{ __('Notifications') }}
+                    </x-nav-link>
+                @endif
+                @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
+                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
+                        {{ __('Sell medicine') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
+                        {{ __('All medicine') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
+                        {{ __('Stock') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
+                        {{ __('Staff') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
+                        {{ __('Category') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
+                        {{ __('Pharmacies') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
+                        {{ __('Notifications') }}
+                    </x-nav-link>
+                @endif
+                @if (Auth::user()->role == 'super')
+                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('superadmin.users') }}" :active="request()->routeIs('superadmin.users')">
+                        {{ __('System Users') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('superadmin.pharmacies') }}" :active="request()->routeIs('superadmin.pharmacies')">
+                        {{ __('Pharmacies') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('packages') }}" :active="request()->routeIs('packages')">
+                        {{ __('Packages') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('allMedicines.all') }}" :active="request()->routeIs('allMedicines.all')">
+                        {{ __('All medicines') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
+                        {{ __('Notifications') }}
+                    </x-nav-link>
+                @endif
+            </div>
         </div>
-    </div>
     </div>
 
     <!-- Responsive Navigation Menu -->
@@ -341,25 +355,24 @@
                 {{ __('Sell medicine') }}
             </x-responsive-nav-link>
             @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
-            <x-responsive-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
-                {{ __('All medicine') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
-                {{ __('Stock') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
-                {{ __('Staff') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
-                {{ __('Category') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
-                {{ __('Pharmacies') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('reports.index') }}" :active="request()->routeIs('reports.index')">
-                {{ __('Reports') }}
-            </x-responsive-nav-link>
-
+                <x-responsive-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
+                    {{ __('All medicine') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
+                    {{ __('Stock') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
+                    {{ __('Staff') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
+                    {{ __('Category') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
+                    {{ __('Pharmacies') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('reports.index') }}" :active="request()->routeIs('reports.index')">
+                    {{ __('Reports') }}
+                </x-responsive-nav-link>
             @endif
         </div>
 
@@ -367,10 +380,10 @@
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
             <div class="flex items-center px-4">
                 @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-                <div class="shrink-0 me-3">
-                    <img class="size-10 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url }}"
-                        alt="{{ Auth::user()->name }}" />
-                </div>
+                    <div class="shrink-0 me-3">
+                        <img class="size-10 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url }}"
+                            alt="{{ Auth::user()->name }}" />
+                    </div>
                 @endif
 
                 <div>
@@ -394,14 +407,14 @@
 
                 {{-- Choose pharmacy --}}
                 @if (Auth::user()->role == 'owner')
-                <x-dropdown-link href="{{ route('pharmacies.switch') }}">
-                    <p class="btn btn-light text-danger">{{ __('Switch Pharmacy') }} </p>
-                </x-dropdown-link>
+                    <x-dropdown-link href="{{ route('pharmacies.switch') }}">
+                        <p class="btn btn-light text-danger">{{ __('Switch Pharmacy') }} </p>
+                    </x-dropdown-link>
                 @endif
 
                 @if (Auth::user()->role != 'owner')
-                <x-dropdown-link href="#">
-                    {{-- <h4
+                    <x-dropdown-link href="#">
+                        {{-- <h4
                             class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
                             {{ session('pharmacy_name') }}</h4>
                     <button type="button" --}}
@@ -410,7 +423,7 @@
                         @endforeach --}}
 
                         <p class=" btn-light text-danger disabled">{{ session('pharmacy_name') }}</p>
-                </x-dropdown-link>
+                    </x-dropdown-link>
                 @endif
 
                 <!-- Authentication -->
@@ -424,36 +437,36 @@
 
                 <!-- Team Management -->
                 @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
-                <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                    <div class="border-t border-gray-200 dark:border-gray-600"></div>
 
-                <div class="block px-4 py-2 text-xs text-gray-400">
-                    {{ __('Manage Team') }}
-                </div>
+                    <div class="block px-4 py-2 text-xs text-gray-400">
+                        {{ __('Manage Team') }}
+                    </div>
 
-                <!-- Team Settings -->
-                <x-responsive-nav-link href="{{ route('teams.show', Auth::user()->currentTeam->id) }}"
-                    :active="request()->routeIs('teams.show')">
-                    {{ __('Team Settings') }}
-                </x-responsive-nav-link>
+                    <!-- Team Settings -->
+                    <x-responsive-nav-link href="{{ route('teams.show', Auth::user()->currentTeam->id) }}"
+                        :active="request()->routeIs('teams.show')">
+                        {{ __('Team Settings') }}
+                    </x-responsive-nav-link>
 
-                @can('create', Laravel\Jetstream\Jetstream::newTeamModel())
-                <x-responsive-nav-link href="{{ route('teams.create') }}" :active="request()->routeIs('teams.create')">
-                    {{ __('Create New Team') }}
-                </x-responsive-nav-link>
-                @endcan
+                    @can('create', Laravel\Jetstream\Jetstream::newTeamModel())
+                        <x-responsive-nav-link href="{{ route('teams.create') }}" :active="request()->routeIs('teams.create')">
+                            {{ __('Create New Team') }}
+                        </x-responsive-nav-link>
+                    @endcan
 
-                <!-- Team Switcher -->
-                @if (Auth::user()->allTeams()->count() > 1)
-                <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                    <!-- Team Switcher -->
+                    @if (Auth::user()->allTeams()->count() > 1)
+                        <div class="border-t border-gray-200 dark:border-gray-600"></div>
 
-                <div class="block px-4 py-2 text-xs text-gray-400">
-                    {{ __('Switch Teams') }}
-                </div>
+                        <div class="block px-4 py-2 text-xs text-gray-400">
+                            {{ __('Switch Teams') }}
+                        </div>
 
-                @foreach (Auth::user()->allTeams() as $team)
-                <x-switchable-team :team="$team" component="responsive-nav-link" />
-                @endforeach
-                @endif
+                        @foreach (Auth::user()->allTeams() as $team)
+                            <x-switchable-team :team="$team" component="responsive-nav-link" />
+                        @endforeach
+                    @endif
                 @endif
             </div>
         </div>

@@ -95,7 +95,7 @@
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
-
+        <audio id="notification-sound" src="{{ asset('audio/notify.mp3') }}" preload="auto"></audio>
     </div>
 
     @stack('modals')
@@ -104,6 +104,9 @@
 
     <script>
         $(document).ready(function() {
+
+            requestNotificationPermission();
+
             // Automatically show the modal if no pharmacy is selected
             @if (!session('current_pharmacy_id'))
                 $('#pharmacyModal').modal('show');
@@ -148,13 +151,32 @@
             $(document).ready(function() {
                 $('#loader-overlay').hide(); // Hide loader initially
 
+
+                $('button').on('click', function(event) {
+                    const $this = $(this);
+                    $this.addClass('bg-light border border-danger text-danger text-muted')
+                        .css('pointer-events', 'none')
+                        .html(
+                            '<span class="spinner-border" style="width: 1rem; height: 1rem;" role="status" aria-hidden="true"></span>Processing...'
+                        );
+                });
+
+
                 // Show the loader before a new page is requested (e.g., on link click)
                 $('a').on('click', function(event) {
+                    const $this = $(this);
+
                     // Prevent loader for modal triggers
-                    if ($(this).attr('data-bs-toggle') === 'modal') {
+                    if ($this.attr('data-bs-toggle') === 'modal') {
                         return; // Exit if the link is for opening a modal
                     }
 
+                    // Disable the link/button
+                    // $this.addClass('bg-light border border-danger text-danger text-muted')
+                    //     .css('pointer-events', 'none')
+                    //     .append(
+                    //         '<span class="spinner-border" style="width: 1rem; height: 1rem;" role="status" aria-hidden="true"></span>'
+                    //     );
 
 
                     // Skip showing loader if the target is a select field (including chosen dropdown)
@@ -187,6 +209,58 @@
                 });
             });
         });
+
+        //NOTIFICATION RING
+        $(document).ready(function() {
+            function checkNotifications() {
+                $.ajax({
+                    url: '/notifications/unread_count', // Replace with your route to fetch unread notifications count
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.unreadCount > 0) {
+                            // Play the notification sound
+                            $('#notification-sound')[0].play();
+                            showBrowserNotification(`You have ${response.unreadCount} unread notifications.`);  
+                        }
+                    },
+                    error: function() {
+                        console.error('Failed to fetch unread notifications.');
+                    }
+                });
+            }
+
+            // Check notifications every minute
+            setInterval(checkNotifications, 60000); // 60000 ms = 1 minute
+        });
+
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                if (Notification.permission === "default") {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            console.log("Notification permission granted.");
+                        } else {
+                            console.log("Notification permission denied.");
+                        }
+                    });
+                } else if (Notification.permission === "granted") {
+                    console.log("Notifications are already enabled.");
+                } else {
+                    console.log("User has denied notifications.");
+                }
+            } else {
+                console.error("This browser does not support notifications.");
+            }
+        }
+
+        function showBrowserNotification(message) {
+            if (Notification.permission === "granted") {
+                new Notification("New Notification", {
+                    body: message,
+                    icon: "/icons/bell-860.png", // Optional: Add a path to your notification icon
+                });
+            }
+        }
     </script>
 
     {{-- CLOCK TIMER --}}
