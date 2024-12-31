@@ -1,4 +1,4 @@
-@extends('sales.app')
+@extends('reports.app')
 
 @section('content')
 <div style="max-width: 600px; margin: 20px auto; font-family: Arial, sans-serif;">
