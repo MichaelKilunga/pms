@@ -18,7 +18,7 @@
         rel="stylesheet">
     <link rel='stylesheet' href='https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css'>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"> 
+    {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"> --}}
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -156,7 +156,10 @@
 
                 $('button').on('click', function(event) {
                     const $this = $(this);
-                    $this.addClass('bg-light border border-danger text-danger text-muted')
+                    if ($this.is('#hamburger')) {
+                        return;
+                    }
+                    $this.addClass('bg-light border border-danger# text-danger text-muted')
                         .css('pointer-events', 'none')
                         .html(
                             '<span class="spinner-border" style="width: 1rem; height: 1rem;" role="status" aria-hidden="true"></span>'
@@ -295,7 +298,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js"></script>
-
 </body>
 
 </html>
