@@ -14,6 +14,7 @@ use App\Models\Stock;
 use App\Models\User;
 use App\Notifications\InAppNotification;
 use App\Notifications\WelcomeNotification;
+use App\Notifications\SmsNotification;
 use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\get;
@@ -27,11 +28,13 @@ class DashboardController extends Controller
     public function index()
     {
 
-        // $notification = [
-        //     'data'=>'Hello!',
-        // ];
-        $user = User::whereId(Auth::user()->id)->first();   
-        // $user = Auth::user();
+        // $user = User::find(1); // Example user
+        // $phoneNumber = 'user_phone_number';
+        // $message = 'Your SMS notification message here';
+        // // Send the SMS
+        // Notification::send($user, new SmsNotification($phoneNumber, $message));
+
+        $user = User::whereId(Auth::user()->id)->first(); 
         $notification = [
             'message'=>'Final trial message!',
             'type'=>'success',

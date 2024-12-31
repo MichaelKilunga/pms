@@ -22,7 +22,7 @@ class NotificationController extends Controller
         $notification->read_at = now();
         $notification->save();
 
-        return redirect()->back()->with('success', 'Notification marked as read!');
+        return redirect()->back()->with('success_disabled', 'Notification marked as read!');
     }
 
     public function readAll()

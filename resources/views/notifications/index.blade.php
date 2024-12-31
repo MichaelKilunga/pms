@@ -2,10 +2,11 @@
 
 @section('content')
     <div class="container mt-4">
-        @if ($unreadNotifications == 0)
+        {{-- <p>{{'Unread: '.Auth::user()->unreadNotifications->count() }}</p> --}}
+        @if ( Auth::user()->unreadNotifications->count() == 0)
             <p class="text-center text-primary italic">no new notification!!</p>
         @endif
-        @if ($unreadNotifications > 0)
+        @if (Auth::user()->unreadNotifications->count() > 0)
             <div class="d-flex justify-content-between">
                 <h1>Notifications</h1>
                 <a class="btn btn-success" href="{{ route('notifications.readAll') }}">Mark all Read</a>
@@ -13,7 +14,7 @@
         @endif
         <ul class="list-group">
             @foreach (Auth::user()->notifications as $notification)
-            {{-- @foreach (Auth::user()->notifications as $notification) --}}
+                {{-- @foreach (Auth::user()->notifications as $notification) --}}
                 @if (!$notification->read_at)
                     <li
                         class="mt-2 list-group-item-{{ $notification->data['type'] }} list-group-item d-flex justify-content-between align-items-center">
