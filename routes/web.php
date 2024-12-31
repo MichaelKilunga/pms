@@ -116,6 +116,7 @@ Route::middleware(['auth'])->group(function () {
     // Route::resource('categories', CategoryController::class);
     //for report printing
     Route::get('/reports', [ReportPrintController::class, 'index'])->name('reports.index');
+    Route::get('/allReports', [ReportPrintController::class, 'all'])->name('reports.all');
     Route::post('/reports', [ReportPrintController::class, 'generateReport'])->name('reports.generate');
 });
 

@@ -35,7 +35,7 @@
                 </a>
             </div>
             <div class="col-6 col-md-4 col-lg-2">
-                <a href="{{ route('sales') }}" class="card bg-info text-white shadow text-decoration-none">
+                <a href="{{ route('reports.all') }}" class="card bg-info text-white shadow text-decoration-none">
                     <div class="card-body">
                         <h6><i class="bi bi-file-earmark-bar-graph fs-1#"></i> Generate Report</h6>
 

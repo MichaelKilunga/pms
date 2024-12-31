@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Sales;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SalesReportExport;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+// use PDF;
+// use Barryvdh\DomPDF\PDF;
 
 class ReportPrintController extends Controller
 {
@@ -50,7 +53,7 @@ class ReportPrintController extends Controller
 
         if ($format === 'pdf') {
             // Generate PDF
-            $pdf = PDF::loadView('reports.sales', ['sales' => $sales, 'type' => $type, 'value' => $value]);
+            $pdf = Pdf::loadView('reports.sales', ['sales' => $sales, 'type' => $type, 'value' => $value]);
             return $pdf->download("sales_report_{$type}_{$value}.pdf");
         }
 
@@ -59,5 +62,8 @@ class ReportPrintController extends Controller
             return Excel::download(new SalesReportExport($sales), "sales_report_{$type}_{$value}.xlsx");
         }
         
+    }
+    public function all(){
+        return view('reports.reports');
     }
 }

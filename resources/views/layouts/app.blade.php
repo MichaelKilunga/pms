@@ -18,6 +18,8 @@
         rel="stylesheet">
     <link rel='stylesheet' href='https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css'>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"> 
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
@@ -157,7 +159,7 @@
                     $this.addClass('bg-light border border-danger text-danger text-muted')
                         .css('pointer-events', 'none')
                         .html(
-                            '<span class="spinner-border" style="width: 1rem; height: 1rem;" role="status" aria-hidden="true"></span>Processing...'
+                            '<span class="spinner-border" style="width: 1rem; height: 1rem;" role="status" aria-hidden="true"></span>'
                         );
                 });
 
@@ -220,7 +222,8 @@
                         if (response.unreadCount > 0) {
                             // Play the notification sound
                             $('#notification-sound')[0].play();
-                            showBrowserNotification(`You have ${response.unreadCount} unread notifications.`);  
+                            showBrowserNotification(
+                                `You have ${response.unreadCount} unread notifications.`);
                         }
                     },
                     error: function() {

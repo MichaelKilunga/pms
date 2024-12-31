@@ -34,14 +34,14 @@ class DashboardController extends Controller
         // // Send the SMS
         // Notification::send($user, new SmsNotification($phoneNumber, $message));
 
-        $user = User::whereId(Auth::user()->id)->first(); 
-        $notification = [
-            'message'=>'Final trial message!',
-            'type'=>'success',
-        ];
+        // $user = User::whereId(Auth::user()->id)->first(); 
+        // $notification = [
+        //     'message'=>'Final trial message!',
+        //     'type'=>'success',
+        // ];
+        // $user->notify(new InAppNotification( $notification));
+        
         // $user->notify(new WelcomeNotification);
-        $user->notify(new InAppNotification( $notification));
-
         // $notifyUser = Auth::user();
         // Notification::send($notifyUser, new WelcomeNotification);
         // // dd('done');
