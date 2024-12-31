@@ -36,15 +36,15 @@ class ReportPrintController extends Controller
         //      ->get();
 
         $sales = match ($type) {
-            'day' => Sales::whereDate('date', $value)->get(),
-            'week' => Sales::whereBetween('date', [
+            'day' => Sales::with('item')->whereDate('sales.date', $value)->get(),
+            'week' => Sales::with('item')->whereBetween('sales.date', [
                 date('Y-m-d', strtotime('monday this week', strtotime($value))),
                 date('Y-m-d', strtotime('sunday this week', strtotime($value)))
             ])->get(),
-            'month' => Sales::whereMonth('date', date('m', strtotime($value)))
+            'month' => Sales::with('item')->whereMonth('sales.date', date('m', strtotime($value)))
                             ->whereYear('date', date('Y', strtotime($value)))
                             ->get(),
-            'year' => Sales::whereYear('date', date('Y', strtotime($value)))->get(),
+            'year' => Sales::with('item')->whereYear('sales.date', date('Y', strtotime($value)))->get(),
             default => collect(),
         };
 

@@ -59,27 +59,35 @@
 
     <table>
         <thead>
+        <!-- <tr>
+                <th colspan="2"><strong>Report Type:</strong></th>
+                <th>{{ ucfirst($type) }}</th>
+                <th><strong>For:</strong></th>
+                <th>{{ $value }}</th>
+            </tr> -->
             <tr>
                 <th>#</th>
-                <th>Quantity</th>
+                <th>Medicine name</th>
+                <th>Sales Date</th>
+                <th>Sales Quantity</th>
                 <th>Total Price</th>
-                <th>Date</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($sales as $sale)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
+                    <td>{{ $sale->item->name }}</td>
+                    <td>{{ $sale->created_at }}</td>
                     <td>{{ $sale->quantity }}</td>
                     <td>{{ number_format($sale->total_price, 2) }}</td>
-                    <td>{{ $sale->created_at }}</td>
                 </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="2" class="total">Total:</td>
-                <td colspan="2">{{ number_format($sales->sum('total_price'), 2) }}</td>
+                <td colspan="4" class="total"><center>Total:</center></td>
+                <td colspan="1">{{ number_format($sales->sum('total_price'), 2) }}</td>
             </tr>
         </tfoot>
     </table>
