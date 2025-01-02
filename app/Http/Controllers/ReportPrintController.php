@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Sales;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SalesReportExport;
+use App\Models\Items;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 // use PDF;
@@ -64,6 +65,7 @@ class ReportPrintController extends Controller
         
     }
     public function all(){
-        return view('reports.reports');
+        $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
+        return view('reports.reports', compact('medicines'));
     }
 }

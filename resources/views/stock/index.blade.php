@@ -33,7 +33,7 @@
                 <tbody>
                     @foreach ($stocks as $stock)
                         <tr>
-                            <td>{{ $stock->id }}</td>
+                            <td>{{ $loop->iteration }}</td>
                             <td>{{ $stock->item->name }}</td>
                             {{-- <td>{{ $stock->buying_price }}</td> --}}
                             <td>{{ $stock->selling_price }}</td>

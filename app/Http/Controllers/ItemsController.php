@@ -7,9 +7,11 @@ use App\Models\Pharmacy;
 use App\Models\Category;
 use App\Models\Medicine;
 use App\Models\Stock;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ItemsController extends Controller
 {
@@ -19,11 +21,11 @@ class ItemsController extends Controller
     public function index()
     {
         $medicines = Items::with(['category', 'pharmacy'])->where('pharmacy_id', session('current_pharmacy_id'))->get();
-        $categories = Category::where('pharmacy_id', session('current_pharmacy_id'))->get();
-        $pharmacy = Pharmacy::where('pharmacy_id', session('current_pharmacy_id'))->first();
+        $categories = Category::get();
+        // $pharmacy = Pharmacy::where('pharmacy_id', session('current_pharmacy_id'))->first();
 
         // dd($medicines);
-        return view('medicines.index', compact('medicines', 'categories', 'pharmacy'));
+        return view('medicines.index', compact('medicines', 'categories'));
     }
 
     public function import(Request $request)
@@ -35,13 +37,21 @@ class ItemsController extends Controller
 
     public function importStore(Request $request)
     {
+        try{
         $request->validate([
             'medicine_id' => 'required|exists:medicines,id',
         ]);
+    }catch(Exception $e){
+            return response()->json(['message' => 'Failed to import medicine because: '.$e->getMessage()], 500);
+        // return redirect()->back()->withInput()->with('error', 'Failed to import beacuse: '.$e->getMessage());
+    }
 
         try {
             $medicine = Medicine::findOrFail($request->medicine_id);
-
+            $request['name'] = $medicine->name;
+            $request->validate([
+                'name' => 'unique:items,name',
+            ]);
             // Get the current pharmacy ID (assuming it's stored in the session or user context)
             $pharmacyId = session('current_pharmacy_id');
 
@@ -53,12 +63,12 @@ class ItemsController extends Controller
             Items::create([
                 'name' => $medicine->name,
                 'pharmacy_id' => $pharmacyId,
-                'category_id' => 5,
+                'category_id' => 1,
             ]);
 
             return response()->json(['message' => 'Medicine imported successfully!'], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed to import medicine.'], 500);
+            return response()->json(['message' => 'Failed to import this medicine because: '.$e->getMessage()], 500);
         }
     }
 
@@ -110,11 +120,19 @@ class ItemsController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'pharmacy_id' => 'required|exists:pharmacies,id',
-            'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
-        ]);
+        $request['pharmacy_id'] = session('current_pharmacy_id');
+        // $request['pharmacy_id'] =20;
+        try {
+            $request->validate([
+                'pharmacy_id' => 'required|exists:pharmacies,id',
+                'category_id' => 'required|exists:categories,id',
+                'name' => 'required|string|max:255',
+            ]);
+        } catch (Exception $e) {
+            // dd($e->getMessage());
+            return redirect()->back()->withInput()->with('error',"Data  not added because: ".$e->getMessage());
+        }
+        // dd($request['pharmacy_id']);
 
         Items::create($request->only('pharmacy_id', 'category_id', 'name'));
 

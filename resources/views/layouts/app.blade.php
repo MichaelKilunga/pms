@@ -23,6 +23,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css">
     <!-- Scripts -->
@@ -134,13 +135,39 @@
             @endif
 
             $(document).ready(function() {
-                $('#Table').DataTable({
+                $('#Table')
+                .DataTable({
                     paging: true, // Enable paging
                     searching: true, // Enable search bar
                     ordering: true, // Enable column sorting
                     info: true // Enable information display
                 });
-
+                $('#reportsTable').DataTable({
+                    paging: true, // Enable paging
+                    searching: true, // Enable search bar
+                    ordering: true, // Enable column sorting
+                    info: true, // Enable information display
+                    dom: 'Bfrtip', // Add Buttons to the table
+                    buttons: [{
+                            extend: 'csvHtml5',
+                            title: 'Reports',
+                            text: 'Download CSV',
+                            className: 'btn btn-primary reportsDownloadButton'
+                        },
+                        {
+                            extend: 'pdfHtml5',
+                            title: 'Reports',
+                            text: 'Download PDF',
+                            className: 'btn btn-secondary reportsDownloadButton',
+                            orientation: 'landscape', // Landscape orientation for PDF
+                            pageSize: 'A4' // A4 page size
+                        }
+                    ]
+                });
+                $(".onReport").chosen({
+                    width: "100%",
+                    no_results_text: "No matches found!",
+                });
                 @if (!session('success') && !session('error'))
                     // $(".chosen").chosen({
                     $("select").chosen({
@@ -157,6 +184,15 @@
                 $('button').on('click', function(event) {
                     const $this = $(this);
                     if ($this.is('#hamburger')) {
+                        return;
+                    }
+                    if ($this.is('.reportsDownloadButton')) {
+                        return;
+                    }
+                    if ($this.is('#addSaleRow')) {
+                        return;
+                    }
+                    if ($this.is('#addStockBtn')) {
                         return;
                     }
                     $this.addClass('bg-light border border-danger# text-danger text-muted')
@@ -195,7 +231,9 @@
 
                 // Show the loader when an AJAX request starts
                 $(document).ajaxStart(function() {
-                    $('#loader-overlay').show();
+                    if (!isNotificationCheck) { // Only show loader if it's not a notification check
+                        $('#loader-overlay').show();
+                    }
                 });
 
                 // Hide the loader when the AJAX request completes
@@ -217,17 +255,29 @@
 
         //NOTIFICATION RING
         $(document).ready(function() {
+            let isNotificationCheck = false;
+
+            $('#loader-overlay').hide(); // Hide loader initially
+
             function checkNotifications() {
+
+                isNotificationCheck = true;
+
                 $.ajax({
                     url: '/notifications/unread_count', // Replace with your route to fetch unread notifications count
                     method: 'GET',
                     success: function(response) {
+                        $('#notifyBell').text(response.unreadCount);
+                        $('#notifyBellPhone').text(response.unreadCount);
                         if (response.unreadCount > 0) {
                             // Play the notification sound
                             $('#notification-sound')[0].play();
                             showBrowserNotification(
                                 `You have ${response.unreadCount} unread notifications.`);
                         }
+                    },
+                    complete: function() {
+                        isNotificationCheck = false; // Reset the flag after the request completes
                     },
                     error: function() {
                         console.error('Failed to fetch unread notifications.');
@@ -236,7 +286,7 @@
             }
 
             // Check notifications every minute
-            setInterval(checkNotifications, 60000); // 60000 ms = 1 minute
+            setInterval(checkNotifications, 15000); // 60000 ms = 1 minute
         });
 
         function requestNotificationPermission() {
@@ -298,6 +348,19 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js"></script>
+
+    {{-- FOR DOWNLOADING REPORTS --}}
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+
+    <!-- Include JSZip and pdfmake for export functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/vfs_fonts.js"></script>
+
+    <!-- Include Buttons extensions -->
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
 </body>
 
 </html>

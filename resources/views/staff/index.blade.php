@@ -27,7 +27,7 @@
             <tbody>
                 @foreach ($staff as $staff)
                 <tr>
-                    <td>{{ $staff->id }}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $staff->user->name }}</td>
                     <td>{{ $staff->user->email }}</td>
                     <td>{{ $staff->user->phone }}</td>

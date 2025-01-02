@@ -6,7 +6,7 @@
             <div class="card-header bg-primary text-white d-flex justify-content-between">
                 <h3 class="mb-0">All Medicines</h3>
                 <div>
-                    <a href="medicines.import-form" class="btn btn-success m-1">Import Medicines</a>
+                    <a href="{{route('medicines.import-form')}}" class="btn btn-success m-1">Import Medicines</a>
                 </div>
             </div>
         </div>

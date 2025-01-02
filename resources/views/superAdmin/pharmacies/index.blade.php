@@ -19,7 +19,7 @@
                 <tbody>
                     @foreach ($pharmacies as $pharmacy)
                         <tr>
-                            <td>{{ $pharmacy->id }}</td>
+                            <td>{{ $loop->iteration }}</td>
                             <td>{{ $pharmacy->name }}</td>
                             <td>{{ $pharmacy->location }}</td>
                             <td>{{ $pharmacy->owner->name }}</td>

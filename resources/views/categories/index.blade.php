@@ -23,7 +23,7 @@
                 <tbody>
                     @foreach ($categories as $category)
                         <tr>
-                            <td>{{ $category->id }}</td>
+                            <td>{{ $loop->iteration }}</td>
                             <td>{{ $category->name }}</td>
                             <td>{{ $category->description }}</td>
                             <td>
@@ -57,10 +57,10 @@
                                                     <strong>Created At:</strong>
                                                     {{ $category->created_at->format('d M, Y') }}
                                                 </div>
-                                                <div class="mb-3">
+                                                {{-- <div class="mb-3">
                                                     <strong>Updated At:</strong>
                                                     {{ $category->updated_at->format('d M, Y') }}
-                                                </div>
+                                                </div> --}}
                                             </div>
                                         </div>
                                     </div>

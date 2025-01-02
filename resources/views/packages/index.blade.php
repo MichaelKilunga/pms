@@ -19,17 +19,12 @@
                 </tr>
             </thead>
             <tbody>
-                @php
-                    $x = 1;
-                @endphp
                 @foreach ($packages as $package)
                     <tr>
-                        <td>{{ $x }}</td>
-                        @php $x++; @endphp
+                        <td>{{ $loop->iteration }}</td>
                         <td>{{ $package->name }}</td>
                         <td>{{ number_format($package->price, 0) }}</td>
                         <td>{{ $package->duration }}</td>
-                        {{-- <td>{{ $package->features }}</td> --}}
                         <td>{{ $package->status ? 'Active' : 'Inactive' }}</td>
                         <td>
                             <a href="{{ route('packages.edit', $package->id) }}" class="btn btn-warning btn-sm"><i

@@ -28,7 +28,7 @@
                 <tbody>
                     @foreach ($sales as $sale)
                         <tr>
-                            <td>{{ $sale->id }}</td>
+                            <td>{{ $loop->iteration }}</td>
                             <td>{{ $sale->item->name }}</td>
                             <td>{{ $sale->total_price / $sale->quantity }}</td>
                             <td>{{ $sale->quantity }}</td>

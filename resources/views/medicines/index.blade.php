@@ -24,7 +24,7 @@
                         <th>#</th>
                         <th>Medicine Name</th>
                         <th>Category</th>
-                        <th>Pharmacy</th>
+                        {{-- <th>Pharmacy</th> --}}
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -35,7 +35,7 @@
                             {{-- <td>{{ $medicine->id }}</td> --}}
                             <td>{{ $medicine->name }}</td>
                             <td>{{ $medicine->category->name }}</td>
-                            <td>{{ $medicine->pharmacy->name }}</td>
+                            {{-- <td>{{ $medicine->pharmacy->name }}</td> --}}
                             <td>
                                 <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal"
                                     data-bs-target="#viewMedicineModal{{ $medicine->id }}"><i class="bi bi-eye"></i></a>
@@ -150,6 +150,7 @@
                         <div class="mb-3">
                             <label for="category" class="form-label">Category</label>
                             <select name="category_id" class="form-select" required>
+                                <option selected value="">--Select category--</option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
