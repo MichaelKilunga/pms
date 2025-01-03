@@ -10,7 +10,7 @@ class Stock extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'staff_id', 'pharmacy_id', 'item_id', 'quantity','remain_Quantity','low_stock_percentage', 'buying_price', 'selling_price', 'in_date','expire_date',
+        'staff_id', 'pharmacy_id', 'item_id', 'quantity','remain_Quantity','low_stock_percentage', 'buying_price', 'selling_price', 'in_date','expire_date','batch_number','supplier',
     ];
 
     public function staff()

@@ -8,6 +8,7 @@ use App\Models\Items;
 use App\Models\Medicine;
 use App\Models\MedicineStore;
 use App\Models\Staff;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,10 +24,10 @@ class StockController extends Controller
         // $pharmacies = Pharmacy::where('owner_id', auth::id())->pluck('id');
         $stocks = Stock::with('staff', 'item')->where('pharmacy_id', session('current_pharmacy_id'))->get();
         $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
-        
+
         // $medicines = Medicine::where('name', '!=', 'name')->get();
         // dd($medicines);
-    
+
         return view('stock.index', compact('stocks', 'medicines'));
     }
 
@@ -55,7 +56,7 @@ class StockController extends Controller
             // 'remain_Quantity.*' => 'required|integer|min:1',
 
             'low_stock_percentage' => 'required|array',
-            'low_stock_percentage.*' => 'required|integer|min:1|max:100',
+            'low_stock_percentage.*' => 'required|integer|min:1',
 
             'buying_price' => 'required|array',
             'buying_price.*' => 'required|numeric',
@@ -68,6 +69,10 @@ class StockController extends Controller
 
             'expire_date' => 'required|array',
             'expire_date.*' => 'required|date',
+
+            'batch_number' => 'required|integer',
+
+            'supplier' => 'required|string|max:255',
         ]);
 
         // dd($request);
@@ -86,6 +91,8 @@ class StockController extends Controller
                 'remain_Quantity' =>  $request->quantity[$index],
                 'low_stock_percentage' => $request->low_stock_percentage[$index],
                 'in_date' => $request->in_date[$index],
+                'batch_number' => $request->batch_number,
+                'supplier' => $request->supplier,
                 'expire_date' => $request->expire_date[$index],
             ]);
         }
@@ -116,19 +123,24 @@ class StockController extends Controller
      */
     public function update(Request $request, Stock $stock)
     {
-        $request->validate([
-            'quantity' => 'required|integer|min:1',
-            'remain_Quantity' => 'required|integer|min:1',
-            'low_stock_percentage' => 'required|integer|min:1',
-            'buying_price' => 'required|numeric',
-            'selling_price' => 'required|numeric',
-            'in_date' => 'required|date',
-            'expire_date' => 'required|date',
-        ]);
-        // dd($request);
+        try {
+            $request->validate([
+                'id'=>'required|integer|exists:stocks,id',
+                'quantity' => 'required|integer|min:1',
+                'remain_Quantity' => 'required|integer',
+                'low_stock_percentage' => 'required|integer|min:1',
+                'buying_price' => 'required|numeric',
+                'selling_price' => 'required|numeric',
+                'supplier' => 'required|string|max:255',
+                'in_date' => 'required|date',
+                'expire_date' => 'required|date',
+            ]);
+        } catch (Exception $e) {
+            return redirect()->back()->withInput()->with('error',"Data  not added because: ".$e->getMessage());            
+        }
 
         $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $request->id)->first();
-        $stock->update($request->only('quantity', 'low_stock_percentage', 'remain_Quantity', 'buying_price', 'selling_price', 'in_date', 'expire_date'));
+        $stock->update($request->only('quantity', 'low_stock_percentage', 'remain_Quantity', 'buying_price', 'selling_price', 'supplier', 'in_date', 'expire_date'));
 
         return redirect()->route('stock')->with('success', 'Stock updated successfully.');
     }

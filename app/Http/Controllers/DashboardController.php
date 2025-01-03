@@ -60,7 +60,7 @@ class DashboardController extends Controller
         }
 
         $totalStaff = Staff::where('pharmacy_id', session('current_pharmacy_id'))->count(); // Adjust as needed
-        $lowStockCount = Stock::where('low_stock_percentage', '<', 10)->where('pharmacy_id', session('current_pharmacy_id'))->count(); // Low stock threshold
+        $lowStockCount = Stock::whereColumn('low_stock_percentage', '>', 'remain_Quantity')->where('pharmacy_id', session('current_pharmacy_id'))->count(); // Low stock threshold
         $stockExpired = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '<', now())->count();
         // dd($lowStockCount);
 

@@ -150,9 +150,9 @@
                             <div class="row mb-3 sale-entry align-items-center">
                                 <input type="text" name="stock_id[]" hidden required>
                                 <div class="col-md-3">
-                                    <label class="form-label">Medicine</label>
+                                    <label  for="medicines" class="form-label">Medicine</label>
                                     <select name="item_id[]" class="form-select chosen" required>
-                                        <option selected disabled value="">Select Item</option>
+                                        <option selected value=""></option>
                                         @foreach ($medicines as $medicine)
                                             <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}
                                             </option>

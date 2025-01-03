@@ -13,8 +13,6 @@
         <div class="container">
             <div class="row mb-2 g-4# p-2 d-flex justify-content-center text-center form-control">
                 <div class="col-12 col-md-6 col-lg-3 fs-4 text-success">
-                    {{-- <div class="mb-2"></div> --}}
-                    {{-- <label class="label" for="filterHead fs-4"></label> --}}
                     <p class="">Filter By:</p>
                 </div>
                 <div class="col-12 col-md-6 col-lg-3 mb-2">
@@ -40,17 +38,17 @@
                     <select class="form-select onReport" name="category" id="category" required>
                         {{-- <option value="">-- Select Category --</option> --}}
                         <option selected value="sales">Sales</option>
-                        <option value="purchases">Stock</option>
-                        <option value="returns">Returns</option>
-                        <option value="expired">Expired</option>
-                        <option value="profit">Profit</option>
+                        <option value="stocks">Stock</option>
+                        {{-- <option value="returns">Returns</option> --}}
+                        {{-- <option value="expired">Expired</option>
+                        <option value="profit">Profit</option> --}}
                     </select>
                 </div>
                 <div class="col-12 col-md-6 col-lg-3">
                     {{-- <input type="text" class="form-control" placeholder="Search by ID or Name"> --}}
                     <label for="medicine">Medicine</label>
                     <select class="form-select onReport" name="medicine" id="medicine" required>
-                        <option selected value="All Medicines">All Medicines</option>
+                        <option selected value="0">All Medicines</option>
                         @foreach ($medicines as $medicine)
                             <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
                         @endforeach
@@ -63,8 +61,8 @@
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h6 class="card-title">Total Purchases</h6>
-                        <h3 class="fw-bold text-danger">$12,000</h3>
+                        <h6 class="card-title">Total Stocks</h6>
+                        <h3 id="totalStocks" class="fw-bold text-danger">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -72,7 +70,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Sales</h6>
-                        <h3 class="fw-bold text-primary">1,200</h3>
+                        <h3 id="totalSales" class="fw-bold text-primary">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -80,7 +78,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Returns</h6>
-                        <h3 class="fw-bold text-warning">50</h3>
+                        <h3 id="totalReturns" class="fw-bold text-warning">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -88,7 +86,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Profit</h6>
-                        <h3 class="fw-bold text-success">$45,000</h3>
+                        <h3 id="totalProfit" class="fw-bold text-success">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -96,54 +94,18 @@
         <!-- Table Section -->
         <div class="row mb-2 g-4 justify-content-center text-center">
             <div class="col-12">
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover align-middle" id="reportsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Date</th>
-                                <th>Pharmacy</th>
-                                <th>Transaction Type</th>
-                                <th>Total Amount</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2024-12-28</td>
-                                <td>Pharmacy A</td>
-                                <td>Sale</td>
-                                <td>$1,200</td>
-                                <td><span class="badge bg-success">Completed</span></td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-outline-primary">View</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="table-responsive reportTable">
+                    <i>Table will appear here!!!</i>
                 </div>
             </div>
         </div>
-        {{-- 
-            <!-- Download Buttons -->
-            <div class="row mb-4 g-4 justify-content-center text-center">
-                <div class="col text-center text-md-end">
-                    <button class="btn btn-danger mx-2" id="downloadPdf">
-                        <i class="bi bi-file-earmark-pdf"></i> PDF
-                    </button>
-                    <button class="btn btn-success mx-2" id="downloadCsv">
-                        <i class="bi bi-file-earmark-spreadsheet"></i> CSV
-                    </button>
-                </div>
-            </div> 
-        --}}
 
         <!-- Chart Section -->
         <div class="row mb-4 g-4 justify-content-center text-center">
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="card-title" id="chartHead">Trends</h6>
+                        <h6 class="card-title" id="chartHead">Fetching...</h6>
                         <canvas id="transactionChart"></canvas>
                     </div>
                 </div>
@@ -152,9 +114,7 @@
     </div>
     <script>
         $(document).ready(function() {
-            var  data = [1200, 1900, 3000, 5000, 2000];
-            var labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
-            drawGraph(labels, data);
+            var transactionChart = null;
             $('.dateDiv').addClass('hidden');
             var medicine = $('#medicine').val();
             var selectedMedicineName = $('#medicine').find(':selected').text();
@@ -167,6 +127,10 @@
             const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
             const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
             const startOfYear = new Date(today.getFullYear(), 0, 1);
+
+            $(document).ready(function() {
+                $('#dateFilter').trigger('change');
+            });
 
             //CAPTURE CATEGORY & MEDICINES FILTERS
             $('#category').on('change', function() {
@@ -184,6 +148,7 @@
             // Handle filter changes
             $('#dateFilter').on('change', function() {
                 const value = $(this).val();
+                console.log(value);
                 $('#startDate, #endDate').addClass('d-none');
 
                 switch (value) {
@@ -233,19 +198,211 @@
             }
             // Example filterData function
             function filterData(start, end, category, medicine) {
-
+                $('#loader-overlay').show(); // show loader initially
+                var transactionChart = null;
                 // Add your AJAX request or data filtering logic here
+                $.ajax({
+                    url: '/filterReports',
+                    method: 'GET',
+                    data: {
+                        start: start,
+                        end: end,
+                        category: category,
+                        medicine: medicine
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        //capture response type
+                        if (response.success) {
+                            $('#loader-overlay').hide(); // Hide loader
+                            // Update the summary cards with 0 decimal points
+                            $('#totalStocks').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalStocks));
+
+                            $('#totalSales').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalSales));
+
+                            $('#totalProfit').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalProfit));
+
+                            $('#totalReturns').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalReturns));
+
+                            //place the table into block with id="reportsTable", use returned data on bases of category filtered
+                            //start with table when category if sales
+                            var salesTable = `
+                                <table class="table table-striped table-bordered table-hover reportsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Date</th>
+                                            <th>Medicine</th>
+                                            <th>Quantity</th>
+                                            <th>Total Sales</th>
+                                            <th>Total profit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${response.sales.map((sale, index) => `
+                                                                            <tr>
+                                                                                <td>${index + 1}</td>
+                                                                                <td>${sale.date}</td>
+                                                                                <td class="text-left">${sale.item['name']}</td>
+                                                                                <td>${sale.quantity}</td>
+                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*sale.stock['selling_price'])}</td>
+                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
+                                                                            </tr>
+                                                                        `).join('')}
+                                            ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
+                                    </tbody>
+                                </table>
+                            `;
+
+                            //lets implement table when category is stocks, the stocks table should list (serial number(#), Batch number, stocked quantity, remained quantity, total sales amount made, total profit made, and total expired loss amount)
+                            var stocksTable = `
+                                <table class="table table-striped table-bordered table-hover reportsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Batch Number</th>
+                                            <th>Medicine</th>
+                                            <th>Stocked Quantity</th>
+                                            <th>Remained Quantity</th>
+                                            <th>Total Sales</th>
+                                            <th>Total Profit</th>
+                                            <th>Expired Loss</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${response.stocks.map((stock, index) => `
+                                                                            <tr>
+                                                                                <td>${index + 1}</td>
+                                                                                <td>${stock.batch_number}</td>
+                                                                                <td class="text-left">${stock.item['name']}</td>
+                                                                                <td>${stock.quantity}</td>
+                                                                                <td>${stock.remain_Quantity}</td>
+                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
+                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
+                                                                                ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
+                                                                            </tr>`).join('')}
+                                            ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
+                                    </tbody>
+                                </table>
+                            `;
 
 
-                $('#chartHead').html(
-                    `<u>${selectedCategoryName}</u> trends of <u>${selectedMedicineName}</u> <br> From: <span class="text-primary">${start}</span> | To: <span class="text-primary">${end}<span>`
-                    );
-                    drawGraph(labels, data);
+                            //place the table into block with id="reportsTable", use returned data on bases of category filtered
+                            if (category == 'sales') {
+                                $('.reportTable').html(salesTable);
+                            } else if (category == 'stocks') {
+                                $('.reportTable').html(stocksTable);
+                            } else if (category == 'expired') {
+                                $('.reportTable').html(expiredTable);
+                            } else if (category == 'profit') {
+                                $('.reportTable').html(profitTable);
+                            }
+
+
+                            // data = [2200, 2900, 4000, 6000, 3000];
+                            // labels = ['June', 'July', 'Aug', 'Sept', 'Nov'];
+                            $('#chartHead').html(
+                                `<p class="h3 sm-h4"><strong  class="text-danger">Sales</strong> trends of <strong class="text-danger">${selectedMedicineName}</strong> </p> <p>From: <span class="h5 sm-h6 text-primary">${start}</span> | To: <span class="h5 sm-h6 text-primary">${end}<span></p>`
+                            );
+                            labels = response.labels;
+                            data = response.data;
+                            drawGraph(labels, data);
+                        } else {
+                            $('#loader-overlay').hide(); // Hide loader
+                            $('#totalStocks').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalStocks));
+
+                            $('#totalSales').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalSales));
+
+                            $('#totalProfit').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalProfit));
+
+                            $('#totalReturns').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0,
+                                decimal: 0
+                            }).format(response.totalReturns));
+
+                            // alert(response.error);
+                        }
+                        // Initialize DataTable
+                        $('.reportsTable').DataTable({
+                            paging: true, // Enable paging
+                            searching: true, // Enable search bar
+                            ordering: true, // Enable column sorting
+                            info: true, // Enable information display
+                            dom: 'Bfrtip', // Add Buttons to the table
+                            buttons: [{
+                                    extend: 'csvHtml5',
+                                    title: 'Reports',
+                                    text: 'Download CSV',
+                                    className: 'btn btn-primary reportsDownloadButton'
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    title: 'Reports',
+                                    text: 'Download PDF',
+                                    className: 'btn btn-secondary reportsDownloadButton',
+                                    orientation: 'landscape', // Landscape orientation for PDF
+                                    pageSize: 'A4' // A4 page size
+                                }
+                            ]
+                        });
+                    },
+                    complete: function() {
+                        $('#loader-overlay').hide(); // Hide loader
+                    },
+                    error: function() {
+                        $('#loader-overlay').hide(); // Hide loader
+                        alert('Failed to filter Reports.');
+                    }
+                });
+
+
             }
             // Initialize Chart.js
             function drawGraph(labels, data) {
                 var ctx = $('#transactionChart')[0].getContext('2d');
-                var transactionChart = new Chart(ctx, {
+                if (transactionChart) {
+                    transactionChart.destroy(); // Destroy the old chart
+                    transactionChart = null;
+                }
+                transactionChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: labels,

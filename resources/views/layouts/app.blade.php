@@ -107,8 +107,8 @@
 
     <script>
         $(document).ready(function() {
-
-            requestNotificationPermission();
+            var isNotificationCheck = true;
+            // requestNotificationPermission();
 
             // Automatically show the modal if no pharmacy is selected
             @if (!session('current_pharmacy_id'))
@@ -136,13 +136,13 @@
 
             $(document).ready(function() {
                 $('#Table')
-                .DataTable({
-                    paging: true, // Enable paging
-                    searching: true, // Enable search bar
-                    ordering: true, // Enable column sorting
-                    info: true // Enable information display
-                });
-                $('#reportsTable').DataTable({
+                    .DataTable({
+                        paging: true, // Enable paging
+                        searching: true, // Enable search bar
+                        ordering: true, // Enable column sorting
+                        info: true // Enable information display
+                    });
+                $('.reportsTable').DataTable({
                     paging: true, // Enable paging
                     searching: true, // Enable search bar
                     ordering: true, // Enable column sorting
@@ -185,6 +185,30 @@
                     const $this = $(this);
                     if ($this.is('#hamburger')) {
                         return;
+                    }
+
+                    //below implement code to check if the button is a submit button and if any of the required field is empty the loader will not appear otherwise it will appear while the form is being submitted
+                    if ($this.is('button[type="submit"]')) {
+                        const $form = $this.closest('form');
+                        if ($form.length) {
+                            if ($form[0].checkValidity()) {
+                                // $('#loader-overlay').show();
+                                $this.addClass(
+                                        'bg-light border border-danger# text-danger text-muted')
+                                    .css('pointer-events', 'none')
+                                    .html(
+                                        '<span class="spinner-border" style="width: 1rem; height: 1rem;" role="status" aria-hidden="true"></span>'
+                                    );
+                            }
+                        }
+                    }
+
+                    if (!$this.find('input[name="requiredField"]').val()) {
+                        return; // Exit the function
+                    }
+
+                    if ($this.is('button.btn-close[data-bs-dismiss="modal"]')) {
+                        return; // Exit the function
                     }
                     if ($this.is('.reportsDownloadButton')) {
                         return;
@@ -255,13 +279,13 @@
 
         //NOTIFICATION RING
         $(document).ready(function() {
-            let isNotificationCheck = false;
+            // isNotificationCheck = false;
 
             $('#loader-overlay').hide(); // Hide loader initially
 
             function checkNotifications() {
 
-                isNotificationCheck = true;
+                isNotificationCheck = false;
 
                 $.ajax({
                     url: '/notifications/unread_count', // Replace with your route to fetch unread notifications count
@@ -272,12 +296,12 @@
                         if (response.unreadCount > 0) {
                             // Play the notification sound
                             $('#notification-sound')[0].play();
-                            showBrowserNotification(
-                                `You have ${response.unreadCount} unread notifications.`);
+                            // showBrowserNotification(
+                            //     `You have ${response.unreadCount} unread notifications.`);
                         }
                     },
                     complete: function() {
-                        isNotificationCheck = false; // Reset the flag after the request completes
+                        isNotificationCheck = true; // Reset the flag after the request completes
                     },
                     error: function() {
                         console.error('Failed to fetch unread notifications.');
@@ -289,34 +313,34 @@
             setInterval(checkNotifications, 15000); // 60000 ms = 1 minute
         });
 
-        function requestNotificationPermission() {
-            if ("Notification" in window) {
-                if (Notification.permission === "default") {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === "granted") {
-                            console.log("Notification permission granted.");
-                        } else {
-                            console.log("Notification permission denied.");
-                        }
-                    });
-                } else if (Notification.permission === "granted") {
-                    console.log("Notifications are already enabled.");
-                } else {
-                    console.log("User has denied notifications.");
-                }
-            } else {
-                console.error("This browser does not support notifications.");
-            }
-        }
+        // function requestNotificationPermission() {
+        //     if ("Notification" in window) {
+        //         if (Notification.permission === "default") {
+        //             Notification.requestPermission().then(permission => {
+        //                 if (permission === "granted") {
+        //                     console.log("Notification permission granted.");
+        //                 } else {
+        //                     console.log("Notification permission denied.");
+        //                 }
+        //             });
+        //         } else if (Notification.permission === "granted") {
+        //             console.log("Notifications are already enabled.");
+        //         } else {
+        //             console.log("User has denied notifications.");
+        //         }
+        //     } else {
+        //         console.error("This browser does not support notifications.");
+        //     }
+        // }
 
-        function showBrowserNotification(message) {
-            if (Notification.permission === "granted") {
-                new Notification("New Notification", {
-                    body: message,
-                    icon: "/icons/bell-860.png", // Optional: Add a path to your notification icon
-                });
-            }
-        }
+        // function showBrowserNotification(message) {
+        //     if (Notification.permission === "granted") {
+        //         new Notification("New Notification", {
+        //             body: message,
+        //             icon: "/icons/bell-860.png", // Optional: Add a path to your notification icon
+        //         });
+        //     }
+        // }
     </script>
 
     {{-- CLOCK TIMER --}}

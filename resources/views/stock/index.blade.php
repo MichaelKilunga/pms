@@ -18,12 +18,13 @@
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th>Batch Number</th>
+                        <th>Supplier</th>
                         <th>Stock Name</th>
-                        {{-- <th>Buying Price</th> --}}
+                        <th>Buying Price</th>
                         <th>Selling Price</th>
-                        {{-- <th>Stoked Quantity</th> --}}
                         <th>Remain Quantity</th>
-                        {{-- <th>Low Stock Percentage(%)</th> --}}
+                        {{-- <th>Low Stock</th> --}}
                         {{-- <th>In Date</th> --}}
                         {{-- <th>Expire Date</th> --}}
                         <th>Status</th>
@@ -34,8 +35,10 @@
                     @foreach ($stocks as $stock)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $stock->item->name }}</td>
-                            {{-- <td>{{ $stock->buying_price }}</td> --}}
+                            <td>{{ $stock->batch_number }}</td>
+                            <td>{{ $stock->supplier }}</td>
+                            <td>{{ \Illuminate\Support\Str::words($stock->item->name, 1, '...') }}</td>
+                            <td>{{ $stock->buying_price }}</td>
                             <td>{{ $stock->selling_price }}</td>
                             {{-- <td>{{ $stock->quantity }}</td> --}}
                             <td>{{ $stock->remain_Quantity }}</td>
@@ -45,126 +48,177 @@
                             <td>
                                 @if ($stock->expire_date < now())
                                     <span class="text-danger">Expired</span>
-                                @else
-                                    <span class="text-success text-center"><i class="bi bi-check fs-3" ></i></span>
+                                @endif
+                                
+                                @if (
+                                    !($stock->expire_date < now()) &&
+                                        !($stock->low_stock_percentage > $stock->remain_Quantity) &&
+                                        !($stock->remain_Quantity < 1))
+                                    <span class="text-success   "><i class="bi bi-check fs-3"></i>fine!</span>  
+                                @endif
+
+                                @if ($stock->expire_date < now() && $stock->low_stock_percentage > $stock->remain_Quantity)
+                                    <span class="text-danger">,</span>
+                                @endif
+                                @if ($stock->remain_Quantity < 1)
+                                    <span class="text-danger">Out of Stock</span>
+                                @elseif ($stock->low_stock_percentage > $stock->remain_Quantity)
+                                    <span class="text-danger">Low stock threshold</span>
                                 @endif
                             </td>
                             <td>
-                                <!-- View Stock Modal -->
-                                <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#viewStockModal{{ $stock->id }}">
-                                    <i class="bi bi-eye"></i>
-                                </a>
+                                <div class="row">
+                                    <!-- View Stock Modal -->
+                                    <div class="col-3">
+                                        <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#viewStockModal{{ $stock->id }}">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
 
-                                <div class="modal fade" id="viewStockModal{{ $stock->id }}" tabindex="-1"
-                                    aria-labelledby="viewStockModalLabel{{ $stock->id }}" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="viewStockModalLabel{{ $stock->id }}">Stock
-                                                    Details</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div><strong>Stock Name:</strong> {{ $stock->item->name }}</div>
-                                                <div><strong>Buying Price:</strong> {{ $stock->buying_price }}</div>
-                                                <div><strong>Selling Price:</strong> {{ $stock->selling_price }}</div>
-                                                <div><strong>Stoked Quantity:</strong> {{ $stock->quantity }}</div>
-                                                <div><strong>Remain Quantity:</strong> {{ $stock->remain_Quantity }}</div>
-                                                <div><strong>Low stock percentage:</strong>
-                                                    {{ $stock->low_stock_percentage }}%</div>
-                                                <div><strong>In Date:</strong> {{ $stock->in_date }}</div>
-                                                <div><strong>Expire Date:</strong> {{ $stock->expire_date }}</div>
+                                    <!-- Edit Stock Modal -->
+                                    <div class="col-3">
+                                        <a href="#" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#editStockModal{{ $stock->id }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+
+                                    <!-- Delete Stock Form -->
+                                    <div class="col-3">
+                                        <form action="{{ route('stock.destroy', $stock->id) }}" method="POST"
+                                            style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            @if ($stock->quantity == $stock->remain_Quantity)
+                                                <button type="submit"
+                                                    onclick="return confirm('Do you want to delete this stock?')"
+                                                    class="btn btn-danger btn-sm">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            @endif
+                                        </form>
+                                    </div>
+
+                                    {{-- VIEW MODAL --}}
+                                    <div class="modal fade" id="viewStockModal{{ $stock->id }}" tabindex="-1"
+                                        aria-labelledby="viewStockModalLabel{{ $stock->id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="viewStockModalLabel{{ $stock->id }}">
+                                                        Stock
+                                                        Details</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div><strong>Stock Name:</strong> {{ $stock->item->name }}</div>
+                                                    <div><strong>Stock Name:</strong> {{ $stock->batch_number }}</div>
+                                                    <div><strong>Stock Name:</strong> {{ $stock->supplier }}</div>
+                                                    <div><strong>Buying Price:</strong> {{ $stock->buying_price }}</div>
+                                                    <div><strong>Selling Price:</strong> {{ $stock->selling_price }}</div>
+                                                    <div><strong>Stoked Quantity:</strong> {{ $stock->quantity }}</div>
+                                                    <div><strong>Remain Quantity:</strong> {{ $stock->remain_Quantity }}
+                                                    </div>
+                                                    <div><strong>Low stock:</strong>
+                                                        {{ $stock->low_stock_percentage }}</div>
+                                                    <div><strong>In Date:</strong> {{ $stock->in_date }}</div>
+                                                    <div><strong>Expire Date:</strong> {{ $stock->expire_date }}</div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Edit Stock Modal -->
-                                <a href="#" class="btn btn-success btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#editStockModal{{ $stock->id }}">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+                                    {{-- EDIT MODAL --}}
+                                    <div class="modal fade" id="editStockModal{{ $stock->id }}" tabindex="-1"
+                                        aria-labelledby="editStockModalLabel{{ $stock->id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="editStockModalLabel{{ $stock->id }}">
+                                                        Edit
+                                                        Stock</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="{{ route('stock.update', $stock->id) }}" method="POST">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="text" class="form-control" name="id"
+                                                            value="{{ $stock->id }}" hidden>
+                                                        <div class="mb-3">
+                                                            <label for="item" class="form-label">Stock Name</label>
+                                                            <input type="text" class="form-control" name="item_name"
+                                                                value="{{ $stock->item->name }}" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="item" class="form-label">Batch Number</label>
+                                                            <input type="text" class="form-control" name="batch_number"
+                                                                value="{{ $stock->batch_number }}" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="item" class="form-label">Supplier Name</label>
+                                                            <input type="text" class="form-control" name="supplier"
+                                                                value="{{ $stock->supplier }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="buying_price" class="form-label">Buying
+                                                                Price</label>
+                                                            <input type="number" class="form-control" name="buying_price"
+                                                                value="{{ $stock->buying_price }}" required>
+                                                        </div>
 
-                                <div class="modal fade" id="editStockModal{{ $stock->id }}" tabindex="-1"
-                                    aria-labelledby="editStockModalLabel{{ $stock->id }}" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="editStockModalLabel{{ $stock->id }}">Edit
-                                                    Stock</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="{{ route('stock.update', $stock->id) }}" method="POST">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    <input type="text" class="form-control" name="id"
-                                                        value="{{ $stock->item_id }}" hidden>
-                                                    <div class="mb-3">
-                                                        <label for="item" class="form-label">Stock Name</label>
-                                                        <input type="text" class="form-control" name="item_name"
-                                                            value="{{ $stock->item->name }}" readonly>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="buying_price" class="form-label">Buying Price</label>
-                                                        <input type="number" class="form-control" name="buying_price"
-                                                            value="{{ $stock->buying_price }}" required>
-                                                    </div>
+                                                        <div class="mb-3">
+                                                            <label for="selling_price" class="form-label">Selling
+                                                                Price</label>
+                                                            <input type="number" class="form-control"
+                                                                name="selling_price" value="{{ $stock->selling_price }}"
+                                                                required>
+                                                        </div>
 
-                                                    <div class="mb-3">
-                                                        <label for="selling_price" class="form-label">Selling Price</label>
-                                                        <input type="number" class="form-control" name="selling_price"
-                                                            value="{{ $stock->selling_price }}" required>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label for="quantity" class="form-label">Stocked Quantity</label>
-                                                        <input type="number" class="form-control" name="quantity"
-                                                            value="{{ $stock->quantity }}" required>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="quantity" class="form-label">Remain Quantity</label>
-                                                        <input type="number" class="form-control" name="remain_Quantity"
-                                                            value="{{ $stock->remain_Quantity }}" readonly required
-                                                            title="You cannot edit">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="quantity" class="form-label">Low stock
-                                                            percentage(%)</label>
-                                                        <input type="number" class="form-control"
-                                                            name="low_stock_percentage"
-                                                            value="{{ $stock->low_stock_percentage }}" required>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="in_date" class="form-label">In Date</label>
-                                                        <input type="text" class="form-control" name="in_date"
-                                                            value="{{ $stock->created_at }}" readonly required>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="expire_date" class="form-label">Expire Date</label>
-                                                        <input type="date" class="form-control" name="expire_date"
-                                                            value="{{ $stock->expire_date }}" required>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-success">Update Stock</button>
-                                                </form>
+                                                        <div class="mb-3">
+                                                            <label for="quantity" class="form-label">Stocked
+                                                                Quantity</label>
+                                                            <input type="number" class="form-control" name="quantity"
+                                                                value="{{ $stock->quantity }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="quantity" class="form-label">Remain
+                                                                Quantity</label>
+                                                            <input type="number" class="form-control"
+                                                                name="remain_Quantity"
+                                                                value="{{ $stock->remain_Quantity }}" readonly required
+                                                                title="You cannot edit">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="quantity" class="form-label">Low stock
+                                                                percentage(%)</label>
+                                                            <input type="number" class="form-control"
+                                                                name="low_stock_percentage"
+                                                                value="{{ $stock->low_stock_percentage }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="in_date" class="form-label">In Date</label>
+                                                            <input type="text" class="form-control" name="in_date"
+                                                                value="{{ $stock->created_at }}" readonly required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="expire_date" class="form-label">Expire
+                                                                Date</label>
+                                                            <input type="date" class="form-control" name="expire_date"
+                                                                value="{{ $stock->expire_date }}" required>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-success">Update
+                                                            Stock</button>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Delete Stock Form -->
-                                <form action="{{ route('stock.destroy', $stock->id) }}" method="POST"
-                                    style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Do you want to delete this stock?')"
-                                        class="btn btn-danger btn-sm">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -187,12 +241,25 @@
                 <div class="modal-body">
                     <form action="{{ route('stock.store') }}" method="POST" id="stockForm">
                         @csrf
+                        <div class="row mb-2">
+                            <div class="col-12# col-sm-6# col-md-6 col-lg-2#">
+                                <label class="form-label fw-bold">Stock batch Number</label>
+                                <input placeholder="1234" id="batch_number" type="text"
+                                    class="rounded form-control shadow-sm" name="batch_number" readonly>
+                            </div>
+                            <div class="col-12# col-sm-6# col-md-6 col-lg-2#">
+                                <label class="form-label fw-bold">Supplier Name</label>
+                                <input type="text" placeholder="ABC Supplier" class="rounded form-control shadow-sm"
+                                    name="supplier" required>
+                            </div>
+                        </div>
+                        <hr class="m-2">
                         <div id="stockFields">
                             <div class="row mb-3 stock-entry align-items-end gx-2 gy-2">
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label for="item_id" class="form-label fw-bold">Medicine Name</label>
-                                    <select name="item_id[]" class="form-select shadow-sm chosen" required>
-                                        <option selected value="">Select medicine..</option>
+                                    <select name="item_id[]" class="form-select chosen shadow-sm" required>
+                                        <option selected value=""></option>
                                         @foreach ($medicines as $medicine)
                                             <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
                                         @endforeach
@@ -207,7 +274,7 @@
                                     <input type="number" class="form-control shadow-sm" name="selling_price[]" required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                                    <label class="form-label fw-bold">Stocked Quantity</label>
+                                    <label class="form-label fw-bold">Quantity</label>
                                     <input type="number" class="form-control shadow-sm" name="quantity[]" required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
@@ -269,12 +336,12 @@
                 <input type="number" class="form-control  shadow-sm" name="selling_price[]" required>
             </div>
             <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                <label class="form-label fw-bold">Total Quantity</label>
+                <label class="form-label fw-bold">Quantity</label>
                 <input type="number" class="form-control  shadow-sm" name="quantity[]" required>
             </div>
            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                 <label class="form-label fw-bold">Low stock percentage (%)</label>
-                 <input type="number" class="form-control  shadow-sm" name="low_stock_percentage[]" min="1" max="100" required>
+                 <label class="form-label fw-bold">Low stock</label>
+                 <input type="number" class="form-control  shadow-sm" name="low_stock_percentage[]" min="1" required>
             </div>
            <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
                 <label class="form-label fw-bold">In Date</label>
@@ -295,13 +362,22 @@
             stockFields.appendChild(newStockEntry);
 
             $(".chosen").chosen({
-                    width: "100%",
-                    no_results_text: "No matches found!",
-                });
+                width: "100%",
+                no_results_text: "No matches found!",
+            });
 
             newStockEntry.querySelector('.remove-stock-entry').addEventListener('click', function() {
                 newStockEntry.remove();
             });
+        });
+        $(document).ready(function() {
+            const today = new Date();
+            const year = today.getFullYear(); // Get the full year
+            const month = String(today.getMonth() + 1).padStart(2,
+                '0'); // Months are zero-based, pad with leading zero if needed
+            const day = String(today.getDate()).padStart(2, '0'); // Pad day with leading zero if needed
+            const formattedDate = `${year}${month}${day}`; // Combine to form YYYYMMDD format
+            $('#batch_number').val(formattedDate); // Use .val() to set the value of the input
         });
     </script>
 @endsection
