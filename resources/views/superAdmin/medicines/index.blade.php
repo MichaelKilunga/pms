@@ -19,7 +19,10 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Name</th>
+                            <th>Brand Name</th>
+                            <th>Generic Name</th>
+                            <th>Category</th>
+                            <th>Description</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -28,7 +31,11 @@
                         @foreach ($medicines as $medicine)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $medicine->name ?? 'N/A' }}</td>
+                                <td>{{ Str::limit($medicine->brand_name,15) ?? 'N/A' }}</td>
+                                <td>{{ Str::limit($medicine->generic_name, 10) ?? 'N/A' }}</td>
+                                <td>{{ $medicine->category ?? 'N/A' }}</td>
+                                {{-- Description should be limited to 20 characters --}}
+                                <td>{{ Str::limit($medicine->description, 20) ?? 'N/A' }}</td>
                                 <td>{{ ucfirst($medicine->status ?? 'unknown') }}</td>
                                 <td class="">
                                     <a href="{{ route('allMedicines.edit', $medicine->id) }}"

@@ -14,8 +14,8 @@ class StaffFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => User::factory()->create(['role'=>'staff']),
-            'pharmacy_id' => Pharmacy::factory(),
+            'user_id' => 3,
+            'pharmacy_id' => 1,
         ];
     }
 }

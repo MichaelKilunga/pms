@@ -14,9 +14,9 @@ class ItemsFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->word,
-            'category_id' => Category::factory(),
-            'pharmacy_id' => Pharmacy::factory(),
+            'name' => 'Default Medicine',
+            'category_id' => 1,
+            'pharmacy_id' => 1,
         ];
     }
 }

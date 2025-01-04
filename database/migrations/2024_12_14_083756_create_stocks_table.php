@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->timestamp('in_date');
             $table->integer('quantity');
+            $table->integer('batch_number');
+            $table->string('supplier');
             $table->integer('remain_Quantity')->nullable(false);  // Shouldn't be nullable
             $table->integer('low_stock_percentage')->nullable(false);  // Shouldn't be nullable            
             $table->timestamp('expire_date');

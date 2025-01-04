@@ -13,9 +13,10 @@ class CategoryFactory extends Factory
     public function definition()
     {
         return [
-            'pharmacy_id' => Pharmacy::factory(),
-            'name' => $this->faker->word,
-            'description' => $this->faker->sentence,
+            'pharmacy_id' => 1,
+            'name' => 'Default Category',
+            'description' => 'This is the default category',
+            'pharmacy_id' => 1,
         ];
     }
 }

@@ -19,7 +19,9 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Name</th>
+                                <th>Generic Name</th>
+                                <th>Brand Name</th>
+                                <th>Description</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -27,11 +29,13 @@
                             @foreach ($onlineMedicines as $medicine)
                                 <tr id="medicine-row-{{ $medicine->id }}">
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $medicine->name ?? 'N/A' }}</td>
+                                    <td>{{ Str::limit($medicine->generic_name, 100) ?? 'N/A' }}</td>
+                                    <td>{{ $medicine->brand_name ?? 'N/A' }}</td>
+                                    <td>{{ Str::limit($medicine->description, 100) ?? 'N/A' }}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-warning import-button"
                                             data-medicine-id="{{ $medicine->id }}"
-                                            data-medicine-name="{{ $medicine->name }}">
+                                            data-medicine-name="{{ $medicine->brand_name }}">
                                             <i class="bi bi-download"></i>
                                         </button>
 

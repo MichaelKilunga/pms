@@ -186,6 +186,9 @@
                     if ($this.is('#hamburger')) {
                         return;
                     }
+                    // if ($this.is('#forAdminImport')) {
+                    //     return;
+                    // }
 
                     //below implement code to check if the button is a submit button and if any of the required field is empty the loader will not appear otherwise it will appear while the form is being submitted
                     if ($this.is('button[type="submit"]')) {

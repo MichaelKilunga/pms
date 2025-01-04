@@ -94,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('stock', [StockController::class, 'index'])->name('stock');
     Route::get('stock/create', [StockController::class, 'create'])->name('stock.create');
     Route::post('stock', [StockController::class, 'store'])->name('stock.store');
+    Route::post('medicineStock', [StockController::class, 'MS_store'])->name('medicineStock.store');
     Route::get('stock/{id}', [StockController::class, 'show'])->name('stock.show');
     Route::put('stock', [StockController::class, 'update'])->name('stock.update');
     Route::delete('stock/delete/{id}', [StockController::class, 'destroy'])->name('stock.destroy');

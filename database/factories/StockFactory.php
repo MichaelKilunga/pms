@@ -15,15 +15,17 @@ class StockFactory extends Factory
     public function definition()
     {
         return [
-            'staff_id' => Staff::factory(),
-            'pharmacy_id' => Pharmacy::factory(),
-            'item_id' => Items::factory(),
-            'quantity' => $this->faker->numberBetween(1000, 5000),
-            'remain_Quantity' => $this->faker->numberBetween(100, 500),
-            'low_stock_percentage' => $this->faker->numberBetween(0, 100),
-            'buying_price' => $this->faker->randomFloat(0, 5000, 100000),
-            'selling_price' => $this->faker->randomFloat(0, 10000, 200000),
-            'in_date' => $this->faker->date(),
+            'staff_id' => 1,
+            'pharmacy_id' => 1,
+            'item_id' => 1,
+            'quantity' =>  5000,
+            'batch_number' =>  123456789,
+            'supplier' =>  'Default Supplier',
+            'remain_Quantity' =>  5000,
+            'low_stock_percentage' => 100,
+            'buying_price' => 500,
+            'selling_price' => 5000,
+            'in_date' => now(),
             'expire_date' => $this->faker->dateTimeBetween('now', '+2 years'),
         ];
     }
