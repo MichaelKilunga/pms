@@ -35,8 +35,8 @@ class CreateNewUser implements CreatesNewUsers
             'password' => Hash::make($input['password']),
         ]);
         //save package id into a session
-        session(['package_id' => $input['package_id']]);
-        
+        // session(['package_id' => $input['package_id']]);
+
         //send welcome notification
         $user->notify(new WelcomeNotification);
 

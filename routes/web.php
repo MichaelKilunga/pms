@@ -20,6 +20,7 @@ use App\Http\Controllers\ReportPrintController;
 use App\Http\Controllers\SmsPush;
 use App\Models\Package;
 use App\Notifications\SmsNotification;
+use App\Http\Controllers\ContractController;
 
 Route::get('/', function () {
     //return welcome view with packages
@@ -146,4 +147,20 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
     Route::get('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
+});
+
+
+
+Route::middleware(['auth', 'role:super'])->prefix('admin')->name('contracts.admin.')->group(function () {
+    Route::get('/contracts', [ContractController::class, 'indexSuperAdmin'])->name('index');
+    Route::get('/contracts/create', [ContractController::class, 'createSuperAdmin'])->name('create');
+    Route::post('/contracts', [ContractController::class, 'storeSuperAdmin'])->name('store');
+    Route::get('/contracts/{id}', [ContractController::class, 'showSuperAdmin'])->name('show');
+    Route::get('/contracts/{id}/edit', [ContractController::class, 'editSuperAdmin'])->name('edit');
+    Route::put('/contracts/{id}', [ContractController::class, 'updateSuperAdmin'])->name('update');
+});
+
+Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('contracts.user.')->group(function () {
+    Route::get('/contracts', [ContractController::class, 'indexUser'])->name('index');
+    Route::get('/contracts/{id}', [ContractController::class, 'showUser'])->name('show');
 });
