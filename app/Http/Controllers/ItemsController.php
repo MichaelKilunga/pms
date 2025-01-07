@@ -31,6 +31,7 @@ class ItemsController extends Controller
     public function import(Request $request)
     {
         $onlineMedicines = Medicine::where('brand_name', '!=', 'brand_name')->get();
+        $onlineMedicines = Medicine::where('brand_name', '!=', 'brand_name')->get();
         return view('medicines.import', compact('onlineMedicines'));
     }
 
