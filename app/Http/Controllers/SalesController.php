@@ -265,10 +265,12 @@ class SalesController extends Controller
         $request->validate([
             'date' => 'required|date',
         ]);
+
+        // dd($request->date);
         
         // Get the sales data for the current pharmacy group for the specified date, but ensure the date is in datetime datatype to match the date in the database
         $receipt = Sales::where('pharmacy_id', session('current_pharmacy_id'))
-            ->whereDate('date', $request->date)
+            ->where('date', $request->date)
             ->selectRaw('date, sum(total_price) as total_amount, staff_id')
             ->groupBy('date', 'staff_id')
             ->first();        
@@ -279,7 +281,7 @@ class SalesController extends Controller
 
         $staff = User::where('id', $receipt->staff_id)->first();
 
-        dd($staff);
+        // dd($staff->name);
 
         try {
             // Automatically detect the active printer name and path
@@ -298,8 +300,10 @@ class SalesController extends Controller
 
             // Prepare the receipt content
             $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("------START OF RECEIPT------\n");
             $printer->text("Pharmacy: \n" . session('pharmacy_name'));
             $printer->text("Address: \n" . session('location'));
+            $printer->text("Description: Medicine  Purchases\n" );
             $printer->text("----------------------------------\n");
 
             $printer->setJustification(Printer::JUSTIFY_LEFT);
@@ -311,6 +315,7 @@ class SalesController extends Controller
             $printer->setJustification(Printer::JUSTIFY_CENTER);
             $printer->text("Thank you for your purchase!\n");
             $printer->feed(3); // Feed 3 lines
+            $printer->text("------END OF RECEIPT------\n");
 
             // Cut the paper
             $printer->cut();

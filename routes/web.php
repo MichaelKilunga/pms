@@ -18,10 +18,12 @@ use App\Models\Pharmacy;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ReportPrintController;
 use App\Http\Controllers\SmsPush;
+use App\Models\Package;
 use App\Notifications\SmsNotification;
 
 Route::get('/', function () {
-    return view('welcome');
+    //return welcome view with packages
+    return view('welcome', ['packages' => Package::where('id', '!=', 1)->get()]);
 });
 
 Route::middleware(['auth'])->group(function () {

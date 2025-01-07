@@ -13,12 +13,23 @@ class Package extends Model
         'name',
         'price',
         'duration',
-        'features',
         'status',
-    ];
-
-    protected $casts = [
-        'features' => 'array', // Automatically cast JSON data to array
+        'number_of_pharmacies',
+        'number_of_pharmacists',
+        'number_of_medicines',
+        'in_app_notification',
+        'email_notification',
+        'sms_notifications',
+        'online_support',
+        'number_of_owner_accounts',
+        'number_of_admin_accounts',
+        'reports',
+        'stock_transfer',
+        'stock_management',
+        'staff_management',
+        'receipts',
+        'analytics',
+        'whatsapp_chats',
     ];
     
     public function pharmacies(){

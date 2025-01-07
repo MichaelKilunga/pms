@@ -236,7 +236,7 @@
             <div class="row g-4">
                 <div class="col-md-12">
                     <div class="d-flex align-items-center">
-                        <a href="/register" class="btn btn-primary">Start</a>
+                        <a href="{{route('register', ['package_id'=>1])}}" class="btn btn-primary">Start</a>
                         <h5 class="mb-0 me-2 px-2">Trial Plan free 14 Days!</h5>
                     </div>
                 </div>
@@ -251,114 +251,60 @@
 
             <div class="row g-4">
 
-
-                <div class="col-md-3">
-                    <div class="card h-100 border-primary">
-                        <div class="card-header bg-primary text-white text-center">
-                            <h5>Basic Plan</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-success text-center">Tshs. 10,000 / Month</h6>
-                            <p class="card-text text-center">Ideal for individuals and small teams starting out.</p>
-                            <ul class="list-unstyled ">
-                                <li>✔ 1 pharmacist per 1 Pharmacy</li>
-                                <li>✔ 1 Owner/Admin account</li>
-                                <li>✔ 2 pharmacy</li>
-                                <li>✔ Limited Medicine</li>
-                                <li>✔ In App Notification </li>
-                                <li>✔ Free Online support</li>
-                                <li>✔ Works on PC, Mac, mobile and Tablet</li>
-                            </ul>
-
-                            <div class="text-center">
-                                <a href="/register" class="btn btn-primary">Choose Plan</a>
+                @foreach ($packages as $package)
+                    <div class="col-md-3">
+                        <div class="card h-100 border-{{$loop->iteration%2==0 ? 'primary':'success'}} border-{{$loop->iteration%3==0 ? 'danger':'success#'}} border-{{$loop->iteration==4 ? 'warning':'success#'}}">
+                            <div class="card-header bg-{{$loop->iteration%2==0 ? 'primary':'success'}} bg-{{$loop->iteration%3==0 ? 'danger':'success#'}} bg-{{$loop->iteration==4 ? 'warning':'success#'}} text-white text-center">
+                                <h5>{{ $package->name }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title" style="color: green;">Tshs. {{ number_format($package->price) }}
+                                    / Month</h6>
+                                <p class="card-text text-center">{{ $package->description }}</p>
+                                <ul class="list-unstyled ">
+                                    <li>✔ {{ $package->number_of_pharmacists }} pharmacist per 1 Pharmacy</li>
+                                    <li>✔ {{ $package->number_of_owner_accounts }} Owner account</li>
+                                    <li>✔ {{ $package->number_of_admin_accounts }} Admin account</li>
+                                    <li>✔ {{ $package->number_of_pharmacies }} pharmacy</li>
+                                    <li>✔ {{ $package->number_of_medicines }} Medicines per Pharmacy</li>
+                                    <li>✔ In App Notification </li>
+                                    @if($package->email_notification)
+                                        <li>✔ Email Notification </li>                                        
+                                    @endif
+                                    @if($package->sms_notifications)
+                                        <li>✔ SMS Notifications </li>
+                                    @endif
+                                    @if($package->whatsapp_chat)
+                                        <li>✔ WhatsApp Chat </li>
+                                    @endif
+                                    @if($package->reports)
+                                        <li>✔ Sales Reporting </li>
+                                    @endif
+                                    @if($package->analytics)
+                                        <li>✔ Sales Analytics </li>
+                                    @endif
+                                    @if($package->receipts)
+                                        <li>✔ Receipts </li>
+                                    @endif
+                                    @if($package->stock_management)
+                                        <li>✔ Stocks Management </li>
+                                    @endif
+                                    @if($package->staff_management)
+                                        <li>✔ Staffs Management </li>
+                                    @endif
+                                    @if($package->stock_transfer)
+                                        <li>✔ Stocks Transfer </li>
+                                    @endif
+                                    <li>✔ Free Online support</li>
+                                    <li>✔ Works on PC, Mac, mobile and Tablet</li>
+                                </ul>
+                            </div>
+                            <div class="text-center m-2">
+                                <a href="{{ route('register', ['package_id'=>$package->id]) }}" class="btn btn-{{$loop->iteration%2==0 ? 'primary':'success'}} btn-{{$loop->iteration==4 ? 'warning':'success#'}} btn-{{$loop->iteration%3==0 ? 'danger':'success#'}}  text-{{$loop->iteration==4 ? 'light':'dark#'}}  ">Choose Plan</a>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="card h-100 border-success">
-                        <div class="card-header bg-success text-white text-center">
-                            <h5>Profesional Plan</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-success text-center">Tshs 20,000 / Month</h6>
-                            <p class="card-text text-center">Designed for growing businesses with advanced needs.</p>
-                            <ul class="list-unstyled ">
-                                <li>✔ 2 pharmacist per 1 Pharmacy</li>
-                                <li>✔ 1 Owner/Admin account</li>
-                                <li>✔ 2 pharmacy</li>
-                                <li>✔ Limited Medicine</li>
-                                <li>✔ In App Notification </li>
-                                <li>✔ Free Online support</li>
-                                <li>✔ Works on PC, Mac, mobile and Tablet</li>
-                            </ul>
-
-                            <div class="text-center">
-                                <a href="/register" class="btn btn-success">Choose Plan</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="card h-100 border-warning">
-                        <div class="card-header bg-warning text-white text-center">
-                            <h5>Premium Plan</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-success text-center">Tshs. 30,000 / Month</h6>
-                            <p class="card-text text-center">Perfect for scaling businesses with enhanced features.</p>
-                            <ul class="list-unstyled ">
-                                <li>✔ 2 pharmacist per 1 Pharmacy</li>
-                                <li>✔ 1 Owner account</li>
-                                <li>✔ 1 Admin account</li>
-                                <li>✔ 3 pharmacy</li>
-                                <li>✔ Limited Medicine</li>
-                                <li>✔ In App Notification </li>
-                                <li>✔ Free Online support</li>
-                                <li>✔ Works on PC, Mac, mobile and Tablet</li>
-                            </ul>
-
-                            <div class="text-center">
-                                <a href="/register" class="btn btn-warning">Choose Plan</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="card h-100 border-danger">
-                        <div class="card-header bg-danger text-white text-center">
-                            <h5>Enterprise Plan</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-success text-center">Tshs. 60,000 / Month</h6>
-                            <p class="card-text text-center">Customized for large organizations with enterprise-level
-                                solutions.</p>
-                            <ul class="list-unstyled ">
-                                <li>✔ 1 Owner account</li>
-                                <li>✔ Unlimited Admin account</li>
-                                <li>✔ Unlimited pharmacy</li>
-                                <li>✔ Unlimited Medicine</li>
-                                <!-- <li>✔ In App Notification </li> -->
-                                <li>✔ SMS & Email Notification </li>
-                                <!-- <li>✔ Live on platform </li> -->
-                                <li>✔ Free Online support</li>
-                                <li>✔ Works on PC, Mac, mobile and Tablet</li>
-                                <li>✔ Pharmacy Only supported</li>
-                                <!-- <li>✔ Online Sales via Platform </li> -->
-                                <li>✔ WhatsApp Chat </li>
-                            </ul>
-
-                            <div class="text-center">
-                                <a href="/register" class="btn btn-danger">Choose Plan</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                @endforeach
             </div>
         </div>
     </section>

@@ -83,21 +83,6 @@ class ReportPrintController extends Controller
             'medicine' => 'required|integer',
         ]);
 
-        //Initialize below response variables to 0 to avoid errors
-        // return response()->json([
-        //     'totalSales' => $totalSales ?? 0,
-        //     'totalStocks' => $totalStocks ?? 0,
-        //     'totalReturns' => $totalReturns ?? 0,
-        //     'totalProfit' => $totalProfit ?? 0,
-        //     'totalExpired' => $totalExpired ?? 0,
-        //     'labels' => $labels,
-        //     'data' => $data,
-        //     'sales' => $salesRows,
-        //     'stocks' => $stocksRows,
-        //     'expired' => $expiredRows,
-        //     'profits' => $profitsRows
-        // ]);
-
         $totalSales = 0;
         $totalStocks = 0;
         $totalReturns = 0;
@@ -109,6 +94,7 @@ class ReportPrintController extends Controller
         $stocksRows = [];
         $expiredRows = [];
         $profitsRows = [];
+        $rows = 0;
 
 
         // Validate and parse dates
@@ -135,7 +121,7 @@ class ReportPrintController extends Controller
                 $stocks->where('item_id', $medicine);
             }
 
-            
+
             //total costs encurred to buy all stocks as the sum of the product of buying price and quantity
             $totalStocks = $stocks->sum(DB::raw('buying_price * quantity'));
 
@@ -143,6 +129,14 @@ class ReportPrintController extends Controller
             // Fetch all sales and stocks        
             $salesRows = $sales->get();
             $stocksRows = $stocks->get();
+
+            //create a variable to count number of rows in the profitsRows and in the stocksRows
+            if($category == 'sales'){
+                $rows = $sales->count();
+            }else if($category == 'stocks'){
+                $rows = $stocks->count();
+            }
+
 
             // Calculate expired stocks
             $expiredRows = $stocks->where('expire_date', '<', now())->get()->map(function ($stock) {
@@ -192,7 +186,8 @@ class ReportPrintController extends Controller
                 'sales' => $salesRows,
                 'stocks' => $stocksRows,
                 'expired' => $expiredRows,
-                'profits' => $profitsRows
+                'profits' => $profitsRows,
+                'rows' => $rows
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -208,7 +203,8 @@ class ReportPrintController extends Controller
                 'sales' => $salesRows,
                 'stocks' => $stocksRows,
                 'expired' => $expiredRows,
-                'profits' => $profitsRows
+                'profits' => $profitsRows,
+                'rows' => $rows
             ]);
         }
     }
