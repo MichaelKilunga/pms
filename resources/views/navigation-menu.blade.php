@@ -164,6 +164,9 @@
                     <x-nav-link href="{{ route('reports.all') }}" :active="request()->routeIs('reports.all')">
                         {{ __('Reports') }}
                     </x-nav-link>
+                    <x-nav-link href="{{ route('myContracts') }}" :active="request()->routeIs('myContracts')">
+                        {{ __('Contacts') }}
+                    </x-nav-link>
                 @endif
                 @if (Auth::user()->role == 'super')
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
@@ -187,6 +190,9 @@
                     <x-nav-link href="{{ route('reports.all') }}" :active="request()->routeIs('reports.all')">
                         {{ __('Reports') }}
                     </x-nav-link>
+                    <x-nav-link href="{{ route('contracts') }}" :active="request()->routeIs('contracts')">
+                        {{ __('Contacts') }}
+                    </x-nav-link>
                 @endif
             </div>
         {{-- </span> --}}
@@ -201,6 +207,9 @@
             <x-responsive-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
                 {{ __('Sell medicine') }}
             </x-responsive-nav-link>
+            <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
+                {{ __('Notifications') }}
+            </x-nav-link>
             @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
                 <x-responsive-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
                     {{ __('All medicine') }}
@@ -219,6 +228,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="{{ route('reports.all') }}" :active="request()->routeIs('reports.all')">
                     {{ __('Reports') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('myContracts') }}" :active="request()->routeIs('myContracts')">
+                    {{ __('Contracts') }}
                 </x-responsive-nav-link>
             @endif
         </div>

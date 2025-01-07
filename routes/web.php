@@ -151,16 +151,14 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-Route::middleware(['auth', 'role:super'])->prefix('admin')->name('contracts.admin.')->group(function () {
-    Route::get('/contracts', [ContractController::class, 'indexSuperAdmin'])->name('index');
-    Route::get('/contracts/create', [ContractController::class, 'createSuperAdmin'])->name('create');
-    Route::post('/contracts', [ContractController::class, 'storeSuperAdmin'])->name('store');
-    Route::get('/contracts/{id}', [ContractController::class, 'showSuperAdmin'])->name('show');
-    Route::get('/contracts/{id}/edit', [ContractController::class, 'editSuperAdmin'])->name('edit');
-    Route::put('/contracts/{id}', [ContractController::class, 'updateSuperAdmin'])->name('update');
-});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/contracts', [ContractController::class, 'indexSuperAdmin'])->name('contracts');
+    Route::get('/contracts/create', [ContractController::class, 'createSuperAdmin'])->name('contracts.admin.create');
+    Route::post('/contracts', [ContractController::class, 'storeSuperAdmin'])->name('contracts.admin.store');
+    Route::get('/contracts/{id}', [ContractController::class, 'showSuperAdmin'])->name('contracts.admin.show');
+    Route::get('/contracts/{id}/edit', [ContractController::class, 'editSuperAdmin'])->name('contracts.admin.edit');
+    Route::put('/contracts/{id}', [ContractController::class, 'updateSuperAdmin'])->name('contracts.admin.update');
 
-Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('contracts.user.')->group(function () {
-    Route::get('/contracts', [ContractController::class, 'indexUser'])->name('index');
-    Route::get('/contracts/{id}', [ContractController::class, 'showUser'])->name('show');
+    Route::get('/owner/contracts', [ContractController::class, 'indexUser'])->name('myContracts');
+    Route::get('/owner/contracts/{id}', [ContractController::class, 'showUser'])->name('contracts.users.show');
 });

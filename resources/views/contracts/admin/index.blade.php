@@ -1,9 +1,9 @@
-@extends('contracts.admin.app')
+@extends('contracts.app')
 
 @section('content')
     <h1>All Contracts</h1>
     <a href="{{ route('contracts.admin.create') }}" class="btn btn-primary">Create Contract</a>
-    <table>
+    <table class="table mt-4 table-striped">
         <thead>
             <tr>
                 <th>#</th>

@@ -35,5 +35,9 @@ class Package extends Model
     public function pharmacies(){
         return $this->hasMany(Pharmacy::class);
     }
+    
+    public function contracts(){
+        return $this->hasMany(Contract::class);
+    }
 }
 
