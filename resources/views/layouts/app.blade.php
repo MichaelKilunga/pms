@@ -142,28 +142,7 @@
                         ordering: true, // Enable column sorting
                         info: true // Enable information display
                     });
-                $('.reportsTable').DataTable({
-                    paging: true, // Enable paging
-                    searching: true, // Enable search bar
-                    ordering: true, // Enable column sorting
-                    info: true, // Enable information display
-                    dom: 'Bfrtip', // Add Buttons to the table
-                    buttons: [{
-                            extend: 'csvHtml5',
-                            title: 'Reports',
-                            text: 'Download CSV',
-                            className: 'btn btn-primary reportsDownloadButton'
-                        },
-                        {
-                            extend: 'pdfHtml5',
-                            title: 'Reports',
-                            text: 'Download PDF',
-                            className: 'btn btn-secondary reportsDownloadButton',
-                            orientation: 'landscape', // Landscape orientation for PDF
-                            pageSize: 'A4' // A4 page size
-                        }
-                    ]
-                });
+
                 $(".onReport").chosen({
                     width: "100%",
                     no_results_text: "No matches found!",
@@ -186,6 +165,9 @@
                     if ($this.is('#hamburger')) {
                         return;
                     }
+                    // if ($this.is('#forAdminImport')) {
+                    //     return;
+                    // }
 
                     //below implement code to check if the button is a submit button and if any of the required field is empty the loader will not appear otherwise it will appear while the form is being submitted
                     if ($this.is('button[type="submit"]')) {

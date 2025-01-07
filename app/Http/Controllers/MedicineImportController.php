@@ -29,7 +29,9 @@ class MedicineImportController extends Controller
     }
     public function all()
     {
-        $medicines = Medicine::where('name', '!=', 'name')->get();
+
+        // $medicines = Medicine::where('brand_name', '!=', 'brand_name')->get();
+        $medicines = Medicine::all();
         return view('superAdmin.medicines.index', compact('medicines'));
     }
     public function edit($id)

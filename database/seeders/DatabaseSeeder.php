@@ -10,58 +10,84 @@ use App\Models\Stock;
 use App\Models\Staff;
 use App\Models\Sales;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
-use function Pest\Laravel\get;
 
 class DatabaseSeeder extends Seeder
 {
     public function run()
     {
+        // Create all seeders here in order of dependency
+        
+        // Seed specific users
+        $users = [
+            [
+                'name' => 'Super Admin',
+                'email' => 'info@skylinksolutions.co.tz',
+                'email_verified_at' => now(),
+                'role' => 'super',
+                'phone' => '0742177328',
+                'password' => Hash::make('password'),
+                'two_factor_secret' => null,
+                'two_factor_recovery_codes' => null,
+                'remember_token' => Str::random(10),
+                'profile_photo_path' => null,
+                'current_team_id' => null,
+            ],
+            [
+                'name' => 'Default Owner',
+                'email' => 'owner@mail.com',
+                'email_verified_at' => now(),
+                'role' => 'owner',
+                'phone' => '0742177328',
+                'password' => Hash::make('password'),
+                'two_factor_secret' => null,
+                'two_factor_recovery_codes' => null,
+                'remember_token' => Str::random(10),
+                'profile_photo_path' => null,
+                'current_team_id' => null,
+            ],
+            [
+                'name' => 'Default Staff',
+                'email' => 'staff@mail.com',
+                'email_verified_at' => now(),
+                'role' => 'staff',
+                'phone' => '0742177328',
+                'password' => Hash::make('password'),
+                'two_factor_secret' => null,
+                'two_factor_recovery_codes' => null,
+                'remember_token' => Str::random(10),
+                'profile_photo_path' => null,
+                'current_team_id' => null,
+            ],
+        ];
+
+        foreach ($users as $user) {
+            User::create($user);
+        }
+
+        // Create package
         Package::factory()->create();
-
-        // // Create some users
-        // User::factory()->count(5)->create(['role' => 'owner']);
-
-        // $owners = User::where('role', 'owner')->get();
-        // foreach ($owners as $owner) {
-        //     // Create some pharmacies and related data
-        //     Pharmacy::factory()->count(3)->create(['owner_id' => $owner->id]);
-
-        //     $pharmacies = Pharmacy::where('owner_id', $owner->id)->get();
-        //     foreach ($pharmacies as $pharmacy) {
-        //         // For each pharmacy, create categories, items, staff, and stock
-        //         $categories = Category::factory()->count(3)->create(['pharmacy_id' => $pharmacy->id]);
-        //         foreach ($categories as $category) {
-        //             Items::factory()->count(5)->create([
-        //                 'pharmacy_id' => $pharmacy->id,
-        //                 'category_id' => $category->id,
-        //             ]);
-        //         }
-
-
-        //         // Create stock for each item in the pharmacy
-        //         $items = Items::where('pharmacy_id', $pharmacy->id)->get();
-        //         foreach ($items as $item) {
-        //             Stock::factory()->count(1)->create([
-        //                 'pharmacy_id' => $pharmacy->id,
-        //                 'item_id' => $item->id,
-        //                 'staff_id' => $owner,
-        //             ]);
-
-        //             $staff = Staff::factory()->count(1)->create(['pharmacy_id' => $pharmacy->id]);
-        //             // Create some sales    data for each pharmacy
-        //             foreach ($staff as $staff) {
-        //                 Sales::factory()->count(10)->create([
-        //                     'pharmacy_id' => $pharmacy->id,
-        //                     'item_id' => $item->id,
-        //                     'staff_id' => $staff->id,
-        //                 ]);
-        //             }
-        //         }
-        //     }
-        // }
+        
+        // Create a pharmacy
+        Pharmacy::factory()->create();
+        
+        // Create a category
+        Category::factory()->create();
+        
+        // Create an item
+        Items::factory()->create();
+        
+        // Create a stock
+        Stock::factory()->create();
+        
+        // Create a staff
+        Staff::factory()->create();
+        
+        // Create a sale
+        Sales::factory()->create();
     }
 }

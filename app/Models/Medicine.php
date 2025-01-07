@@ -9,11 +9,15 @@ class Medicine extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'name','status',
+        'brand_name',
+        'generic_name',
+        'description',
+        'status',
+        'category',
+        'class',
+        'dosage_form',
+        'strength',
+        'manufacturer',
+        'manufacturing_country',
     ];
-    
-    public function stock()
-    {
-        return $this->hasMany(Stock::class);
-    }
 }

@@ -15,12 +15,13 @@ class SalesFactory extends Factory
     public function definition()
     {
         return [
-            'staff_id' => Staff::factory(),
-            'pharmacy_id' => Pharmacy::factory(),
-            'item_id' => Items::factory(),
-            'quantity' => $this->faker->numberBetween(1, 100),
-            'total_price' => $this->faker->randomFloat(0, 500, 100000),
-            'date' => $this->faker->dateTimeThisYear(),
+            'staff_id' => 1,
+            'pharmacy_id' => 1,
+            'item_id' => 1,
+            'stock_id' => 1,
+            'quantity' => 400,
+            'total_price' => 2000000,
+            'date' => now(),
         ];
     }
 }

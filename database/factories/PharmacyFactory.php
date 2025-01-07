@@ -13,9 +13,11 @@ class PharmacyFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->company,
-            'location' => $this->faker->address,
-            'owner_id' => User::factory(), // Creating an owner user automatically
+            'name' => 'Default Pharmacy',
+            'location' => 'Morogoro',
+            'status' => 'Active',
+            'package_id' => 1, // Default package
+            'owner_id' => 2, // Default user
         ];
     }
 }

@@ -4,11 +4,24 @@
     <div class="container mt-4">
         <!-- Header -->
         <div class="d-flex justify-content-between mb-3">
-            <h2 class="text-primary fw-bold">Sales Management</h2>
-                <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createSalesModal">
-                    <i class="bi bi-plus-lg"></i> Add New Sales
-                </a>
+            <h2 class="text-primary fs-2 fw-bold">Sales Management</h2>
+            <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createSalesModal">
+                <i class="bi bi-plus-lg"></i> New Sales
+            </a>
         </div>
+        <hr>
+        <div class="d-flex justify-content-between">
+            <div></div>
+            <div>
+                <a href="print/lastReceipt" class="btn btn-success m-2">
+                    <i class="bi bi-printer"></i> Last
+                </a>
+                <a href="allReceipts" class="btn btn-success m-2">
+                    <i class="bi bi-receipt"></i> Receipts
+                </a>
+            </div>
+        </div>
+        <hr class="mb-2">
 
         <!-- Sales Table -->
         <div class="table-responsive shadow-sm rounded-3">
@@ -136,7 +149,8 @@
     </div>
 
     <!-- Create Sales Modal -->
-    <div class="modal fade" id="createSalesModal" tabindex="-1" aria-labelledby="createSalesModalLabel" aria-hidden="true">
+    <div class="modal fade" id="createSalesModal" tabindex="-1" aria-labelledby="createSalesModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
@@ -150,7 +164,7 @@
                             <div class="row mb-3 sale-entry align-items-center">
                                 <input type="text" name="stock_id[]" hidden required>
                                 <div class="col-md-3">
-                                    <label  for="medicines" class="form-label">Medicine</label>
+                                    <label for="medicines" class="form-label">Medicine</label>
                                     <select name="item_id[]" class="form-select chosen" required>
                                         <option selected value=""></option>
                                         @foreach ($medicines as $medicine)

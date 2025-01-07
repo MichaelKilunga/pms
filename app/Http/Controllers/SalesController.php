@@ -7,8 +7,15 @@ use App\Models\Pharmacy;
 use App\Models\Items;
 use App\Models\Staff;
 use App\Models\Stock;
+use App\Models\User;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session as FacadesSession;
+use Mike42\Escpos\PrintConnectors\FilePrintConnector;
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
+use Mike42\Escpos\Printer;
 
 class SalesController extends Controller
 {
@@ -18,10 +25,10 @@ class SalesController extends Controller
     public function index()
     {
         // Get sales data for the pharmacies owned by the authenticated user
-        
+
         $sales = Sales::with('item')->where('pharmacy_id', session('current_pharmacy_id'))
             ->get();
-            
+
         $medicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->with('item')->get();
         // dd($medicines);
         return view('sales.index', compact('sales', 'medicines'));
@@ -81,8 +88,8 @@ class SalesController extends Controller
             //update remaning stock
             $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('item_id', $item_id)->first();
             $remainQuantity = $stock->remain_Quantity - $request->quantity[$key];
-            $stock->update(['remain_Quantity'=> $remainQuantity ]);
-            
+            $stock->update(['remain_Quantity' => $remainQuantity]);
+
             // dd($request);
             Sales::create([
                 'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
@@ -141,5 +148,179 @@ class SalesController extends Controller
         Sales::destroy($request->id);
 
         return redirect()->route('sales')->with('success', 'Sale deleted successfully!');
+    }
+
+    /* implement functions for listing all receipts, and printing last receipt */
+    public function allReceipts()
+    {
+        // Get all receipts from sales data for the current pharmacy group the by date where the sales of same date belongs to the same receipt, return a collection of receipts including serial number, date, total amount and staff name
+        $receipts = Sales::where('pharmacy_id', session('current_pharmacy_id'))
+            ->selectRaw('date, sum(total_price) as total_amount, staff_id')
+            ->groupBy('date', 'staff_id')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        return view('sales.receipts', compact('receipts'));
+    }
+
+    public function printLastReceipt()
+    {
+        // Get the last receipt from sales data for the current pharmacy group
+        $lastReceipt = Sales::where('pharmacy_id', session('current_pharmacy_id'))
+            ->selectRaw('date, sum(total_price) as total_amount, staff_id')
+            ->groupBy('date', 'staff_id')
+            ->latest('date')
+            ->first();
+        $staff = User::where('id', $lastReceipt->staff_id)->first();
+
+        if (!$lastReceipt) {
+            return redirect()->back()->with('error', 'No sales data found for the last receipt.');
+        }
+
+        try {
+            // Automatically detect the active printer name and path
+            $printerPath = $this->getConnectedPrinterName();
+
+            // dd(session('location'));
+
+            if (!$printerPath) {
+                throw new \Exception("No connected printer detected.");
+            }
+
+            // Log the printer path for debugging
+            Log::info('Using Printer Path: ' . $printerPath);
+
+            // Initialize the printer connection using the network printer path
+            $connector = new WindowsPrintConnector($printerPath);
+            $printer = new Printer($connector);
+
+            // Prepare the receipt content
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("Pharmacy: \n" . session('pharmacy_name'));
+            $printer->text("Address: \n" . session('location'));
+            $printer->text("----------------------------------\n");
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text("Date:   " . $lastReceipt->date . "\n");
+            $printer->text("Pharmacist:   " . $staff->name . "\n");
+            $printer->text("Total Amount:  TZS" . number_format($lastReceipt->total_amount, 0) . "\n");
+            $printer->text("----------------------------------\n");
+
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("Thank you for your purchase!\n");
+            $printer->feed(3); // Feed 3 lines
+
+            // Cut the paper
+            $printer->cut();
+
+            // Close the printer connection
+            $printer->close();
+
+            return redirect()->back()->with('success', 'Last receipt printed successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error printing last receipt: ' . $e->getMessage());
+        }
+    }
+
+    private function getConnectedPrinterName()
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            // Get the default printer name using WMIC
+            $output = shell_exec('wmic printer where "Default=True" get Name /value');
+
+            if ($output) {
+                // Extract the printer name
+                preg_match('/Name=(.+)/', $output, $matches);
+                if (isset($matches[1])) {
+                    $printerName = trim($matches[1]);
+                    $computerName = getenv('COMPUTERNAME'); // Get the computer's name
+
+                    // Try using SMB path format
+                    $printerPath = 'smb://' . $computerName . '/' . $printerName;
+
+                    // Log the path to confirm it is correct
+                    Log::info('Detected printer path: ' . $printerPath);
+
+                    return $printerPath;
+                }
+            }
+        } elseif (PHP_OS_FAMILY === 'Linux') {
+            // Typical USB printer path for Linux
+            $usbPrinter = '/dev/usb/lp0';
+            if (file_exists($usbPrinter)) {
+                return $usbPrinter;
+            }
+        }
+
+        // Fallback: Return null if no printer is detected
+        return null;
+    }
+
+    //implement function for printing a specific receipt after receiving the date of sales made
+    public function printReceipt(Request $request)
+    {
+        
+        // dd($salesDate);
+        // Validate the date format
+        $request->validate([
+            'date' => 'required|date',
+        ]);
+        
+        // Get the sales data for the current pharmacy group for the specified date, but ensure the date is in datetime datatype to match the date in the database
+        $receipt = Sales::where('pharmacy_id', session('current_pharmacy_id'))
+            ->whereDate('date', $request->date)
+            ->selectRaw('date, sum(total_price) as total_amount, staff_id')
+            ->groupBy('date', 'staff_id')
+            ->first();        
+
+        if (!$receipt) {
+            return redirect()->back()->with('error', 'No sales data found for the specified date.');
+        }
+
+        $staff = User::where('id', $receipt->staff_id)->first();
+
+        dd($staff);
+
+        try {
+            // Automatically detect the active printer name and path
+            $printerPath = $this->getConnectedPrinterName();
+
+            if (!$printerPath) {
+                throw new \Exception("No connected printer detected.");
+            }
+
+            // Log the printer path for debugging
+            Log::info('Using Printer Path: ' . $printerPath);
+
+            // Initialize the printer connection using the network printer path
+            $connector = new WindowsPrintConnector($printerPath);
+            $printer = new Printer($connector);
+
+            // Prepare the receipt content
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("Pharmacy: \n" . session('pharmacy_name'));
+            $printer->text("Address: \n" . session('location'));
+            $printer->text("----------------------------------\n");
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text("Date:   " . $receipt->date . "\n");
+            $printer->text("Pharmacist:   " . $staff->name . "\n");
+            $printer->text("Total Amount:  TZS" . number_format($receipt->total_amount, 0) . "\n");
+            $printer->text("----------------------------------\n");
+
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("Thank you for your purchase!\n");
+            $printer->feed(3); // Feed 3 lines
+
+            // Cut the paper
+            $printer->cut();
+
+            // Close the printer connection
+            $printer->close();
+
+            return redirect()->back()->with('success', 'Receipt printed successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error printing receipt: ' . $e->getMessage());
+        }
     }
 }

@@ -94,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('stock', [StockController::class, 'index'])->name('stock');
     Route::get('stock/create', [StockController::class, 'create'])->name('stock.create');
     Route::post('stock', [StockController::class, 'store'])->name('stock.store');
+    Route::post('medicineStock', [StockController::class, 'MS_store'])->name('medicineStock.store');
     Route::get('stock/{id}', [StockController::class, 'show'])->name('stock.show');
     Route::put('stock', [StockController::class, 'update'])->name('stock.update');
     Route::delete('stock/delete/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
@@ -105,6 +106,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('sales', [SalesController::class, 'update'])->name('sales.update');
     Route::delete('sales/delete/{id}', [SalesController::class, 'destroy'])->name('sales.destroy');
 
+    Route::get('allReceipts', [SalesController::class, 'allReceipts'])->name('allReceipts');
+    Route::get('print/lastReceipt', [SalesController::class, 'printLastReceipt'])->name('print.lastReceipt');
+    Route::get('printReceipt', [SalesController::class, 'printReceipt'])->name('printReceipt');
 
     Route::get('category', [CategoryController::class, 'index'])->name('category');
     Route::get('category/create', [CategoryController::class, 'create'])->name('category.create');

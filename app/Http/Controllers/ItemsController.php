@@ -30,7 +30,7 @@ class ItemsController extends Controller
 
     public function import(Request $request)
     {
-        $onlineMedicines = Medicine::where('name', '!=', 'name')->get();
+        $onlineMedicines = Medicine::where('brand_name', '!=', 'brand_name')->get();
         return view('medicines.import', compact('onlineMedicines'));
     }
 
@@ -48,7 +48,7 @@ class ItemsController extends Controller
 
         try {
             $medicine = Medicine::findOrFail($request->medicine_id);
-            $request['name'] = $medicine->name;
+            $request['name'] = $medicine->generic_name.' ('.$medicine->brand_name.')';
             $request->validate([
                 'name' => 'unique:items,name',
             ]);
@@ -61,7 +61,7 @@ class ItemsController extends Controller
 
             // Insert the medicine into the items table
             Items::create([
-                'name' => $medicine->name,
+                'name' => $request->name,
                 'pharmacy_id' => $pharmacyId,
                 'category_id' => 1,
             ]);

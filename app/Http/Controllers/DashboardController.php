@@ -34,12 +34,12 @@ class DashboardController extends Controller
         // // Send the SMS
         // Notification::send($user, new SmsNotification($phoneNumber, $message));
 
-        $user = User::whereId(Auth::user()->id)->first(); 
-        $notification = [
-            'message'=>'Final trial message!',
-            'type'=>'success',
-        ];
-        $user->notify(new InAppNotification( $notification));
+        // $user = User::whereId(Auth::user()->id)->first(); 
+        // $notification = [
+        //     'message'=>'Final trial message!',
+        //     'type'=>'success',
+        // ];
+        // $user->notify(new InAppNotification( $notification));
         
         // $user->notify(new WelcomeNotification);
         // $notifyUser = Auth::user();
@@ -71,6 +71,7 @@ class DashboardController extends Controller
         }
         $pharmacyId = session('current_pharmacy_id');
         session(['pharmacy_name' => Pharmacy::where('id', session('current_pharmacy_id'))->value('name')]);
+        session(['location' => Pharmacy::where('id', session('current_pharmacy_id'))->value('location')]);
 
         $itemsSummary = DB::table('items')
             ->leftJoin('sales', function ($join) use ($pharmacyId) {
