@@ -6,6 +6,7 @@ use App\Models\Pharmacy;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Notifications\GeneralNotification;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 
@@ -60,7 +61,12 @@ class PharmacyController extends Controller
             'path' => 'dashboard',
         ];
         $user = User::where('id', Auth::user()->id)->first();
+        
+        try{
         $user->notify( new GeneralNotification($notification));
+        } catch(Exception $e){
+            //
+        }
 
         return redirect()->route('dashboard')->with('success', 'Pharmacy created successfully!');
     }

@@ -301,8 +301,8 @@ class SalesController extends Controller
             // Prepare the receipt content
             $printer->setJustification(Printer::JUSTIFY_CENTER);
             $printer->text("------START OF RECEIPT------\n");
-            $printer->text("Pharmacy: \n" . session('pharmacy_name'));
-            $printer->text("Address: \n" . session('location'));
+            $printer->text("Pharmacy: " . session('pharmacy_name')."\n");
+            $printer->text("Address: " . session('location')."\n");
             $printer->text("Description: Medicine  Purchases\n" );
             $printer->text("----------------------------------\n");
 
@@ -310,6 +310,7 @@ class SalesController extends Controller
             $printer->text("Date:   " . $receipt->date . "\n");
             $printer->text("Pharmacist:   " . $staff->name . "\n");
             $printer->text("Total Amount:  TZS" . number_format($receipt->total_amount, 0) . "\n");
+            $printer->text("For: Medicine \n" );
             $printer->text("----------------------------------\n");
 
             $printer->setJustification(Printer::JUSTIFY_CENTER);
