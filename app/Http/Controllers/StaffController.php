@@ -60,12 +60,16 @@ class StaffController extends Controller
         $request['pharmacy_id'] = session('current_pharmacy_id');
 
         // Validate the incoming request
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:255|unique:users,phone',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'role' => 'required|string', // Ensure role is provided
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'phone' => 'required|string|max:255|unique:users,phone',
+                'email' => 'required|string|email|max:255|unique:users,email',
+                'role' => 'required|string', // Ensure role is provided
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error importing file: ' . $e->getMessage());
+        }
 
         // Check if a user with the same phone or email already exists
         $existingUser = User::where('phone', $request->phone)

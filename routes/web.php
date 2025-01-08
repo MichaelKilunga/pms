@@ -28,8 +28,6 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    // Route::get('/superadmin', [SuperAdminController::class, 'dashboard'])->name('superadmin.dashboard');
-
     //USERS
     Route::get('/superadmin/users', [SuperAdminController::class, 'manageUsers'])->name('superadmin.users');
     Route::get('/superadmin/users/{id}/edit', [SuperAdminController::class, 'editUser'])->name('superadmin.users.edit');
@@ -59,9 +57,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('allMedicines/{id}', [MedicineImportController::class, 'destroy'])->name('allMedicines.destroy');
     Route::get('/medicines/import', [MedicineImportController::class, 'showImportForm'])->name('medicines.import-form');
     Route::post('/medicines/import', [MedicineImportController::class, 'import'])->name('medicines.import');
-});
 
-Route::middleware(['auth'])->group(function () {
+    
     // Route::resource('dashboard', DashboardController::class);
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/sales/filter', [DashboardController::class, 'filterSales'])->name('sales.filter');
@@ -126,15 +123,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/filterReports', [ReportPrintController::class, 'filterReports'])->name('filterReports');
     Route::get('/allReports', [ReportPrintController::class, 'all'])->name('reports.all');
     Route::post('/reports', [ReportPrintController::class, 'generateReport'])->name('reports.generate');
-});
 
-Route::middleware(['auth'])->group(function () {
+    
     Route::get('/select', [SelectPharmacyController::class, 'show'])->name('pharmacies.selection');
     Route::get('/switch', [SelectPharmacyController::class, 'switch'])->name('pharmacies.switch');
     Route::post('/select', [SelectPharmacyController::class, 'set'])->name('pharmacies.set');
-});
 
-Route::middleware(['auth'])->group(function () {
+    
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/readAll', [NotificationController::class, 'readAll'])->name('notifications.readAll');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
@@ -147,19 +142,19 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
     Route::get('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
-});
 
-
-
-Route::middleware(['auth'])->group(function () {
     Route::get('/contracts', [ContractController::class, 'indexSuperAdmin'])->name('contracts');
     Route::get('/contracts/create', [ContractController::class, 'createSuperAdmin'])->name('contracts.admin.create');
     Route::post('/contracts', [ContractController::class, 'storeSuperAdmin'])->name('contracts.admin.store');
     Route::get('/contracts/{id}', [ContractController::class, 'showSuperAdmin'])->name('contracts.admin.show');
     Route::get('/contracts/{id}/edit', [ContractController::class, 'editSuperAdmin'])->name('contracts.admin.edit');
     Route::put('/contracts/{id}', [ContractController::class, 'updateSuperAdmin'])->name('contracts.admin.update');
+    Route::get('/contracts/{id}/confirm', [ContractController::class, 'confirm'])->name('contracts.admin.confirm');
+    Route::get('/contracts/{id}/grace', [ContractController::class, 'grace'])->name('contracts.admin.grace');
 
-    Route::get('/contracts', [ContractController::class, 'indexUser'])->name('myContracts');
-    Route::get('/contracts/{id}', [ContractController::class, 'showUser'])->name('contracts.users.show');
-    Route::get('/contracts/packages', [ContractController::class, 'selectPackage'])->name('contracts.users.create');
+    Route::get('myContracts', [ContractController::class, 'indexUser'])->name('myContracts');
+    Route::get('myContracts/{id}', [ContractController::class, 'showUser'])->name('contracts.users.show');
+    Route::get('contracts/users/upgrade', [ContractController::class, 'upgrade'])->name('contracts.users.upgrade');
+    Route::get('contracts/users/subscribe', [ContractController::class, 'subscribe'])->name('contracts.users.subscribe');
+    Route::get('/contracts/users/activate', [ContractController::class, 'activate'])->name('contracts.users.activate');
 });

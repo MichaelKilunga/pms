@@ -14,11 +14,11 @@ class ContractController extends Controller
     public function indexSuperAdmin()
     {
         // Retrieves a collection of contracts
-        $contracts = Contract::with('owner', 'package')->get();
-    
+        $contracts = Contract::with('owner', 'package')->where('is_current_contract', 1)->get();
+
         return view('contracts.admin.index', compact('contracts'));
     }
-    
+
 
     public function createSuperAdmin()
     {
@@ -81,16 +81,134 @@ class ContractController extends Controller
     {
         $packages = Package::all();
         // $owners = User::all();
-        $contracts = Contract::where('owner_id', Auth::user()->id)->with('package')->get();
-        //  $contract = Package::where('id',1)->get();
-        // dd($contract);
+        $contracts = Contract::where('owner_id', Auth::user()->id)->with('package')->orderBy('created_at', 'desc')->get();
+        $current_contract = Contract::where('is_current_contract', 1)->get('end_date')->first();
 
-        return view('contracts.users.index', compact('contracts', 'packages'));
+        //create a current_contract_end_date date from current_contract 
+        if ($current_contract) {
+            $current_contract_end_date = date('Y-m-d', strtotime($current_contract->end_date));
+        } else {
+            $current_contract_end_date = null;
+        }
+
+        return view('contracts.users.index', compact('contracts', 'packages', 'current_contract_end_date'));
     }
 
     public function showUser($id)
     {
         $contract = Contract::where('owner_id', Auth::user()->id)->with('package')->findOrFail($id);
         return view('contracts.users.show', compact('contract'));
+    }
+
+    public function upgrade(Request $request)
+    {
+        // create a new contract
+        $request['status'] = 'inactive';
+        $request['payment_status'] = 'pending';
+        $request['is_current_contract'] = 1;
+        $request['start_date'] = now();
+        $request['end_date'] = now()->addDays(30);
+        $request['grace_end_date'] = null;
+
+        try {
+
+            $validated = $request->validate([
+                'owner_id' => 'required|exists:users,id',
+                'package_id' => 'required|exists:packages,id',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after:start_date',
+                'status' => 'required|in:active,inactive,graced',
+                'grace_end_date' => 'nullable|date|after_or_equal:end_date',
+                'payment_status' => 'required|in:payed,unpayed,pending',
+                'is_current_contract' => 'required|boolean',
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
+
+        $current_contract = Contract::where('owner_id', Auth::user()->id)->where('status', 'active')->orWhere('is_current_contract', 1)->first();
+
+        try {
+            if ($current_contract->package_id == $validated['package_id']) {
+                throw new \Exception('You are already subscribed to this package.');
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
+
+        // change the current contract to inactive
+        $current_contract->update(['is_current_contract' => 0]);
+
+        try {
+            Contract::create($validated);
+
+            $packages = Package::all();
+
+            $contracts = Contract::where('owner_id', Auth::user()->id)->with('package')->get();
+
+            $current_contract = Contract::where('is_current_contract', 1)->get('end_date')->first();
+
+            $current_contract_end_date = date('Y-m-d', strtotime($current_contract->end_date));
+
+            //redirect to route 'myContracts" with success message
+            return redirect()->route('myContracts')->with('success', 'Package upgraded successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+    //function for new subscription
+    public function subscribe(Request $request)
+    {
+        $request['status'] = 'active';
+        $request['payment_status'] = 'pending';
+        $request['is_current_contract'] = 1;
+        $request['start_date'] = now();
+        $request['end_date'] = now()->addDays(30);
+        $request['grace_end_date'] = null;
+
+        try {
+            $validated = $request->validate([
+                'owner_id' => 'required|exists:users,id',
+                'package_id' => 'required|exists:packages,id',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after:start_date',
+                'status' => 'required|in:active,inactive,graced',
+                'grace_end_date' => 'nullable|date|after_or_equal:end_date',
+                'payment_status' => 'required|in:payed,unpayed,pending',
+                'is_current_contract' => 'required|boolean',
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
+
+        Contract::create($validated);
+
+        return redirect()->back()->with('success', 'Package subscribed successfully.');
+    }
+
+    // function "confirm" to confirm payment
+    public function confirm($id)
+    {
+        $contract = Contract::findOrFail($id);
+        $contract->update(['payment_status' => 'payed', 'status' => 'active']);
+        return redirect()->back()->with('success', 'Payment confirmed successfully.');
+    }
+
+    //function to activate a contract
+    public function activate(Request $request)
+    {
+        // dd($request->all());
+        //find the current contract
+        $current_contract = Contract::where('owner_id', $request['owner_id'])->where('is_current_contract', 1)->first();
+        //change the current contract to not current
+        if ($current_contract) {
+            $current_contract->update(['is_current_contract' => 0]);
+        }
+
+        //find the contract to activate
+        $contract = Contract::findOrFail($request['contract_id']);
+        $contract->update(['is_current_contract' => 1]);
+        return redirect()->back()->with('success', 'Contract activated successfully.');
     }
 }
