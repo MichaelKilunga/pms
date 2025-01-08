@@ -161,4 +161,5 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/contracts', [ContractController::class, 'indexUser'])->name('myContracts');
     Route::get('/contracts/{id}', [ContractController::class, 'showUser'])->name('contracts.users.show');
+    Route::get('/contracts/packages', [ContractController::class, 'selectPackage'])->name('contracts.users.create');
 });

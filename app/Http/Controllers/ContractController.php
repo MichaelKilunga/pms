@@ -79,13 +79,13 @@ class ContractController extends Controller
     // User (Owner) Views
     public function indexUser()
     {
-        // $packages = Package::all();
+        $packages = Package::all();
         // $owners = User::all();
-        $contract = Contract::where('owner_id', auth::user()->id)->with('package')->get();
+        $contracts = Contract::where('owner_id', Auth::user()->id)->with('package')->get();
         //  $contract = Package::where('id',1)->get();
         // dd($contract);
 
-        return view('contracts.users.index', compact('contract'));
+        return view('contracts.users.index', compact('contracts', 'packages'));
     }
 
     public function showUser($id)
