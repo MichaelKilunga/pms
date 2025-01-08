@@ -1,9 +1,13 @@
 @extends('contracts.app')
 
 @section('content')
-    <h1>All Contracts</h1>
-    <a href="{{ route('contracts.admin.create') }}" class="btn btn-primary">Create Contract</a>
-    <table class="table mt-4 table-striped">
+<div class="container mt-4">
+    <div class="d-flex justify-content-between mb-2">
+        <h1>All Contracts</h1>
+            <a href="{{ route('contracts.admin.create') }}" class="btn btn-primary">Create Contract</a>
+        </div>
+        
+    <table class="table mt-4 table-striped" id="Table">
         <thead>
             <tr>
                 <th>#</th>
@@ -30,4 +34,5 @@
             @endforeach
         </tbody>
     </table>
+</div>
 @endsection

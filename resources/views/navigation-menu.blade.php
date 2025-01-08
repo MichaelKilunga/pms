@@ -165,7 +165,7 @@
                         {{ __('Reports') }}
                     </x-nav-link>
                     <x-nav-link href="{{ route('myContracts') }}" :active="request()->routeIs('myContracts')">
-                        {{ __('Contacts') }}
+                        {{ __('Contracts') }}
                     </x-nav-link>
                 @endif
                 @if (Auth::user()->role == 'super')
@@ -191,7 +191,7 @@
                         {{ __('Reports') }}
                     </x-nav-link>
                     <x-nav-link href="{{ route('contracts') }}" :active="request()->routeIs('contracts')">
-                        {{ __('Contacts') }}
+                        {{ __('Contracts') }}
                     </x-nav-link>
                 @endif
             </div>

@@ -159,6 +159,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/contracts/{id}/edit', [ContractController::class, 'editSuperAdmin'])->name('contracts.admin.edit');
     Route::put('/contracts/{id}', [ContractController::class, 'updateSuperAdmin'])->name('contracts.admin.update');
 
-    Route::get('/owner/contracts', [ContractController::class, 'indexUser'])->name('myContracts');
-    Route::get('/owner/contracts/{id}', [ContractController::class, 'showUser'])->name('contracts.users.show');
+    Route::get('/contracts', [ContractController::class, 'indexUser'])->name('myContracts');
+    Route::get('/contracts/{id}', [ContractController::class, 'showUser'])->name('contracts.users.show');
 });

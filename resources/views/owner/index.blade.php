@@ -6,7 +6,7 @@
         <h1>Your Subscription Plan</h1>
         <div class="card">
             <div class="card-body">
-                {{-- iff no data display message  --}}
+                {{-- iff no data display message --}}
                 @if ($contract)
                     <h5 class="card-title">Current Plan: {{ $contract->package['name'] }}</h5>
                     <p class="card-text">Status: {{ $contract->status }}</p>

@@ -13,9 +13,12 @@ class ContractController extends Controller
     // Super Admin Views
     public function indexSuperAdmin()
     {
+        // Retrieves a collection of contracts
         $contracts = Contract::with('owner', 'package')->get();
+    
         return view('contracts.admin.index', compact('contracts'));
     }
+    
 
     public function createSuperAdmin()
     {
@@ -76,8 +79,12 @@ class ContractController extends Controller
     // User (Owner) Views
     public function indexUser()
     {
+        // $packages = Package::all();
+        // $owners = User::all();
         $contract = Contract::where('owner_id', auth::user()->id)->with('package')->get();
+        //  $contract = Package::where('id',1)->get();
         // dd($contract);
+
         return view('contracts.users.index', compact('contract'));
     }
 
