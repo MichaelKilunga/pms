@@ -18,7 +18,7 @@
                                 <p class="card-text">End Date: {{ $contract->end_date }}</p>
                                 {{-- Display animated countdown of remained time before plan expire --}}
                                 <p class="card-text">Time Remaining: <span class="text-danger" id="countdown"></span></p>
-                                <p class="card-text">Status: {{ $contract->status }}</p>
+                                <p class="card-text">Status: {{ $contract->status }} <small class="text-warning" >({{ $contract->status == 'graced' ?  \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans()  : '' }})</small> </p>
                                 <p class="card-text">Payment: {{ $contract->payment_status }}</p>
                                 {{-- <a href="{{ route('contracts.users.upgrade') }}" class="btn btn-primary">Change Plan</a> --}}
                             @endif
@@ -48,7 +48,7 @@
                         <tbody>
                             @if ($contracts)
                                 @foreach ($contracts as $contract)
-                                    @if ($contract->is_current_contract==0 && $contract->payment_status == 'payed' && $contract->status == 'active')
+                                    @if ($contract->is_current_contract == 0 && $contract->payment_status == 'payed' && $contract->status != 'inactive')
                                         <tr>
                                             <td>{{ $contract->package->name }}</td>
                                             {{-- <td>TZS {{ number_format($contract->package->price) }}</td>
@@ -58,7 +58,7 @@
                                             <td>{{ $contract->payment_status }}</td>
                                             <td>{{ $contract->status }}</td> --}}
                                             <td>
-                                                <a href="{{ route('contracts.users.activate', ['contract_id' => $contract->id, 'owner_id'=>Auth::user()->id]) }}"
+                                                <a href="{{ route('contracts.users.activate', ['contract_id' => $contract->id, 'owner_id' => Auth::user()->id]) }}"
                                                     class="btn btn-primary">Activate</a>
                                             </td>
                                         </tr>
@@ -70,14 +70,14 @@
                                 </tr>
                             @endif
                         </tbody>
-                    </table> 
-                </div>                   
+                    </table>
+                </div>
             </div>
             {{-- show previous contracts on the right in a table form --}}
             <div class="card col-md-8">
                 <div class="card-body table-responsive">
                     <h5 class="card-title text-center fs-4 text-primary">Previous Subscription Plans</h5>
-                    <table class="table"  id="Table">
+                    <table class="table" id="Table">
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
@@ -93,7 +93,7 @@
                         <tbody>
                             @if ($contracts)
                                 @foreach ($contracts as $contract)
-                                    @if (!$contract->is_current_contract)
+                                    @if (!$contract->is_current_contract && $contract->payment_status!='pending')
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $contract->package->name }}</td>
@@ -134,26 +134,41 @@
                 <tbody>
                     @if ($packages)
                         @foreach ($packages as $package)
-                        @if($package->id != 1)
-                            <tr>
-                                <td>{{ $package->name }}</td>
-                                <td>TZS {{ number_format($package->price) }}</td>
-                                <td>{{ $package->duration }} days</td>
-                                <td>
-                                    {{-- count active contracts, if is less than 1, show subscribe button otherwise upgrade button --}}
-                                    @php
-                                        $activeContracts = Auth::user()->contracts->where('is_current_contract', 1)->count();
-                                    @endphp
-                                    @if ($activeContracts < 1)
-                                        <a href="{{ route('contracts.users.subscribe', ['package_id' => $package->id, 'owner_id'=>Auth::user()->id]) }}"
-                                            class="btn btn-primary">Subscribe</a>
-                                    @else
+                            @if ($package->id != 1)
+                                <tr>
+                                    <td>{{ $package->name }}</td>
+                                    <td>TZS {{ number_format($package->price) }}</td>
+                                    <td>{{ $package->duration }} days</td>
+                                    <td>
+                                        {{-- count active contracts, if is less than 1, show subscribe button otherwise upgrade button --}}
+                                        @php
+                                            $activeContracts = Auth::user()->contracts->where('is_current_contract', 1);
+                                        @endphp
+                                        @if ($activeContracts->count() < 1)
+                                            <a href="{{ route('contracts.users.subscribe', ['package_id' => $package->id, 'owner_id' => Auth::user()->id]) }}"
+                                                class="btn btn-primary">Subscribe</a>
+                                        @endif
+                                        @if ($activeContracts->count() > 0)
+                                            @if ($activeContracts->first()->package->id == $package->id)
+                                                @if ($activeContracts->first()->end_date < now())
+                                                    <a href="{{ route('contracts.users.renew', ['package_id' => $package->id, 'owner_id' => Auth::user()->id]) }}"
+                                                        class="btn btn-danger">Re-new</a>
+                                                @else
+                                                    <p class="text-success i">current!</p>
+                                                @endif
+                                            @else
+                                                <a href="{{ route('contracts.users.upgrade', ['package_id' => $package->id, 'owner_id' => Auth::user()->id]) }}"
+                                                    class="btn btn-primary">Upgrade</a>
+                                            @endif
+                                        @endif
+
+                                        {{-- @if ($activeContracts->count() > 0 && $activeContracts->first()->package->id != $package->id)
                                     <a href="{{ route('contracts.users.upgrade', ['package_id'=>$package->id, 'owner_id'=>Auth::user()->id]) }}"
-                                        class="btn btn-primary">upgrade</a>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endif
+                                        class="btn btn-success">Renew</a>
+                                    @endif --}}
+                                    </td>
+                                </tr>
+                            @endif
                         @endforeach
                     @else
                         <tr>

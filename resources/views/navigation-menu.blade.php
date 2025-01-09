@@ -193,6 +193,9 @@
                     <x-nav-link href="{{ route('contracts') }}" :active="request()->routeIs('contracts')">
                         {{ __('Contracts') }}
                     </x-nav-link>
+                    <x-nav-link href="{{ route('update.contracts') }}" :active="request()->routeIs('update.contracts')">
+                        {{ __('Schedules') }}
+                    </x-nav-link>
                 @endif
             </div>
         {{-- </span> --}}
