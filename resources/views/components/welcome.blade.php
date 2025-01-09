@@ -13,7 +13,7 @@
             <div class="col-6 col-md-4 col-lg-2">
                 <a href="{{ route('staff') }}" class="card bg-success text-white shadow text-decoration-none">
                     <div class="card-body">
-                        <h6><i class="bi bi-people-fill fs-1#"></i> Manage Staff</h6>
+                        <h6><i class="bi bi-people-fill fs-1#"></i> Pharmacist</h6>
 
                     </div>
                 </a>

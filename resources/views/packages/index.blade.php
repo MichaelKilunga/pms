@@ -7,6 +7,7 @@
             <a href="{{ route('packages.create') }}" class="btn btn-primary mb-3">Add New Package</a>
         </div>
         {{-- Use div classess for responsiveness of our table --}}
+        
         <div class="table-responsive">
             {{-- Use table classess for styling our table --}}
             <table class="table table-bordered" id="Table">

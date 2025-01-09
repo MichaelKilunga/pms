@@ -22,7 +22,7 @@
                         <th>#</th>
                         <th>Batch Number</th>
                         <th>Supplier</th>
-                        <th>Stock Name</th>
+                        <th>Medicine Name</th>
                         <th>Buying Price</th>
                         <th>Selling Price</th>
                         <th>Remain Quantity</th>
@@ -39,7 +39,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $stock->batch_number }}</td>
                             <td>{{ $stock->supplier }}</td>
-                            <td>{{ \Illuminate\Support\Str::words($stock->item->name, 1, '...') }}</td>
+                            <td>{{ \Illuminate\Support\Str::words($stock->item->name, 3, '...') }}</td>
                             <td>{{ $stock->buying_price }}</td>
                             <td>{{ $stock->selling_price }}</td>
                             {{-- <td>{{ $stock->quantity }}</td> --}}

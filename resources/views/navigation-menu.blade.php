@@ -150,7 +150,7 @@
                         {{ __('Stock') }}
                     </x-nav-link>
                     <x-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
-                        {{ __('Staff') }}
+                        {{ __('Pharmacist') }}
                     </x-nav-link>
                     <x-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
                         {{ __('Category') }}
@@ -218,7 +218,7 @@
                     {{ __('Stock') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
-                    {{ __('Staff') }}
+                    {{ __('Pharmacist') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
                     {{ __('Category') }}
