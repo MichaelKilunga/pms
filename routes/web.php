@@ -21,13 +21,23 @@ use App\Http\Controllers\SmsPush;
 use App\Models\Package;
 use App\Notifications\SmsNotification;
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\ContractUpdateController;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     //return welcome view with packages
     return view('welcome', ['packages' => Package::where('id', '!=', 1)->get()]);
 });
 
+
 Route::middleware(['auth'])->group(function () {
+    Route::get('schedule', function () {
+        // Run the Artisan schedule:run command to manually trigger the scheduled tasks
+        Artisan::call('schedule:run');
+
+        return 'Scheduler task triggered and executed!';
+    })->name('schedule');
+
     //USERS
     Route::get('/superadmin/users', [SuperAdminController::class, 'manageUsers'])->name('superadmin.users');
     Route::get('/superadmin/users/{id}/edit', [SuperAdminController::class, 'editUser'])->name('superadmin.users.edit');
@@ -51,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('packages/update/{id}', [PackageController::class, 'update'])->name('packages.update');
     Route::delete('packages/delete/{id}', [PackageController::class, 'destroy'])->name('packages.destroy');
 
+
     Route::get('allMedicines', [MedicineImportController::class, 'all'])->name('allMedicines.all');
     Route::get('allMedicines/{id}/edit', [MedicineImportController::class, 'edit'])->name('allMedicines.edit');
     Route::put('allMedicines/{id}', [MedicineImportController::class, 'update'])->name('allMedicines.update');
@@ -58,7 +69,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/medicines/import', [MedicineImportController::class, 'showImportForm'])->name('medicines.import-form');
     Route::post('/medicines/import', [MedicineImportController::class, 'import'])->name('medicines.import');
 
-    
+
     // Route::resource('dashboard', DashboardController::class);
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/sales/filter', [DashboardController::class, 'filterSales'])->name('sales.filter');
@@ -82,14 +93,14 @@ Route::middleware(['auth'])->group(function () {
     Route::put('pharmacies', [PharmacyController::class, 'update'])->name('pharmacies.update');
     Route::delete('pharmacies/delete/{id}', [PharmacyController::class, 'destroy'])->name('pharmacies.destroy');
 
-
-    Route::get('staff', [StaffController::class, 'index'])->name('staff');
-    Route::get('staff/create', [StaffController::class, 'create'])->name('staff.create');
-    Route::post('staff', [StaffController::class, 'store'])->name('staff.store');
-    Route::get('staff/{id}', [StaffController::class, 'show'])->name('staff.show');
-    Route::put('staff', [StaffController::class, 'update'])->name('staff.update');
-    Route::delete('staff/delete/{id}', [StaffController::class, 'destroy'])->name('staff.destroy');
-
+    Route::middleware(['contract_can:manage staff'])->group(function () {
+        Route::get('staff', [StaffController::class, 'index'])->name('staff');
+        Route::get('staff/create', [StaffController::class, 'create'])->name('staff.create');
+        Route::post('staff', [StaffController::class, 'store'])->name('staff.store');
+        Route::get('staff/{id}', [StaffController::class, 'show'])->name('staff.show');
+        Route::put('staff', [StaffController::class, 'update'])->name('staff.update');
+        Route::delete('staff/delete/{id}', [StaffController::class, 'destroy'])->name('staff.destroy');
+    });
 
     Route::get('stock', [StockController::class, 'index'])->name('stock');
     Route::get('stock/create', [StockController::class, 'create'])->name('stock.create');
@@ -124,12 +135,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/allReports', [ReportPrintController::class, 'all'])->name('reports.all');
     Route::post('/reports', [ReportPrintController::class, 'generateReport'])->name('reports.generate');
 
-    
+
     Route::get('/select', [SelectPharmacyController::class, 'show'])->name('pharmacies.selection');
     Route::get('/switch', [SelectPharmacyController::class, 'switch'])->name('pharmacies.switch');
     Route::post('/select', [SelectPharmacyController::class, 'set'])->name('pharmacies.set');
 
-    
+
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/readAll', [NotificationController::class, 'readAll'])->name('notifications.readAll');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
@@ -157,4 +168,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('contracts/users/upgrade', [ContractController::class, 'upgrade'])->name('contracts.users.upgrade');
     Route::get('contracts/users/subscribe', [ContractController::class, 'subscribe'])->name('contracts.users.subscribe');
     Route::get('/contracts/users/activate', [ContractController::class, 'activate'])->name('contracts.users.activate');
+    Route::get('/contracts/users/renew', [ContractController::class, 'renew'])->name('contracts.users.renew');
+
+    Route::get('/update-contracts', [ContractUpdateController::class, 'updateContracts'])->name('update.contracts');
 });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Contract;
 use App\Models\Package;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -187,6 +188,40 @@ class ContractController extends Controller
         return redirect()->back()->with('success', 'Package subscribed successfully.');
     }
 
+    public function renew(Request $request)
+    {
+        // dd($request->all());
+        //locate the current contract and change it not current
+        $current_contract = Contract::where('owner_id', $request['owner_id'])->where('is_current_contract', 1)->first();
+        $current_contract->update(['is_current_contract' => 0]);
+
+        $request['status'] = 'inactive';
+        $request['payment_status'] = 'pending';
+        $request['is_current_contract'] = 1;
+        $request['start_date'] = now();
+        $request['end_date'] = now()->addDays(30);
+        $request['grace_end_date'] = null;
+
+        try {
+            $validated = $request->validate([
+                'owner_id' => 'required|exists:users,id',
+                'package_id' => 'required|exists:packages,id',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after:start_date',
+                'status' => 'required|in:active,inactive,graced',
+                'grace_end_date' => 'nullable|date|after_or_equal:end_date',
+                'payment_status' => 'required|in:payed,unpayed,pending',
+                'is_current_contract' => 'required|boolean',
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
+
+        Contract::create($validated);
+
+        return redirect()->back()->with('success', 'Package renewed successfully.');
+    }
+
     // function "confirm" to confirm payment
     public function confirm($id)
     {
@@ -210,5 +245,21 @@ class ContractController extends Controller
         $contract = Contract::findOrFail($request['contract_id']);
         $contract->update(['is_current_contract' => 1]);
         return redirect()->back()->with('success', 'Contract activated successfully.');
+    }
+
+    //function to add a grace period to a contract
+    public function grace(Request $request, $id)
+    {
+        $request['contract_id'] = $id;
+        //receive the number of days to add to the grace period, convert value from string to integer
+        $day = (int)$request['days'];
+
+        // dd($request->all());
+        //find the contract to add grace period
+        $contract = Contract::findOrFail($request['contract_id']);
+
+        $contract->update(['status' => 'graced', 'grace_end_date' => now()->addDays($day)]);
+
+        return redirect()->back()->with('success', 'Grace period added successfully.');
     }
 }
