@@ -112,6 +112,18 @@ class Eligible
                     return redirect()->route('medicines')->with('error', 'You have reached the maximum number of medicines allowed by your subscription.');
                 }
                 break;
+            case 'view reports':
+                $package = Package::find($contract->package_id);
+                
+                if (!$package) {
+                    return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
+                }
+
+                if ($package->reports != 1) {
+                    return redirect()->back()->with('error', 'You\'re not allowed to see reports with your subscription plan, please upgrade!');
+                }
+                break;
+
             default:
                 return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }

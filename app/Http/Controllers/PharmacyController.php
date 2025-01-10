@@ -62,13 +62,14 @@ class PharmacyController extends Controller
         ];
         $user = User::where('id', Auth::user()->id)->first();
         
-        try{
-            //check if user has access to receive email notification
-                                    
-        $user->notify( new GeneralNotification($notification));
-        } catch(Exception $e){
+        // try{
+            // //check if user has access to receive email notification, use middleware 'eligible:receive email' to check
+            // if($user->eligible('receive email'))
+            //     $user->notify( new GeneralNotification($notification));
+        // $user->notify( new GeneralNotification($notification));
+        // } catch(Exception $e){
             //
-        }
+        // }
 
         return redirect()->route('dashboard')->with('success', 'Pharmacy created successfully!');
     }

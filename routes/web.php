@@ -137,10 +137,10 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
 
     //for report printing
     Route::middleware(['eligible:view reports'])->group(function () {
-        Route::get('/reports', [ReportPrintController::class, 'index'])->name('reports.index');
+        Route::get('/allReports', [ReportPrintController::class, 'all'])->name('reports.all');
     });
+    Route::get('/reports', [ReportPrintController::class, 'index'])->name('reports.index');
     Route::get('/filterReports', [ReportPrintController::class, 'filterReports'])->name('filterReports');
-    Route::get('/allReports', [ReportPrintController::class, 'all'])->name('reports.all');
     Route::post('/reports', [ReportPrintController::class, 'generateReport'])->name('reports.generate');
 
     Route::middleware(['eligible:get sms'])->group(function () {
