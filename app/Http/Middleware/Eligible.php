@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Pharmacy;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,8 @@ class Eligible
     {
         $user = Auth::user();
 
-        if ($action == 'manage staff') {
+        if ($action == 'check number of pharmacy') {
+            $pharmacy = Pharmacy::where('owner->id', $user->id)
             return redirect()->route('dashboard')->with('error', 'You must subscribe to access this resource.');
         }
         return $next($request);
