@@ -85,8 +85,10 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
 
     Route::get('pharmacies', [PharmacyController::class, 'index'])->name('pharmacies');
 
-    Route::get('pharmacies/create', [PharmacyController::class, 'create'])->name('pharmacies.create');
-    Route::post('pharmacies', [PharmacyController::class, 'store'])->name('pharmacies.store');
+    Route::middleware(['eligible:create pharmacy'])->group(function () {
+        Route::get('pharmacies/create', [PharmacyController::class, 'create'])->name('pharmacies.create');
+        Route::post('pharmacies', [PharmacyController::class, 'store'])->name('pharmacies.store');
+    });
 
     Route::get('pharmacies/{id}', [PharmacyController::class, 'show'])->name('pharmacies.show');
     Route::put('pharmacies', [PharmacyController::class, 'update'])->name('pharmacies.update');
@@ -137,13 +139,6 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::get('/switch', [SelectPharmacyController::class, 'switch'])->name('pharmacies.switch');
     Route::post('/select', [SelectPharmacyController::class, 'set'])->name('pharmacies.set');
 
-
-    Route::get('/notifications/unread_count', function () {
-        return response()->json([
-            'unreadCount' => Auth::user()->unreadNotifications->count()
-        ]);
-    });
-
     Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
     Route::get('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
 });
@@ -151,7 +146,7 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     // Route::resource('dashboard', DashboardController::class);
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');    
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/sales/filter', [DashboardController::class, 'filterSales'])->name('sales.filter');
 
 
@@ -172,9 +167,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/contracts/users/renew', [ContractController::class, 'renew'])->name('contracts.users.renew');
 
     Route::get('/update-contracts', [ContractUpdateController::class, 'updateContracts'])->name('update.contracts');
-    
+
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/readAll', [NotificationController::class, 'readAll'])->name('notifications.readAll');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 
+    Route::get('/notifications/unread_count', function () {
+        return response()->json([
+            'unreadCount' => Auth::user()->unreadNotifications->count()
+        ]);
+    });
 });

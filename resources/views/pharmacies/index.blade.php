@@ -5,8 +5,11 @@
         <div class="d-flex justify-content-between mb-3">
             <h2>Stock</h2>
             <div>
-                <a href="{{ route('pharmacies.create') }}" class="btn btn-success" data-bs-toggle="modal"
-                data-bs-target="#addPharmacyModal">Add New Pharmacy</a>
+                {{-- @show('create pharmacy') --}}
+                {{-- @show('create pharmacy button') --}}
+                    <a href="{{ route('pharmacies.create') }}" class="btn btn-success" data-bs-toggle="modal"
+                        data-bs-target="#addPharmacyModal">Add New Pharmacy</a>
+                {{-- @endshow --}}
             </div>
         </div>
 
@@ -28,7 +31,8 @@
                             <td>{{ $pharmacy->location }}</td>
                             <!-- <td class="d-flex justify-content-between"> -->
                             <td>
-                                <a href="#" class="btn btn-primary btn-sm"><i class="bi bi-eye"  data-bs-toggle="modal" data-bs-target="#viewPharmacyModal{{ $pharmacy->id }}" ></i></a>
+                                <a href="#" class="btn btn-primary btn-sm"><i class="bi bi-eye" data-bs-toggle="modal"
+                                        data-bs-target="#viewPharmacyModal{{ $pharmacy->id }}"></i></a>
                                 <div class="modal fade" id="viewPharmacyModal{{ $pharmacy->id }}" tabindex="-1"
                                     aria-labelledby="viewPharmacyModalLabel{{ $pharmacy->id }}" aria-hidden="true">
                                     <div class="modal-dialog">
@@ -57,9 +61,9 @@
                                     </div>
                                 </div>
 
-                               <!-- edit pharnacy modal -->
+                                <!-- edit pharnacy modal -->
                                 <a href="#" class="btn btn-success btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#editPharmacyModal{{ $pharmacy->id }}"><i class="bi bi-pencil"></i></a>
+                                    data-bs-target="#editPharmacyModal{{ $pharmacy->id }}"><i class="bi bi-pencil"></i></a>
                                 <div class="modal fade" id="editPharmacyModal{{ $pharmacy->id }}" tabindex="-1"
                                     aria-labelledby="editPharmacyModalLabel{{ $pharmacy->id }}" aria-hidden="true">
                                     <div class="modal-dialog">
@@ -79,7 +83,7 @@
 
                                                     <input type="number" name="id" id=""
                                                         value="{{ $pharmacy->id }}" hidden>
-                                                        
+
                                                     <div class="mb-3">
                                                         <label for="name{{ $pharmacy->id }}" class="form-label">Pharmacy
                                                             Name</label>
@@ -103,10 +107,12 @@
                                     </div>
                                 </div>
 
-                                <form action="{{ route('pharmacies.destroy', $pharmacy->id) }}" method="POST" style="display:inline;">
+                                <form action="{{ route('pharmacies.destroy', $pharmacy->id) }}" method="POST"
+                                    style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Do you want to delete this pharmacy?')" class="btn btn-danger btn-sm"><i class="bi bi-trash" ></i></button>
+                                    <button type="submit" onclick="return confirm('Do you want to delete this pharmacy?')"
+                                        class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>
                         </tr>
@@ -141,7 +147,7 @@
                         <input type="hidden" name="pharmacy_id" value="{{ session('current_pharmacy_id') }}">
                     </div>
                     <div class="mb-3">
-                    <button type="submit" class="btn btn-primary">Save Pharmacy</button>
+                        <button type="submit" class="btn btn-primary">Save Pharmacy</button>
                     </div>
                 </form>
             </div>
@@ -149,4 +155,4 @@
     </div>
 </div>
 
- {{-- {{$Pharmacy}} --}}
+{{-- {{$Pharmacy}} --}}

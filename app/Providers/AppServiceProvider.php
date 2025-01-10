@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\App;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -19,6 +22,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Blade::if('eligible', function ($action) {
+            $request = request();
+            $middleware = App::make(\App\Http\Middleware\Eligible::class);
+            return $middleware->handle($request, function () {}, $action) === null;
+        });
+
+        Blade::if('show', function ($action) {
+            $request = request();
+            $middleware = App::make(\App\Http\Middleware\Show::class);
+            return $middleware->handle($request, function () {}, $action) === null;
+        });
     }
 }

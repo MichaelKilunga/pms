@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Contract;
+use App\Models\Notification;
 use Carbon\Carbon;
 
 class ContractUpdaterService
@@ -33,7 +34,9 @@ class ContractUpdaterService
                 ->where('start_date', '<', $today->subDays(3))
                 ->delete();
 
-            throw new \Exception("Deactivated {$contractEnd} contracts. Graced {$contractGrace} contracts, and Removed {$pendingRemoved} pending contracts.");
+            $deleteReadNotifications =  Notification::where('read_at','!=', null )->delete();
+
+            throw new \Exception("Deactivated {$contractEnd} contracts. Graced {$contractGrace} contracts, Removed {$pendingRemoved} pending contracts, and deleted {$deleteReadNotifications} notifications.");
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
