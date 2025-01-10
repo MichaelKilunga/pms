@@ -15,12 +15,30 @@ class Eligible
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
+
+        private $user;
+        private $pharmacy;
+        private $staff;
+        private $package;
+        private $medicines;
+        private $admins;
+        private $owner;
+        private $stock;
+        private $notification;
+        private $reports;
+        private $analytics;
+
+        public public function __construct()
+        {
+            
+        }
+
     public function handle(Request $request, Closure $next, $action): Response
     {
-        $user = Auth::user();
 
         if ($action == 'check number of pharmacy') {
-            $pharmacy = Pharmacy::where('owner->id', $user->id)
+
+            if($pharmacy->count())
             return redirect()->route('dashboard')->with('error', 'You must subscribe to access this resource.');
         }
         return $next($request);
