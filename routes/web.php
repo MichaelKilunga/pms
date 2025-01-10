@@ -135,10 +135,6 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::post('/reports', [ReportPrintController::class, 'generateReport'])->name('reports.generate');
 
 
-    Route::get('/select', [SelectPharmacyController::class, 'show'])->name('pharmacies.selection');
-    Route::get('/switch', [SelectPharmacyController::class, 'switch'])->name('pharmacies.switch');
-    Route::post('/select', [SelectPharmacyController::class, 'set'])->name('pharmacies.set');
-
     Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
     Route::get('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
 });
@@ -177,4 +173,9 @@ Route::middleware(['auth'])->group(function () {
             'unreadCount' => Auth::user()->unreadNotifications->count()
         ]);
     });
+
+
+    Route::get('/select', [SelectPharmacyController::class, 'show'])->name('pharmacies.selection');
+    Route::get('/switch', [SelectPharmacyController::class, 'switch'])->name('pharmacies.switch');
+    Route::post('/select', [SelectPharmacyController::class, 'set'])->name('pharmacies.set');
 });
