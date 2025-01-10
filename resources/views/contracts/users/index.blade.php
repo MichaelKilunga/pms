@@ -18,7 +18,7 @@
                                 <p class="card-text">End Date: {{ $contract->end_date }}</p>
                                 {{-- Display animated countdown of remained time before plan expire --}}
                                 <p class="card-text">Time Remaining: <span class="text-danger" id="countdown"></span></p>
-                                <p class="card-text">Status: {{ $contract->status }} <small class="text-warning" >({{ $contract->status == 'graced' ?  \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans()  : '' }})</small> </p>
+                                <p class="card-text">Status: {{ $contract->status }} <small class="text-warning" >{{ $contract->status == 'graced' ?  (\Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans())  : '' }}</small> </p>
                                 <p class="card-text">Payment: {{ $contract->payment_status }}</p>
                                 {{-- <a href="{{ route('contracts.users.upgrade') }}" class="btn btn-primary">Change Plan</a> --}}
                             @endif
@@ -134,16 +134,17 @@
                 <tbody>
                     @if ($packages)
                         @foreach ($packages as $package)
-                            @if ($package->id != 1)
-                                <tr>
+                            {{-- @if ($package->id != 1) --}}
+                                        {{-- count active contracts, if is less than 1, show subscribe button otherwise upgrade button --}}
+                                        @php
+                                            $activeContracts = Auth::user()->contracts->where('is_current_contract', 1);
+                                            $hasAnyContract = Auth::user()->contracts->count();
+                                        @endphp
+                                <tr class="{{($hasAnyContract > 0 && $package->id == 1) ? 'hidden': ''}}">
                                     <td>{{ $package->name }}</td>
                                     <td>TZS {{ number_format($package->price) }}</td>
                                     <td>{{ $package->duration }} days</td>
                                     <td>
-                                        {{-- count active contracts, if is less than 1, show subscribe button otherwise upgrade button --}}
-                                        @php
-                                            $activeContracts = Auth::user()->contracts->where('is_current_contract', 1);
-                                        @endphp
                                         @if ($activeContracts->count() < 1)
                                             <a href="{{ route('contracts.users.subscribe', ['package_id' => $package->id, 'owner_id' => Auth::user()->id]) }}"
                                                 class="btn btn-primary">Subscribe</a>
@@ -168,7 +169,7 @@
                                     @endif --}}
                                     </td>
                                 </tr>
-                            @endif
+                            {{-- @endif --}}
                         @endforeach
                     @else
                         <tr>

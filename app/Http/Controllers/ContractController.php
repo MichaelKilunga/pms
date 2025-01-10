@@ -6,6 +6,7 @@ use App\Models\Contract;
 use App\Models\Package;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -123,6 +124,21 @@ class ContractController extends Controller
                 'payment_status' => 'required|in:payed,unpayed,pending',
                 'is_current_contract' => 'required|boolean',
             ]);
+
+            $hasAnyContract = Contract::where('owner_id', Auth::user()->id)->count();
+
+            if ($hasAnyContract > 0) {
+                if ($validated['package_id'] ==  1) {
+                    throw new Exception('This is unauthorized action!');
+                }
+            }else {
+                if ($validated['package_id'] ==  1) {
+                    $validated['status'] = 'active';
+                    $validated['payment_status'] = 'payed';
+                    $validated['end_date'] = now()->addDays(14);
+                }
+            }
+
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
@@ -161,12 +177,13 @@ class ContractController extends Controller
     //function for new subscription
     public function subscribe(Request $request)
     {
-        $request['status'] = 'active';
+        $request['status'] = 'inactive';
         $request['payment_status'] = 'pending';
         $request['is_current_contract'] = 1;
         $request['start_date'] = now();
         $request['end_date'] = now()->addDays(30);
         $request['grace_end_date'] = null;
+
 
         try {
             $validated = $request->validate([
@@ -179,6 +196,21 @@ class ContractController extends Controller
                 'payment_status' => 'required|in:payed,unpayed,pending',
                 'is_current_contract' => 'required|boolean',
             ]);
+
+
+            $hasAnyContract = Contract::where('owner_id', Auth::user()->id)->count();
+
+            if ($hasAnyContract > 0) {
+                if ($validated['package_id'] ==  1) {
+                    throw new Exception('This is unauthorized action!');
+                }
+            } else {
+                if ($validated['package_id'] ==  1) {
+                    $validated['status'] = 'active';
+                    $validated['payment_status'] = 'payed';
+                    $validated['end_date'] = now()->addDays(14);
+                }
+            }
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }

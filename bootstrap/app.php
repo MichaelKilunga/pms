@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'contract_can' => \App\Http\Middleware\Eligible::class,
+            'eligible' => \App\Http\Middleware\Eligible::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

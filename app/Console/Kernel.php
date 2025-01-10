@@ -4,7 +4,6 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -13,14 +12,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Add the contract update task
+        // Schedule the route to run every minute
         $schedule->call(function () {
-            Log::info('Scheduler task executed at: ' . now());
-            \Illuminate\Support\Facades\Http::get('http://127.0.0.1:8000/update-contracts');
-        })->everyMinute(); // Adjust the frequency as needed
+            \Illuminate\Support\Facades\Artisan::call('route:run /update-contracts');
+        })->everyMinute();
     }
-
-
 
     /**
      * Register the commands for the application.

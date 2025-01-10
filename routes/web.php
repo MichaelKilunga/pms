@@ -30,7 +30,7 @@ Route::get('/', function () {
 });
 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::get('schedule', function () {
         // Run the Artisan schedule:run command to manually trigger the scheduled tasks
         Artisan::call('schedule:run');
@@ -70,9 +70,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/medicines/import', [MedicineImportController::class, 'import'])->name('medicines.import');
 
 
-    // Route::resource('dashboard', DashboardController::class);
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/sales/filter', [DashboardController::class, 'filterSales'])->name('sales.filter');
 
     // Route::resource('medicines', ItemsController::class);
     Route::get('medicines', [ItemsController::class, 'index'])->name('medicines');
@@ -88,23 +85,19 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('pharmacies', [PharmacyController::class, 'index'])->name('pharmacies');
 
-    Route::middleware(['contract_can:check number of pharmacy'])->group(function () {
-        Route::get('pharmacies/create', [PharmacyController::class, 'create'])->name('pharmacies.create');
-        Route::post('pharmacies', [PharmacyController::class, 'store'])->name('pharmacies.store');
-    });
+    Route::get('pharmacies/create', [PharmacyController::class, 'create'])->name('pharmacies.create');
+    Route::post('pharmacies', [PharmacyController::class, 'store'])->name('pharmacies.store');
 
     Route::get('pharmacies/{id}', [PharmacyController::class, 'show'])->name('pharmacies.show');
     Route::put('pharmacies', [PharmacyController::class, 'update'])->name('pharmacies.update');
     Route::delete('pharmacies/delete/{id}', [PharmacyController::class, 'destroy'])->name('pharmacies.destroy');
 
-    Route::middleware(['contract_can:manage staff'])->group(function () {
-        Route::get('staff', [StaffController::class, 'index'])->name('staff');
-        Route::get('staff/create', [StaffController::class, 'create'])->name('staff.create');
-        Route::post('staff', [StaffController::class, 'store'])->name('staff.store');
-        Route::get('staff/{id}', [StaffController::class, 'show'])->name('staff.show');
-        Route::put('staff', [StaffController::class, 'update'])->name('staff.update');
-        Route::delete('staff/delete/{id}', [StaffController::class, 'destroy'])->name('staff.destroy');
-    });
+    Route::get('staff', [StaffController::class, 'index'])->name('staff');
+    Route::get('staff/create', [StaffController::class, 'create'])->name('staff.create');
+    Route::post('staff', [StaffController::class, 'store'])->name('staff.store');
+    Route::get('staff/{id}', [StaffController::class, 'show'])->name('staff.show');
+    Route::put('staff', [StaffController::class, 'update'])->name('staff.update');
+    Route::delete('staff/delete/{id}', [StaffController::class, 'destroy'])->name('staff.destroy');
 
     Route::get('stock', [StockController::class, 'index'])->name('stock');
     Route::get('stock/create', [StockController::class, 'create'])->name('stock.create');
@@ -145,10 +138,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/select', [SelectPharmacyController::class, 'set'])->name('pharmacies.set');
 
 
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
-    Route::get('/notifications/readAll', [NotificationController::class, 'readAll'])->name('notifications.readAll');
-    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-
     Route::get('/notifications/unread_count', function () {
         return response()->json([
             'unreadCount' => Auth::user()->unreadNotifications->count()
@@ -157,6 +146,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
     Route::get('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
+});
+
+
+Route::middleware(['auth'])->group(function () {
+    // Route::resource('dashboard', DashboardController::class);
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');    
+    Route::get('/sales/filter', [DashboardController::class, 'filterSales'])->name('sales.filter');
+
 
     Route::get('/contracts', [ContractController::class, 'indexSuperAdmin'])->name('contracts');
     Route::get('/contracts/create', [ContractController::class, 'createSuperAdmin'])->name('contracts.admin.create');
@@ -175,4 +172,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/contracts/users/renew', [ContractController::class, 'renew'])->name('contracts.users.renew');
 
     Route::get('/update-contracts', [ContractUpdateController::class, 'updateContracts'])->name('update.contracts');
+    
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::get('/notifications/readAll', [NotificationController::class, 'readAll'])->name('notifications.readAll');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+
 });
