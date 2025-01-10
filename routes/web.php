@@ -73,13 +73,17 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
 
     // Route::resource('medicines', ItemsController::class);
     Route::get('medicines', [ItemsController::class, 'index'])->name('medicines');
-    Route::get('medicines/create', [ItemsController::class, 'create'])->name('medicines.create');
-    Route::post('medicines', [ItemsController::class, 'store'])->name('medicines.store');
+
+    Route::middleware(['eligible:add medicine'])->group(function () {
+        Route::get('medicines/create', [ItemsController::class, 'create'])->name('medicines.create');
+        Route::post('medicines', [ItemsController::class, 'store'])->name('medicines.store');
+        Route::post('medicineStock', [StockController::class, 'MS_store'])->name('medicineStock.store');
+        Route::post('/import', [ItemsController::class, 'importStore'])->name('importStore');
+    });
     Route::get('medicines/search', [ItemsController::class, 'search'])->name('medicines.search');
     Route::get('medicines/{id}', [ItemsController::class, 'show'])->name('medicines.show');
     Route::put('medicines/update/{id}', [ItemsController::class, 'update'])->name('medicines.update');
     Route::delete('medicines/delete/{id}', [ItemsController::class, 'destroy'])->name('medicines.destroy');
-    Route::post('/import', [ItemsController::class, 'importStore'])->name('importStore');
     Route::get('/import', [ItemsController::class, 'import'])->name('import');
 
 
@@ -95,8 +99,12 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::delete('pharmacies/delete/{id}', [PharmacyController::class, 'destroy'])->name('pharmacies.destroy');
 
     Route::get('staff', [StaffController::class, 'index'])->name('staff');
-    Route::get('staff/create', [StaffController::class, 'create'])->name('staff.create');
-    Route::post('staff', [StaffController::class, 'store'])->name('staff.store');
+
+    Route::middleware(['eligible:add staff'])->group(function () {
+        Route::get('staff/create', [StaffController::class, 'create'])->name('staff.create');
+        Route::post('staff', [StaffController::class, 'store'])->name('staff.store');
+    });
+
     Route::get('staff/{id}', [StaffController::class, 'show'])->name('staff.show');
     Route::put('staff', [StaffController::class, 'update'])->name('staff.update');
     Route::delete('staff/delete/{id}', [StaffController::class, 'destroy'])->name('staff.destroy');
@@ -104,7 +112,6 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::get('stock', [StockController::class, 'index'])->name('stock');
     Route::get('stock/create', [StockController::class, 'create'])->name('stock.create');
     Route::post('stock', [StockController::class, 'store'])->name('stock.store');
-    Route::post('medicineStock', [StockController::class, 'MS_store'])->name('medicineStock.store');
     Route::get('stock/{id}', [StockController::class, 'show'])->name('stock.show');
     Route::put('stock', [StockController::class, 'update'])->name('stock.update');
     Route::delete('stock/delete/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
@@ -127,16 +134,19 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::put('category', [CategoryController::class, 'update'])->name('category.update');
     Route::delete('category/delete/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
 
-    // Route::resource('categories', CategoryController::class);
+
     //for report printing
-    Route::get('/reports', [ReportPrintController::class, 'index'])->name('reports.index');
+    Route::middleware(['eligible:view reports'])->group(function () {
+        Route::get('/reports', [ReportPrintController::class, 'index'])->name('reports.index');
+    });
     Route::get('/filterReports', [ReportPrintController::class, 'filterReports'])->name('filterReports');
     Route::get('/allReports', [ReportPrintController::class, 'all'])->name('reports.all');
     Route::post('/reports', [ReportPrintController::class, 'generateReport'])->name('reports.generate');
 
-
-    Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
-    Route::get('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
+    Route::middleware(['eligible:get sms'])->group(function () {
+        Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
+        Route::get('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
+    });
 });
 
 

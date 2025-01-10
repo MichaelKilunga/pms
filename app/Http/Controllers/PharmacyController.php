@@ -63,6 +63,8 @@ class PharmacyController extends Controller
         $user = User::where('id', Auth::user()->id)->first();
         
         try{
+            //check if user has access to receive email notification
+                        
         $user->notify( new GeneralNotification($notification));
         } catch(Exception $e){
             //

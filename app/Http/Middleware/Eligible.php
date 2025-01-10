@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use App\Models\Contract;
+use App\Models\Items;
 use App\Models\Package;
 use App\Models\Pharmacy;
+use App\Models\Staff;
 use App\Models\User;
 use App\Notifications\InAppNotification;
 use Closure;
@@ -53,7 +56,6 @@ class Eligible
             ->whereIn('status', ['active', 'graced'])
             ->first();
 
-        $pharmaciesCount = Pharmacy::where('owner_id', $owner->id)->count();
 
         switch ($action) {
             case 'hasContract':
@@ -75,6 +77,8 @@ class Eligible
                 }
 
                 $package = Package::find($contract->package_id);
+                $pharmaciesCount = Pharmacy::where('owner_id', $owner->id)->count();
+
                 if (!$package) {
                     return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
                 }
@@ -84,6 +88,30 @@ class Eligible
                 }
                 break;
 
+            case 'add staff':
+                $package = Package::find($contract->package_id);
+                $staffCount = Staff::where('pharmacy_id', $pharmacy->id)->count();
+
+                if (!$package) {
+                    return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
+                }
+
+                if ($staffCount >= $package->number_of_pharmacists) {
+                    return redirect()->route('staff')->with('error', 'You have reached the maximum number of pharmacists allowed by your subscription.');
+                }
+                break;
+            case 'add medicine':
+                $package = Package::find($contract->package_id);
+                $medicineCount = Items::where('pharmacy_id', $pharmacy->id)->count();
+
+                if (!$package) {
+                    return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
+                }
+
+                if ($medicineCount >= $package->number_of_medicines) {
+                    return redirect()->route('medicines')->with('error', 'You have reached the maximum number of medicines allowed by your subscription.');
+                }
+                break;
             default:
                 return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
