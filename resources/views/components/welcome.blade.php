@@ -13,7 +13,7 @@
             <div class="col-6 col-md-4 col-lg-2">
                 <a href="{{ route('staff') }}" class="card bg-success text-white shadow text-decoration-none">
                     <div class="card-body">
-                        <h6><i class="bi bi-people-fill fs-1#"></i> Pharmacist</h6>
+                        <h6><i class="bi bi-people-fill fs-1#"></i>Manage Pharmacist</h6>
 
                     </div>
                 </a>
@@ -55,7 +55,7 @@
         {{-- Summary Section --}}
         <div class="row mb-4 g-4 justify-content-center text-center">
             <div class="col-6 col-md-4 col-lg-2">
-                <div class="card bg-danger text-white shadow">
+                <div class="card bg-primary text-white shadow">
                     <div class="card-body">
                         <h6>
                             <i class="bi bi-capsule fs-3# me-2"></i>Medicines
@@ -95,7 +95,7 @@
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2">
-                <div class="card bg-success text-white shadow">
+                <div class="card bg-info text-white shadow">
                     <div class="card-body">
                         <h6>
                             <i class="bi bi-currency-exchange fs-3# me-2"></i>Today Sales
@@ -105,7 +105,7 @@
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2">
-                <div class="card bg-warning text-dark shadow">
+                <div class="card bg-secondary text-light shadow">
                     <div class="card-body">
                         <h6>
                             <i class="bi bi-box-seam fs-3# me-2"></i>Low Stock
@@ -199,9 +199,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mb-4 mb-4">
+        <div class="col-md-6 mb-4">
             {{-- Search   Medicine --}}
-            <div class="row m-2">
+            <div class="row">
                 <div class="col-12">
                     <div class="card shadow">
                         <div class="card-body">
@@ -228,7 +228,7 @@
                 </div>
             </div>
             {{-- Sales filter --}}
-            <div class="row  m-2">
+            <div class="row  mt-2">
                 <div class="col-12">
                     <div class="card shadow">
                         <div class="card-body">
