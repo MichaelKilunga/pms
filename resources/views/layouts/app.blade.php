@@ -74,22 +74,24 @@
 </head>
 
 <body class="font-sans antialiased">
-    
-{{-- TAWK START --}}
-<!--Start of Tawk.to Script-->
-<script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-    s1.async=true;
-    s1.src='https://embed.tawk.to/67810ca9af5bfec1dbe9b008/1ih81itsi';
-    s1.charset='UTF-8';
-    s1.setAttribute('crossorigin','*');
-    s0.parentNode.insertBefore(s1,s0);
-    })();
+
+    {{-- TAWK START --}}
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {},
+            Tawk_LoadStart = new Date();
+        (function() {
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = 'https://embed.tawk.to/67810ca9af5bfec1dbe9b008/1ih81itsi';
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
     </script>
     <!--End of Tawk.to Script-->
-{{-- TAWK END --}}
+    {{-- TAWK END --}}
 
 
     {{-- <x-banner /> --}}
@@ -129,12 +131,17 @@
             // requestNotificationPermission();
 
             // Automatically show the modal if no pharmacy is selected
-            @if (!session('current_pharmacy_id'))
+            @if (!session('current_pharmacy_id') && Auth::user()->contracts->where('is_current_contract', 1)->count() > 0)
                 $('#pharmacyModal').modal('show');
             @endif
-            @if (session('guest-owner'))
+            @if (session('guest-owner') && Auth::user()->contracts->where('is_current_contract', 1)->count() > 0)
                 $('#guestPharmacyModal').modal('show');
             @endif
+
+            // @if (Auth::user()->contracts->where('is_current_contract', 1)->count() < 1)
+            //     // $('#guestPharmacyModal').modal('show');
+            //     return redirect()->route('myContracts')->with('error','Subscribe first to continue using our products!');
+            // @endif
 
             @if (session('success'))
                 Swal.fire({
@@ -151,6 +158,22 @@
                     // timer: 2000
                 });
             @endif
+            
+            @if (session('info'))
+                Swal.fire({
+                    icon: 'info',
+                    title: '{{ session('info') }}',
+                    // timer: 2000
+                });
+            @endif
+
+            // @if (session('notification'))
+            //     Swal.fire({
+            //         // icon: 'notification',
+            //         title: '{{ session('notification') }}',
+            //         timer: 2000
+            //     });
+            // @endif
 
             $(document).ready(function() {
                 $('#Table')
@@ -165,7 +188,7 @@
                     width: "100%",
                     no_results_text: "No matches found!",
                 });
-                @if (!session('success') && !session('error'))
+                @if (!session('success') && !session('error') && !session('info'))
                     // $(".chosen").chosen({
                     $("select").chosen({
                         width: "100%",

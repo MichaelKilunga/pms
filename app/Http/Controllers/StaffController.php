@@ -98,7 +98,7 @@ class StaffController extends Controller
                 'pharmacy_id' => $request->pharmacy_id,
             ]);
 
-            return redirect()->route('staff')->with('success', 'Staff added successfully.');
+            return redirect()->route('staff')->with('success', 'Staff added successfully!');
         } catch (\Exception $e) {
             // Handle any errors during user or staff creation
             return redirect()->route('staff')->with('error', 'Failed to add staff. Please try again.');

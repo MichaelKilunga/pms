@@ -84,7 +84,7 @@ class ContractController extends Controller
         $packages = Package::all();
         // $owners = User::all();
         $contracts = Contract::where('owner_id', Auth::user()->id)->with('package')->orderBy('created_at', 'desc')->get();
-        $current_contract = Contract::where('is_current_contract', 1)->get('end_date')->first();
+        $current_contract = Contract::where('owner_id', Auth::user()->id)->where('is_current_contract', 1)->first();
 
         //create a current_contract_end_date date from current_contract 
         if ($current_contract) {

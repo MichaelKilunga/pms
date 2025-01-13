@@ -30,7 +30,7 @@ class ItemsController extends Controller
 
     public function import(Request $request)
     {
-        $onlineMedicines = Medicine::where('brand_name', '!=', 'brand_name')->get();
+        // $onlineMedicines = Medicine::where('brand_name', '!=', 'brand_name')->get();
         $onlineMedicines = Medicine::where('brand_name', '!=', 'brand_name')->get();
         return view('medicines.import', compact('onlineMedicines'));
     }
@@ -50,15 +50,21 @@ class ItemsController extends Controller
         try {
             $medicine = Medicine::findOrFail($request->medicine_id);
             $request['name'] = $medicine->generic_name.' ('.$medicine->brand_name.')';
-            $request->validate([
-                'name' => 'unique:items,name',
-            ]);
+            // $request->validate([
+            //     'name' => 'unique:items,name,pharmacy_id',
+            // ]);
             // Get the current pharmacy ID (assuming it's stored in the session or user context)
             $pharmacyId = session('current_pharmacy_id');
 
-            if (!$pharmacyId) {
-                return response()->json(['message' => 'Pharmacy not selected.'], 400);
+            $thisMedicine = Items::where('pharmacy_id',$pharmacyId)->where('name',$request['name'])->count();
+
+            if ($thisMedicine>0) {
+                return response()->json(['message' => 'duplicate'], 200);
             }
+
+            // if (!$pharmacyId) {
+            //     return response()->json(['message' => 'Pharmacy not selected.'], 400);
+            // }
 
             // Insert the medicine into the items table
             Items::create([

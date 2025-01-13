@@ -35,9 +35,6 @@ class Eligible
         $user = Auth::user();
         $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
 
-        if (!$pharmacy) {
-            return redirect()->route('dashboard')->with('error', 'No pharmacy found in the session.');
-        }
 
         // Determine the owner
         $owner = match ($user->role) {
@@ -45,6 +42,13 @@ class Eligible
             'owner' => $user,
             default => null,
         };
+
+        if (!$pharmacy && Auth::user()->role == 'owner') {
+            // return redirect()->route('dashboard')->with('error', 'No pharmacy found in the session.');
+            // $owner = Auth::user();
+            if ($action == 'create pharmacy')
+                return $next($request);
+        }
 
         if (!$owner) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
@@ -109,12 +113,17 @@ class Eligible
                 }
 
                 if ($medicineCount >= $package->number_of_medicines) {
+                    
+                    //check if request 
+                    // if($request)
+                    // return response()->json(['message' => 'maximum'], 200);
+
                     return redirect()->route('medicines')->with('error', 'You have reached the maximum number of medicines allowed by your subscription.');
                 }
                 break;
             case 'view reports':
                 $package = Package::find($contract->package_id);
-                
+
                 if (!$package) {
                     return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
                 }

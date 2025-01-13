@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Notifications\InAppNotification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -34,12 +35,27 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
         ]);
-        //save package id into a session
-        // session(['package_id' => $input['package_id']]);
 
+        $this->notify(
+            $user,
+            'Welcome PILLPOINT, choose a plan to continue using our services!',
+            'success'
+        );
         //send welcome notification
-        $user->notify(new WelcomeNotification);
+        try{
+            $user->notify(new WelcomeNotification);
+        }catch(\Exception $e){
+            // 
+        }
 
         return $user;
+    }
+    private function notify(User $user, string $message, string $type): void
+    {
+        $notification = [
+            'message' => $message,
+            'type' => $type,
+        ];
+        $user->notify(new InAppNotification($notification));
     }
 }

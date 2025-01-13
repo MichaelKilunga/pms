@@ -66,23 +66,29 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    
+
     public function pharmaciesOwned()
     {
-        return $this->hasMany(Pharmacy::class);
+        return $this->hasMany(Pharmacy::class, 'owner_id');
     }
-    
+
     public function manage()
     {
-        return $this->hasMany(Pharmacy::class);
+        return $this->hasMany(Pharmacy::class, 'owner_id');
+    }
+
+    public function pharmacies()
+    {
+        return $this->hasMany(Pharmacy::class, 'owner_id');
     }
 
     public function staff()
     {
         return $this->hasMany(Staff::class);
     }
-    
-    public function contracts(){
-        return $this->hasMany(Contract::class,'owner_id');
+
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class, 'owner_id');
     }
 }

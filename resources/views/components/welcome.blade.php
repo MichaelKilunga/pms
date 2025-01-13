@@ -68,7 +68,7 @@
                 <div class="card bg-success text-white shadow">
                     <div class="card-body">
                         <h6>
-                            <i class="bi bi-people-fill fs-3# me-2"></i>Staff
+                            <i class="bi bi-people-fill fs-3# me-2"></i>Pharmacists
                         </h6>
                         <p class="fs-5 fw-bold">{{ $totalStaff }}</p>
                     </div>

@@ -40,7 +40,7 @@ class DashboardController extends Controller
         //     'type'=>'success',
         // ];
         // $user->notify(new InAppNotification( $notification));
-        
+
         // $user->notify(new WelcomeNotification);
         // $notifyUser = Auth::user();
         // Notification::send($notifyUser, new WelcomeNotification);
@@ -131,6 +131,10 @@ class DashboardController extends Controller
 
 
         if (Auth::user()->role == 'owner') {
+
+            if (Auth::user()->contracts->where('is_current_contract', 1)->count() < 1) {
+                return redirect()->route('myContracts')->with('info', 'Subscribe first to continue using our products!');
+            }
 
             $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
             // dd($pharmacies->count());
