@@ -113,11 +113,12 @@ class Eligible
                 }
 
                 if ($medicineCount >= $package->number_of_medicines) {
-                    
-                    //check if request 
-                    // if($request)
-                    // return response()->json(['message' => 'maximum'], 200);
 
+                    //check if request is ajax
+                    if ($request->ajax())
+                        return response()->json(['message' => 'maximum'], 200);
+
+                    //check if not ajax
                     return redirect()->route('medicines')->with('error', 'You have reached the maximum number of medicines allowed by your subscription.');
                 }
                 break;
