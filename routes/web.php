@@ -88,12 +88,7 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
 
 
     Route::get('pharmacies', [PharmacyController::class, 'index'])->name('pharmacies');
-
-    Route::middleware(['eligible:create pharmacy'])->group(function () {
-        Route::get('pharmacies/create', [PharmacyController::class, 'create'])->name('pharmacies.create');
-        Route::post('pharmacies', [PharmacyController::class, 'store'])->name('pharmacies.store');
-    });
-
+    Route::get('pharmacies/create', [PharmacyController::class, 'create'])->name('pharmacies.create');
     Route::get('pharmacies/{id}', [PharmacyController::class, 'show'])->name('pharmacies.show');
     Route::put('pharmacies', [PharmacyController::class, 'update'])->name('pharmacies.update');
     Route::delete('pharmacies/delete/{id}', [PharmacyController::class, 'destroy'])->name('pharmacies.destroy');
@@ -188,4 +183,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/select', [SelectPharmacyController::class, 'show'])->name('pharmacies.selection');
     Route::get('/switch', [SelectPharmacyController::class, 'switch'])->name('pharmacies.switch');
     Route::post('/select', [SelectPharmacyController::class, 'set'])->name('pharmacies.set');
+});
+
+Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {
+    Route::post('pharmacies', [PharmacyController::class, 'store'])->name('pharmacies.store');
 });

@@ -163,18 +163,19 @@
                         <div id="salesFields">
                             <div class="row mb-3 sale-entry align-items-center">
                                 <input type="text" name="stock_id[]" hidden required>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <label for="medicines" class="form-label">Medicine</label>
                                     <select name="item_id[]" class="form-select chosen" required>
                                         <option selected value=""></option>
                                         @foreach ($medicines as $medicine)
-                                            <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}
+                                            <option value="{{ $medicine->id }}">
+                                                {{ $medicine->item->name }} <br><strong class="text-danger">Exp:({{ \Carbon\Carbon::parse($medicine->expire_date)->format('m/Y') }})</strong>
                                             </option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Unit Price(TZS)</label>
+                                <div class="col-md-2">
+                                    <label class="form-label">Price(TZS)</label>
                                     <input type="text" class="form-control" placeholder="Price" name="total_price[]"
                                         value="0" readonly required>
                                 </div>
@@ -259,7 +260,7 @@
                 const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
 
                 // Find the selected medicine
-                const selectedMedicine = medicines.find(medicine => medicine.item.id == selectedMedicineId);
+                const selectedMedicine = medicines.find(medicine => medicine.id == selectedMedicineId);
 
                 row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
                 // console.log(selectedMedicine.id);
@@ -308,16 +309,17 @@
 
                 newRow.innerHTML = `
                             <input type="text" name="stock_id[]" hidden required>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <select name="item_id[]" data-row-id="item_id[]" class="form-select chosen" required>
                                     <option selected disabled value="">Select Item</option>
                                     @foreach ($medicines as $medicine)
-                                        <option value="{{ $medicine->item->id }}">{{ $medicine->item->name }}
-                                        </option>
+                                        <option value="{{ $medicine->id }}">
+                                                {{ $medicine->item->name }} <br><strong class="text-danger">Exp:({{ \Carbon\Carbon::parse($medicine->expire_date)->format('m/Y') }})</strong>
+                                            </option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <input type="text" class="form-control" VALUE="0" name="total_price[]" readonly required>
                             </div>
                             <div class="col-md-2">

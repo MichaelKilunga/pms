@@ -35,6 +35,19 @@ class Eligible
         $user = Auth::user();
         $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
 
+        if (!$pharmacy && Auth::user()->role == 'owner') {
+            // return redirect()->route('dashboard')->with('error', 'No pharmacy found in the session.');
+            // $owner = Auth::user();
+            if(Auth::user()->pharmacies->count() < 1){
+                if ($action == "create pharmacy") {
+                    return $next($request);
+                }
+
+                if ($action != "create pharmacy") {
+                    return redirect()->route('dashboard')->with('info', 'You don\'t have any pharmacy, select or create one to continue!');
+                }
+            }
+        }
 
         // Determine the owner
         $owner = match ($user->role) {
@@ -43,12 +56,6 @@ class Eligible
             default => null,
         };
 
-        if (!$pharmacy && Auth::user()->role == 'owner') {
-            // return redirect()->route('dashboard')->with('error', 'No pharmacy found in the session.');
-            // $owner = Auth::user();
-            if ($action == 'create pharmacy')
-                return $next($request);
-        }
 
         if (!$owner) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
@@ -70,7 +77,7 @@ class Eligible
                         'warning'
                     );
 
-                    $redirectRoute = $user->role === 'staff' ? 'dashboard' : 'myContracts';
+                    $redirectRoute = $user->role == 'staff' ? 'dashboard' : 'myContracts';
                     return redirect()->route($redirectRoute)->with('error', 'You do not have an active subscription plan.');
                 }
                 break;

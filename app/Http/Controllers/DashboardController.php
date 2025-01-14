@@ -133,7 +133,7 @@ class DashboardController extends Controller
         if (Auth::user()->role == 'owner') {
 
             if (Auth::user()->contracts->where('is_current_contract', 1)->count() < 1) {
-                return redirect()->route('myContracts')->with('info', 'Subscribe first to continue using our products!');
+                return redirect()->route('myContracts')->with('info', 'Welcome on board! Subscribe first to continue using our products!');
             }
 
             $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();

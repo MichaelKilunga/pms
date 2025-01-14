@@ -168,7 +168,7 @@
                                                         <div class="mb-3">
                                                             <label for="buying_price" class="form-label">Buying
                                                                 Price</label>
-                                                            <input type="number" class="form-control"
+                                                            <input type="number" class="form-control"  {{$stock->quantity == $stock->remain_Quantity ? '': 'readonly'}} 
                                                                 name="buying_price" value="{{ $stock->buying_price }}"
                                                                 required>
                                                         </div>
@@ -176,7 +176,7 @@
                                                         <div class="mb-3">
                                                             <label for="selling_price" class="form-label">Selling
                                                                 Price</label>
-                                                            <input type="number" class="form-control"
+                                                            <input type="number" class="form-control"  {{$stock->quantity == $stock->remain_Quantity ? '': 'readonly'}} 
                                                                 name="selling_price" value="{{ $stock->selling_price }}"
                                                                 required>
                                                         </div>
@@ -184,7 +184,7 @@
                                                         <div class="mb-3">
                                                             <label for="quantity" class="form-label">Stocked
                                                                 Quantity</label>
-                                                            <input type="number" class="form-control" name="quantity"
+                                                            <input type="number" class="form-control" {{$stock->quantity == $stock->remain_Quantity ? '': 'readonly'}} name="quantity"
                                                                 value="{{ $stock->quantity }}" required>
                                                         </div>
                                                         <div class="mb-3">
@@ -196,8 +196,7 @@
                                                                 title="You cannot edit">
                                                         </div>
                                                         <div class="mb-3">
-                                                            <label for="quantity" class="form-label">Low stock
-                                                                percentage(%)</label>
+                                                            <label for="quantity" class="form-label">Low stock</label>
                                                             <input type="number" class="form-control"
                                                                 name="low_stock_percentage"
                                                                 value="{{ $stock->low_stock_percentage }}" required>
@@ -210,7 +209,7 @@
                                                         <div class="mb-3">
                                                             <label for="expire_date" class="form-label">Expire
                                                                 Date</label>
-                                                            <input type="date" class="form-control" name="expire_date"
+                                                            <input type="date" class="form-control" name="expire_date"  {{$stock->quantity == $stock->remain_Quantity ? '': 'readonly'}} 
                                                                 value="{{ $stock->expire_date }}" required>
                                                         </div>
                                                         <button type="submit" class="btn btn-success">Update

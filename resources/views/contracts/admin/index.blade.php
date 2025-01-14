@@ -72,7 +72,7 @@
                                 href="{{ route('contracts.admin.confirm', $contract->id) }}"><i
                                     class="bi bi-cash-coin"></i></a>
                             {{-- action button to grace a grace period --}}
-                            <a class="btn btn-warning {{!(\Carbon\Carbon::parse($contract->grace_end_date)) ? '': 'disabled'}} "
+                            <a class="btn btn-warning {{((\Carbon\Carbon::parse($contract->end_date) < now()) && !($contract->grace_end_date)) ? '': 'disabled'}} "
                                 href="javascript:void(0);"
                                 onclick="let daysToAdd = prompt('How many days do you want to add?'); 
                                      if (daysToAdd !== null && !isNaN(daysToAdd)) {

@@ -131,10 +131,10 @@
             // requestNotificationPermission();
 
             // Automatically show the modal if no pharmacy is selected
-            @if (!session('current_pharmacy_id') && Auth::user()->contracts->where('is_current_contract', 1)->count() > 0)
+            @if (!session('current_pharmacy_id'))
                 $('#pharmacyModal').modal('show');
             @endif
-            @if (session('guest-owner') && Auth::user()->contracts->where('is_current_contract', 1)->count() > 0)
+            @if (session('guest-owner'))
                 $('#guestPharmacyModal').modal('show');
             @endif
 

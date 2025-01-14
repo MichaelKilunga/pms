@@ -105,7 +105,7 @@ class StockController extends Controller
         try {
             $request->validate([
                 'item_name' => 'required|array',
-                'item_name.*' => 'required|string|unique:items,name',
+                // 'item_name.*' => 'required|string|unique:items,name',
 
                 'quantity' => 'required|array',
                 'quantity.*' => 'required|integer|min:1',

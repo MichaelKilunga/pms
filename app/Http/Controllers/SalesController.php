@@ -52,28 +52,34 @@ class SalesController extends Controller
     public function store(Request $request)
     {
 
+        // item_id represents the stock_id here
+
         // dd($request->stock_id);
         // Validate the incoming request data for all rows of sales
-        $request->validate([
-            //NIMEIGNORE HIVI DATA NDIO IKAFANYA KAZI
-            // 'pharmacy_id' => 'required|exists:pharmacies,id',
-            // 'staff_id' => 'required|exists:users,id',
+        try {
+            $request->validate([
+                //NIMEIGNORE HIVI DATA NDIO IKAFANYA KAZI
+                // 'pharmacy_id' => 'required|exists:pharmacies,id',
+                // 'staff_id' => 'required|exists:users,id',
 
-            'item_id' => 'required|array',         // Ensure it's an array of item IDs
-            'item_id.*' => 'required|exists:items,id', // Validate each item ID in the array
+                'item_id' => 'required|array',         // Ensure it's an array of item IDs
+                'item_id.*' => 'required|exists:stocks,id', // Validate each item ID in the array
 
-            'quantity' => 'required|array',        // Ensure it's an array of quantities
-            'quantity.*' => 'required|integer|min:1', // Validate each quantity
+                'quantity' => 'required|array',        // Ensure it's an array of quantities
+                'quantity.*' => 'required|integer|min:1', // Validate each quantity
 
-            'total_price' => 'required|array',     // Ensure it's an array of prices
-            'total_price.*' => 'required|numeric', // Validate each total price
+                'total_price' => 'required|array',     // Ensure it's an array of prices
+                'total_price.*' => 'required|numeric', // Validate each total price
 
-            'amount' => 'required|array',     // Ensure it's an array of prices
-            'amount.*' => 'required|numeric', // Validate each total price
+                'amount' => 'required|array',     // Ensure it's an array of prices
+                'amount.*' => 'required|numeric', // Validate each total price
 
-            'date' => 'required|array',            // Ensure it's an array of dates
-            'date.*' => 'required|date',           // Validate each date
-        ]);
+                'date' => 'required|array',            // Ensure it's an array of dates
+                'date.*' => 'required|date',           // Validate each date
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Not added because: ' . $e->getMessage());
+        }
 
 
         // Retrieve the pharmacy_id and staff_id for the sale record
@@ -83,27 +89,29 @@ class SalesController extends Controller
 
 
         // Loop through the arrays of item data and create individual sale records
-        foreach ($request->item_id as $key => $item_id) {
+        try {
+            foreach ($request->item_id as $key => $item_id) {
 
-            //update remaning stock
-            $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('item_id', $item_id)->first();
-            $remainQuantity = $stock->remain_Quantity - $request->quantity[$key];
-            $stock->update(['remain_Quantity' => $remainQuantity]);
+                //update remaning stock
+                $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $item_id)->first();
+                $remainQuantity = $stock->remain_Quantity - $request->quantity[$key];
+                $stock->update(['remain_Quantity' => $remainQuantity]);
 
-            // dd($request);
-            Sales::create([
-                'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
-                'staff_id' => $staffId,                // Use the staff_id from the authenticated user
-                'item_id' => $item_id,
-                'quantity' => $request->quantity[$key],
-                'stock_id' => $request->stock_id[$key],
-                'total_price' => $request->amount[$key],
-                'date' => $request->date[$key],
-            ]);
+                // dd($request);
+                Sales::create([
+                    'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
+                    'staff_id' => $staffId,                // Use the staff_id from the authenticated user
+                    'item_id' => $stock->item_id,
+                    'quantity' => $request->quantity[$key],
+                    'stock_id' => $request->stock_id[$key],
+                    'total_price' => $request->amount[$key],
+                    'date' => $request->date[$key],
+                ]);
+            }
+            return redirect()->route('sales')->with('success', 'Sales recorded successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Not added because: ' . $e->getMessage());
         }
-
-        // Redirect with a success message
-        return redirect()->route('sales')->with('success', 'Sales recorded successfully.');
     }
 
 
@@ -259,7 +267,7 @@ class SalesController extends Controller
     //implement function for printing a specific receipt after receiving the date of sales made
     public function printReceipt(Request $request)
     {
-        
+
         // dd($salesDate);
         // Validate the date format
         $request->validate([
@@ -267,13 +275,13 @@ class SalesController extends Controller
         ]);
 
         // dd($request->date);
-        
+
         // Get the sales data for the current pharmacy group for the specified date, but ensure the date is in datetime datatype to match the date in the database
         $receipt = Sales::where('pharmacy_id', session('current_pharmacy_id'))
             ->where('date', $request->date)
             ->selectRaw('date, sum(total_price) as total_amount, staff_id')
             ->groupBy('date', 'staff_id')
-            ->first();        
+            ->first();
 
         if (!$receipt) {
             return redirect()->back()->with('error', 'No sales data found for the specified date.');
@@ -301,16 +309,16 @@ class SalesController extends Controller
             // Prepare the receipt content
             $printer->setJustification(Printer::JUSTIFY_CENTER);
             $printer->text("------START OF RECEIPT------\n");
-            $printer->text("Pharmacy: " . session('pharmacy_name')."\n");
-            $printer->text("Address: " . session('location')."\n");
-            $printer->text("Description: Medicine  Purchases\n" );
+            $printer->text("Pharmacy: " . session('pharmacy_name') . "\n");
+            $printer->text("Address: " . session('location') . "\n");
+            $printer->text("Description: Medicine  Purchases\n");
             $printer->text("----------------------------------\n");
 
             $printer->setJustification(Printer::JUSTIFY_LEFT);
             $printer->text("Date:   " . $receipt->date . "\n");
             $printer->text("Pharmacist:   " . $staff->name . "\n");
             $printer->text("Total Amount:  TZS" . number_format($receipt->total_amount, 0) . "\n");
-            $printer->text("For: Medicine \n" );
+            $printer->text("For: Medicine \n");
             $printer->text("----------------------------------\n");
 
             $printer->setJustification(Printer::JUSTIFY_CENTER);
