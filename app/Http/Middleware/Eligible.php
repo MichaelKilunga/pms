@@ -47,6 +47,9 @@ class Eligible
                     return redirect()->route('dashboard')->with('info', 'You don\'t have any pharmacy, select or create one to continue!');
                 }
             }
+            else{
+                return redirect()->route('dashboard')->with('info', 'Select a pharmacy to continue!');
+            }
         }
 
         // Determine the owner

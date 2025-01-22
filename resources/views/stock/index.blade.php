@@ -12,6 +12,8 @@
                     Stock</a>
                 <a href="#" class="btn btn-success" data-bs-toggle="modal"
                     data-bs-target="#createMedicineStockModal">Medicine + Stock</a>
+                <a href="#" class="btn btn-danger" data-bs-toggle="modal"
+                    data-bs-target="#importMedicineStockModal">Import CSV</a>
             </div>
         </div>
 
@@ -168,7 +170,8 @@
                                                         <div class="mb-3">
                                                             <label for="buying_price" class="form-label">Buying
                                                                 Price</label>
-                                                            <input type="number" class="form-control"  {{$stock->quantity == $stock->remain_Quantity ? '': 'readonly'}} 
+                                                            <input type="number" class="form-control"
+                                                                {{ $stock->quantity == $stock->remain_Quantity ? '' : 'readonly' }}
                                                                 name="buying_price" value="{{ $stock->buying_price }}"
                                                                 required>
                                                         </div>
@@ -176,7 +179,8 @@
                                                         <div class="mb-3">
                                                             <label for="selling_price" class="form-label">Selling
                                                                 Price</label>
-                                                            <input type="number" class="form-control"  {{$stock->quantity == $stock->remain_Quantity ? '': 'readonly'}} 
+                                                            <input type="number" class="form-control"
+                                                                {{ $stock->quantity == $stock->remain_Quantity ? '' : 'readonly' }}
                                                                 name="selling_price" value="{{ $stock->selling_price }}"
                                                                 required>
                                                         </div>
@@ -184,8 +188,9 @@
                                                         <div class="mb-3">
                                                             <label for="quantity" class="form-label">Stocked
                                                                 Quantity</label>
-                                                            <input type="number" class="form-control" {{$stock->quantity == $stock->remain_Quantity ? '': 'readonly'}} name="quantity"
-                                                                value="{{ $stock->quantity }}" required>
+                                                            <input type="number" class="form-control"
+                                                                {{ $stock->quantity == $stock->remain_Quantity ? '' : 'readonly' }}
+                                                                name="quantity" value="{{ $stock->quantity }}" required>
                                                         </div>
                                                         <div class="mb-3">
                                                             <label for="quantity" class="form-label">Remain
@@ -209,7 +214,8 @@
                                                         <div class="mb-3">
                                                             <label for="expire_date" class="form-label">Expire
                                                                 Date</label>
-                                                            <input type="date" class="form-control" name="expire_date"  {{$stock->quantity == $stock->remain_Quantity ? '': 'readonly'}} 
+                                                            <input type="date" class="form-control" name="expire_date"
+                                                                {{ $stock->quantity == $stock->remain_Quantity ? '' : 'readonly' }}
                                                                 value="{{ $stock->expire_date }}" required>
                                                         </div>
                                                         <button type="submit" class="btn btn-success">Update
@@ -230,7 +236,8 @@
     </div>
 
 
-    <!-- Create Stock Modal -->
+
+    {{-- <!-- Create Stock Modal --> --}}
     <div class="modal fade" id="createStockModal" tabindex="-1" aria-labelledby="createStockModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -313,7 +320,7 @@
         </div>
     </div>
 
-    <!-- Create Stock Modal -->
+    <!-- Create Medicine + Stock Modal -->
     <div class="modal fade" id="createMedicineStockModal" tabindex="-1" aria-labelledby="createMedicineStockModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -386,6 +393,45 @@
                     </form>
 
 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Create a modal to Import Medicine and Stock from csv file --}}
+    <div class="modal fade" id="importMedicineStockModal" tabindex="-1" aria-labelledby="importMedicineStockModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header text-center bg-primary text-white">
+                    <h5 class="modal-title" id="importMedicineStockModalLabel">Import Medicines and Stock</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form action="{{ route('importMedicineStock') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="mb-3">
+                            {{-- Indicate fields required in the label --}}
+                            <label for="file" class="form-label fw-bold">Select CSV File, (Colums:<small
+                                    class="smallest text-danger"> item_name, buying_price, selling_price, quantity,
+                                    low_stock_percentage, expire_date, supplier</small>) </label>
+                            <input type="file" class="form-control" name="file" accept=".csv" required>
+                        </div>
+                        <div class="col-12# col-sm-6# col-md-6 col-lg-2#" hidden>
+                            <label class="form-label fw-bold">Stock batch Number</label>
+                            <input placeholder="1234" id="batch_number__" type="text"
+                                class="rounded form-control shadow-sm" name="batch_number__" readonly required>
+                        </div>
+                        <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
+                            <label class="form-label fw-bold">In Date</label>
+                            <input type="text" class="form-control shadow-sm" name="in_date"
+                                value="{{ now() }}" required readonly>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-upload"></i> Import
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -517,6 +563,7 @@
             const formattedDate = `${year}${month}${day}`; // Combine to form YYYYMMDD format
             $('#batch_number').val(formattedDate); // Use .val() to set the value of the input
             $('#batch_number_').val(formattedDate); // Use .val() to set the value of the input
+            $('#batch_number__').val(formattedDate); // Use .val() to set the value of the input
         });
     </script>
 @endsection

@@ -19,6 +19,9 @@ use Mike42\Escpos\Printer;
 
 class SalesController extends Controller
 {
+    //create a printer's name variable
+    private $printerName;
+
     /**
      * Display a listing of sales.
      */
@@ -108,6 +111,9 @@ class SalesController extends Controller
                     'date' => $request->date[$key],
                 ]);
             }
+            //call the function to print the last receipt
+            $this->printLastReceipt();
+
             return redirect()->route('sales')->with('success', 'Sales recorded successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Not added because: ' . $e->getMessage());
@@ -181,6 +187,10 @@ class SalesController extends Controller
             ->first();
         $staff = User::where('id', $lastReceipt->staff_id)->first();
 
+        $medicines = Sales::where('pharmacy_id', session('current_pharmacy_id'))->with('item')
+            ->where('date', $lastReceipt->date)
+            ->get();
+
         if (!$lastReceipt) {
             return redirect()->back()->with('error', 'No sales data found for the last receipt.');
         }
@@ -211,6 +221,11 @@ class SalesController extends Controller
             $printer->setJustification(Printer::JUSTIFY_LEFT);
             $printer->text("Date:   " . $lastReceipt->date . "\n");
             $printer->text("Pharmacist:   " . $staff->name . "\n");
+            $printer->text("Medicine: \n");
+            //list medicines sold
+            foreach ($medicines as $medicine) {
+                $printer->text("\t\t" . $medicine->item->name . "\n");
+            }
             $printer->text("Total Amount:  TZS" . number_format($lastReceipt->total_amount, 0) . "\n");
             $printer->text("----------------------------------\n");
 
@@ -224,14 +239,22 @@ class SalesController extends Controller
             // Close the printer connection
             $printer->close();
 
+            //clear the printer queue
+            // $this->clearPrinterQueue($this->printerName);
+
             return redirect()->back()->with('success', 'Last receipt printed successfully.');
         } catch (\Exception $e) {
+
+            //clear the printer queue
+            // $this->clearPrinterQueue($this->printerName);
+
             return redirect()->back()->with('error', 'Error printing last receipt: ' . $e->getMessage());
         }
     }
 
     private function getConnectedPrinterName()
     {
+
         if (PHP_OS_FAMILY === 'Windows') {
             // Get the default printer name using WMIC
             $output = shell_exec('wmic printer where "Default=True" get Name /value');
@@ -241,6 +264,9 @@ class SalesController extends Controller
                 preg_match('/Name=(.+)/', $output, $matches);
                 if (isset($matches[1])) {
                     $printerName = trim($matches[1]);
+                    // store the printer name in a variable
+                    $this->printerName = $printerName;
+
                     $computerName = getenv('COMPUTERNAME'); // Get the computer's name
 
                     // Try using SMB path format
@@ -287,6 +313,11 @@ class SalesController extends Controller
             return redirect()->back()->with('error', 'No sales data found for the specified date.');
         }
 
+
+        $medicines = Sales::where('pharmacy_id', session('current_pharmacy_id'))->with('item')
+            ->where('date', $receipt->date)
+            ->get();
+
         $staff = User::where('id', $receipt->staff_id)->first();
 
         // dd($staff->name);
@@ -314,16 +345,24 @@ class SalesController extends Controller
             $printer->text("Description: Medicine  Purchases\n");
             $printer->text("----------------------------------\n");
 
-            $printer->setJustification(Printer::JUSTIFY_LEFT);
-            $printer->text("Date:   " . $receipt->date . "\n");
-            $printer->text("Pharmacist:   " . $staff->name . "\n");
-            $printer->text("Total Amount:  TZS" . number_format($receipt->total_amount, 0) . "\n");
-            $printer->text("For: Medicine \n");
-            $printer->text("----------------------------------\n");
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("Date:" . $receipt->date . "\n");
+            $printer->text("Pharmacist:" . $staff->name . "\n");
+
+            $printer->text("Medicines:");
+            //list medicines sold
+            foreach ($medicines as $medicine) {
+                $printer->text($medicine->item->name . "\n" . "\r            \r");
+            }
 
             $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("----------------------------------\n");
+            $printer->text("\r        \rTotal Amount:  TZS " . number_format($receipt->total_amount, 0) . "/= \n");
+            // $printer->text("For: Medicine \n");
+            $printer->text("----------------------------------\n");
+
             $printer->text("Thank you for your purchase!\n");
-            $printer->feed(3); // Feed 3 lines
+            $printer->feed(1); // Feed 3 lines
             $printer->text("------END OF RECEIPT------\n");
 
             // Cut the paper
@@ -332,9 +371,48 @@ class SalesController extends Controller
             // Close the printer connection
             $printer->close();
 
+            //clear the printer queue
+            // $this->clearPrinterQueue($this->printerName);
+
             return redirect()->back()->with('success', 'Receipt printed successfully.');
         } catch (\Exception $e) {
+
+            //clear the printer queue
+            // $this->clearPrinterQueue($this->printerName);
+
             return redirect()->back()->with('error', 'Error printing receipt: ' . $e->getMessage());
+        }
+    }
+
+    //implement function for clearing the printer queue
+    public function clearPrinterQueue($printerName)
+    {
+        try {
+            // Stop the Spooler service
+            exec('net stop spooler', $output, $statusStop);
+            if ($statusStop !== 0) {
+                throw new \Exception("Failed to stop spooler service. Output: " . implode("\n", $output));
+            }
+
+            // Get the printer queue folder path
+            $printerSpoolPath = 'C:\\Windows\\System32\\spool\\PRINTERS\\*';
+
+            // Clear only the jobs related to the specific printer
+            exec('del /Q /F ' . $printerSpoolPath, $output, $statusDel);
+            if ($statusDel !== 0) {
+                throw new \Exception("Failed to clear printer queue. Output: " . implode("\n", $output));
+            }
+
+            // Restart the Spooler service
+            exec('net start spooler', $output, $statusStart);
+            if ($statusStart !== 0) {
+                throw new \Exception("Failed to restart spooler service. Output: " . implode("\n", $output));
+            }
+
+            // return "Printer queue cleared successfully for printer: $printerName";
+            return;
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
         }
     }
 }

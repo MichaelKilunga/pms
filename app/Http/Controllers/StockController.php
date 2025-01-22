@@ -11,6 +11,9 @@ use App\Models\Staff;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 
 class StockController extends Controller
@@ -136,10 +139,10 @@ class StockController extends Controller
             return redirect()->back()->withInput()->with('error', "Data  not added because: " . $e->getMessage());
         }
 
-        
+
         $pharmacy_id = session('current_pharmacy_id');
         $staff_id = Auth::user()->id;
-        
+
         //a loop to add the medicine name to the items table and stock to the stock table
         foreach ($request->item_name as $index => $item_name) {
             $item = Items::create([
@@ -206,7 +209,7 @@ class StockController extends Controller
         }
 
         $request['remain_Quantity'] = $request['quantity'];
-        
+
         $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $request->id)->first();
         $stock->update($request->only('quantity', 'low_stock_percentage', 'remain_Quantity', 'buying_price', 'selling_price', 'supplier', 'in_date', 'expire_date'));
 
@@ -221,5 +224,97 @@ class StockController extends Controller
         $stock = Stock::destroy($request->id);
 
         return redirect()->route('stock')->with('success', 'Stock deleted successfully.');
+    }
+
+    /**
+     * Import stock from a CSV file.
+     */
+    public function import(Request $request)
+    {
+        // dd($request->all());
+        try {
+            $request->validate([
+                'file' => 'required|file|mimes:csv,txt',
+                'batch_number__' => 'required|integer',
+                'in_date' => 'required|date',
+            ]);
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Error processing the file: ' . $e->getMessage());
+        }
+
+        try {
+            $file = $request->file('file');
+            $data = array_map('str_getcsv', file($file));
+
+            // Extract the header and rows
+            $header = array_map('strtolower', $data[0]);
+            unset($data[0]);
+            $rows = $data;
+
+            $pharmacy_id = session('current_pharmacy_id');
+            $staff_id = Auth::user()->id;
+
+            foreach ($rows as $row) {
+                $row = array_combine($header, $row);
+
+                // Validate each row
+                try {
+                    $validator = Validator::make($row, [
+                        'item_name' => 'required|string|max:255',
+                        'buying_price' => 'required|numeric|min:0',
+                        'selling_price' => 'required|numeric|min:0',
+                        'quantity' => 'required|integer|min:1',
+                        'low_stock_percentage' => 'required|integer|min:1',
+                        'expire_date' => 'required|date',
+                        'supplier' => 'required|string|max:255',
+                    ]);
+                } catch (Exception $e) {
+                    throw new Exception('Validate File input\'s error: '.$e->getMessage());
+                }
+
+
+                // if ($validator->fails()) {
+                //     throw new Exception('Validate File data error: '.$validator->errors()->first());
+                // }
+
+                // if ($validator->fails()) {
+                //     return redirect()->back()->withErrors($validator)->with('error', 'Validation error in CSV data.');
+                // }
+
+                // Check if the item exists
+                try {
+                    $item = Items::firstOrCreate(
+                        ['name' => $row['item_name'], 'pharmacy_id' => $pharmacy_id],
+                        ['category_id' => 1]
+                    );
+                } catch (Exception $e) {
+                    throw new Exception('Create Medicine Error: ' . $e->getMessage());
+                }
+
+                // Add stock
+                try {
+                    Stock::create([
+                        'pharmacy_id' => $pharmacy_id,
+                        'staff_id' => $staff_id,
+                        'item_id' => $item->id,
+                        'quantity' => $row['quantity'],
+                        'remain_quantity' => $row['quantity'],
+                        'low_stock_percentage' => $row['low_stock_percentage'],
+                        'buying_price' => $row['buying_price'],
+                        'selling_price' => $row['selling_price'],
+                        'expire_date' => $row['expire_date'],
+                        'supplier' => $row['supplier'],
+                        'in_date' => $request->in_date,
+                        'batch_number' => $request->batch_number__,
+                    ]);
+                } catch (Exception $e) {
+                    throw new Exception('Create Stock Error: ' . $e->getMessage());
+                }
+            }
+            return redirect()->route('stock')->with('success', 'Medicines and stock imported successfully!');
+        } catch (Exception $e) {
+
+            return redirect()->back()->with('error', 'Error processing the file: ' . $e->getMessage());
+        }
     }
 }

@@ -197,6 +197,7 @@
                 @endif
             });
 
+            //LOADER
             $(document).ready(function() {
                 $('#loader-overlay').hide(); // Hide loader initially
 
