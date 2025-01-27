@@ -9,12 +9,14 @@ use Illuminate\Support\Facades\DB;
 use  Illuminate\Support\Carbon;
 use App\Models\Staff;
 use App\Models\Items;
+use App\Models\PrinterSetting;
 use App\Models\Sales;
 use App\Models\Stock;
 use App\Models\User;
 use App\Notifications\InAppNotification;
 use App\Notifications\WelcomeNotification;
 use App\Notifications\SmsNotification;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\get;
@@ -316,5 +318,68 @@ class DashboardController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function storePrinterSettings(Request $request)
+    {
+        try {
+            $request->validate([
+                'printer' => 'required|string',
+                'ip_address' => 'required|ip',
+                'port' => 'nullable|numeric'
+            ]);
+
+            // Save printer configuration (e.g., in the database)
+            $printerName = $request->input('printer');
+            $ipAddress = $request->input('ip_address');
+            $port = $request->input('port');
+
+            // check if pharmacy has printer configuration
+            $printer = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
+
+            if ($printer) {
+                // Update printer configuration
+                $printer->update([
+                    'name' => $printerName,
+                    'ip_address' => $ipAddress,
+                    'port' => $port
+                ]);
+                // Example logic for updating or logging printer details
+                Log::info("Printer updated: $printerName by IP: $ipAddress");
+                return redirect()->back()->with('success', 'Printer configuration updated successfully.');
+            } else{
+                // Save printer configuration
+                PrinterSetting::create([
+                    'name' => $printerName,
+                    'ip_address' => $ipAddress,
+                    'port' => $port,
+                    'pharmacy_id' => session('current_pharmacy_id')
+                ]);
+
+                // set printer configuration session
+                session(['printer' => $printerName]);
+                session(['printer_ip_address' => $ipAddress]);
+
+                // Example logic for storing or logging printer details
+                Log::info("Printer selected: $printerName by IP: $ipAddress");
+                return redirect()->back()->with('success', 'Printer configuration saved successfully.');
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    // function to get printer settings
+    public function setPrinterSettings()
+    {
+        $printer = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
+        if ($printer) {
+            session(['printer' => $printer->name]);
+            session(['printer_ip_address' => $printer->ip_address]);
+            session(['printer_port' => $printer->port]);
+        }else {
+            redirect()->route('sales')->with('error', 'No printer configuration found.');
+        }
+        return;
     }
 }

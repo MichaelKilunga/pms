@@ -158,7 +158,7 @@
                     // timer: 2000
                 });
             @endif
-            
+
             @if (session('info'))
                 Swal.fire({
                     icon: 'info',
@@ -337,34 +337,12 @@
             setInterval(checkNotifications, 15000); // 60000 ms = 1 minute
         });
 
-        // function requestNotificationPermission() {
-        //     if ("Notification" in window) {
-        //         if (Notification.permission === "default") {
-        //             Notification.requestPermission().then(permission => {
-        //                 if (permission === "granted") {
-        //                     console.log("Notification permission granted.");
-        //                 } else {
-        //                     console.log("Notification permission denied.");
-        //                 }
-        //             });
-        //         } else if (Notification.permission === "granted") {
-        //             console.log("Notifications are already enabled.");
-        //         } else {
-        //             console.log("User has denied notifications.");
-        //         }
-        //     } else {
-        //         console.error("This browser does not support notifications.");
-        //     }
-        // }
-
-        // function showBrowserNotification(message) {
-        //     if (Notification.permission === "granted") {
-        //         new Notification("New Notification", {
-        //             body: message,
-        //             icon: "/icons/bell-860.png", // Optional: Add a path to your notification icon
-        //         });
-        //     }
-        // }
+        //capture active printers and append them to the modal select dropdown after id="selectPrinter"
+        $(document).ready(function() {
+            if(true){
+                $('#printerModal').modal('show');
+            }
+        });
     </script>
 
     {{-- CLOCK TIMER --}}

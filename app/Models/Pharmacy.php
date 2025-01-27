@@ -47,4 +47,9 @@ class Pharmacy extends Model
     {
         return $this->hasMany(Sales::class);
     }
+
+    public function printerSetting()
+    {
+        return $this->hasOne(PrinterSetting::class);
+    }
 }

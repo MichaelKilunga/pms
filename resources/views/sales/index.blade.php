@@ -169,7 +169,8 @@
                                         <option selected value=""></option>
                                         @foreach ($medicines as $medicine)
                                             <option value="{{ $medicine->id }}">
-                                                {{ $medicine->item->name }} <br><strong class="text-danger">Exp:({{ \Carbon\Carbon::parse($medicine->expire_date)->format('m/Y') }})</strong>
+                                                {{ $medicine->item->name }} <br><strong
+                                                    class="text-danger">Exp:({{ \Carbon\Carbon::parse($medicine->expire_date)->format('m/Y') }})</strong>
                                             </option>
                                         @endforeach
                                     </select>
@@ -227,6 +228,41 @@
             </div>
         </div>
     </div>
+
+
+    {{-- A MODAL FOR SELECTING PRINTERS FROM THE LIST OF ACTIVE PRINTERS, MODAL SHOULD DETECT ACTIVE PRINTERS
+         USING JS AND RETURN THEM AS A DROP-DOWN LIST, USER WILL SELECT THE PRINTER HE/SHE WANTS AND SUBMIT,
+         USER SHOULD ONLY SELECT WHILE THE FORM SHOULD CATCH IP address and Printe's path using JS --}}
+    {{-- Modal for Selecting Printers --}}
+    @if (!session('printer'))
+        <div class="modal fade" id="printerModal" tabindex="-1" aria-labelledby="printerModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="printerModalLabel">Select Printer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <form action="{{ route('printer.store') }}" method="POST">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="printer" class="form-label">Printer's Name</label>
+                                <input type="text" class="form-control" id="printer" name="printer"
+                                    placeholder="TM-20ll Receipt" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ip_address" class="form-label">IP Address</label>
+                                <input type="text" class="form-control" id="ip_address" name="ip_address"
+                                    placeholder="192.168.0.123" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- Scripts -->
     <script>

@@ -14,11 +14,26 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session as FacadesSession;
 use Mike42\Escpos\PrintConnectors\FilePrintConnector;
+use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\Printer;
 
-class SalesController extends Controller
+use Illuminate\Routing\Controller as BaseController;
+
+class SalesController extends BaseController
 {
+    // get printer configuration from the database using setPrinterConfig function from dashboard controller
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $dashboard = new DashboardController();
+            $dashboard->setPrinterSettings();
+            return $next($request);
+        });
+    }
+
+
+
     //create a printer's name variable
     private $printerName;
 
@@ -185,48 +200,55 @@ class SalesController extends Controller
             ->groupBy('date', 'staff_id')
             ->latest('date')
             ->first();
+
+        // Check if receipt exists
+        if (!$lastReceipt) {
+            return redirect()->back()->with('error', 'No sales data found for the last receipt.');
+        }
+
         $staff = User::where('id', $lastReceipt->staff_id)->first();
 
         $medicines = Sales::where('pharmacy_id', session('current_pharmacy_id'))->with('item')
             ->where('date', $lastReceipt->date)
             ->get();
 
-        if (!$lastReceipt) {
-            return redirect()->back()->with('error', 'No sales data found for the last receipt.');
-        }
-
         try {
-            // Automatically detect the active printer name and path
-            $printerPath = $this->getConnectedPrinterName();
+            // Retrieve printer details from the session
+            $printerName = session('printer');
+            $printerIp = session('printer_ip_address');
 
-            // dd(session('location'));
-
-            if (!$printerPath) {
-                throw new \Exception("No connected printer detected.");
+            // Validate printer details
+            if (!$printerName || !$printerIp) {
+                throw new \Exception("Printer details are missing. Please select a printer first.");
             }
+
+            // Get the network printer path
+            $printerPath = $this->getConnectedPrinterName($printerName, $printerIp);
 
             // Log the printer path for debugging
             Log::info('Using Printer Path: ' . $printerPath);
 
-            // Initialize the printer connection using the network printer path
-            $connector = new WindowsPrintConnector($printerPath);
+            // Initialize the printer connection
+            $connector = new WindowsPrintConnector($printerPath, 9100); // Port 9100 is standard for network printers
             $printer = new Printer($connector);
 
             // Prepare the receipt content
             $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text("Pharmacy: \n" . session('pharmacy_name'));
-            $printer->text("Address: \n" . session('location'));
+            $printer->text("Pharmacy: \n" . session('pharmacy_name') . "\n");
+            $printer->text("Address: \n" . session('location') . "\n");
             $printer->text("----------------------------------\n");
 
             $printer->setJustification(Printer::JUSTIFY_LEFT);
             $printer->text("Date:   " . $lastReceipt->date . "\n");
             $printer->text("Pharmacist:   " . $staff->name . "\n");
-            $printer->text("Medicine: \n");
-            //list medicines sold
+            $printer->text("Medicines:\n");
+
+            // List medicines sold
             foreach ($medicines as $medicine) {
-                $printer->text("\t\t" . $medicine->item->name . "\n");
+                $printer->text("\t" . $medicine->item->name . "\n");
             }
-            $printer->text("Total Amount:  TZS" . number_format($lastReceipt->total_amount, 0) . "\n");
+
+            $printer->text("Total Amount:  TZS " . number_format($lastReceipt->total_amount, 0) . "\n");
             $printer->text("----------------------------------\n");
 
             $printer->setJustification(Printer::JUSTIFY_CENTER);
@@ -239,56 +261,36 @@ class SalesController extends Controller
             // Close the printer connection
             $printer->close();
 
-            //clear the printer queue
-            // $this->clearPrinterQueue($this->printerName);
-
             return redirect()->back()->with('success', 'Last receipt printed successfully.');
         } catch (\Exception $e) {
-
-            //clear the printer queue
-            // $this->clearPrinterQueue($this->printerName);
-
+            Log::error('Error printing receipt: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error printing last receipt: ' . $e->getMessage());
         }
     }
 
-    private function getConnectedPrinterName()
+    private function getConnectedPrinterName($printerName, $printerIp)
     {
-
-        if (PHP_OS_FAMILY === 'Windows') {
-            // Get the default printer name using WMIC
-            $output = shell_exec('wmic printer where "Default=True" get Name /value');
-
-            if ($output) {
-                // Extract the printer name
-                preg_match('/Name=(.+)/', $output, $matches);
-                if (isset($matches[1])) {
-                    $printerName = trim($matches[1]);
-                    // store the printer name in a variable
-                    $this->printerName = $printerName;
-
-                    $computerName = getenv('COMPUTERNAME'); // Get the computer's name
-
-                    // Try using SMB path format
-                    $printerPath = 'smb://' . $computerName . '/' . $printerName;
-
-                    // Log the path to confirm it is correct
-                    Log::info('Detected printer path: ' . $printerPath);
-
-                    return $printerPath;
-                }
-            }
-        } elseif (PHP_OS_FAMILY === 'Linux') {
-            // Typical USB printer path for Linux
-            $usbPrinter = '/dev/usb/lp0';
-            if (file_exists($usbPrinter)) {
-                return $usbPrinter;
-            }
+        if (!$printerName || !$printerIp) {
+            throw new \Exception("Printer details are missing.");
         }
 
-        // Fallback: Return null if no printer is detected
-        return null;
+        // Construct the network printer path
+        if (PHP_OS_FAMILY === 'Windows') {
+            // Windows network printer path using SMB notation
+            $computerName = $printerIp; // Using the IP address as the computer name
+            $printerPath = 'smb://' . $computerName . '/' . $printerName;
+        } elseif (PHP_OS_FAMILY === 'Linux') {
+            // Linux network printer path
+            $printerPath = '/dev/usb/' . $printerName;
+        } else {
+            // Fallback for other environments
+            $printerPath = 'smb://' . $printerIp . '/' . $printerName;
+        }
+
+        Log::info('Constructed Printer Path: ' . $printerPath);
+        return $printerPath;
     }
+
 
     //implement function for printing a specific receipt after receiving the date of sales made
     public function printReceipt(Request $request)
@@ -324,7 +326,7 @@ class SalesController extends Controller
 
         try {
             // Automatically detect the active printer name and path
-            $printerPath = $this->getConnectedPrinterName();
+            $printerPath = $this->getConnectedPrinterName(session('printer'), session('printer_ip_address'));
 
             if (!$printerPath) {
                 throw new \Exception("No connected printer detected.");

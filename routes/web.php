@@ -184,6 +184,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/select', [SelectPharmacyController::class, 'show'])->name('pharmacies.selection');
     Route::get('/switch', [SelectPharmacyController::class, 'switch'])->name('pharmacies.switch');
     Route::post('/select', [SelectPharmacyController::class, 'set'])->name('pharmacies.set');
+
+
+    // store printer settings
+    Route::post('/printer', [DashboardController::class, 'storePrinterSettings'])->name('printer.store');
 });
 
 Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {
