@@ -275,13 +275,15 @@ class SalesController extends BaseController
         }
 
         // Construct the network printer path
+        // Windows network printer path using SMB notation
+        $computerName = $printerIp; // Using the IP address as the computer name
+        
         if (PHP_OS_FAMILY === 'Windows') {
-            // Windows network printer path using SMB notation
-            $computerName = $printerIp; // Using the IP address as the computer name
             $printerPath = 'smb://' . $computerName . '/' . $printerName;
         } elseif (PHP_OS_FAMILY === 'Linux') {
             // Linux network printer path
-            $printerPath = '/dev/usb/' . $printerName;
+            // $printerPath = '/dev/usb/' . $printerName;
+            $printerPath = 'smb://' . $computerName . '/' . $printerName;
         } else {
             // Fallback for other environments
             $printerPath = 'smb://' . $printerIp . '/' . $printerName;
