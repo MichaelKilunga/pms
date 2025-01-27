@@ -276,7 +276,8 @@ class SalesController extends BaseController
 
         // Construct the network printer path
         // Windows network printer path using SMB notation
-        $computerName = $printerIp; // Using the IP address as the computer name
+        // $computerName = $printerIp; // Using the IP address as the computer name
+        $computerName = getenv('COMPUTERNAME'); // or hard-code your Windows computer name
         
         if (PHP_OS_FAMILY === 'Windows') {
             $printerPath = 'smb://' . $computerName . '/' . $printerName;
