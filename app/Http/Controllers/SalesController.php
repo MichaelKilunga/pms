@@ -282,8 +282,6 @@ class SalesController extends BaseController
         // $computerName = $printerIp; // Using the IP address as the computer name
         $computerName = isEmpty(getenv('COMPUTERNAME')) ? $computer_name : getenv('COMPUTERNAME'); // or hard-code your Windows computer name
         
-        dd($computerName);
-        
         if (PHP_OS_FAMILY === 'Windows') {
             $printerPath = 'smb://' . $computerName . '/' . $printerName;
         } elseif (PHP_OS_FAMILY === 'Linux') {
