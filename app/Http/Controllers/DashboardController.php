@@ -384,6 +384,10 @@ class DashboardController extends Controller
             session(['computer_name' => $printer->computer_name]);
             session(['printer_port' => $printer->port]);
         } else {
+            session(['printer' => null]);
+            session(['printer_ip_address' => null]);
+            session(['computer_name' => null]);
+            session(['printer_port' => null]);
             redirect()->route('sales')->with('error', 'No printer configuration found.');
         }
         return;
