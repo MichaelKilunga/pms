@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('ip_address');
+            $table->string('computer_name');
             $table->string('port')->nullable();
             $table->foreignId('pharmacy_id')->constrained('pharmacies')->onDelete('cascade');
             $table->timestamps();

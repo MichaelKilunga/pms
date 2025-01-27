@@ -326,12 +326,14 @@ class DashboardController extends Controller
             $request->validate([
                 'printer' => 'required|string',
                 'ip_address' => 'required|ip',
+                'computer_name' => 'required|string',
                 'port' => 'nullable|numeric'
             ]);
 
             // Save printer configuration (e.g., in the database)
             $printerName = $request->input('printer');
             $ipAddress = $request->input('ip_address');
+            $computer_name = $request->input('computer_name');
             $port = $request->input('port');
 
             // check if pharmacy has printer configuration
@@ -342,16 +344,18 @@ class DashboardController extends Controller
                 $printer->update([
                     'name' => $printerName,
                     'ip_address' => $ipAddress,
+                    'computer_name' => $computer_name,
                     'port' => $port
                 ]);
                 // Example logic for updating or logging printer details
                 Log::info("Printer updated: $printerName by IP: $ipAddress");
                 return redirect()->back()->with('success', 'Printer configuration updated successfully.');
-            } else{
+            } else {
                 // Save printer configuration
                 PrinterSetting::create([
                     'name' => $printerName,
                     'ip_address' => $ipAddress,
+                    'computer_name' => $computer_name,
                     'port' => $port,
                     'pharmacy_id' => session('current_pharmacy_id')
                 ]);
@@ -359,6 +363,7 @@ class DashboardController extends Controller
                 // set printer configuration session
                 session(['printer' => $printerName]);
                 session(['printer_ip_address' => $ipAddress]);
+                session(['computer_name' => $computer_name]);
 
                 // Example logic for storing or logging printer details
                 Log::info("Printer selected: $printerName by IP: $ipAddress");
@@ -376,8 +381,9 @@ class DashboardController extends Controller
         if ($printer) {
             session(['printer' => $printer->name]);
             session(['printer_ip_address' => $printer->ip_address]);
+            session(['computer_name' => $printer->computer_name]);
             session(['printer_port' => $printer->port]);
-        }else {
+        } else {
             redirect()->route('sales')->with('error', 'No printer configuration found.');
         }
         return;

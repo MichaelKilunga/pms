@@ -20,6 +20,8 @@ use Mike42\Escpos\Printer;
 
 use Illuminate\Routing\Controller as BaseController;
 
+use function PHPUnit\Framework\isEmpty;
+
 class SalesController extends BaseController
 {
     // get printer configuration from the database using setPrinterConfig function from dashboard controller
@@ -216,6 +218,7 @@ class SalesController extends BaseController
             // Retrieve printer details from the session
             $printerName = session('printer');
             $printerIp = session('printer_ip_address');
+            $computer_name = session('computer_name');
 
             // Validate printer details
             if (!$printerName || !$printerIp) {
@@ -223,7 +226,7 @@ class SalesController extends BaseController
             }
 
             // Get the network printer path
-            $printerPath = $this->getConnectedPrinterName($printerName, $printerIp);
+            $printerPath = $this->getConnectedPrinterName($printerName, $printerIp, $computer_name);
 
             // Log the printer path for debugging
             Log::info('Using Printer Path: ' . $printerPath);
@@ -268,7 +271,7 @@ class SalesController extends BaseController
         }
     }
 
-    private function getConnectedPrinterName($printerName, $printerIp)
+    private function getConnectedPrinterName($printerName, $printerIp, $computer_name)
     {
         if (!$printerName || !$printerIp) {
             throw new \Exception("Printer details are missing.");
@@ -277,7 +280,9 @@ class SalesController extends BaseController
         // Construct the network printer path
         // Windows network printer path using SMB notation
         // $computerName = $printerIp; // Using the IP address as the computer name
-        $computerName = getenv('COMPUTERNAME'); // or hard-code your Windows computer name
+        $computerName = isEmpty(getenv('COMPUTERNAME')) ? $computer_name : getenv('COMPUTERNAME'); // or hard-code your Windows computer name
+        
+        dd($computerName);
         
         if (PHP_OS_FAMILY === 'Windows') {
             $printerPath = 'smb://' . $computerName . '/' . $printerName;
@@ -329,7 +334,7 @@ class SalesController extends BaseController
 
         try {
             // Automatically detect the active printer name and path
-            $printerPath = $this->getConnectedPrinterName(session('printer'), session('printer_ip_address'));
+            $printerPath = $this->getConnectedPrinterName(session('printer'), session('printer_ip_address'), session('computer_name'));
 
             if (!$printerPath) {
                 throw new \Exception("No connected printer detected.");

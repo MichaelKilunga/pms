@@ -256,6 +256,11 @@
                                 <input type="text" class="form-control" id="ip_address" name="ip_address"
                                     placeholder="192.168.0.123" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="computer_name" class="form-label">Computer's Name</label>
+                                <input type="text" class="form-control" id="computer_name" name="computer_name"
+                                    placeholder="DESKTOP-32" required>
+                            </div>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form>
                     </div>
