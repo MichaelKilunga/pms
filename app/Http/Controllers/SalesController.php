@@ -283,13 +283,16 @@ class SalesController extends BaseController
         $computerName = isEmpty(getenv('COMPUTERNAME')) ? $computer_name : getenv('COMPUTERNAME'); // or hard-code your Windows computer name
         
         if (PHP_OS_FAMILY === 'Windows') {
-            $printerPath = 'smb://' . $computerName . '/' . $printerName;
+            // $printerPath = 'smb://' . $computerName . '/' . $printerName;
+            $printerPath = 'smb://' . $printerIp . '/' . $printerName;
         } elseif (PHP_OS_FAMILY === 'Linux') {
             // Linux network printer path
             // $printerPath = '/dev/usb/' . $printerName;
-            $printerPath = 'smb://' . $computerName . '/' . $printerName;
+            // $printerPath = 'smb://' . $computerName . '/' . $printerName;
+            $printerPath = 'smb://' . $printerIp . '/' . $printerName;
         } else {
             // Fallback for other environments
+            // $printerPath = 'smb://' . $printerIp . '/' . $printerName;
             $printerPath = 'smb://' . $printerIp . '/' . $printerName;
         }
 
