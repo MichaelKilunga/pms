@@ -59,14 +59,14 @@
                             <th>Unit Price</th>
                             <th>Status</th>
                             <th>Description</th>
-                            <th>Pharmacy</th>
-                            <th>Staff</th>
+                            {{-- <th>Pharmacy</th>
+                            <th>Staff</th> --}}
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {{-- sample tr --}}
-                        <tr>
+                        {{-- <tr>
                             <td>1</td>
                             <td>Paracetamol</td>
                             <td>10</td>
@@ -83,7 +83,7 @@
                                     data-target="#editSalesNoteModal">Edit</button>
                                 <button class="btn btn-secondary">Delete</button>
                             </td>
-                        </tr>
+                        </tr> --}}
                         @foreach ($salesNotes as $salesNote)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
@@ -92,15 +92,29 @@
                                 <td>{{ $salesNote->unit_price }}</td>
                                 <td>{{ $salesNote->status }}</td>
                                 <td>{{ $salesNote->description }}</td>
-                                <td>{{ $salesNote->pharmacy_id }}</td>
-                                <td>{{ $salesNote->staff_id }}</td>
+                                {{-- <td>{{ $salesNote->pharmacy_id }}</td>
+                                <td>{{ $salesNote->staff_id }}</td> --}}
                                 <td>
-                                    <button class="btn btn-primary">View</button>
-                                    <button class="btn btn-success" data-toggle="modal"
-                                        data-target="#promoteSalesNoteModal">Promote </button>
-                                    <button class="btn btn-danger" data-toggle="modal"
-                                        data-target="#editSalesNoteModal">Edit</button>
-                                    <button class="btn btn-secondary">Delete</button>
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <a href="{{ route('') }}" class="btn btn-success" data-toggle="modal"
+                                                data-target="#promoteSalesNoteModal"><i class="bi bi-upload"> Promote</i>
+                                            </a>
+                                        </div>
+                                        <div> <a href="{{ route('') }}" class="btn btn-primary"><i
+                                                    class="bi bi-eye"></i></a>
+                                        </div>
+                                        <div>
+                                            <a href="{{ route('') }}" class="btn btn-warning" data-toggle="modal"
+                                                data-target="#editSalesNoteModal"><i class="bi bi-pencil"></i></a>
+                                        </div>
+                                        {{-- a form for deleting sales note --}}
+                                        <form class="" action="{{ route('salesNotes.destroy', $salesNote->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-danger"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             {{-- Edit Sales Note Modal --}}
@@ -202,15 +216,36 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body d-flex flex-column">
-                        <input type="text" name="name" placeholder="Name">
-                        <input type="text" name="quantity" placeholder="Quantity">
-                        <input type="text" name="unit_price" placeholder="Unit Price">
-                        <input type="text" name="description" placeholder="Description">
-                        <input type="text" name="pharmacy_id" placeholder="Pharmacy ID">
-                        <input type="text" name="staff_id" placeholder="Staff ID">
+                        <div class="form-floating mb-2">
+                            <input type="text" class="form-control" id="floatingName" name="name"
+                                placeholder="Amoxicillin" required>
+                            <label class="form-label" for="floatingName">Medicine Name</label>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-6 form-floating">
+                                <input type="number" min="1" class="form-control" id="floatingQuantity"
+                                    name="quantity" placeholder="50" required>
+                                <label class="form-label" for="floatingQuantity">Quantity</label>
+                            </div>
+                            <div class="col-md-6 form-floating">
+                                <input type="number" min="1" class="form-control" id="floatingUnitPrice"
+                                    name="unit_price" placeholder="200" required>
+                                <label class="form-label" for="floatingUnitPrice">Unit Price</label>
+                            </div>
+                        </div>
+                        <div class="form-floating mb-2">
+                            <input type="text" class="form-control" id="floatingDescription" name="description"
+                                placeholder="Sold for headache">
+                            <label class="form-label" for="floatingDescription">Description</label>
+                        </div>
+
+                        <input readonly hidden type="text" name="pharmacy_id" placeholder="Pharmacy ID"
+                            value="{{ session('current_pharmacy_id') }}" required>
+                        <input readonly hidden type="text" name="staff_id" placeholder="Staff ID"
+                            value="{{ auth()->id() }}" required>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-secondary " data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Create</button>
                     </div>
                 </form>
