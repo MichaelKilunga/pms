@@ -196,7 +196,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('salesNotes/create', [SaleNoteController::class, 'createSalesNotes'])->name('salesNotes.create');
     Route::post('salesNotes', [SaleNoteController::class, 'storeSalesNotes'])->name('salesNotes.store');
     Route::get('salesNotes/{id}', [SaleNoteController::class, 'showSalesNotes'])->name('salesNotes.show');
-    Route::put('salesNotes', [SaleNoteController::class, 'updateSalesNotes'])->name('salesNotes.update');
+    Route::put('salesNotes', [SaleNoteController::class, 'update'])->name('salesNotes.update');
     Route::delete('salesNotes/delete/{id}', [SaleNoteController::class, 'destroySalesNotes'])->name('salesNotes.destroy');
     Route::get('salesNotes/{id}/edit', [SaleNoteController::class, 'editSalesNotes'])->name('salesNotes.edit');
     //Promote sales Notes to sales

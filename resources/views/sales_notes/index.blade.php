@@ -97,54 +97,84 @@
                                 <td>
                                     <div class="d-flex justify-content-between">
                                         <div>
-                                            <a href="{{ route('') }}" class="btn btn-success" data-toggle="modal"
+                                            <button class="btn btn-success" data-toggle="modal"
                                                 data-target="#promoteSalesNoteModal"><i class="bi bi-upload"> Promote</i>
-                                            </a>
-                                        </div>
-                                        <div> <a href="{{ route('') }}" class="btn btn-primary"><i
-                                                    class="bi bi-eye"></i></a>
+                                            </button>
                                         </div>
                                         <div>
-                                            <a href="{{ route('') }}" class="btn btn-warning" data-toggle="modal"
-                                                data-target="#editSalesNoteModal"><i class="bi bi-pencil"></i></a>
+                                            <button class="btn btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#showSalesNoteModal"><i class="bi bi-eye"></i></button>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-warning" data-bs-toggle="modal"
+                                                data-bs-target="#editSalesNoteModal"><i class="bi bi-pencil"></i></button>
                                         </div>
                                         {{-- a form for deleting sales note --}}
-                                        <form class="" action="{{ route('salesNotes.destroy', $salesNote->id) }}" method="POST">
+                                        <form class="" action="{{ route('salesNotes.destroy', $salesNote->id) }}"
+                                            method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-danger"><i class="bi bi-trash"></i></button>
+                                            <button type="submit" onclick="return confirm('Do you want to delete?')"
+                                                class="btn btn-danger"><i class="bi bi-trash"></i></button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
                             {{-- Edit Sales Note Modal --}}
-                            <div class="modal fade" id="editSalesNoteModal" tabindex="-1" role="dialog"
+                            <div class="modal fade" id="editSalesNoteModal" role="dialog"
                                 aria-labelledby="editSalesNoteModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
-                                        <form action="{{ route('salesNotes.update', $salesNote->id) }}" method="POST">
+                                        <form action="{{ route('salesNotes.update') }}" method="POST">
                                             @csrf
                                             @method('PUT')
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="editSalesNoteModalLabel">Edit Sales Note</h5>
-                                                <button type="button" class="close" data-dismiss="modal"
+                                                <button type="button" class="close" data-bs-dismiss="modal"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
                                             </div>
                                             <div class="modal-body d-flex flex-column">
-                                                <input type="text" name="name" placeholder="Name">
-                                                <input type="text" name="quantity" placeholder="Quantity">
-                                                <input type="text" name="unit_price" placeholder="Unit Price">
-                                                <input type="text" name="description" placeholder="Description">
-                                                <input type="text" name="pharmacy_id" placeholder="Pharmacy ID">
-                                                <input type="text" name="staff_id" placeholder="Staff ID">
-                                                <input type="text" name="status" placeholder="Status">
+                                                <div class="form-floating mb-2">
+                                                    <input type="text" class="form-control" id="floatingName"
+                                                        name="name" placeholder="Amoxicillin" required
+                                                        value="{{ $salesNote->name }}">
+                                                    <label class="form-label" for="floatingName">Medicine Name</label>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-md-6 form-floating">
+                                                        <input type="number" min="1" class="form-control"
+                                                            value="{{ $salesNote->quantity }}" id="floatingQuantity"
+                                                            name="quantity" placeholder="50" required>
+                                                        <label class="form-label" for="floatingQuantity">Quantity</label>
+                                                    </div>
+                                                    <div class="col-md-6 form-floating">
+                                                        <input type="number" min="1" class="form-control"
+                                                            value="{{ $salesNote->unit_price }}" id="floatingUnitPrice"
+                                                            name="unit_price" placeholder="200" required>
+                                                        <label class="form-label" for="floatingUnitPrice">Unit Price</label>
+                                                    </div>
+                                                </div>
+                                                <div class="form-floating mb-2">
+                                                    <input type="text" class="form-control"
+                                                        value="{{ $salesNote->description }}" id="floatingDescription"
+                                                        name="description" placeholder="Sold for headache">
+                                                    <label class="form-label" for="floatingDescription">Description</label>
+                                                </div>
+
+                                                <input readonly hidden type="text" name="pharmacy_id"
+                                                    placeholder="Pharmacy ID" value="{{ $salesNote->pharmacy_id }}"
+                                                    required>
+                                                <input readonly hidden type="text" name="staff_id" placeholder="Staff ID"
+                                                    value="{{ $salesNote->staff_id }}" required>
+                                                <input readonly hidden type="number" name="id" placeholder="Note ID"
+                                                    value="{{ $salesNote->id }}" required>
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary"
-                                                    data-dismiss="modal">Close</button>
-                                                <button type="submit" class="btn btn-primary">Edit</button>
+                                                    data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-primary">Update</button>
                                             </div>
                                         </form>
                                     </div>
@@ -152,7 +182,7 @@
                             </div>
 
                             {{-- Promote Sales Note Modal --}}
-                            <div class="modal fade" id="promoteSalesNoteModal" tabindex="-1" role="dialog"
+                            <div class="modal fade" id="promoteSalesNoteModal" role="dialog"
                                 aria-labelledby="promoteSalesNoteModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
@@ -162,7 +192,7 @@
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="promoteSalesNoteModalLabel">Promote Sales Note
                                                 </h5>
-                                                <button type="button" class="close" data-dismiss="modal"
+                                                <button type="button" class="close" data-bs-dismiss="modal"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
@@ -190,10 +220,43 @@
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary"
-                                                    data-dismiss="modal">Close</button>
+                                                    data-bs-dismiss="modal">Close</button>
                                                 <button type="submit" class="btn btn-primary">Promote</button>
                                             </div>
                                         </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Show sales note --}}
+                            <div class="modal fade bd-example-modal-lg" id="showSalesNoteModal" role="dialog"
+                                aria-labelledby="showSalesNoteModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="showSalesNoteModalLabel">Show Sales Note</h5>
+                                            <button type="button" class="close" data-bs-dismiss="modal"
+                                                aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>Name:</strong> {{ $salesNote->name }}</p>
+                                                    <p><strong>Quantity:</strong> {{ $salesNote->quantity }}</p>
+                                                    <p><strong>Unit Price:</strong> {{ $salesNote->unit_price }}</p>
+                                                    <p><strong>Status:</strong> {{ $salesNote->status }}</p>
+                                                    <p><strong>Description:</strong> {{ $salesNote->description }}</p>
+                                                    {{-- <p><strong>Pharmacy:</strong> {{ $salesNote->pharmacy_id }}</p> --}}
+                                                    <p><strong>Staff:</strong> {{ $salesNote->staff->name }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

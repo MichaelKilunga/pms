@@ -58,28 +58,28 @@ class SaleNoteController extends Controller
      */
     public function storeSalesNotes(Request $request)
     {
-        try{
-        $request->validate([
-            'name' => 'required|string',
-            'quantity' => 'required|numeric|min:1',
-            'unit_price' => 'required|numeric|min:1',
-            'description' => 'nullable|string',
-            'pharmacy_id' => 'required|exists:pharmacies,id',
-            'staff_id' => 'required|exists:users,id',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string',
+                'quantity' => 'required|numeric|min:1',
+                'unit_price' => 'required|numeric|min:1',
+                'description' => 'nullable|string',
+                'pharmacy_id' => 'required|exists:pharmacies,id',
+                'staff_id' => 'required|exists:users,id',
+            ]);
 
-        $saleNote = new SaleNote();
-        $saleNote->name = $request->name;
-        $saleNote->quantity = $request->quantity;
-        $saleNote->unit_price = $request->unit_price;
-        $saleNote->description = $request->description;
-        $saleNote->pharmacy_id = $request->pharmacy_id;
-        $saleNote->staff_id = $request->staff_id;
-        $saleNote->save();
+            $saleNote = new SaleNote();
+            $saleNote->name = $request->name;
+            $saleNote->quantity = $request->quantity;
+            $saleNote->unit_price = $request->unit_price;
+            $saleNote->description = $request->description;
+            $saleNote->pharmacy_id = $request->pharmacy_id;
+            $saleNote->staff_id = $request->staff_id;
+            $saleNote->save();
 
-        return redirect()->route('salesNotes')
-            ->with('success', 'Sale Note created successfully.');
-        }catch(\Exception $e){
+            return redirect()->route('salesNotes')
+                ->with('success', 'Sale Note created successfully.');
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
@@ -103,21 +103,39 @@ class SaleNoteController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, SaleNote $saleNote)
+    public function update(Request $request)
     {
-        //
+        try {
+            $request->validate([
+                'name' => 'required|string',
+                'quantity' => 'required|numeric|min:1',
+                'unit_price' => 'required|numeric|min:1',
+                'description' => 'nullable|string',
+            ]);
+
+            $saleNote = SaleNote::where('id',$request->id)->first();
+            // dd($saleNote->all());
+            // dd($request->all());
+
+            $saleNote->update($request->only('name', 'quantity', 'unit_price', 'description'));
+
+            return redirect()->route('salesNotes')->with('success', 'Sale Note updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroySalesNotes(SaleNote $saleNote)
+    public function destroySalesNotes($saleNoteId)
     {
-        try{
-        $saleNote->delete();
-        return redirect()->route('salesNotes')
-            ->with('success', 'Sale Note deleted successfully.');
-        }catch(\Exception $e){
+        try {
+            // $saleNote->delete();
+            // dd($saleNoteId);
+            SaleNote::destroy($saleNoteId);
+            return redirect()->back()->with('success', 'Sale Note deleted successfully.');
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

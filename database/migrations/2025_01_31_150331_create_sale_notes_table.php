@@ -20,7 +20,7 @@ return new class extends Migration
             //status
             $table->enum('status', ['promoted', 'Unpromoted','rejected'])->default('Unpromoted');
             //description
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             //foreign key for pharmacy id
             $table->foreignId('pharmacy_id')->constrained('pharmacies')->onDelete('cascade');
             //foreign key for staff id
