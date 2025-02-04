@@ -52,4 +52,9 @@ class Pharmacy extends Model
     {
         return $this->hasOne(PrinterSetting::class);
     }
+
+    public function saleNote()
+    {
+        return $this->hasMany(SaleNote::class, 'pharmacy_id');
+    }
 }

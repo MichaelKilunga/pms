@@ -91,4 +91,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Contract::class, 'owner_id');
     }
+
+    public function saleNote()
+    {
+        return $this->hasMany(SaleNote::class, 'staff_id');
+    }
 }

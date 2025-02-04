@@ -22,6 +22,7 @@ use App\Models\Package;
 use App\Notifications\SmsNotification;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ContractUpdateController;
+use App\Http\Controllers\SaleNoteController;
 use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
@@ -188,6 +189,20 @@ Route::middleware(['auth'])->group(function () {
 
     // store printer settings
     Route::post('/printer', [DashboardController::class, 'storePrinterSettings'])->name('printer.store');
+
+
+    //routes for sales notes
+    Route::get('salesNotes', [SaleNoteController::class, 'index'])->name('salesNotes');
+    Route::get('salesNotes/create', [SaleNoteController::class, 'createSalesNotes'])->name('salesNotes.create');
+    Route::post('salesNotes', [SaleNoteController::class, 'storeSalesNotes'])->name('salesNotes.store');
+    Route::get('salesNotes/{id}', [SaleNoteController::class, 'showSalesNotes'])->name('salesNotes.show');
+    Route::put('salesNotes', [SaleNoteController::class, 'updateSalesNotes'])->name('salesNotes.update');
+    Route::delete('salesNotes/delete/{id}', [SaleNoteController::class, 'destroySalesNotes'])->name('salesNotes.destroy');
+    Route::get('salesNotes/{id}/edit', [SaleNoteController::class, 'editSalesNotes'])->name('salesNotes.edit');
+    //Promote sales Notes to sales
+    Route::get('salesNotes/promote', [SaleNoteController::class, 'promoteSalesNotes'])->name('salesNotes.promote');
+    Route::get('salesNotes/promoteSelected', [SaleNoteController::class, 'promoteSelectedSalesNotes'])->name('salesNotes.promoteSelected');
+
 });
 
 Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {
