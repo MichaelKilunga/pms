@@ -96,18 +96,21 @@
                                 <td>{{ $salesNote->staff_id }}</td> --}}
                                 <td>
                                     <div class="d-flex justify-content-between">
-                                        <div>
-                                            <button class="btn btn-success" data-toggle="modal"
-                                                data-target="#promoteSalesNoteModal"><i class="bi bi-upload"> Promote</i>
-                                            </button>
-                                        </div>
+                                        @if (Auth::user()->role != 'staff')
+                                            <div>
+                                                <button class="btn btn-success" data-toggle="modal"
+                                                    data-bs-target="#promoteSalesNoteModal{{$salesNote->id}}"><i class="bi bi-upload">
+                                                        Promote</i>
+                                                </button>
+                                            </div>
+                                        @endif
                                         <div>
                                             <button class="btn btn-primary" data-bs-toggle="modal"
-                                                data-bs-target="#showSalesNoteModal"><i class="bi bi-eye"></i></button>
+                                                data-bs-target="#showSalesNoteModal{{$salesNote->id}}"><i class="bi bi-eye"></i></button>
                                         </div>
                                         <div>
                                             <button class="btn btn-warning" data-bs-toggle="modal"
-                                                data-bs-target="#editSalesNoteModal"><i class="bi bi-pencil"></i></button>
+                                                data-bs-target="#editSalesNoteModal{{$salesNote->id}}"><i class="bi bi-pencil"></i></button>
                                         </div>
                                         {{-- a form for deleting sales note --}}
                                         <form class="" action="{{ route('salesNotes.destroy', $salesNote->id) }}"
@@ -121,15 +124,15 @@
                                 </td>
                             </tr>
                             {{-- Edit Sales Note Modal --}}
-                            <div class="modal fade" id="editSalesNoteModal" role="dialog"
-                                aria-labelledby="editSalesNoteModalLabel" aria-hidden="true">
+                            <div class="modal fade" id="editSalesNoteModal{{$salesNote->id}}" role="dialog"
+                                aria-labelledby="editSalesNoteModalLabel{{$salesNote->id}}" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <form action="{{ route('salesNotes.update') }}" method="POST">
                                             @csrf
                                             @method('PUT')
                                             <div class="modal-header">
-                                                <h5 class="modal-title" id="editSalesNoteModalLabel">Edit Sales Note</h5>
+                                                <h5 class="modal-title" id="editSalesNoteModalLabel{{$salesNote->id}}">Edit Sales Note</h5>
                                                 <button type="button" class="close" data-bs-dismiss="modal"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
@@ -182,15 +185,15 @@
                             </div>
 
                             {{-- Promote Sales Note Modal --}}
-                            <div class="modal fade" id="promoteSalesNoteModal" role="dialog"
-                                aria-labelledby="promoteSalesNoteModalLabel" aria-hidden="true">
+                            <div class="modal fade" id="promoteSalesNoteModal{{$salesNote->id}}" role="dialog"
+                                aria-labelledby="promoteSalesNoteModalLabel{{$salesNote->id}}" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <form action="{{ route('salesNotes.promote', $salesNote->id) }}" method="POST">
                                             @csrf
                                             @method('PUT')
                                             <div class="modal-header">
-                                                <h5 class="modal-title" id="promoteSalesNoteModalLabel">Promote Sales Note
+                                                <h5 class="modal-title" id="promoteSalesNoteModalLabel{{$salesNote->id}}">Promote Sales Note
                                                 </h5>
                                                 <button type="button" class="close" data-bs-dismiss="modal"
                                                     aria-label="Close">
@@ -229,12 +232,12 @@
                             </div>
 
                             {{-- Show sales note --}}
-                            <div class="modal fade bd-example-modal-lg" id="showSalesNoteModal" role="dialog"
-                                aria-labelledby="showSalesNoteModalLabel" aria-hidden="true">
+                            <div class="modal fade bd-example-modal-lg" id="showSalesNoteModal{{$salesNote->id}}" role="dialog"
+                                aria-labelledby="showSalesNoteModalLabel{{$salesNote->id}}" aria-hidden="true">
                                 <div class="modal-dialog modal-lg" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="showSalesNoteModalLabel">Show Sales Note</h5>
+                                            <h5 class="modal-title" id="showSalesNoteModalLabel{{$salesNote->id}}">Show Sales Note</h5>
                                             <button type="button" class="close" data-bs-dismiss="modal"
                                                 aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
@@ -249,7 +252,7 @@
                                                     <p><strong>Status:</strong> {{ $salesNote->status }}</p>
                                                     <p><strong>Description:</strong> {{ $salesNote->description }}</p>
                                                     {{-- <p><strong>Pharmacy:</strong> {{ $salesNote->pharmacy_id }}</p> --}}
-                                                    <p><strong>Staff:</strong> {{ $salesNote->staff->name }}</p>
+                                                    <p><strong>Added by:</strong> {{ $salesNote->staff_id == Auth::user()->id ? "You!" : $salesNote->staff->name  }}</p>
                                                 </div>
                                             </div>
                                         </div>
