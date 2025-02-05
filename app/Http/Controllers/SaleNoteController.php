@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SaleNote;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,10 +31,15 @@ class SaleNoteController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         //return a  collection of sale notes
         $notes = SaleNote::where('pharmacy_id', session('current_pharmacy_id'))->with('staff');
+        
+        if($request->filter == true){
+            $notes = SaleNote::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today())->with('staff');
+        }
+
         $saleNotes = null;
         if (Auth::user()->role == 'staff') {
             $saleNotes = $notes->where('staff_id', Auth::user()->id)->get();

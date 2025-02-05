@@ -339,7 +339,7 @@
 
         //capture active printers and append them to the modal select dropdown after id="selectPrinter"
         $(document).ready(function() {
-            if(true){
+            if (true) {
                 $('#printerModal').modal('show');
             }
         });
