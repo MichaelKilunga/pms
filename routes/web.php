@@ -200,9 +200,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('salesNotes/delete/{id}', [SaleNoteController::class, 'destroySalesNotes'])->name('salesNotes.destroy');
     Route::get('salesNotes/{id}/edit', [SaleNoteController::class, 'editSalesNotes'])->name('salesNotes.edit');
     //Promote sales Notes to sales
-    Route::get('salesNotes/promote', [SaleNoteController::class, 'promoteSalesNotes'])->name('salesNotes.promote');
-    Route::get('salesNotes/promoteSelected', [SaleNoteController::class, 'promoteSelectedSalesNotes'])->name('salesNotes.promoteSelected');
-
+    Route::post('salesNotes/promote', [SaleNoteController::class, 'promoteSalesNotes'])->name('salesNotes.promote');
 });
 
 Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {

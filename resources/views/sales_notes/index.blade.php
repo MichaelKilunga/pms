@@ -52,10 +52,8 @@
                     </div>
                     <div>
                         @if (Auth::user()->role != 'staff')
-                            <a id="buttonToPromoteAll" href="{{ route('salesNotes.promote') }}"
-                                class="btn btn-outline-warning text-dark">Promote All</a>
-                            <button id="buttonToPromotedSelected" class="btn btn-outline-warning text-dark"
-                                data-bs-toggle="modal" data-bs-target="#promoteSelectedSaleNoteModal#">Promote
+                            <button id="buttonToPromoteAll" class="btn btn-outline-warning text-dark">Promote All</button>
+                            <button id="buttonToPromotedSelected" class="btn btn-outline-warning text-dark">Promote
                                 Selected Notes</button>
                         @endif
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSalesNoteModal">Create
@@ -96,9 +94,7 @@
                                     <div class="d-flex justify-content-between">
                                         @if (Auth::user()->role != 'staff')
                                             <div>
-                                                <button class="btn btn-success" data-toggle="modal"
-                                                    data-bs-target="#promoteSalesNoteModal{{ $salesNote->id }}"><i
-                                                        class="bi bi-upload">
+                                                <button class="btn btn-success promoteButton"><i class="bi bi-upload">
                                                         Promote</i>
                                                 </button>
                                             </div>
@@ -165,8 +161,7 @@
                                                     <input type="text" class="form-control"
                                                         value="{{ $salesNote->description }}" id="floatingDescription"
                                                         name="description" placeholder="Sold for headache">
-                                                    <label class="form-label"
-                                                        for="floatingDescription">Description</label>
+                                                    <label class="form-label" for="floatingDescription">Description</label>
                                                 </div>
 
                                                 <input readonly hidden type="text" name="pharmacy_id"
@@ -181,55 +176,6 @@
                                                 <button type="button" class="btn btn-secondary"
                                                     data-bs-dismiss="modal">Close</button>
                                                 <button type="submit" class="btn btn-primary">Update</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Promote Sales Note Modal --}}
-                            <div class="modal fade" id="promoteSalesNoteModal{{ $salesNote->id }}" role="dialog"
-                                aria-labelledby="promoteSalesNoteModalLabel{{ $salesNote->id }}" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <form action="{{ route('salesNotes.promote', $salesNote->id) }}" method="POST">
-                                            @csrf
-                                            @method('PUT')
-                                            <div class="modal-header">
-                                                <h5 class="modal-title"
-                                                    id="promoteSalesNoteModalLabel{{ $salesNote->id }}">Promote Sales Note
-                                                </h5>
-                                                <button type="button" class="close" data-bs-dismiss="modal"
-                                                    aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body d-flex flex-column">
-                                                {{-- <input type="hidden" name="sale_note_ids" id="selectedSaleNoteIds"> --}}
-                                                <input type="text" name="buying_price" placeholder="Buying Price">
-                                                <input type="text" name="selling_price" placeholder="Selling Price">
-                                                <input type="text" name="expiry_date" placeholder="Expiry Date">
-                                                <input type="text" name="stocked_quantity"
-                                                    placeholder="Stocked Quantity">
-                                                <input type="text" name="batch_number" placeholder="Batch Number">
-                                                <input type="text" name="supplier_name" placeholder="Supplier Name">
-                                                <input type="text" name="low_stock_quantity"
-                                                    placeholder="Low Stock Quantity">
-                                                <input type="text" name="status" placeholder="Status">
-                                                <input type="text" name="pharmacy_id" placeholder="Pharmacy ID">
-                                                <input type="text" name="staff_id" placeholder="Staff ID">
-                                                <input type="text" name="name" placeholder="Name">
-                                                <input type="text" name="quantity" placeholder="Quantity">
-                                                <input type="text" name="unit_price" placeholder="Unit Price">
-                                                <input type="text" name="description" placeholder="Description">
-                                                <input type="text" name="pharmacy_id" placeholder="Pharmacy ID">
-                                                <input type="text" name="staff_id" placeholder="Staff ID">
-                                                <input type="text" name="status" placeholder="Status">
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Close</button>
-                                                <button type="submit" class="btn btn-primary">Promote</button>
                                             </div>
                                         </form>
                                     </div>
@@ -331,28 +277,23 @@
 
     {{-- Modal for promoting multiple sales notes at once --}}
     <div class="modal fade" id="promoteSelectedSaleNoteModal" role="dialog">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
-                <form action="{{ route('salesNotes.promoteSelected') }}" method="POST">
+                <form action="{{ route('salesNotes.promote') }}" id="promoteSaleNoteForm" method="POST">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Promote Selected Sales Notes</h5>
                         <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                     </div>
-                    <div class="modal-body">
-                        <input type="number" name="sale_note_ids" placeholder="1,2,3" id="selectedSaleNoteIds">
-                        <input type="number" name="buying_price" placeholder="Buying Price">
-                        <input type="number" name="selling_price" placeholder="Selling Price">
-                        <input type="date" name="expiry_date" placeholder="Expiry Date">
-                        <input type="number" name="stocked_quantity" placeholder="Stocked Quantity">
-                        <input type="text" name="batch_number" placeholder="Batch Number">
-                        <input type="text" name="supplier_name" placeholder="Supplier Name">
-                        <input type="number" name="low_stock_quantity" placeholder="Low Stock Quantity">
-                    </div>
+                    <div id="promotionPannel" class="modal-body">
 
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Promote</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        {{-- This will be populated with rows of each item to be promoted --}}
+
+                    </div>
+                    <div class="justify-content-between modal-footer">
+                        <button id="closePromotionModal" type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" id="submitPromotion" class="btn btn-success">Promote</button>
                     </div>
                 </form>
             </div>
@@ -392,10 +333,127 @@
                         selectedSalesNotes = selectedSalesNotes.filter(id => id !== saleNoteId);
                     }
                 });
+            //end
 
+            $('.promoteButton')
+                .on('click', function(e) {
+                    var saleNoteId = $(this).closest('tr').find('td:first')
+                        .text(); // Get sale note ID from first column
+                    var row = $(this).closest('tr'); // Get the row
+
+                    row.toggleClass('selected_'); // Toggle row selection
+
+                    // Store or remove sale note ID
+                    if (row.hasClass('selected_')) {
+                        // clear previous selected selectedSalesNotes
+                        selectedSalesNotes = [];
+                        // add the current selected sale note to the selectedSalesNotes array
+                        selectedSalesNotes.push(saleNoteId);
+                    } else {
+                        selectedSalesNotes = selectedSalesNotes.filter(id => id !== saleNoteId);
+                    }
+                });
+            //end
+
+            // Open the modal when "Promote all" button is clicked
+            $('#buttonToPromoteAll').on('click', function(e) {
+                e.preventDefault();
+
+                //Edit the body of the modal to include rows of each item
+                $('#promotionPannel').empty(); // Clear previous rows
+                // Loop through all rows and add them to the modal
+                $('#promotionPannel').append(`
+                            <div class="form-group mb-3 row">
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control batch_number" type="text" id="batch_number" name="batch_number"
+                                    placeholder="Batch Number" required readonly>
+                                <label class="form-label" for="batch_number">Batch Number</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control" type="text" name="supplier_name" required
+                                    placeholder="Supplier Name">
+                                <label class="form-label" for="supplier_name">Supplier Name</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control" type="date" value="{{ date('Y-m-d') }}"
+                                    name="date" required placeholder="Entry Date">
+                                <label class="form-label" for="date">Entry Date</label>
+                            </div>
+                            </div>`);
+
+
+                table.rows().every(function() {
+                    // get the current tr
+                    var row = this.node();
+                    // Get sale note ID from first column
+                    var saleNoteId = $(row).find('td:first')
+                        .text(); // Get sale note ID from first column
+                    // Get the row name and quantity from the third column
+                    var rowName = $(row).find('td:nth-child(3)').text();
+                    var rowQuantity = $(row).find('td:nth-child(4)').text();
+                    var rowUnitPrice = $(row).find('td:nth-child(5)').text();
+                    // Append the row to the modal
+                    $('#promotionPannel').append(
+                        `
+                        <div class="form-group mb-3 row">
+                            <div hidden class="hidden form-floating">
+                                <input readonly type="text"  required name="sale_note_id[]" value="${saleNoteId}">
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="text" name="name[]"
+                                    placeholder="Name" value="${rowName}" required>
+                                <label class="form-label" for="name">Name</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="number" name="buying_price[]"
+                                    placeholder="Buying Price" required>
+                                <label class="form-label" for="buying_price">Buying Price</label>
+                            </div>
+                            <div class="col-md-1 form-floating">
+                                <input class="form-control" type="number" name="selling_price[]"
+                                    placeholder="Selling Price" value="${rowUnitPrice}" readonly required>
+                                <label class="form-label" for="selling_price">Selling Price</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="number" min="1" name="stocked_quantity[]"
+                                    placeholder="Stocked Quantity" required>
+                                <label class="form-label" for="stocked_quantity">Quantity</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="number" name="low_stock_quantity[]"required placeholder="Low Stock Quantity">
+                                <label class="form-label" for="low_stock_quantity">Low Stock</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="date"
+                                    name="expiry_date[]" placeholder="Expiry Date" required>
+                                <label class="form-label" for="expiry_date">Expire Date</label>
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-danger btn-sm removeRow"><i class="bi bi-x-lg"></i></button>
+                            </div>
+                        </div>`
+                    );
+                });
+
+                $(document).ready(function() {
+                    const today = new Date();
+                    const year = today.getFullYear(); // Get the full year
+                    const month = String(today.getMonth() + 1).padStart(2,
+                        '0'); // Months are zero-based, pad with leading zero if needed
+                    const day = String(today.getDate()).padStart(2,
+                        '0'); // Pad day with leading zero if needed
+                    const formattedDate =
+                        `${year}${month}${day}`; // Combine to form YYYYMMDD format
+                    $('.batch_number').val(
+                        formattedDate); // Use .val() to set the value of the input
+                });
+
+                // Show the modal
+                $('#promoteSelectedSaleNoteModal').modal('show');
+            });
 
             // Open the modal when "Promote Selected" button is clicked
-            $('#buttonToPromotedSelected').on('click', function(e) {
+            $('#buttonToPromotedSelected, .promoteButton').on('click', function(e) {
                 e.preventDefault();
 
                 if (selectedSalesNotes.length === 0) {
@@ -404,12 +462,153 @@
                 }
 
                 // Populate the modal with selected IDs
-                $('#promoteSelectedSaleNoteModal input[name="sale_note_ids"]').val(selectedSalesNotes.join(
-                    ',')); // Store IDs in hidden input
+                //Edit the body of the modal to include rows of each item
+                $('#promotionPannel').empty(); // Clear previous rows
+                // Loop through all rows and add them to the modal
+                $('#promotionPannel').append(`
+                            <div class="form-group mb-3 row">
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control batch_number" type="text" id="batch_number" name="batch_number"
+                                    placeholder="Batch Number" required readonly>
+                                <label class="form-label" for="batch_number">Batch Number</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control" type="text" name="supplier_name"
+                                    placeholder="Supplier Name" required>
+                                <label class="form-label" for="supplier_name">Supplier Name</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control" type="date" value="{{ date('Y-m-d') }}"
+                                    name="date" placeholder="Entry Date" required>
+                                <label class="form-label" for="date">Entry Date</label>
+                            </div>
+                            </div>`);
+
+
+                selectedSalesNotes.forEach(function(saleNoteId) {
+                    // Find the row with the matching ID
+                    var row = table.row(`:contains(${saleNoteId})`);
+                    // Get the row name and quantity from the third column
+                    var rowName = $(row.node()).find('td:nth-child(3)').text();
+                    var rowQuantity = $(row.node()).find('td:nth-child(4)').text();
+                    var rowUnitPrice = $(row.node()).find('td:nth-child(5)').text();
+
+                    // Append the row to the modal
+                    $('#promotionPannel').append(
+                        `
+                        <div class="form-group mb-3 row">
+                            <div hidden class="hidden form-floating">
+                                <input readonly type="text" required name="sale_note_id[]" value="${saleNoteId}">
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="text" required name="name[]"
+                                    placeholder="Name" value="${rowName}">
+                                <label class="form-label" for="name">Name</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="number" required name="buying_price[]"
+                                    placeholder="Buying Price">
+                                <label class="form-label" for="buying_price">Buying Price</label>
+                            </div>
+                            <div class="col-md-1 form-floating">
+                                <input class="form-control" type="number" required name="selling_price[]"
+                                    placeholder="Selling Price" readonly value="${rowUnitPrice}">
+                                <label class="form-label" for="selling_price">Unit Price</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="number" min="1" required name="stocked_quantity[]"
+                                    placeholder="Stocked Quantity">
+                                <label class="form-label" for="stocked_quantity">Quantity</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="number" required name="low_stock_quantity[]" placeholder="Low Stock Quantity">
+                                <label class="form-label" for="low_stock_quantity">Low Stock</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="date"
+                                    required name="expiry_date[]" placeholder="Expiry Date">
+                                <label class="form-label" for="expiry_date">Expire Date</label>
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-danger btn-sm removeRow"><i class="bi bi-x-lg"></i></button>
+                            </div>
+                        </div>`
+                    );
+                });
+
+                // genarate batch number
+                $(document).ready(function() {
+                    const today = new Date();
+                    const year = today.getFullYear(); // Get the full year
+                    const month = String(today.getMonth() + 1).padStart(2,
+                        '0'); // Months are zero-based, pad with leading zero if needed
+                    const day = String(today.getDate()).padStart(2,
+                        '0'); // Pad day with leading zero if needed
+                    const formattedDate =
+                        `${year}${month}${day}`; // Combine to form YYYYMMDD format
+                    $('.batch_number').val(
+                        formattedDate); // Use .val() to set the value of the input
+                });
 
                 // Show the modal
                 $('#promoteSelectedSaleNoteModal').modal('show');
             });
+
+            // when the modal is closed, clear the selected sales notes array
+            $('#closePromotionModal').on('click', function(e) {
+                e.preventDefault();
+
+                // Clear the selected sales notes array
+                selectedSalesNotes = [];
+
+                // Clear the modal content
+                $('#promotionPannel').empty();
+
+                // remove the class "selected"  and "selected_"  from the selected rows
+                $('#SaleNoteTable tbody tr.selected').removeClass('selected');
+                $('#SaleNoteTable tbody tr.selected_').removeClass('selected_');
+
+                // Hide the modal
+                $('#promoteSelectedSaleNoteModal').modal('hide');
+            });
+
+            // remove the selected row from the modal when the remove button is clicked
+            $(document).on('click', '.removeRow', function() {
+                $(this).closest('.row').remove();
+                // if the removed row is the last one, clear the selected sales notes array and close the modal
+                if ($('#promotionPannel .row').length < 2) {
+                    $('#closePromotionModal').trigger('click');
+                }
+            });
+
+            //genrate the batch number
+            $(document).ready(function() {
+                const today = new Date();
+                const year = today.getFullYear(); // Get the full year
+                const month = String(today.getMonth() + 1).padStart(2,
+                    '0'); // Months are zero-based, pad with leading zero if needed
+                const day = String(today.getDate()).padStart(2, '0'); // Pad day with leading zero if needed
+                const formattedDate = `${year}${month}${day}`; // Combine to form YYYYMMDD format
+                $('.batch_number').val(formattedDate); // Use .val() to set the value of the input
+            });
+
+            $(document).ready(function() {
+                // Disable the button initially
+                $('#submitPromotion').prop('disabled', true);
+
+                // Listen for input changes in the form
+                $('#promoteSaleNoteForm').on('input', 'input[required]', function() {
+                    var requiredFields = $('#promoteSaleNoteForm').find('input[required]');
+
+                    // Check if there are any empty required fields
+                    var hasEmptyFields = requiredFields.toArray().some(input => input.value
+                        .trim() === '');
+
+                    // Enable the button only when all required fields are filled
+                    $('#submitPromotion').prop('disabled', hasEmptyFields);
+                });
+            });
+
         });
     </script>
 @endsection
