@@ -279,9 +279,9 @@ class SaleNoteController extends Controller
                 }
                 $saleNote->status = 'promoted';
                 $saleNote->save();
-
-                return redirect()->back()->with('success', 'Sale notes promoted successfully');
             }
+            
+            return redirect()->back()->with('success', 'Sale notes promoted successfully');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

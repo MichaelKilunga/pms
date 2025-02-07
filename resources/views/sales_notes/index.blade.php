@@ -289,10 +289,12 @@
                     <div class="modal-header">
                         <h5 class="modal-title">Promote Selected Sales Notes</h5>
                         {{-- Button to promote to existing items --}}
-                        <button type="button" class="btn btn-success" id="promoteToExistingItems">Promote to Existing
+                        <button type="button" class="btn btn-outline-success promoteToExistingItems"
+                            id="promoteMultipleToExistingItems">Promote to Existing
                             items </button>
                         {{-- Button to promote to existing stocks --}}
-                        <button type="button" class="btn btn-success" id="promoteToExistingStocks">Promote to
+                        <button type="button" class="btn btn-outline-success promoteToExistingStocks"
+                            id="promoteMultipleToExistingStocks">Promote to
                             Existing Stocks </button>
                         <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                     </div>
@@ -320,6 +322,14 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Promote Selected Sales Notes as One Item</h5>
+                        {{-- Button to promote to existing items --}}
+                        <button type="button" class="btn btn-outline-success promoteToExistingItems"
+                            id="promoteAsOneToExistingItems">Promote to Existing
+                            items </button>
+                        {{-- Button to promote to existing stocks --}}
+                        <button type="button" class="btn btn-outline-success promoteToExistingStocks"
+                            id="promoteAsOneToExistingStocks">Promote to
+                            Existing Stocks </button>
                         <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                     </div>
                     <div id="asOnePromotionPannel" class="modal-body">
@@ -374,6 +384,9 @@
 
             $('.promoteButton')
                 .on('click', function(e) {
+                    
+                    e.preventDefault();
+
                     var saleNoteId = $(this).closest('tr').find('td:first')
                         .text(); // Get sale note ID from first column
                     var row = $(this).closest('tr'); // Get the row
@@ -389,6 +402,103 @@
                     } else {
                         selectedSalesNotes = selectedSalesNotes.filter(id => id !== saleNoteId);
                     }
+
+                    if (selectedSalesNotes.length === 0) {
+                        alert('Please select at least one sales note to promote.');
+                        return;
+                    }
+
+                    // Populate the modal with selected IDs
+                    //Edit the body of the modal to include rows of each item
+                    $('#promotionPannel').empty(); // Clear previous rows
+                    // Loop through all rows and add them to the modal
+                    $('#promotionPannel').append(`
+                            <div class="form-group mb-3 row">
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control batch_number" type="text" id="batch_number" name="batch_number"
+                                    placeholder="Batch Number" required readonly>
+                                <label class="form-label" for="batch_number">Batch Number</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control" type="text" name="supplier_name"
+                                    placeholder="Supplier Name" required>
+                                <label class="form-label" for="supplier_name">Supplier Name</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control" type="date" value="{{ date('Y-m-d') }}"
+                                    name="date" placeholder="Entry Date" required>
+                                <label class="form-label" for="date">Entry Date</label>
+                            </div>
+                    </div>`);
+
+
+                    selectedSalesNotes.forEach(function(saleNoteId) {
+                        // Find the row with the matching ID
+                        var row = table.row(`:contains(${saleNoteId})`);
+                        // Get the row name and quantity from the third column
+                        var rowName = $(row.node()).find('td:nth-child(3)').text();
+                        var rowQuantity = $(row.node()).find('td:nth-child(4)').text();
+                        var rowUnitPrice = $(row.node()).find('td:nth-child(5)').text();
+
+                        // Append the row to the modal
+                        $('#promotionPannel').append(
+                            `
+                                <div class="form-group mb-3 row">
+                                    <div hidden class="hidden form-floating">
+                                        <input readonly type="text" required name="sale_note_id[]" value="${saleNoteId}">
+                                    </div>
+                                    <div class="col-md-2 form-floating">
+                                        <input class="form-control" type="text" required name="name[]"
+                                            placeholder="Name" value="${rowName}">
+                                        <label class="form-label" for="name">Name</label>
+                                    </div>
+                                    <div class="col-md-2 form-floating">
+                                        <input class="form-control" type="number" required name="buying_price[]"
+                                            placeholder="Buying Price">
+                                        <label class="form-label" for="buying_price">Buying Price</label>
+                                    </div>
+                                    <div class="col-md-1 form-floating">
+                                        <input class="form-control" type="number" required name="selling_price[]"
+                                            placeholder="Selling Price" readonly value="${rowUnitPrice}">
+                                        <label class="form-label" for="selling_price">Unit Price</label>
+                                    </div>
+                                    <div class="col-md-2 form-floating">
+                                        <input class="form-control" type="number" min="${rowQuantity}" required name="stocked_quantity[]"
+                                            placeholder="Stocked Quantity" value="${rowQuantity}">
+                                        <label class="form-label" for="stocked_quantity">Quantity</label>
+                                    </div>
+                                    <div class="col-md-2 form-floating">
+                                        <input class="form-control" type="number" required name="low_stock_quantity[]" placeholder="Low Stock Quantity">
+                                        <label class="form-label" for="low_stock_quantity">Low Stock</label>
+                                    </div>
+                                    <div class="col-md-2 form-floating">
+                                        <input class="form-control" type="date"
+                                            required name="expiry_date[]" placeholder="Expiry Date">
+                                        <label class="form-label" for="expiry_date">Expire Date</label>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-danger btn-sm removeRow"><i class="bi bi-x-lg"></i></button>
+                                    </div>
+                                </div>`
+                        );
+                    });
+
+                    // genarate batch number
+                    $(document).ready(function() {
+                        const today = new Date();
+                        const year = today.getFullYear(); // Get the full year
+                        const month = String(today.getMonth() + 1).padStart(2,
+                            '0'); // Months are zero-based, pad with leading zero if needed
+                        const day = String(today.getDate()).padStart(2,
+                            '0'); // Pad day with leading zero if needed
+                        const formattedDate =
+                            `${year}${month}${day}`; // Combine to form YYYYMMDD format
+                        $('.batch_number').val(
+                            formattedDate); // Use .val() to set the value of the input
+                    });
+
+                    // Show the modal
+                    $('#promoteSelectedSaleNoteModal').modal('show');
                 });
             //end
 
@@ -490,7 +600,7 @@
             });
 
             // Open the modal when "Promote separate" button is clicked
-            $('#buttonToPromotedSelected, .promoteButton').on('click', function(e) {
+            $('#buttonToPromotedSelected').on('click', function(e) {
                 e.preventDefault();
 
                 if (selectedSalesNotes.length === 0) {
@@ -553,8 +663,8 @@
                                 <label class="form-label" for="selling_price">Unit Price</label>
                             </div>
                             <div class="col-md-2 form-floating">
-                                <input class="form-control" type="number" min="1" required name="stocked_quantity[]"
-                                    placeholder="Stocked Quantity">
+                                <input class="form-control" type="number" min="${rowQuantity}" required name="stocked_quantity[]"
+                                    placeholder="Stocked Quantity" value="${rowQuantity}">
                                 <label class="form-label" for="stocked_quantity">Quantity</label>
                             </div>
                             <div class="col-md-2 form-floating">
@@ -774,6 +884,7 @@
                 $('.batch_number').val(formattedDate); // Use .val() to set the value of the input
             });
 
+            // when the submit button is clicked, submit the form
             $(document).ready(function() {
                 // Disable the button initially
                 $('#submitPromotion').prop('disabled', true);
@@ -791,6 +902,15 @@
                 });
             });
 
+            // add existing stocks data when user click on the button "promote to Existing Stocks"
+            $(document).ready(function() {
+                $('.promoteToExistingStocks').on('click', function() {
+                    alert('This module is still under development! Thank you for your patience.');
+                });
+                $('.promoteToExistingItems').on('click', function() {
+                    alert('This module is still under development! Thank you for your patience.');
+                });
+            });
         });
     </script>
 @endsection
