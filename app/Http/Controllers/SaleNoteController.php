@@ -241,8 +241,47 @@ class SaleNoteController extends Controller
 
             ]);
 
-            dd($request->all());
-            
+            // for each sales note
+            foreach ($request->sale_note_id as $key => $saleNoteId) {
+                $saleNote = SaleNote::find($saleNoteId);
+
+                // create a new stock for this sale note
+                $stockValues = new Request();
+                $stockValues['batch_number'] = $request->batch_number;
+                $stockValues['supplier_name'] = $request->supplier_name;
+                $stockValues['date'] = $request->date;
+                $stockValues['name'] = $request->name[$key];
+                $stockValues['buying_price'] = $request->buying_price[$key];
+                $stockValues['selling_price'] = $request->selling_price[$key];
+                $stockValues['stocked_quantity'] = $request->stocked_quantity[$key];
+                $stockValues['low_stock_quantity'] = $request->low_stock_quantity[$key];
+                $stockValues['expiry_date'] = $request->expiry_date[$key];
+
+                $stock = $this->createStock($stockValues);
+
+                // create a new sale for this sale note
+                try {
+                    $saleValues = new Request();
+                    $saleValues['staff_id'] = $saleNote->staff_id;
+                    $saleValues['pharmacy_id'] = $saleNote->pharmacy_id;
+                    $saleValues['item_id'] = $stock->item_id;
+                    $saleValues['quantity'] = $saleNote->quantity;
+                    $saleValues['total_price'] = $saleNote->quantity * $saleNote->unit_price;
+                    $saleValues['date'] = $saleNote->created_at;
+                    $saleValues['stock_id'] = $stock->id;
+
+                    $sale = $this->storeSales($saleValues);
+                } catch (\Exception $e) {
+                    // if there is an error, delete the stocks and items created
+                    Stock::where('id', $stock->id)->delete();
+                    Items::where('id', $stock->item_id)->delete();
+                    throw new \Exception($e->getMessage());
+                }
+                $saleNote->status = 'promoted';
+                $saleNote->save();
+
+                return redirect()->back()->with('success', 'Sale notes promoted successfully');
+            }
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -256,7 +295,7 @@ class SaleNoteController extends Controller
                 'batch_number' => 'required|numeric',
                 'supplier_name' => 'required|string',
                 'date' => 'required|date',
-                
+
                 'sale_note_ids' => 'required|string',
 
                 'name' => 'required|string',
@@ -273,7 +312,7 @@ class SaleNoteController extends Controller
             $stock = $this->createStock($stockValues);
 
             // get the sale note ids
-            $saleNoteIds = explode(',', $request->sale_note_ids);            
+            $saleNoteIds = explode(',', $request->sale_note_ids);
             // create a sales record for each sale note
             $salesValues = new Request();
             $salesValues['item_id'] = $stock->item_id;
@@ -294,7 +333,6 @@ class SaleNoteController extends Controller
             }
 
             return redirect()->route('salesNotes')->with('success', 'Sale Notes promoted successfully.');
-
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -304,10 +342,10 @@ class SaleNoteController extends Controller
     public function createStock(Request $stockValues)
     {
         try {
-                $stockValues->validate([
+            $stockValues->validate([
                 'batch_number' => 'required|numeric',
                 'supplier_name' => 'required|string',
-                'date' => 'required|date',                
+                'date' => 'required|date',
                 'name' => 'required|string',
                 'buying_price' => 'required|numeric',
                 'selling_price' => 'required|numeric',
@@ -350,7 +388,6 @@ class SaleNoteController extends Controller
             ]);
 
             return  $stock;
-
         } catch (\Exception $e) {
             // delete the item record if validation fails
             $item->delete();
@@ -363,7 +400,7 @@ class SaleNoteController extends Controller
     {
         try {
             $request->validate([
-               'item_id' => 'required|integer|exists:items,id',
+                'item_id' => 'required|integer|exists:items,id',
                 'staff_id' => 'required|integer|exists:users,id',
                 'quantity' => 'required|integer|min:1',
                 'total_price' => 'required|numeric',
@@ -379,25 +416,25 @@ class SaleNoteController extends Controller
         }
 
         // Retrieve the pharmacy_id and staff_id for the sale record
-        $pharmacyId = session('current_pharmacy_id'); 
+        $pharmacyId = session('current_pharmacy_id');
 
         // Loop through the arrays of item data and create individual sale records
         try {
-                //update remaning stock
-                $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $request->stock_id)->first();
-                $remainQuantity = $stock->remain_Quantity - $request->quantity;
-                $stock->update(['remain_Quantity' => $remainQuantity]);
+            //update remaning stock
+            $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $request->stock_id)->first();
+            $remainQuantity = $stock->remain_Quantity - $request->quantity;
+            $stock->update(['remain_Quantity' => $remainQuantity]);
 
-                // dd($request);
-                $sale = Sales::create([
-                    'pharmacy_id' => $pharmacyId, 
-                    'staff_id' => $request->staff_id,   
-                    'item_id' => $request->item_id,
-                    'quantity' => $request->quantity,
-                    'stock_id' => $request->stock_id,
-                    'total_price' => $request->total_price,
-                    'date' => $request->date,
-                ]);
+            // dd($request);
+            $sale = Sales::create([
+                'pharmacy_id' => $pharmacyId,
+                'staff_id' => $request->staff_id,
+                'item_id' => $request->item_id,
+                'quantity' => $request->quantity,
+                'stock_id' => $request->stock_id,
+                'total_price' => $request->total_price,
+                'date' => $request->date,
+            ]);
 
             return $sale;
         } catch (\Exception $e) {

@@ -288,6 +288,12 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Promote Selected Sales Notes</h5>
+                        {{-- Button to promote to existing items --}}
+                        <button type="button" class="btn btn-success" id="promoteToExistingItems">Promote to Existing
+                            items </button>
+                        {{-- Button to promote to existing stocks --}}
+                        <button type="button" class="btn btn-success" id="promoteToExistingStocks">Promote to
+                            Existing Stocks </button>
                         <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                     </div>
                     <div id="promotionPannel" class="modal-body">
