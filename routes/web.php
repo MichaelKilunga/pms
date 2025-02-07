@@ -201,6 +201,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('salesNotes/{id}/edit', [SaleNoteController::class, 'editSalesNotes'])->name('salesNotes.edit');
     //Promote sales Notes to sales
     Route::post('salesNotes/promote', [SaleNoteController::class, 'promoteSalesNotes'])->name('salesNotes.promote');
+    Route::post('salesNotes/promoteAsOne', [SaleNoteController::class, 'promoteSalesNotesAsOne'])->name('salesNotes.promoteAsOne');
 });
 
 Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {

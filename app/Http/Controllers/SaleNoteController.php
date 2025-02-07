@@ -2,10 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Items;
 use App\Models\SaleNote;
+use App\Models\Sales;
+use App\Models\Stock;
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\ValidatedInput;
+use Illuminate\Validation\ValidationData;
+use Livewire\Attributes\Validate;
+use Vonage\Client\Exception\Validation;
 
 class SaleNoteController extends Controller
 {
@@ -201,7 +210,8 @@ class SaleNoteController extends Controller
             </div>
         </div>
                         */
-    public function promoteSalesNotes(Request $request){
+    public function promoteSalesNotes(Request $request)
+    {
         try {
             $request->validate([
                 'batch_number' => 'required|numeric',
@@ -220,21 +230,182 @@ class SaleNoteController extends Controller
                 'selling_price' => 'required|array',
                 'selling_price.*' => 'required|numeric',
 
-               'stocked_quantity' => 'required|array',
-               'stocked_quantity.*' => 'required|numeric',
+                'stocked_quantity' => 'required|array',
+                'stocked_quantity.*' => 'required|numeric',
 
                 'low_stock_quantity' => 'required|array',
                 'low_stock_quantity.*' => 'required|numeric',
 
                 'expiry_date' => 'required|array',
                 'expiry_date.*' => 'required|date',
-                
+
             ]);
 
             dd($request->all());
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    // promoting multiple sale notes as one
+    public function promoteSalesNotesAsOne(Request $request)
+    {
+        try {
+            $request->validate([
+                'batch_number' => 'required|numeric',
+                'supplier_name' => 'required|string',
+                'date' => 'required|date',
+                
+                'sale_note_ids' => 'required|string',
+
+                'name' => 'required|string',
+                'buying_price' => 'required|numeric',
+                'selling_price' => 'required|numeric',
+                'stocked_quantity' => 'required|numeric',
+                'low_stock_quantity' => 'required|numeric',
+                'expiry_date' => 'required|date',
+            ]);
+
+            // dd($request->all());
+            $stockValues = $request;
+            // create a stock record
+            $stock = $this->createStock($stockValues);
+
+            // get the sale note ids
+            $saleNoteIds = explode(',', $request->sale_note_ids);            
+            // create a sales record for each sale note
+            $salesValues = new Request();
+            $salesValues['item_id'] = $stock->item_id;
+            $salesValues['stock_id'] = $stock->id;
+
+            foreach ($saleNoteIds as $saleNoteId) {
+                $saleNote = SaleNote::where('id', $saleNoteId)->first();
+
+                $salesValues['staff_id'] = $saleNote->staff_id;
+                $salesValues['quantity'] = $saleNote->quantity;
+                $salesValues['total_price'] = $saleNote->unit_price * $saleNote->quantity;
+                $salesValues['date'] = $saleNote->created_at;
+
+                $sale = $this->storeSales($salesValues);
+
+                $saleNote->status = 'promoted';
+                $saleNote->save();
+            }
+
+            return redirect()->route('salesNotes')->with('success', 'Sale Notes promoted successfully.');
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    // function that receives an array   of stock values and to create a new stock
+    public function createStock(Request $stockValues)
+    {
+        try {
+                $stockValues->validate([
+                'batch_number' => 'required|numeric',
+                'supplier_name' => 'required|string',
+                'date' => 'required|date',                
+                'name' => 'required|string',
+                'buying_price' => 'required|numeric',
+                'selling_price' => 'required|numeric',
+                'stocked_quantity' => 'required|numeric',
+                'low_stock_quantity' => 'required|numeric',
+                'expiry_date' => 'required|date',
+            ]);
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+
+        // dd($stockValues->all());
+
+        $pharmacy_id = session('current_pharmacy_id');
+        $staff_id = Auth::user()->id;
+
+        //a loop to add the medicine name to the items table and stock to the stock table
+        try {
+            $item = Items::create([
+                'pharmacy_id' => $pharmacy_id,
+                'category_id' => 1,
+                'name' => $stockValues->name,
+            ]);
+
+            $stock = Stock::create([
+                'pharmacy_id' => $pharmacy_id,
+                'staff_id' => $staff_id,
+                'item_id' => $item->id,
+
+                'quantity' => $stockValues->stocked_quantity,
+                'buying_price' => $stockValues->buying_price,
+                'selling_price' => $stockValues->selling_price,
+                'remain_Quantity' =>  $stockValues->stocked_quantity,
+                'low_stock_percentage' => $stockValues->low_stock_quantity,
+                'in_date' => $stockValues->date,
+                'expire_date' => $stockValues->expiry_date,
+
+                'batch_number' => $stockValues->batch_number,
+                'supplier' => $stockValues->supplier_name,
+            ]);
+
+            return  $stock;
+
+        } catch (\Exception $e) {
+            // delete the item record if validation fails
+            $item->delete();
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    // function that receives Request $request of sales values then store them in the database
+    public function storeSales(Request $request)
+    {
+        try {
+            $request->validate([
+               'item_id' => 'required|integer|exists:items,id',
+                'staff_id' => 'required|integer|exists:users,id',
+                'quantity' => 'required|integer|min:1',
+                'total_price' => 'required|numeric',
+                'date' => 'required|date',
+                'stock_id' => 'required|integer|exists:stocks,id',
+            ]);
+        } catch (\Exception $e) {
+            // Delete the stock record if validation fails
+            Stock::where('id', $request->stock_id)->delete();
+            // delete the item record if validation fails
+            Items::where('id', $request->item_id)->delete();
+            throw new \Exception($e->getMessage());
+        }
+
+        // Retrieve the pharmacy_id and staff_id for the sale record
+        $pharmacyId = session('current_pharmacy_id'); 
+
+        // Loop through the arrays of item data and create individual sale records
+        try {
+                //update remaning stock
+                $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $request->stock_id)->first();
+                $remainQuantity = $stock->remain_Quantity - $request->quantity;
+                $stock->update(['remain_Quantity' => $remainQuantity]);
+
+                // dd($request);
+                $sale = Sales::create([
+                    'pharmacy_id' => $pharmacyId, 
+                    'staff_id' => $request->staff_id,   
+                    'item_id' => $request->item_id,
+                    'quantity' => $request->quantity,
+                    'stock_id' => $request->stock_id,
+                    'total_price' => $request->total_price,
+                    'date' => $request->date,
+                ]);
+
+            return $sale;
+        } catch (\Exception $e) {
+            // Delete the stock record if validation fails
+            Stock::where('id', $request->stock_id)->delete();
+            // delete the item record if validation fails
+            Items::where('id', $request->item_id)->delete();
+            throw new \Exception($e->getMessage());
         }
     }
 }
