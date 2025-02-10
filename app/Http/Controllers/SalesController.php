@@ -129,7 +129,11 @@ class SalesController extends BaseController
                 ]);
             }
             //call the function to print the last receipt
-            $this->printLastReceipt();
+            try{
+                $this->printLastReceipt();
+            }catch(\Exception $e){
+                // 
+            }
 
             return redirect()->route('sales')->with('success', 'Sales recorded successfully.');
         } catch (\Exception $e) {
@@ -267,7 +271,8 @@ class SalesController extends BaseController
             return redirect()->back()->with('success', 'Last receipt printed successfully.');
         } catch (\Exception $e) {
             Log::error('Error printing receipt: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error printing last receipt: ' . $e->getMessage());
+            // return redirect()->back()->with('error', 'Error printing last receipt: ' . $e->getMessage());
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -391,7 +396,8 @@ class SalesController extends BaseController
             //clear the printer queue
             // $this->clearPrinterQueue($this->printerName);
 
-            return redirect()->back()->with('error', 'Error printing receipt: ' . $e->getMessage());
+            // return redirect()->back()->with('error', 'Error printing receipt: ' . $e->getMessage());
+            throw new \Exception($e->getMessage());
         }
     }
 

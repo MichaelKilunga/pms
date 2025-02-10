@@ -132,11 +132,11 @@
                 <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
                     {{ __('Sell medicine') }}
                 </x-nav-link>
+                <x-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
+                    {{ __('Document Sales') }}
+                </x-nav-link>
                 <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
                     {{ __('Notifications') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
-                    {{ __('Sales Notes') }}
                 </x-nav-link>
             @endif
             @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
@@ -145,6 +145,9 @@
                 </x-nav-link>
                 <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
                     {{ __('Sell medicine') }}
+                </x-nav-link>
+                <x-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
+                    {{ __('Document Sales') }}
                 </x-nav-link>
                 <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
                     {{ __('All medicine') }}
@@ -169,9 +172,6 @@
                 </x-nav-link>
                 <x-nav-link href="{{ route('myContracts') }}" :active="request()->routeIs('myContracts')">
                     {{ __('Contracts') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
-                    {{ __('Sales Notes') }}
                 </x-nav-link>
             @endif
             @if (Auth::user()->role == 'super')
