@@ -43,47 +43,47 @@
                 <tbody>
                     @foreach ($salesNotes as $salesNote)
                         {{-- @if ($salesNote->status != 'promoted') --}}
-                            <tr>
-                                <td hidden# class="hidden#"> {{ $salesNote->id }} </td>
-                                <td>{{ $loop->iteration }}</td>
-                                <td class="name-column">{{ $salesNote->name }}</td>
-                                <td>{{ $salesNote->quantity }}</td>
-                                <td>{{ $salesNote->unit_price }}</td>
-                                <td>{{ $salesNote->status }}</td>
-                                {{-- <td>{{ $salesNote->description }}</td> --}}
-                                {{-- <td>{{ $salesNote->pharmacy_id }}</td>
+                        <tr>
+                            <td hidden# class="hidden#"> {{ $salesNote->id }} </td>
+                            <td>{{ $loop->iteration }}</td>
+                            <td class="name-column">{{ $salesNote->name }}</td>
+                            <td>{{ $salesNote->quantity }}</td>
+                            <td>{{ $salesNote->unit_price }}</td>
+                            <td>{{ $salesNote->status }}</td>
+                            {{-- <td>{{ $salesNote->description }}</td> --}}
+                            {{-- <td>{{ $salesNote->pharmacy_id }}</td>
                                     <td>{{ $salesNote->staff_id }}</td> --}}
-                                <td>{{ \Carbon\Carbon::parse($salesNote->created_at)->diffForHumans() }}</td>
-                                <td>
-                                    <div class="d-flex justify-content-between">
-                                        @if (Auth::user()->role != 'staff')
-                                            <div>
-                                                <button class="btn btn-success promoteButton"><i class="bi bi-upload">
-                                                        Promote</i>
-                                                </button>
-                                            </div>
-                                        @endif
+                            <td>{{ \Carbon\Carbon::parse($salesNote->created_at)->diffForHumans() }}</td>
+                            <td>
+                                <div class="d-flex justify-content-between">
+                                    @if (Auth::user()->role != 'staff')
                                         <div>
-                                            <button class="btn btn-primary" data-bs-toggle="modal"
-                                                data-bs-target="#showSalesNoteModal{{ $salesNote->id }}"><i
-                                                    class="bi bi-eye"></i></button>
+                                            <button class="btn btn-success promoteButton"><i class="bi bi-upload">
+                                                    Promote</i>
+                                            </button>
                                         </div>
-                                        <div>
-                                            <button class="btn btn-warning" data-bs-toggle="modal"
-                                                data-bs-target="#editSalesNoteModal{{ $salesNote->id }}"><i
-                                                    class="bi bi-pencil"></i></button>
-                                        </div>
-                                        {{-- a form for deleting sales note --}}
-                                        <form class="" action="{{ route('salesNotes.destroy', $salesNote->id) }}"
-                                            method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Do you want to delete?')"
-                                                class="btn btn-danger"><i class="bi bi-trash"></i></button>
-                                        </form>
+                                    @endif
+                                    <div>
+                                        <button class="btn btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#showSalesNoteModal{{ $salesNote->id }}"><i
+                                                class="bi bi-eye"></i></button>
                                     </div>
-                                </td>
-                            </tr>
+                                    <div>
+                                        <button class="btn btn-warning" data-bs-toggle="modal"
+                                            data-bs-target="#editSalesNoteModal{{ $salesNote->id }}"><i
+                                                class="bi bi-pencil"></i></button>
+                                    </div>
+                                    {{-- a form for deleting sales note --}}
+                                    <form class="" action="{{ route('salesNotes.destroy', $salesNote->id) }}"
+                                        method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" onclick="return confirm('Do you want to delete?')"
+                                            class="btn btn-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
                         {{-- @endif --}}
 
                         {{-- Edit Sales Note Modal --}}
@@ -204,24 +204,28 @@
                         <div class="form-floating mb-2">
                             <input type="text" class="form-control" id="floatingName" name="name"
                                 placeholder="Amoxicillin" required>
-                            <label class="form-label" for="floatingName">Medicine Name</label>
+                            <label class="form-label" for="floatingName">Medicine Name<span
+                                    class="text-danger">*</span></label>
                         </div>
                         <div class="row mb-2">
                             <div class="col-md-6 form-floating">
                                 <input type="number" min="1" class="form-control" id="floatingQuantity"
                                     name="quantity" placeholder="50" required>
-                                <label class="form-label" for="floatingQuantity">Quantity</label>
+                                <label class="form-label" for="floatingQuantity">Quantity<span
+                                        class="text-danger">*</span></label>
                             </div>
                             <div class="col-md-6 form-floating">
                                 <input type="number" min="1" class="form-control" id="floatingUnitPrice"
                                     name="unit_price" placeholder="200" required>
-                                <label class="form-label" for="floatingUnitPrice">Unit Price</label>
+                                <label class="form-label" for="floatingUnitPrice">Unit Price<span
+                                        class="text-danger">*</span></label>
                             </div>
                         </div>
                         <div class="form-floating mb-2">
                             <input type="text" class="form-control" id="floatingDescription" name="description"
                                 placeholder="Sold for headache">
-                            <label class="form-label" for="floatingDescription">Description</label>
+                            <label class="form-label" for="floatingDescription">Description <span
+                                    class="text-success">(optional)</span></label>
                         </div>
 
                         <input readonly hidden type="text" name="pharmacy_id" placeholder="Pharmacy ID"
@@ -354,9 +358,9 @@
                     // // Store or remove sale note ID
                     // if (row.hasClass('selected_')) {
                     //     // clear previous selected selectedSalesNotes
-                        // selectedSalesNotes = [];
+                    // selectedSalesNotes = [];
                     //     // add the current selected sale note to the selectedSalesNotes array
-                        // selectedSalesNotes.push(saleNoteId);
+                    // selectedSalesNotes.push(saleNoteId);
                     // } else {
                     //     selectedSalesNotes = selectedSalesNotes.filter(id => id !== saleNoteId);
                     // }
@@ -391,16 +395,16 @@
 
 
                     // selectedSalesNotes.forEach(function(saleNoteId) {
-                        // Find the row with the matching ID
-                        var row = table.row(`:contains(${saleNoteId})`);
-                        // Get the row name and quantity from the third column
-                        var rowName = $(row.node()).find('td:nth-child(3)').text();
-                        var rowQuantity = $(row.node()).find('td:nth-child(4)').text();
-                        var rowUnitPrice = $(row.node()).find('td:nth-child(5)').text();
+                    // Find the row with the matching ID
+                    var row = table.row(`:contains(${saleNoteId})`);
+                    // Get the row name and quantity from the third column
+                    var rowName = $(row.node()).find('td:nth-child(3)').text();
+                    var rowQuantity = $(row.node()).find('td:nth-child(4)').text();
+                    var rowUnitPrice = $(row.node()).find('td:nth-child(5)').text();
 
-                        // Append the row to the modal
-                        $('#promotionPannel').append(
-                            `
+                    // Append the row to the modal
+                    $('#promotionPannel').append(
+                        `
                                 <div class="form-group mb-3 row">
                                     <div hidden class="hidden form-floating">
                                         <input readonly type="text" required name="sale_note_id[]" value="${saleNoteId}">
@@ -438,7 +442,7 @@
                                         <button type="button" class="btn btn-danger btn-sm removeRow"><i class="bi bi-x-lg"></i></button>
                                     </div>
                                 </div>`
-                        );
+                    );
                     // });
 
                     // genarate batch number

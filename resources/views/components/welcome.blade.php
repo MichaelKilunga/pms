@@ -415,25 +415,24 @@
                     <div class="form-floating mb-2">
                         <input type="text" class="form-control" id="floatingName" name="name"
                             placeholder="Amoxicillin" required>
-                        <label class="form-label" for="floatingName">Medicine Name</label>
+                        <label class="form-label" for="floatingName">Medicine Name<span class="text-danger">*</span></label>
                     </div>
                     <div class="row mb-2">
                         <div class="col-md-6 form-floating">
                             <input type="number" min="1" class="form-control" id="floatingQuantity"
                                 name="quantity" placeholder="50" required>
-                            <label class="form-label" for="floatingQuantity">Quantity</label>
+                            <label class="form-label" for="floatingQuantity">Quantity<span class="text-danger">*</span></label>
                         </div>
                         <div class="col-md-6 form-floating">
                             <input type="number" min="1" class="form-control" id="floatingUnitPrice"
                                 name="unit_price" placeholder="200" required>
-                            <label class="form-label" for="floatingUnitPrice">Unit Price</label>
+                            <label class="form-label" for="floatingUnitPrice">Unit Price<span class="text-danger">*</span></label>
                         </div>
                     </div>
                     <div class="form-floating mb-2">
                         <input type="text" class="form-control" id="floatingDescription" name="description"
                             placeholder="Sold for headache">
-                        <label class="form-label" for="floatingDescription">Description <span class="text-danger">(If
-                                any)</span></label>
+                        <label class="form-label" for="floatingDescription">Description <span class="text-success">(optional)</span></label>
                     </div>
 
                     <input readonly hidden type="text" name="pharmacy_id" placeholder="Pharmacy ID"
