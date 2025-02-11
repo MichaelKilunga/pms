@@ -147,7 +147,7 @@
                     {{ __('Sell medicine') }}
                 </x-nav-link>
                 <x-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
-                    {{ __('Document Sales') }}
+                    {{ __('Documented Sales') }}
                 </x-nav-link>
                 <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
                     {{ __('All medicine') }}
@@ -217,7 +217,7 @@
                 {{ __('Sell medicine') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
-                {{ __('Sales Notes') }}
+                {{ __('Document Sales') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
                 {{ __('Notifications') }}

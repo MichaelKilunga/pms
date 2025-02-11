@@ -17,8 +17,8 @@
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSalesNoteModal">+ New</button>
                 @if (Auth::user()->role != 'staff')
                     <button id="buttonToPromoteAll" class="btn btn-warning text-dark">Promote All</button>
-                    <button id="buttonToPromotedSelected" class="btn btn-warning text-dark">Promote Separate</button>
-                    <button id="buttonToPromotedSelectedAsOne" class="btn btn-warning text-dark">Promote as One</button>
+                    <button id="buttonToPromoteSelected" class="btn btn-warning text-dark">Promote Separate</button>
+                    <button id="buttonToPromoteSelectedAsOne" class="btn btn-warning text-dark">Promote as One</button>
                 @endif
             </div>
         </div>
@@ -27,9 +27,9 @@
             <table class="table table-bordered table-striped" id="SaleNoteTable">
                 <thead class="table-light">
                     <tr>
-                        <th class="hidden">#</th>
+                        <th hidden# class="hidden#"></th>
                         <th>#</th>
-                        <th class="name-column">Name</th>
+                        <th class="name-column#">Name</th>
                         <th>Quantity</th>
                         <th>Unit Price</th>
                         <th>Status</th>
@@ -42,9 +42,9 @@
                 </thead>
                 <tbody>
                     @foreach ($salesNotes as $salesNote)
-                        @if ($salesNote->status != 'promoted')
+                        {{-- @if ($salesNote->status != 'promoted') --}}
                             <tr>
-                                <td class="hidden"> {{ $salesNote->id }} </td>
+                                <td hidden# class="hidden#"> {{ $salesNote->id }} </td>
                                 <td>{{ $loop->iteration }}</td>
                                 <td class="name-column">{{ $salesNote->name }}</td>
                                 <td>{{ $salesNote->quantity }}</td>
@@ -84,7 +84,7 @@
                                     </div>
                                 </td>
                             </tr>
-                        @endif
+                        {{-- @endif --}}
 
                         {{-- Edit Sales Note Modal --}}
                         <div class="modal fade" id="editSalesNoteModal{{ $salesNote->id }}" role="dialog"
@@ -347,24 +347,24 @@
 
                     var saleNoteId = $(this).closest('tr').find('td:first')
                         .text(); // Get sale note ID from first column
-                    var row = $(this).closest('tr'); // Get the row
+                    // var row = $(this).closest('tr'); // Get the row
 
-                    row.toggleClass('selected_'); // Toggle row selection
+                    // row.toggleClass('selected_'); // Toggle row selection
 
-                    // Store or remove sale note ID
-                    if (row.hasClass('selected_')) {
-                        // clear previous selected selectedSalesNotes
-                        selectedSalesNotes = [];
-                        // add the current selected sale note to the selectedSalesNotes array
-                        selectedSalesNotes.push(saleNoteId);
-                    } else {
-                        selectedSalesNotes = selectedSalesNotes.filter(id => id !== saleNoteId);
-                    }
+                    // // Store or remove sale note ID
+                    // if (row.hasClass('selected_')) {
+                    //     // clear previous selected selectedSalesNotes
+                        // selectedSalesNotes = [];
+                    //     // add the current selected sale note to the selectedSalesNotes array
+                        // selectedSalesNotes.push(saleNoteId);
+                    // } else {
+                    //     selectedSalesNotes = selectedSalesNotes.filter(id => id !== saleNoteId);
+                    // }
 
-                    if (selectedSalesNotes.length === 0) {
-                        alert('Please select at least one sales note to promote.');
-                        return;
-                    }
+                    // if (selectedSalesNotes.length === 0) {
+                    //     alert('Please select at least one sales note to promote.');
+                    //     return;
+                    // }
 
                     // Populate the modal with selected IDs
                     //Edit the body of the modal to include rows of each item
@@ -390,7 +390,7 @@
                     </div>`);
 
 
-                    selectedSalesNotes.forEach(function(saleNoteId) {
+                    // selectedSalesNotes.forEach(function(saleNoteId) {
                         // Find the row with the matching ID
                         var row = table.row(`:contains(${saleNoteId})`);
                         // Get the row name and quantity from the third column
@@ -439,7 +439,7 @@
                                     </div>
                                 </div>`
                         );
-                    });
+                    // });
 
                     // genarate batch number
                     $(document).ready(function() {
@@ -558,7 +558,7 @@
             });
 
             // Open the modal when "Promote separate" button is clicked
-            $('#buttonToPromotedSelected').on('click', function(e) {
+            $('#buttonToPromoteSelected').on('click', function(e) {
                 e.preventDefault();
 
                 if (selectedSalesNotes.length === 0) {
@@ -660,7 +660,7 @@
             });
 
             // Open the modal for promoting as one when "Promote as one" button is clicked
-            $('#buttonToPromotedSelectedAsOne').on('click', function(e) {
+            $('#buttonToPromoteSelectedAsOne').on('click', function(e) {
                 e.preventDefault();
 
                 if (selectedSalesNotes.length === 0) {

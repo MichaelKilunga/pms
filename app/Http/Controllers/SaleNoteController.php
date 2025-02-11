@@ -51,9 +51,9 @@ class SaleNoteController extends Controller
 
         $saleNotes = null;
         if (Auth::user()->role == 'staff') {
-            $saleNotes = $notes->where('staff_id', Auth::user()->id)->get();
+            $saleNotes = $notes->where('staff_id', Auth::user()->id)->where('status','Unpromoted')->get();
         } else {
-            $saleNotes = $notes->get();
+            $saleNotes = $notes->where('status','Unpromoted')->get();
         }
 
         $salesNotes = $saleNotes;
