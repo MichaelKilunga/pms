@@ -24,6 +24,12 @@
         </div>
 
         <div class="table-responsive mt-3">
+            {{-- a row to display total sales note count and total sales amount --}}
+            <div class="d-flex justify-content-end align-items-center mb-3">
+                <div class="text-end">Total Sales: {{ $salesNotes->count() }}</div>
+                <div class="text-end">Total Amount:
+                    {{ $totalSalesMadeToday}}</div>
+                </div>
             <table class="table table-bordered table-striped" id="SaleNoteTable">
                 <thead class="table-light">
                     <tr>

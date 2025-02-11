@@ -11,6 +11,7 @@ use Exception;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ValidatedInput;
 use Illuminate\Validation\ValidationData;
 use Livewire\Attributes\Validate;
@@ -45,19 +46,25 @@ class SaleNoteController extends Controller
         //return a  collection of sale notes
         $notes = SaleNote::where('pharmacy_id', session('current_pharmacy_id'))->with('staff');
 
+        // sum of the product of quantity and unit_price for sales made today
+        $totalSalesMadeToday = $notes;
+
         if ($request->filter == true) {
             $notes = SaleNote::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today())->with('staff');
+            $totalSalesMadeToday = $notes->whereDate('created_at', Carbon::today());
         }
 
         $saleNotes = null;
         if (Auth::user()->role == 'staff') {
-            $saleNotes = $notes->where('staff_id', Auth::user()->id)->where('status','Unpromoted')->get();
+            $saleNotes = $notes->where('staff_id', Auth::user()->id)->where('status', 'Unpromoted')->get();
+            $totalSalesMadeToday = $notes->where('staff_id', Auth::user()->id)->where('status', 'Unpromoted')->sum(DB::raw('quantity * unit_price'));
         } else {
-            $saleNotes = $notes->where('status','Unpromoted')->get();
+            $saleNotes = $notes->where('status', 'Unpromoted')->get();
+            $totalSalesMadeToday = $notes->where('status', 'Unpromoted')->sum(DB::raw('quantity * unit_price'));
         }
 
         $salesNotes = $saleNotes;
-        return view('sales_notes.index', compact('salesNotes'));
+        return view('sales_notes.index', compact('salesNotes', 'totalSalesMadeToday'));
     }
 
     /**
@@ -280,7 +287,7 @@ class SaleNoteController extends Controller
                 $saleNote->status = 'promoted';
                 $saleNote->save();
             }
-            
+
             return redirect()->back()->with('success', 'Sale notes promoted successfully');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
