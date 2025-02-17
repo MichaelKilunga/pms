@@ -8,32 +8,33 @@
             </div>
         </div>
 
-        <div class="row justify-content-md-center">
-            <div class="col-md-6 d-flex justify-content-md-start gap-2">
+        <div class="row">
+            <div class="col-md-6 gap-2">
                 <a href="{{ route('salesNotes', ['filter' => false]) }}" class="btn btn-outline-secondary">All</a>
                 <a href="{{ route('salesNotes', ['filter' => true]) }}" class="btn btn-outline-secondary">Today Notes</a>
             </div>
-            <div class="col-md-6 d-flex justify-content-md-end# gap-2 mt-2 mt-md-0">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSalesNoteModal">+ New</button>
+            <div class="col-md-6 d-flex mt-2 gap-2">
                 @if (Auth::user()->role != 'staff')
-                    <button id="buttonToPromoteAll" class="btn btn-warning text-dark">Promote All</button>
-                    <button id="buttonToPromoteSelected" class="btn btn-warning text-dark">Promote Separate</button>
-                    <button id="buttonToPromoteSelectedAsOne" class="btn btn-warning text-dark">Promote as One</button>
+                <button id="buttonToPromoteAll" class=" btn btn-warning text-dark"><small class="smallest">Promote All</small></button>
+                <button id="buttonToPromoteSelected" class=" btn btn-warning text-dark"><small class="smallest">Promote Separate</small></button>
+                <button id="buttonToPromoteSelectedAsOne" class=" btn btn-warning text-dark"><small class="smallest">Promote as One</small></button>
+                <button id="buttonToPromoteToExisting" class=" btn btn-warning text-dark"><small class="smallest">Promote To Existing</small></button>
                 @endif
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSalesNoteModal"><small class="md-smallest">+ New</small></button>
             </div>
         </div>
 
         <div class="table-responsive mt-3">
             {{-- a row to display total sales note count and total sales amount --}}
             <div class="d-flex justify-content-end align-items-center mb-3">
-                <div class="text-end">Total Sales: {{ $salesNotes->count() }} |  </div>
-                <div class="text-end"> Today Amount:
-                     {{ $totalSalesMadeToday}}</div>
+                <div class="text-end mx-2"><span class="text-primary"> Total Sales Note: </span> <span class="text-danger">{{ $salesNotes->count() }}</span>, </div>
+                <div class="text-end mx-2">  <span class="text-primary">Total Amount:</span>
+                    <span class="text-danger">{{ number_format($totalSalesMadeToday)}}/=</span> TZS</div>
                 </div>
             <table class="table table-bordered table-striped" id="SaleNoteTable">
                 <thead class="table-light">
                     <tr>
-                        <th hidden# class="hidden#"></th>
+                        <th hidden class="hidden"></th>
                         <th>#</th>
                         <th class="name-column#">Name</th>
                         <th>Quantity</th>
@@ -50,7 +51,7 @@
                     @foreach ($salesNotes as $salesNote)
                         {{-- @if ($salesNote->status != 'promoted') --}}
                         <tr>
-                            <td hidden# class="hidden#"> {{ $salesNote->id }} </td>
+                            <td hidden class="hidden"> {{ $salesNote->id }} </td>
                             <td>{{ $loop->iteration }}</td>
                             <td class="name-column">{{ $salesNote->name }}</td>
                             <td>{{ $salesNote->quantity }}</td>
