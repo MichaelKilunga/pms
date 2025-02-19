@@ -25,6 +25,10 @@ use function PHPUnit\Framework\isEmpty;
 
 class SalesController extends BaseController
 {
+
+    private $errorMessage = '';
+    private $successMessage = '';
+
     // get printer configuration from the database using setPrinterConfig function from dashboard controller
     public function __construct()
     {
@@ -78,6 +82,9 @@ class SalesController extends BaseController
      */
     public function store(Request $request)
     {
+        $saleDate = $request->input('date');
+
+        // dd($saleDate[0]);
 
         // item_id represents the stock_id here
 
@@ -124,7 +131,6 @@ class SalesController extends BaseController
                 $remainQuantity = $stock->remain_Quantity - $request->quantity[$key];
                 $stock->update(['remain_Quantity' => $remainQuantity]);
 
-                // dd($request);
                 Sales::create([
                     'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
                     'staff_id' => $staffId,                // Use the staff_id from the authenticated user
@@ -135,14 +141,15 @@ class SalesController extends BaseController
                     'date' => $request->date[$key],
                 ]);
             }
-            //call the function to print the last receipt
-            try {
-                $this->printLastReceipt();
-            } catch (\Exception $e) {
-                // 
+            
+            // Print the receipt using the first date of the first sale
+            $printing = $this->printSaleReceipt($saleDate[0]);
+            if ($printing == false) {
+                return redirect()->route('sales')->with('info', 'Sales recorded successfully,  without printing');
+            } else {
+                return redirect()->route('sales')->with('success', 'Sales recorded successfully,  with printing');
             }
 
-            return redirect()->route('sales')->with('success', 'Sales recorded successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Not added because: ' . $e->getMessage());
         }
@@ -207,6 +214,28 @@ class SalesController extends BaseController
 
     public function printLastReceipt()
     {
+        // check if has enabled  receipt printing
+        $hasPrinter = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
+        if (!$hasPrinter) {
+            // use factory to create fake data and store in  database
+            $createPrinter = PrinterSetting::create([
+                'name' => 'Printer',
+                'ip_address' => '192.168.1.1',
+                'computer_name' => 'Computer Name',
+                'port' => 9100,
+                'pharmacy_id' => session('current_pharmacy_id'),
+                'use_printer' => false
+            ]);
+            if ($createPrinter->use_printer == false) {
+                return redirect()->back()->with('error', 'Receipt printing is not enabled.');
+            }
+        } else {
+            // use factory to create fake data and store in  database
+            if ($hasPrinter->use_printer == false) {
+                return redirect()->back()->with('error', 'Receipt printing is not enabled.');
+            }
+        }
+
         // Get the last receipt from sales data for the current pharmacy group
         $lastReceipt = Sales::where('pharmacy_id', session('current_pharmacy_id'))
             ->selectRaw('date, sum(total_price) as total_amount, staff_id')
@@ -226,24 +255,10 @@ class SalesController extends BaseController
             ->get();
 
         try {
-            // Retrieve printer details from the session
-            $printerName = session('printer');
-            $printerIp = session('printer_ip_address');
-            $computer_name = session('computer_name');
+            $printerName = $this->getDefaultPrinterName();
 
-            // Validate printer details
-            if (!$printerName || !$printerIp) {
-                throw new \Exception("Printer details are missing. Please select a printer first.");
-            }
+            $connector = new WindowsPrintConnector("smb://localhost/" . $printerName);
 
-            // Get the network printer path
-            $printerPath = $this->getConnectedPrinterName($printerName, $printerIp, $computer_name);
-
-            // Log the printer path for debugging
-            Log::info('Using Printer Path: ' . $printerPath);
-
-            // Initialize the printer connection
-            $connector = new WindowsPrintConnector($printerPath, 9100); // Port 9100 is standard for network printers
             $printer = new Printer($connector);
 
             // Prepare the receipt content
@@ -283,39 +298,33 @@ class SalesController extends BaseController
         }
     }
 
-    private function getConnectedPrinterName($printerName, $printerIp, $computer_name)
-    {
-        if (!$printerName || !$printerIp) {
-            throw new \Exception("Printer details are missing.");
-        }
-
-        // Construct the network printer path
-        // Windows network printer path using SMB notation
-        // $computerName = $printerIp; // Using the IP address as the computer name
-        $computerName = isEmpty(getenv('COMPUTERNAME')) ? $computer_name : getenv('COMPUTERNAME'); // or hard-code your Windows computer name
-
-        if (PHP_OS_FAMILY === 'Windows') {
-            // $printerPath = 'smb://' . $computerName . '/' . $printerName;
-            $printerPath = 'smb://' . $printerIp . '/' . $printerName;
-        } elseif (PHP_OS_FAMILY === 'Linux') {
-            // Linux network printer path
-            // $printerPath = '/dev/usb/' . $printerName;
-            // $printerPath = 'smb://' . $computerName . '/' . $printerName;
-            $printerPath = 'smb://' . $printerIp . '/' . $printerName;
-        } else {
-            // Fallback for other environments
-            // $printerPath = 'smb://' . $printerIp . '/' . $printerName;
-            $printerPath = 'smb://' . $printerIp . '/' . $printerName;
-        }
-
-        Log::info('Constructed Printer Path: ' . $printerPath);
-        return $printerPath;
-    }
+  
 
 
     //implement function for printing a specific receipt after receiving the date of sales made
     public function printReceipt(Request $request)
     {
+
+        $hasPrinter = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
+        if (!$hasPrinter) {
+            // use factory to create fake data and store in  database
+            $createPrinter = PrinterSetting::create([
+                'name' => 'Printer',
+                'ip_address' => '192.168.1.1',
+                'computer_name' => 'Computer Name',
+                'port' => 9100,
+                'pharmacy_id' => session('current_pharmacy_id'),
+                'use_printer' => false
+            ]);
+            if ($createPrinter->use_printer == false) {
+                return redirect()->back()->with('error', 'Receipt printing is not enabled.');
+            }
+        } else {
+            // use factory to create fake data and store in  database
+            if ($hasPrinter->use_printer == false) {
+                return redirect()->back()->with('error', 'Receipt printing is not enabled.');
+            }
+        }
 
         // dd($salesDate);
         // Validate the date format
@@ -346,18 +355,15 @@ class SalesController extends BaseController
         // dd($staff->name);
 
         try {
-            // Automatically detect the active printer name and path
-            $printerPath = $this->getConnectedPrinterName(session('printer'), session('printer_ip_address'), session('computer_name'));
+            $printerName = $this->getDefaultPrinterName();
 
-            if (!$printerPath) {
-                throw new \Exception("No connected printer detected.");
+            if (!$printerName) {
+                throw new \Exception("No default printer detected.");
             }
 
-            // Log the printer path for debugging
-            Log::info('Using Printer Path: ' . $printerPath);
 
-            // Initialize the printer connection using the network printer path
-            $connector = new WindowsPrintConnector($printerPath);
+            // Connect to the default printer
+            $connector = new WindowsPrintConnector("smb://localhost/" . $printerName);
             $printer = new Printer($connector);
 
             // Prepare the receipt content
@@ -407,36 +413,122 @@ class SalesController extends BaseController
             throw new \Exception($e->getMessage());
         }
     }
-
-    //implement function for clearing the printer queue
-    public function clearPrinterQueue($printerName)
+    
+    public function printSaleReceipt($salesDate)
     {
-        try {
-            // Stop the Spooler service
-            exec('net stop spooler', $output, $statusStop);
-            if ($statusStop !== 0) {
-                throw new \Exception("Failed to stop spooler service. Output: " . implode("\n", $output));
+
+        $hasPrinter = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
+        if (!$hasPrinter) {
+            // use factory to create fake data and store in  database
+            $createPrinter = PrinterSetting::create([
+                'name' => 'Printer',
+                'ip_address' => '192.168.1.1',
+                'computer_name' => 'Computer Name',
+                'port' => 9100,
+                'pharmacy_id' => session('current_pharmacy_id'),
+                'use_printer' => false
+            ]);
+            if ($createPrinter->use_printer == false) {
+                throw new \Exception("Receipt printing is not enabled.");
             }
-
-            // Get the printer queue folder path
-            $printerSpoolPath = 'C:\\Windows\\System32\\spool\\PRINTERS\\*';
-
-            // Clear only the jobs related to the specific printer
-            exec('del /Q /F ' . $printerSpoolPath, $output, $statusDel);
-            if ($statusDel !== 0) {
-                throw new \Exception("Failed to clear printer queue. Output: " . implode("\n", $output));
+        } else {
+            // use factory to create fake data and store in  database
+            if ($hasPrinter->use_printer == false) {
+                throw new \Exception("Receipt printing is not enabled.");
             }
-
-            // Restart the Spooler service
-            exec('net start spooler', $output, $statusStart);
-            if ($statusStart !== 0) {
-                throw new \Exception("Failed to restart spooler service. Output: " . implode("\n", $output));
-            }
-
-            // return "Printer queue cleared successfully for printer: $printerName";
-            return;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
         }
+
+        // Get the sales data for the current pharmacy group for the specified date, but ensure the date is in datetime datatype to match the date in the database
+        $receipt = Sales::where('pharmacy_id', session('current_pharmacy_id'))
+            ->where('date', $salesDate)
+            ->selectRaw('date, sum(total_price) as total_amount, staff_id')
+            ->groupBy('date', 'staff_id')
+            ->first();
+
+        if (!$receipt) {
+            throw new \Exception("No sales data found for the specified date.");
+        }
+
+
+        $medicines = Sales::where('pharmacy_id', session('current_pharmacy_id'))->with('item')
+            ->where('date', $receipt->date)
+            ->get();
+
+        $staff = User::where('id', $receipt->staff_id)->first();
+
+        // dd($staff->name);
+
+        try {
+            $printerName = $this->getDefaultPrinterName();
+
+            if (!$printerName) {
+                throw new \Exception("No default printer detected.");
+            }
+
+
+            // Connect to the default printer
+            $connector = new WindowsPrintConnector("smb://localhost/" . $printerName);
+            $printer = new Printer($connector);
+
+            // Prepare the receipt content
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("------START OF RECEIPT------\n");
+            $printer->text("Pharmacy: " . session('pharmacy_name') . "\n");
+            $printer->text("Address: " . session('location') . "\n");
+            $printer->text("Description: Medicine  Purchases\n");
+            $printer->text("----------------------------------\n");
+
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("Date:" . $receipt->date . "\n");
+            $printer->text("Pharmacist:" . $staff->name . "\n");
+
+            $printer->text("Medicines:");
+            //list medicines sold
+            foreach ($medicines as $medicine) {
+                $printer->text($medicine->item->name . "\n" . "\r            \r");
+            }
+
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("----------------------------------\n");
+            $printer->text("\r        \rTotal Amount:  TZS " . number_format($receipt->total_amount, 0) . "/= \n");
+            // $printer->text("For: Medicine \n");
+            $printer->text("----------------------------------\n");
+
+            $printer->text("Thank you for your purchase!\n");
+            $printer->feed(1); // Feed 3 lines
+            $printer->text("------END OF RECEIPT------\n");
+
+            // Cut the paper
+            $printer->cut();
+
+            // Close the printer connection
+            $printer->close();
+
+            //clear the printer queue
+            // $this->clearPrinterQueue($this->printerName);
+
+            
+            $this->successMessage = 'Receipt printing is not enabled.';
+            return true;
+
+        } catch (\Exception $e) {
+
+            $this->errorMessage = 'Error printing receipt: ' . $e->getMessage();
+            return false;
+        }
+    }
+
+    // Function to get the default printer name on Windows
+    function getDefaultPrinterName()
+    {
+        // dd("fdfvd ");
+        $output = shell_exec('wmic printer where "Default=True" get Name /value');
+
+
+        if ($output) {
+            preg_match('/Name=(.+)/', $output, $matches);
+            return isset($matches[1]) ? trim($matches[1]) : null;
+        }
+        return null;
     }
 }

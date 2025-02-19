@@ -241,7 +241,7 @@
          USING JS AND RETURN THEM AS A DROP-DOWN LIST, USER WILL SELECT THE PRINTER HE/SHE WANTS AND SUBMIT,
          USER SHOULD ONLY SELECT WHILE THE FORM SHOULD CATCH IP address and Printe's path using JS --}}
     {{-- Modal for Selecting Printers --}}
-    @if (session('use_printer'))
+    @if (false)
         <div class="modal fade" id="printerModal" tabindex="-1" aria-labelledby="printerModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">

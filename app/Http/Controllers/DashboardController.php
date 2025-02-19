@@ -412,9 +412,19 @@ class DashboardController extends Controller
                 if (!$printer) {
                     session(['use_printer' => true]);
 
+                    // use factory to create fake data and store in  database
+                    $printer = PrinterSetting::create([
+                        'name' => 'Printer',
+                        'ip_address' => '192.168.1.1',
+                        'computer_name' => 'Computer Name',
+                        'port' => 9100,
+                        'pharmacy_id' => session('current_pharmacy_id'),
+                        'use_printer' => true
+                    ]);
+
                     return response()->json([
                         'status' => 'success',
-                        'message' => 'no configurations'
+                        'message' => 'successfully enabled!'
                     ]);
                 }
                 if ($printer) {
@@ -441,6 +451,17 @@ class DashboardController extends Controller
                     session(['printer_port' => null]);
                     session(['use_printer' => false]);
 
+                    // use factory to create fake data and store in  database
+                    $printer = PrinterSetting::create([
+                        'name' => 'Printer',
+                        'ip_address' => '192.168.1.1',
+                        'computer_name' => 'Computer Name',
+                        'port' => 9100,
+                        'pharmacy_id' => session('current_pharmacy_id'),
+                        'use_printer' => true
+                    ]);
+
+                    // return json response
                     return response()->json([
                         'status' => 'success',
                         'message' => 'Disabled successfully!'
