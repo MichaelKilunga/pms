@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sales;
 use App\Models\Pharmacy;
 use App\Models\Items;
+use App\Models\PrinterSetting;
 use App\Models\Staff;
 use App\Models\Stock;
 use App\Models\User;
@@ -49,9 +50,15 @@ class SalesController extends BaseController
         $sales = Sales::with('item')->where('pharmacy_id', session('current_pharmacy_id'))
             ->get();
 
+        $printerEnabled = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
+        if ($printerEnabled) {
+            $usePrinter = $printerEnabled->use_printer;
+        } else {
+            $usePrinter = false;
+        }
         $medicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->with('item')->get();
         // dd($medicines);
-        return view('sales.index', compact('sales', 'medicines'));
+        return view('sales.index', compact('sales', 'medicines', 'usePrinter'));
     }
 
     /**
@@ -129,9 +136,9 @@ class SalesController extends BaseController
                 ]);
             }
             //call the function to print the last receipt
-            try{
+            try {
                 $this->printLastReceipt();
-            }catch(\Exception $e){
+            } catch (\Exception $e) {
                 // 
             }
 
@@ -286,7 +293,7 @@ class SalesController extends BaseController
         // Windows network printer path using SMB notation
         // $computerName = $printerIp; // Using the IP address as the computer name
         $computerName = isEmpty(getenv('COMPUTERNAME')) ? $computer_name : getenv('COMPUTERNAME'); // or hard-code your Windows computer name
-        
+
         if (PHP_OS_FAMILY === 'Windows') {
             // $printerPath = 'smb://' . $computerName . '/' . $printerName;
             $printerPath = 'smb://' . $printerIp . '/' . $printerName;

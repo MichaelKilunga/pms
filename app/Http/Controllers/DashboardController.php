@@ -383,14 +383,92 @@ class DashboardController extends Controller
             session(['printer_ip_address' => $printer->ip_address]);
             session(['computer_name' => $printer->computer_name]);
             session(['printer_port' => $printer->port]);
+            session(['use_printer' => $printer->use_printer]);
         } else {
             session(['printer' => null]);
             session(['printer_ip_address' => null]);
             session(['computer_name' => null]);
             session(['printer_port' => null]);
+            // session(['use_printer' => false]);
             redirect()->route('sales');
             // ->with('error', 'No printer configuration found.');
         }
         return;
+    }
+
+    // function to update printer use status
+    public function updatePrinterStatus(Request $request)
+    {
+        $usePrinter = false;
+
+        try {
+            $request->validate([
+                'new_status' => 'required|boolean',
+                'current_status' => 'required|boolean'
+            ]);
+
+            $printer = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
+            if ($request->input('new_status')) {
+                if (!$printer) {
+                    session(['use_printer' => true]);
+
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'no configurations'
+                    ]);
+                }
+                if ($printer) {
+                    session(['printer' => $printer->name]);
+                    session(['printer_ip_address' => $printer->ip_address]);
+                    session(['computer_name' => $printer->computer_name]);
+                    session(['printer_port' => $printer->port]);
+                    session(['use_printer' => true]);
+
+                    $printer->update([
+                        'use_printer' => $request->input('new_status')
+                    ]);
+
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'successfully enabled!'
+                    ]);
+                }
+            } else {
+                if (!$printer) {
+                    session(['printer' => null]);
+                    session(['printer_ip_address' => null]);
+                    session(['computer_name' => null]);
+                    session(['printer_port' => null]);
+                    session(['use_printer' => false]);
+
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Disabled successfully!'
+                    ]);
+                }
+                if ($printer) {
+                    session(['printer' => $printer->name]);
+                    session(['printer_ip_address' => $printer->ip_address]);
+                    session(['computer_name' => $printer->computer_name]);
+                    session(['printer_port' => $printer->port]);
+                    session(['use_printer' => false]);
+
+                    $printer->update([
+                        'use_printer' => $request->input('new_status')
+                    ]);
+
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'successfully disabled!'
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            // return json response
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 }

@@ -11,7 +11,14 @@
         </div>
         <hr>
         <div class="d-flex justify-content-between">
-            <div></div>
+            {{-- checkbox to enable use of printer --}}
+            <div>
+                <div class="form-control form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox"
+                        {{ session('use_printer') ? 'checked' : '' }} id="printerCheckbox">
+                    <label class="form-check-label" for="printerCheckbox">Printer Enabled</label>
+                </div>
+            </div>
             <div>
                 <a href="print/lastReceipt" class="btn btn-success m-2">
                     <i class="bi bi-printer"></i> Last
@@ -234,7 +241,7 @@
          USING JS AND RETURN THEM AS A DROP-DOWN LIST, USER WILL SELECT THE PRINTER HE/SHE WANTS AND SUBMIT,
          USER SHOULD ONLY SELECT WHILE THE FORM SHOULD CATCH IP address and Printe's path using JS --}}
     {{-- Modal for Selecting Printers --}}
-    @if (session('printer') == null && session('computer_name')==null)
+    @if (session('use_printer'))
         <div class="modal fade" id="printerModal" tabindex="-1" aria-labelledby="printerModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -411,6 +418,45 @@
 
             // Initialize Chosen on Page Load
             initializeChosen();
+
+            // function to enable or disable use of printer
+            var printerCheckbox = $('#printerCheckbox');
+            printerCheckbox.on('change', function() {
+                if (printerCheckbox.is(':checked')) {
+                    new_status = 1;
+                    current_status = 0;
+                } else {
+                    new_status = 0;
+                    current_status = 1;
+                }
+
+                // Update printer enable status in the db using jquery ajax
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('printer.updateStatus') }}",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        current_status: current_status,
+                        new_status: new_status,
+                    },
+                    success: function(response) {
+                        // Handle the response from the server
+                        console.log(response);
+                        if(response.status == "success"){
+                            if(response.message == "no configurations"){
+                                
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle errors
+                        error(error);
+
+                    }
+                });
+
+            });
+
         });
     </script>
 @endsection

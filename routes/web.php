@@ -189,6 +189,8 @@ Route::middleware(['auth'])->group(function () {
 
     // store printer settings
     Route::post('/printer', [DashboardController::class, 'storePrinterSettings'])->name('printer.store');
+    // Update printer use status
+    Route::post('/printer/update-status', [DashboardController::class, 'updatePrinterStatus'])->name('printer.updateStatus');
 
 
     //routes for sales notes

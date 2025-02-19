@@ -20,7 +20,8 @@ class PrinterSetting extends Model
         'ip_address',
         'port',
         'pharmacy_id',
-        'computer_name'
+        'computer_name',
+        'use_printer',
     ];
 
     public function pharmacy()
