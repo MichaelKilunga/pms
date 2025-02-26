@@ -203,6 +203,26 @@
                     {{ __('Schedules') }}
                 </x-nav-link>
             @endif
+            @if (Auth::user()->role == 'agent')
+                <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                    {{ __('Dashboard') }}
+                </x-nav-link>
+                <x-nav-link href="{{ route('agent.pharmacies',['action'=>'index']) }}" :active="request()->routeIs('agent.pharmacies')">
+                    {{ __('Pharmacies') }}
+                </x-nav-link>
+                <x-nav-link href="{{ route('agent.packages',['action'=>'index']) }}" :active="request()->routeIs('agent.packages')">
+                    {{ __('Packages') }}
+                </x-nav-link>
+                <x-nav-link href="{{ route('agent.messages',['action'=>'index']) }}" :active="request()->routeIs('agent.messages')">
+                    {{ __('Messages') }}
+                </x-nav-link>
+                <x-nav-link href="{{ route('agent.cases',['action'=>'index']) }}" :active="request()->routeIs('agent.cases')">
+                    {{ __('Cases') }}
+                </x-nav-link>
+                <x-nav-link href="{{ route('agent.contracts',['action'=>'index']) }}" :active="request()->routeIs('agent.contracts')">
+                    {{ __('Contracts') }}
+                </x-nav-link>
+            @endif
         </div>
         {{-- </span> --}}
     </div>
@@ -258,7 +278,8 @@
                 @endif
 
                 <div>
-                    <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
+                    <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}
+                    </div>
                     <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
                 </div>
             </div>

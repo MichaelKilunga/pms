@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use  Illuminate\Support\Carbon;
 use App\Models\Staff;
 use App\Models\Items;
+use App\Models\Package;
 use App\Models\PrinterSetting;
 use App\Models\Sales;
 use App\Models\Stock;
@@ -53,7 +54,14 @@ class DashboardController extends Controller
         }
 
         if(Auth::user()->role == "agent"){
-            return view('superAdmin.index');
+            $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
+            $totalPackages = Package::where('owner_id', Auth::user()->id)->count();
+            $activePharmacies = Pharmacy::where('owner_id', Auth::user()->id)->where('status', 'active')->count();
+            $inactivePharmacies = Pharmacy::where('owner_id', Auth::user()->id)->where('status', 'inactive')->count();
+            $totalMessages = 0;
+            $totalCases = 0;
+
+            return view('agent.index', compact('totalPharmacies', 'totalPackages', 'activePharmacies', 'inactivePharmacies', 'totalMessages', 'totalCases'));
         }
         
         $sellMedicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->with('item')->get();

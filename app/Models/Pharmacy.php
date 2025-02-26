@@ -10,7 +10,11 @@ class Pharmacy extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'name', 'location', 'owner_id', 'package_id','status',
+        'name',
+        'location',
+        'owner_id',
+        'package_id',
+        'status',
     ];
 
     public function owner()
@@ -37,12 +41,12 @@ class Pharmacy extends Model
     {
         return $this->hasMany(Items::class);
     }
-    
+
     public function stock()
     {
         return $this->hasMany(Stock::class);
     }
-    
+
     public function sales()
     {
         return $this->hasMany(Sales::class);
@@ -56,5 +60,10 @@ class Pharmacy extends Model
     public function saleNote()
     {
         return $this->hasMany(SaleNote::class, 'pharmacy_id');
+    }
+
+    public function agent()
+    {
+        return $this->belongsTo(User::class, 'agent_id');
     }
 }

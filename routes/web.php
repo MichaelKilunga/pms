@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AgentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PharmacyController;
 use App\Http\Controllers\StaffController;
@@ -204,6 +205,14 @@ Route::middleware(['auth'])->group(function () {
     //Promote sales Notes to sales
     Route::post('salesNotes/promote', [SaleNoteController::class, 'promoteSalesNotes'])->name('salesNotes.promote');
     Route::post('salesNotes/promoteAsOne', [SaleNoteController::class, 'promoteSalesNotesAsOne'])->name('salesNotes.promoteAsOne');
+
+
+    // Agent routes
+    Route::get('agent.messages', [AgentController::class, 'message'])->name('agent.messages');
+    Route::get('agent.cases', [AgentController::class, 'cases'])->name('agent.cases');
+    Route::get('agent.pharmacies', [AgentController::class, 'pharmacies'])->name('agent.pharmacies');
+    Route::get('agent.packages', [AgentController::class, 'packages'])->name('agent.packages');
+    Route::get('agent.contracts', [AgentController::class, 'contracts'])->name('agent.contracts');
 });
 
 Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {
