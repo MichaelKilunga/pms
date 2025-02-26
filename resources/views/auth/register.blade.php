@@ -12,14 +12,33 @@
             <div>
                 <x-label for="name" value="{{ __('Name') }}" />
                 <x-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required
-                    autofocus autocomplete="name" />
+                    autofocus autocomplete="name" placeholder="Pill Point" />
+            </div>
+
+            <div class="mt-4">
+                <x-label for="role" value="{{ __('Role') }}" />
+                <select name="role" id="role"
+                    class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                    required>
+                    <option class="w-50" value="">-- Select a Role --</option>
+                    <option class="w-50" {{old('role')=='agent'?'selected':''}} value="agent">Agent</option>
+                    <option class="w-50" {{old('role')=='agent'?'selected':''}} value="owner">Owner</option>
+                </select>
             </div>
 
             <div class="mt-4">
                 <x-label for="email" value="{{ __('Email') }}" />
                 <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')"
-                    required autocomplete="username" />
+                    required autocomplete="username" placeholder="info@pillpoint.com" />
             </div>
+
+            {{-- Phone number input --}}
+            <div class="mt-4">
+                <x-label for="phone_number" value="{{ __('Phone Number') }}" />
+                <x-input id="phone_number" class="block mt-1 w-full" type="tel" name="phone_number"
+                    :value="old('phone_number')" required placeholder="0742177328" autocomplete="phone_number" />
+            </div>
+            {{-- Address input --}}
 
             <div class="mt-4">
                 <x-label for="password" value="{{ __('Password') }}" />
@@ -33,16 +52,6 @@
                     name="password_confirmation" required autocomplete="new-password" />
             </div>
 
-            {{-- Add field to select package --}}
-            {{-- <div class="mt-4">
-                <x-label for="package" value="{{ __('Package') }}" />
-                <select name="package_id" id="package" class="form-control" required>
-                    <option value="">-- Select a Package --</option>
-                    @foreach($packages as $package)
-                        <option value="{{ $package->id }}">{{ $package->name }} - ${{ $package->price }}</option>
-                    @endforeach
-                </select>
-            </div> --}}
 
             @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
                 <div class="mt-4">

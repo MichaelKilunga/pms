@@ -51,6 +51,11 @@ class DashboardController extends Controller
         if (Auth::user()->role == "super") {
             return view('superAdmin.index');
         }
+
+        if(Auth::user()->role == "agent"){
+            return view('superAdmin.index');
+        }
+        
         $sellMedicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->with('item')->get();
         $totalMedicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->count();
         $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
