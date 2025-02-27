@@ -15,6 +15,7 @@ class Pharmacy extends Model
         'owner_id',
         'package_id',
         'status',
+        'agent_id',
     ];
 
     public function owner()

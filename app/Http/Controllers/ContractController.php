@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contract;
 use App\Models\Package;
+use App\Models\Pharmacy;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -81,6 +82,22 @@ class ContractController extends Controller
     // User (Owner) Views
     public function indexUser()
     {
+
+        // Get pharmacies that belong to the authenticated owner
+        $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
+        // Detect the agent responsible for these pharmacies
+        $agent = User::whereHas('agent', function ($query) use ($pharmacies) {
+            $query->whereIn('id', $pharmacies->pluck('id'));
+        })->first();
+        // Store agent ID in the session if found
+        if ($agent) {
+            session(['agent' => $agent->id]);
+            session(['agentData' => $agent]);
+        } else {
+            session(['agent' => '']);
+            session(['agentData' => '']);
+        }
+
         $packages = Package::all();
         // $owners = User::all();
         $contracts = Contract::where('owner_id', Auth::user()->id)->with('package')->orderBy('created_at', 'desc')->get();
@@ -104,6 +121,16 @@ class ContractController extends Controller
 
     public function upgrade(Request $request)
     {
+        $current_contract = Contract::where('owner_id', $request['owner_id'])->where('is_current_contract', 1)->get();
+        //change all the current contract to not current
+        foreach ($current_contract as $contract) {
+            $contract->update(['is_current_contract' => 0]);
+            // delete them if they are unpayed and inactive
+            if ($contract->payment_status == 'unpayed' && $contract->status == 'inactive') {
+                $contract->delete();
+            }
+        }
+
         // create a new contract
         $request['status'] = 'inactive';
         $request['payment_status'] = 'pending';
@@ -131,14 +158,13 @@ class ContractController extends Controller
                 if ($validated['package_id'] ==  1) {
                     throw new Exception('This is unauthorized action!');
                 }
-            }else {
+            } else {
                 if ($validated['package_id'] ==  1) {
                     $validated['status'] = 'active';
                     $validated['payment_status'] = 'payed';
                     $validated['end_date'] = now()->addDays(14);
                 }
             }
-
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
@@ -168,7 +194,7 @@ class ContractController extends Controller
             $current_contract_end_date = date('Y-m-d', strtotime($current_contract->end_date));
 
             //redirect to route 'myContracts" with success message
-            return redirect()->route('myContracts')->with('success', 'Package upgraded successfully.');
+            return redirect()->back()->with('success', 'Package upgraded successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
@@ -267,10 +293,14 @@ class ContractController extends Controller
     {
         // dd($request->all());
         //find the current contract
-        $current_contract = Contract::where('owner_id', $request['owner_id'])->where('is_current_contract', 1)->first();
-        //change the current contract to not current
-        if ($current_contract) {
-            $current_contract->update(['is_current_contract' => 0]);
+        $current_contract = Contract::where('owner_id', $request['owner_id'])->where('is_current_contract', 1)->get();
+        //change all the current contract to not current
+        foreach ($current_contract as $contract) {
+            $contract->update(['is_current_contract' => 0]);
+            // delete them if they are unpayed and inactive
+            if ($contract->payment_status == 'unpayed' && $contract->status == 'inactive') {
+                $contract->delete();
+            }
         }
 
         //find the contract to activate

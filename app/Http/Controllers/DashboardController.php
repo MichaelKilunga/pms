@@ -53,7 +53,7 @@ class DashboardController extends Controller
             return view('superAdmin.index');
         }
 
-        if(Auth::user()->role == "agent"){
+        if (Auth::user()->role == "agent") {
             $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
             $totalPackages = Package::where('owner_id', Auth::user()->id)->count();
             $activePharmacies = Pharmacy::where('owner_id', Auth::user()->id)->where('status', 'active')->count();
@@ -63,7 +63,7 @@ class DashboardController extends Controller
 
             return view('agent.index', compact('totalPharmacies', 'totalPackages', 'activePharmacies', 'inactivePharmacies', 'totalMessages', 'totalCases'));
         }
-        
+
         $sellMedicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->with('item')->get();
         $totalMedicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->count();
         $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
@@ -147,11 +147,36 @@ class DashboardController extends Controller
 
         if (Auth::user()->role == 'owner') {
 
+            // Get pharmacies that belong to the authenticated owner
+            $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
+
+            if (Pharmacy::where('owner_id', Auth::user()->id)->count() > 0) {
+                // Detect the agent responsible for these pharmacies
+                $agent = User::whereHas('agent', function ($query) use ($pharmacies) {
+                    $query->whereIn('id', $pharmacies->pluck('id'));
+                })->first();
+
+                // dd($agent);
+                // Store agent ID in the session if found
+                if ($agent) {
+                    session(['agent' => $agent->id]);
+                    session(['agentData' => $agent]);
+                    // dd(session('agentData'));
+                    if (Auth::user()->contracts->where('is_current_contract', 1)->count() < 1) {
+                        return redirect()->route('myContracts')->with('info', "Contact your agent to subscribe you first!");
+                    }
+                } else {
+                    // clear session
+                    session()->forget('agent');
+                    session()->forget('agentData');
+                }
+            }
+
+
             if (Auth::user()->contracts->where('is_current_contract', 1)->count() < 1) {
                 return redirect()->route('myContracts')->with('info', 'Welcome on board! Subscribe first to continue using our products!');
             }
 
-            $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
             // dd($pharmacies->count());
             if ($pharmacies->count() > 0) {
                 return view('dashboard', compact(
