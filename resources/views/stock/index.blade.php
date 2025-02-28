@@ -94,13 +94,13 @@
                                             style="display:inline;">
                                             @csrf
                                             @method('DELETE')
-                                            @if ($stock->quantity == $stock->remain_Quantity)
+                                            {{-- @if ($stock->quantity == $stock->remain_Quantity) --}}
                                                 <button type="submit"
                                                     onclick="return confirm('Do you want to delete this stock?')"
                                                     class="btn btn-danger btn-sm">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
-                                            @endif
+                                            {{-- @endif --}}
                                         </form>
                                     </div>
 
