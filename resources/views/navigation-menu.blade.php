@@ -202,8 +202,11 @@
                 <x-nav-link href="{{ route('agent.contracts',['action'=>'index']) }}" :active="request()->routeIs('agent.contracts')">
                     {{ __('Agent\'s Contracts') }}
                 </x-nav-link>
-                <x-nav-link href="{{ route('update.contracts') }}" :active="request()->routeIs('update.contracts')">
+                <x-nav-link href="{{ route('update.packages') }}" :active="request()->routeIs('update.packages')">
                     {{ __('Schedules') }}
+                </x-nav-link>
+                <x-nav-link href="{{ route('agent.pharmacies',['action'=>'index']) }}" :active="request()->routeIs('agent.pharmacies')">
+                    {{ __('Pharmacies') }}
                 </x-nav-link>
             @endif
             @if (Auth::user()->role == 'agent')
