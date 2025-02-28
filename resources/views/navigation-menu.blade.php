@@ -199,10 +199,10 @@
                 <x-nav-link href="{{ route('contracts') }}" :active="request()->routeIs('contracts')">
                     {{ __('Contracts') }}
                 </x-nav-link>
-                <x-nav-link href="{{ route('agent.contracts',['action'=>'index']) }}" :active="request()->routeIs('agent.contracts')">
+                <x-nav-link href="{{ route('agent.packages',['action'=>'index']) }}" :active="request()->routeIs('agent.packages')">
                     {{ __('Agent\'s Contracts') }}
                 </x-nav-link>
-                <x-nav-link href="{{ route('update.packages') }}" :active="request()->routeIs('update.packages')">
+                <x-nav-link href="{{ route('update.contracts') }}" :active="request()->routeIs('update.contracts')">
                     {{ __('Schedules') }}
                 </x-nav-link>
                 <x-nav-link href="{{ route('agent.pharmacies',['action'=>'index']) }}" :active="request()->routeIs('agent.pharmacies')">
