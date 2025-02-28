@@ -7,7 +7,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('pharmacies', function (Blueprint $table) {
-            $table->foreignId('agent_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('agent_id')->default(1)->constrained('users');
         });
     }
 
