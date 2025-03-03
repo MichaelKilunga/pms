@@ -265,7 +265,7 @@
                                                                                                                                         <td>${sale.date}</td>
                                                                                                                                         <td class="text-left">${sale.item['name']}</td>
                                                                                                                                         <td>${sale.quantity}</td>
-                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*sale.stock['selling_price'])}</td>
+                                                                                                                                        <td>${  sale.quantity*sale.stock['selling_price'])}</td>
                                                                                                                                         <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
                                                                                                                                     </tr>
                                                                                                                                 `).join('')}

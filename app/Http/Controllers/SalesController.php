@@ -9,6 +9,7 @@ use App\Models\PrinterSetting;
 use App\Models\Staff;
 use App\Models\Stock;
 use App\Models\User;
+use Dompdf\Dompdf;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -62,6 +63,7 @@ class SalesController extends BaseController
         }
         $medicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->with('item')->get();
         // dd($medicines);
+
         return view('sales.index', compact('sales', 'medicines', 'usePrinter'));
     }
 
@@ -141,15 +143,47 @@ class SalesController extends BaseController
                     'date' => $request->date[$key],
                 ]);
             }
-            
-            // Print the receipt using the first date of the first sale
-            $printing = $this->printSaleReceipt($saleDate[0]);
-            if ($printing == false) {
-                return redirect()->route('sales')->with('info', 'Sales recorded successfully,  without printing');
-            } else {
-                return redirect()->route('sales')->with('success', 'Sales recorded successfully,  with printing');
-            }
 
+            // $printing = $this->printSaleReceipt($saleDate[0]);           
+            $hasPrinter = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
+            if ($hasPrinter && $hasPrinter->use_printer) {
+
+                // Get the sales data for the current pharmacy group for the specified date, but ensure the date is in datetime datatype to match the date in the database
+                $receipt = Sales::where('pharmacy_id', session('current_pharmacy_id'))
+                    ->where('date', $saleDate[0])
+                    ->selectRaw('date, sum(total_price) as total_amount, staff_id')
+                    ->groupBy('date', 'staff_id')
+                    ->first();
+
+                if (!$receipt) {
+                    return  false;
+                }
+
+
+                $medicines = Sales::where('pharmacy_id', session('current_pharmacy_id'))->with('item')
+                    ->where('date', $receipt->date)
+                    ->get();
+
+                $staff = User::where('id', $receipt->staff_id)->first();
+
+                return view('sales.receipt', compact('receipt', 'medicines', 'staff'))->with('success', 'Receipt printed successfully');
+            } else {
+                if (!$hasPrinter) {
+                    // use factory to create fake data and store in  database
+                    $createPrinter = PrinterSetting::create([
+                        'name' => 'Printer',
+                        'ip_address' => '192.168.1.1',
+                        'computer_name' => 'Computer Name',
+                        'port' => 9100,
+                        'pharmacy_id' => session('current_pharmacy_id'),
+                        'use_printer' => false
+                    ]);
+                }
+                // if ($hasPrinter->use_printer == false) {
+                //     return redirect()->back()->with('error', 'Printer is not set up');
+                // }
+            }
+            return redirect()->back()->with('success', 'Sale added successfully');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Not added because: ' . $e->getMessage());
         }
@@ -254,52 +288,10 @@ class SalesController extends BaseController
             ->where('date', $lastReceipt->date)
             ->get();
 
-        try {
-            $printerName = $this->getDefaultPrinterName();
 
-            $connector = new WindowsPrintConnector("smb://localhost/" . $printerName);
-
-            $printer = new Printer($connector);
-
-            // Prepare the receipt content
-            $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text("Pharmacy: \n" . session('pharmacy_name') . "\n");
-            $printer->text("Address: \n" . session('location') . "\n");
-            $printer->text("----------------------------------\n");
-
-            $printer->setJustification(Printer::JUSTIFY_LEFT);
-            $printer->text("Date:   " . $lastReceipt->date . "\n");
-            $printer->text("Pharmacist:   " . $staff->name . "\n");
-            $printer->text("Medicines:\n");
-
-            // List medicines sold
-            foreach ($medicines as $medicine) {
-                $printer->text("\t" . $medicine->item->name . "\n");
-            }
-
-            $printer->text("Total Amount:  TZS " . number_format($lastReceipt->total_amount, 0) . "\n");
-            $printer->text("----------------------------------\n");
-
-            $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text("Thank you for your purchase!\n");
-            $printer->feed(3); // Feed 3 lines
-
-            // Cut the paper
-            $printer->cut();
-
-            // Close the printer connection
-            $printer->close();
-
-            return redirect()->back()->with('success', 'Last receipt printed successfully.');
-        } catch (\Exception $e) {
-            Log::error('Error printing receipt: ' . $e->getMessage());
-            // return redirect()->back()->with('error', 'Error printing last receipt: ' . $e->getMessage());
-            throw new \Exception($e->getMessage());
-        }
+        $receipt = $lastReceipt;
+        return view('sales.receipt', compact('receipt', 'medicines', 'staff'))->with('success', 'Receipt printed successfully');
     }
-
-  
-
 
     //implement function for printing a specific receipt after receiving the date of sales made
     public function printReceipt(Request $request)
@@ -352,68 +344,9 @@ class SalesController extends BaseController
 
         $staff = User::where('id', $receipt->staff_id)->first();
 
-        // dd($staff->name);
-
-        try {
-            $printerName = $this->getDefaultPrinterName();
-
-            if (!$printerName) {
-                throw new \Exception("No default printer detected.");
-            }
-
-
-            // Connect to the default printer
-            $connector = new WindowsPrintConnector("smb://localhost/" . $printerName);
-            $printer = new Printer($connector);
-
-            // Prepare the receipt content
-            $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text("------START OF RECEIPT------\n");
-            $printer->text("Pharmacy: " . session('pharmacy_name') . "\n");
-            $printer->text("Address: " . session('location') . "\n");
-            $printer->text("Description: Medicine  Purchases\n");
-            $printer->text("----------------------------------\n");
-
-            $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text("Date:" . $receipt->date . "\n");
-            $printer->text("Pharmacist:" . $staff->name . "\n");
-
-            $printer->text("Medicines:");
-            //list medicines sold
-            foreach ($medicines as $medicine) {
-                $printer->text($medicine->item->name . "\n" . "\r            \r");
-            }
-
-            $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text("----------------------------------\n");
-            $printer->text("\r        \rTotal Amount:  TZS " . number_format($receipt->total_amount, 0) . "/= \n");
-            // $printer->text("For: Medicine \n");
-            $printer->text("----------------------------------\n");
-
-            $printer->text("Thank you for your purchase!\n");
-            $printer->feed(1); // Feed 3 lines
-            $printer->text("------END OF RECEIPT------\n");
-
-            // Cut the paper
-            $printer->cut();
-
-            // Close the printer connection
-            $printer->close();
-
-            //clear the printer queue
-            // $this->clearPrinterQueue($this->printerName);
-
-            return redirect()->back()->with('success', 'Receipt printed successfully.');
-        } catch (\Exception $e) {
-
-            //clear the printer queue
-            // $this->clearPrinterQueue($this->printerName);
-
-            // return redirect()->back()->with('error', 'Error printing receipt: ' . $e->getMessage());
-            throw new \Exception($e->getMessage());
-        }
+        return view('sales.receipt', compact('receipt', 'medicines', 'staff'));
     }
-    
+
     public function printSaleReceipt($salesDate)
     {
 
@@ -429,12 +362,12 @@ class SalesController extends BaseController
                 'use_printer' => false
             ]);
             if ($createPrinter->use_printer == false) {
-                throw new \Exception("Receipt printing is not enabled.");
+                return false;
             }
         } else {
             // use factory to create fake data and store in  database
             if ($hasPrinter->use_printer == false) {
-                throw new \Exception("Receipt printing is not enabled.");
+                return false;
             }
         }
 
@@ -446,7 +379,7 @@ class SalesController extends BaseController
             ->first();
 
         if (!$receipt) {
-            throw new \Exception("No sales data found for the specified date.");
+            return  false;
         }
 
 
@@ -455,67 +388,8 @@ class SalesController extends BaseController
             ->get();
 
         $staff = User::where('id', $receipt->staff_id)->first();
-
-        // dd($staff->name);
-
-        try {
-            $printerName = $this->getDefaultPrinterName();
-
-            if (!$printerName) {
-                throw new \Exception("No default printer detected.");
-            }
-
-
-            // Connect to the default printer
-            $connector = new WindowsPrintConnector("smb://localhost/" . $printerName);
-            $printer = new Printer($connector);
-
-            // Prepare the receipt content
-            $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text("------START OF RECEIPT------\n");
-            $printer->text("Pharmacy: " . session('pharmacy_name') . "\n");
-            $printer->text("Address: " . session('location') . "\n");
-            $printer->text("Description: Medicine  Purchases\n");
-            $printer->text("----------------------------------\n");
-
-            $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text("Date:" . $receipt->date . "\n");
-            $printer->text("Pharmacist:" . $staff->name . "\n");
-
-            $printer->text("Medicines:");
-            //list medicines sold
-            foreach ($medicines as $medicine) {
-                $printer->text($medicine->item->name . "\n" . "\r            \r");
-            }
-
-            $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text("----------------------------------\n");
-            $printer->text("\r        \rTotal Amount:  TZS " . number_format($receipt->total_amount, 0) . "/= \n");
-            // $printer->text("For: Medicine \n");
-            $printer->text("----------------------------------\n");
-
-            $printer->text("Thank you for your purchase!\n");
-            $printer->feed(1); // Feed 3 lines
-            $printer->text("------END OF RECEIPT------\n");
-
-            // Cut the paper
-            $printer->cut();
-
-            // Close the printer connection
-            $printer->close();
-
-            //clear the printer queue
-            // $this->clearPrinterQueue($this->printerName);
-
-            
-            $this->successMessage = 'Receipt printing is not enabled.';
-            return true;
-
-        } catch (\Exception $e) {
-
-            $this->errorMessage = 'Error printing receipt: ' . $e->getMessage();
-            return false;
-        }
+        // dd($staff);
+        return view('sales.receipt', compact('receipt', 'medicines', 'staff'))->with('success', 'Receipt printed successfully');
     }
 
     // Function to get the default printer name on Windows
