@@ -260,15 +260,15 @@
                                     </thead>
                                     <tbody>
                                         ${response.sales.map((sale, index) => `
-                                                                                                                                    <tr>
-                                                                                                                                        <td>${index + 1}</td>
-                                                                                                                                        <td>${sale.date}</td>
-                                                                                                                                        <td class="text-left">${sale.item['name']}</td>
-                                                                                                                                        <td>${sale.quantity}</td>
-                                                                                                                                        <td>${  sale.quantity*sale.stock['selling_price'])}</td>
-                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
-                                                                                                                                    </tr>
-                                                                                                                                `).join('')}
+                                                                <tr>
+                                                                    <td>${index + 1}</td>
+                                                                    <td>${sale.date}</td>
+                                                                    <td class="text-left">${sale.item['name']}</td>
+                                                                    <td>${sale.quantity}</td>
+                                                                    <td>${sale.quantity*(sale.stock['selling_price'])}</td>
+                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
+                                                                </tr>
+                                                            `).join('')}
                                             ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
                                     </tbody>
                                 </table>
@@ -291,16 +291,16 @@
                                     </thead>
                                     <tbody>
                                         ${response.stocks.map((stock, index) => `
-                                                                                                                                    <tr>
-                                                                                                                                        <td>${index + 1}</td>
-                                                                                                                                        <td>${stock.batch_number}</td>
-                                                                                                                                        <td class="text-left">${stock.item['name']}</td>
-                                                                                                                                        <td>${stock.quantity}</td>
-                                                                                                                                        <td>${stock.remain_Quantity}</td>
-                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
-                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
-                                                                                                                                        ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
-                                                                                                                                    </tr>`).join('')}
+                                                                    <tr>
+                                                                        <td>${index + 1}</td>
+                                                                        <td>${stock.batch_number}</td>
+                                                                        <td class="text-left">${stock.item['name']}</td>
+                                                                        <td>${stock.quantity}</td>
+                                                                        <td>${stock.remain_Quantity}</td>
+                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
+                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
+                                                                        ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
+                                                                    </tr>`).join('')}
                                             ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
                                     </tbody>
                                 </table>
@@ -315,14 +315,14 @@
                                 var tableBody = $('.reportTable').find('tbody');
                                 //append the footer to the table
                                 tableBody.after(`
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="4" class="text-end fw-bolder fs-5">Total Profit</td>
-                                        <td colspan="1" class="text-center fw-bolder" id="">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(response.totalSales)}</td>
-                                        <td colspan="1" class="text-center fw-bolder" id="">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(response.totalProfit)}</td>
-                                    </tr>
-                                </tfoot>
-                            `);
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="4" class="text-end fw-bolder fs-5">Total Profit</td>
+                                                <td colspan="1" class="text-center fw-bolder" id="">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(response.totalSales)}</td>
+                                                <td colspan="1" class="text-center fw-bolder" id="">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(response.totalProfit)}</td>
+                                            </tr>
+                                        </tfoot>
+                                    `);
                             } else if (category == 'stocks') {
                                 $('.reportTable').html(stocksTable);
                             }
@@ -371,6 +371,7 @@
                             // alert(response.error);
                         }
 
+
                         // Initialize DataTable, but count the number of rows in the table first, if it is greater than 0, then destroy the table and reinitialize it, otherwise skip the initialization
                         if (response.rows > 0) {
                             $('.reportsTable').DataTable().destroy(); // Destroy the old table
@@ -411,10 +412,8 @@
                         alert('Failed to filter Reports.');
                     }
                 });
-
-
-
             }
+
             // Initialize Chart.js
             function drawGraph(labels, data) {
                 var ctx = $('#transactionChart')[0].getContext('2d');
@@ -444,7 +443,6 @@
                     }
                 });
             }
-
 
         });
     </script>
