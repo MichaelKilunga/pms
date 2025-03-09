@@ -334,6 +334,31 @@
                 </div>
             </div>
         </section>
+    @else
+        {{-- Display our agents, show their profile picture, name, phone and email,   in a row scrolling horizontally --}}
+        <section class="py-5">
+            <div class="container">
+                <h2 class="text-center mb-4">Our Agents</h2>
+                <div class="row">
+                    @foreach ($agents as $agent)
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <img src="{{ asset('storage/' . $agent->profile_picture) }}"
+                                        alt="Agent Profile Picture" class="img-fluid rounded-circle mb-3"
+                                        style="width: 100px; height: 100px;">
+                                    <h5 class="card-title">{{ $agent->name }}</h5>
+                                    <p class="card-text">{{ $agent->phone }}</p>
+                                    <p class="card-text">{{ $agent->email }}</p>
+                                    {{-- show number of  clients --}}
+                                    <p class="card-text">Number of Clients: {{ $agent->agent->count() }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
     @endif
 
     <!-- Call to Action Section -->

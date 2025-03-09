@@ -24,11 +24,12 @@ use App\Notifications\SmsNotification;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ContractUpdateController;
 use App\Http\Controllers\SaleNoteController;
+use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     //return welcome view with packages
-    return view('welcome', ['packages' => Package::where('id', '!=', 1)->get()]);
+    return view('welcome', ['packages' => Package::where('id', '!=', 1)->get(), 'agents' => User::where('role', 'agent')->get()]);
 });
 
 
