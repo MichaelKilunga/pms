@@ -115,21 +115,23 @@
 
 <body>
 
-{{-- TAWK START --}}
-<!--Start of Tawk.to Script-->
-<script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-    s1.async=true;
-    s1.src='https://embed.tawk.to/67810ca9af5bfec1dbe9b008/1ih81itsi';
-    s1.charset='UTF-8';
-    s1.setAttribute('crossorigin','*');
-    s0.parentNode.insertBefore(s1,s0);
-    })();
+    {{-- TAWK START --}}
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {},
+            Tawk_LoadStart = new Date();
+        (function() {
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = 'https://embed.tawk.to/67810ca9af5bfec1dbe9b008/1ih81itsi';
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
     </script>
     <!--End of Tawk.to Script-->
-{{-- TAWK END --}}
+    {{-- TAWK END --}}
 
 
     <!-- Hero Section -->
@@ -246,85 +248,93 @@
 
 
     <!-- Subscription Plans Section -->
-    <section class="subscription-plans" id="plans">
-        <div class="container">
-            <h2 class="mb-4 text-center">Our Subscription Plans</h2>
+    {{-- CHeck if is user logged in and is agent --}}
+    @if (Auth::check() && Auth::user()->role == 'agent')
+        <section class="subscription-plans" id="plans">
+            <div class="container">
+                <h2 class="mb-4 text-center">Our Subscription Plans</h2>
 
-            <div class="row g-4">
-                <div class="col-md-12">
-                    <div class="d-flex align-items-center">
-                        <a href="{{route('register', ['package_id'=>1])}}" class="btn btn-primary">Start</a>
-                        <h5 class="mb-0 me-2 px-2">Trial Plan free 14 Days!</h5>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="row g-4">
-                <div class="col-md-12 text-center">
-                    <hr />
-                </div>
-            </div>
-
-            <div class="row g-4">
-
-                @foreach ($packages as $package)
-                    <div class="col-md-3">
-                        <div class="card h-100 border-{{$loop->iteration%2==0 ? 'primary':'success'}} border-{{$loop->iteration%3==0 ? 'danger':'success#'}} border-{{$loop->iteration==4 ? 'warning':'success#'}}">
-                            <div class="card-header bg-{{$loop->iteration%2==0 ? 'primary':'success'}} bg-{{$loop->iteration%3==0 ? 'danger':'success#'}} bg-{{$loop->iteration==4 ? 'warning':'success#'}} text-white text-center">
-                                <h5>{{ $package->name }}</h5>
-                            </div>
-                            <div class="card-body">
-                                <h6 class="card-title" style="color: green;">Tshs. {{ number_format($package->price) }}
-                                    / Month</h6>
-                                <p class="card-text text-center">{{ $package->description }}</p>
-                                <ul class="list-unstyled ">
-                                    <li>✔ {{ $package->number_of_pharmacists }} pharmacist per 1 Pharmacy</li>
-                                    <li>✔ {{ $package->number_of_owner_accounts }} Owner account</li>
-                                    <li>✔ {{ $package->number_of_admin_accounts }} Admin account</li>
-                                    <li>✔ {{ $package->number_of_pharmacies }} pharmacy</li>
-                                    <li>✔ {{ $package->number_of_medicines }} Medicines per Pharmacy</li>
-                                    <li>✔ In App Notification </li>
-                                    @if($package->email_notification)
-                                        <li>✔ Email Notification </li>                                        
-                                    @endif
-                                    @if($package->sms_notifications)
-                                        <li>✔ SMS Notifications </li>
-                                    @endif
-                                    @if($package->whatsapp_chat)
-                                        <li>✔ WhatsApp Chat </li>
-                                    @endif
-                                    @if($package->reports)
-                                        <li>✔ Sales Reporting </li>
-                                    @endif
-                                    @if($package->analytics)
-                                        <li>✔ Sales Analytics </li>
-                                    @endif
-                                    @if($package->receipts)
-                                        <li>✔ Receipts </li>
-                                    @endif
-                                    @if($package->stock_management)
-                                        <li>✔ Stocks Management </li>
-                                    @endif
-                                    @if($package->staff_management)
-                                        <li>✔ Staffs Management </li>
-                                    @endif
-                                    @if($package->stock_transfer)
-                                        <li>✔ Stocks Transfer </li>
-                                    @endif
-                                    <li>✔ Free Online support</li>
-                                    <li>✔ Works on PC, Mac, mobile and Tablet</li>
-                                </ul>
-                            </div>
-                            <div class="text-center m-2">
-                                <a href="{{ route('register', ['package_id'=>$package->id]) }}" class="btn btn-{{$loop->iteration%2==0 ? 'primary':'success'}} btn-{{$loop->iteration==4 ? 'warning':'success#'}} btn-{{$loop->iteration%3==0 ? 'danger':'success#'}}  text-{{$loop->iteration==4 ? 'light':'dark#'}}  ">Choose Plan</a>
-                            </div>
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="d-flex align-items-center">
+                            <a href="{{ route('register', ['package_id' => 1]) }}" class="btn btn-primary">Start</a>
+                            <h5 class="mb-0 me-2 px-2">Trial Plan free 14 Days!</h5>
                         </div>
                     </div>
-                @endforeach
+                </div>
+
+
+                <div class="row g-4">
+                    <div class="col-md-12 text-center">
+                        <hr />
+                    </div>
+                </div>
+
+                <div class="row g-4">
+
+                    @foreach ($packages as $package)
+                        <div class="col-md-3">
+                            <div
+                                class="card h-100 border-{{ $loop->iteration % 2 == 0 ? 'primary' : 'success' }} border-{{ $loop->iteration % 3 == 0 ? 'danger' : 'success#' }} border-{{ $loop->iteration == 4 ? 'warning' : 'success#' }}">
+                                <div
+                                    class="card-header bg-{{ $loop->iteration % 2 == 0 ? 'primary' : 'success' }} bg-{{ $loop->iteration % 3 == 0 ? 'danger' : 'success#' }} bg-{{ $loop->iteration == 4 ? 'warning' : 'success#' }} text-white text-center">
+                                    <h5>{{ $package->name }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="card-title" style="color: green;">Tshs.
+                                        {{ number_format($package->price) }}
+                                        / Month</h6>
+                                    <p class="card-text text-center">{{ $package->description }}</p>
+                                    <ul class="list-unstyled ">
+                                        <li>✔ {{ $package->number_of_pharmacists }} pharmacist per 1 Pharmacy</li>
+                                        <li>✔ {{ $package->number_of_owner_accounts }} Owner account</li>
+                                        <li>✔ {{ $package->number_of_admin_accounts }} Admin account</li>
+                                        <li>✔ {{ $package->number_of_pharmacies }} pharmacy</li>
+                                        <li>✔ {{ $package->number_of_medicines }} Medicines per Pharmacy</li>
+                                        <li>✔ In App Notification </li>
+                                        @if ($package->email_notification)
+                                            <li>✔ Email Notification </li>
+                                        @endif
+                                        @if ($package->sms_notifications)
+                                            <li>✔ SMS Notifications </li>
+                                        @endif
+                                        @if ($package->whatsapp_chat)
+                                            <li>✔ WhatsApp Chat </li>
+                                        @endif
+                                        @if ($package->reports)
+                                            <li>✔ Sales Reporting </li>
+                                        @endif
+                                        @if ($package->analytics)
+                                            <li>✔ Sales Analytics </li>
+                                        @endif
+                                        @if ($package->receipts)
+                                            <li>✔ Receipts </li>
+                                        @endif
+                                        @if ($package->stock_management)
+                                            <li>✔ Stocks Management </li>
+                                        @endif
+                                        @if ($package->staff_management)
+                                            <li>✔ Staffs Management </li>
+                                        @endif
+                                        @if ($package->stock_transfer)
+                                            <li>✔ Stocks Transfer </li>
+                                        @endif
+                                        <li>✔ Free Online support</li>
+                                        <li>✔ Works on PC, Mac, mobile and Tablet</li>
+                                    </ul>
+                                </div>
+                                <div class="text-center m-2">
+                                    <a href="{{ route('register', ['package_id' => $package->id]) }}"
+                                        class="btn btn-{{ $loop->iteration % 2 == 0 ? 'primary' : 'success' }} btn-{{ $loop->iteration == 4 ? 'warning' : 'success#' }} btn-{{ $loop->iteration % 3 == 0 ? 'danger' : 'success#' }}  text-{{ $loop->iteration == 4 ? 'light' : 'dark#' }}  ">Choose
+                                        Plan</a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    @endif
 
     <!-- Call to Action Section -->
     <section class="py-5 text-center">
