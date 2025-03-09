@@ -9,8 +9,8 @@
                 class="btn btn-outline-primary rounded-lg shadow-md">Add Pharmacy</button>
             <button data-toggle="modal" data-target="#addPackageModal"
                 class="btn btn-outline-secondary rounded-lg shadow-md">Add a new package</button>
-            <a href="{{ route('agent.messages') }}" class="btn btn-outline-success rounded shadow-md">Message</a>
-            <a href="{{ route('agent.cases') }}" class="btn btn-outline-warning text-dark rounded-lg shadow-md">Report
+            <a href="{{ route('agent.messages',['action'=>'index']) }}" class="btn btn-outline-success rounded shadow-md">Message</a>
+            <a href="{{ route('agent.cases',['action'=>'index']) }}" class="btn btn-outline-warning text-dark rounded-lg shadow-md">Report
                 Case</a>
         </div>
         {{-- end of quick actions --}}

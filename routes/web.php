@@ -208,9 +208,11 @@ Route::middleware(['auth'])->group(function () {
 
 
     // Agent routes
-    Route::get('agent/messages', [AgentController::class, 'message'])->name('agent.messages');
-    Route::post('agent/messages', [AgentController::class, 'message'])->name('agent.messages');
+    Route::get('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
+    Route::post('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
+
     Route::get('agent/cases', [AgentController::class, 'cases'])->name('agent.cases');
+    Route::post('agent/cases', [AgentController::class, 'cases'])->name('agent.cases');
 
     Route::get('agent/pharmacies', [AgentController::class, 'pharmacies'])->name('agent.pharmacies');
     Route::post('agent/pharmacies/create', [AgentController::class, 'pharmacies'])->name('agent.pharmacies.store');
@@ -221,6 +223,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('agent/packages', [AgentController::class, 'packages'])->name('agent.packages.manage');
 
     Route::get('agent/contracts', [AgentController::class, 'contracts'])->name('agent.contracts');
+    Route::post('agent/contracts', [AgentController::class, 'contracts'])->name('agent.contracts');
 });
 
 Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {

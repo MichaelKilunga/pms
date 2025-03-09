@@ -173,4 +173,19 @@ class AgentController extends Controller
             }
         }
     }
+
+    public function messages(Request $request){
+        // dd($request->all());
+        return redirect()->back()->with('info', 'This module is still under Construction, thanks for your patience!');
+    }
+
+    public function cases(Request $request){
+        // dd($request->all());
+        return redirect()->back()->with('info', 'This module is s   till under Construction, thanks for your patience!');
+    }
+    
+    public function contracts(Request $request){
+        // dd($request->all());
+        return redirect()->back()->with('info', 'This module is s   till under Construction, thanks for your patience!');
+    }
 }

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\WelcomeNotification;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Jetstream\Jetstream;
 
 class CreateNewUser implements CreatesNewUsers
@@ -24,9 +25,9 @@ class CreateNewUser implements CreatesNewUsers
     {
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
-            'role' => ['required','string','max:255'],
+            'role' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'phone_number' => ['required','numeric','unique:users,phone', 'regex:/^[0-9]{10}$/'],
+            'phone_number' => ['required', 'numeric', 'unique:users,phone', 'regex:/^[0-9]{10}$/'],
             'password' => $this->passwordRules(),
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
@@ -39,15 +40,25 @@ class CreateNewUser implements CreatesNewUsers
             'phone' => $input['phone_number'],
         ]);
 
-        $this->notify(
-            $user,
-            'Welcome PILLPOINT, choose a plan to continue using our services!',
-            'success'
-        );
+        if ($input['role'] == 'agent') {
+            $this->notify(
+                $user,
+                'Welcome on board! Follow the instructions to continue.',
+                'success'
+            );
+        } 
+        if ($input['role'] == 'owner') {
+            $this->notify(
+                $user,
+                'Welcome to PILLPOINT, Contact Your Agent '.Auth::user()->name.', '.Auth::user()->phone.', to assign you to a subscription package.',
+                'success'
+            );
+        }
+
         //send welcome notification
-        try{
+        try {
             $user->notify(new WelcomeNotification);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             // 
         }
 
