@@ -340,6 +340,20 @@
             <div class="container">
                 <h2 class="text-center mb-4">Our Agents</h2>
                 <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <img src="{{ asset('storage/' . App\Models\User::where('id',1)->first()->profile_picture) }}"
+                                    alt="Agent Profile Picture" class="img-fluid rounded-circle mb-3"
+                                    style="width: 100px; height: 100px;">
+                                <h5 class="card-title">{{ App\Models\User::where('id',1)->first()->name }}</h5>
+                                <p class="card-text">{{ App\Models\User::where('id',1)->first()->phone }}</p>
+                                <p class="card-text">{{ App\Models\User::where('id',1)->first()->email }}</p>
+                                {{-- show number of  clients --}}
+                                <p class="card-text">Number of Clients: {{ App\Models\User::where('id',1)->first()->agent->count() }}</p>
+                            </div>
+                        </div>
+                    </div>
                     @foreach ($agents as $agent)
                         <div class="col-md-4 mb-4">
                             <div class="card">
