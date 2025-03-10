@@ -260,15 +260,15 @@
                                     </thead>
                                     <tbody>
                                         ${response.sales.map((sale, index) => `
-                                                                                <tr>
-                                                                                    <td>${index + 1}</td>
-                                                                                    <td>${sale.date}</td>
-                                                                                    <td class="text-left">${sale.item['name']}</td>
-                                                                                    <td>${sale.quantity}</td>
-                                                                                    <td>${sale.quantity*(sale.stock['selling_price'])}</td>
-                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
-                                                                                </tr>
-                                                                            `).join('')}
+                                                                                            <tr>
+                                                                                                <td>${index + 1}</td>
+                                                                                                <td>${sale.date}</td>
+                                                                                                <td class="text-left">${sale.item['name']}</td>
+                                                                                                <td>${sale.quantity}</td>
+                                                                                                <td>${sale.quantity*(sale.stock['selling_price'])}</td>
+                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
+                                                                                            </tr>
+                                                                                        `).join('')}
                                             ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
                                     </tbody>
                                 </table>
@@ -298,23 +298,23 @@
                                     </thead>
                                     <tbody>
                                         ${response.stocks.map((stock, index) => `
-                                                                                    <tr>
-                                                                                        <td>${index + 1}</td>
-                                                                                        <td>${stock.batch_number}</td>
+                                                                                                <tr>
+                                                                                                    <td>${index + 1}</td>
+                                                                                                    <td>${stock.batch_number}</td>
 
-                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
-                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
-                                                                                        <td>${stock.expire_date}</td>
-                                                                                        <td>${stock.low_stock_percentage}</td>
-                                                                                        <td>${stock.supplier}</td>  
-                                                                                                    
-                                                                                        <td class="text-left">${stock.item['name']}</td>
-                                                                                        <td>${stock.quantity}</td>
-                                                                                        <td>${stock.remain_Quantity}</td>
-                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
-                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
-                                                                                        ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
-                                                                                    </tr>`).join('')}
+                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
+                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
+                                                                                                    <td>${stock.expire_date}</td>
+                                                                                                    <td>${stock.low_stock_percentage}</td>
+                                                                                                    <td>${stock.supplier}</td>  
+                                                                                                                
+                                                                                                    <td class="text-left">${stock.item['name']}</td>
+                                                                                                    <td>${stock.quantity}</td>
+                                                                                                    <td>${stock.remain_Quantity}</td>
+                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
+                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
+                                                                                                    ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
+                                                                                                </tr>`).join('')}
                                             ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
                                     </tbody>
                                 </table>
@@ -426,7 +426,24 @@
                                         extend: 'csvHtml5',
                                         title: 'Reports',
                                         text: 'Download CSV',
-                                        className: 'btn btn-primary reportsDownloadButton'
+                                        className: 'btn btn-primary reportsDownloadButton',
+                                        exportOptions: {
+                                            // columns: ':visible', // Export only visible columns
+                                            format: {
+                                                body: function(data, row, column, node) {
+                                                    return $('<div>').html(data)
+                                                    .text() // Convert HTML to plain text
+                                                        .replace(/\s+/g,
+                                                        ' ') // Replace multiple spaces with a single space
+                                                        .replace(/\u00A0/g,
+                                                        '') // Remove non-breaking spaces (&nbsp;)
+                                                        .replace(/TSh|TZS|,/g,
+                                                        '') // Remove currency symbols and commas
+                                                        .trim(); // Remove leading and trailing spaces
+                                                }
+                                            }
+
+                                        }
                                     },
                                     {
                                         extend: 'pdfHtml5',
