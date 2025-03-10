@@ -236,6 +236,7 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
+
             @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
                 <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                     {{ __('Dashboard') }}
@@ -271,6 +272,76 @@
                     {{ __('Contracts') }}
                 </x-responsive-nav-link>
             @endif
+            @if (Auth::user()->role == 'super')
+                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('superadmin.users') }}" :active="request()->routeIs('superadmin.users')">
+                    {{ __('System Users') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('superadmin.pharmacies') }}" :active="request()->routeIs('superadmin.pharmacies')">
+                    {{ __('Pharmacies') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('packages') }}" :active="request()->routeIs('packages')">
+                    {{ __('Packages') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('allMedicines.all') }}" :active="request()->routeIs('allMedicines.all')">
+                    {{ __('All medicines') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
+                    {{ __('Notifications') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('reports.all') }}" :active="request()->routeIs('reports.all')">
+                    {{ __('Reports') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('contracts') }}" :active="request()->routeIs('contracts')">
+                    {{ __('Contracts') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('agent.packages', ['action' => 'index']) }}" :active="request()->routeIs('agent.packages')">
+                    {{ __('Agent\'s Contracts') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('update.contracts') }}" :active="request()->routeIs('update.contracts')">
+                    {{ __('Schedules') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('agent.pharmacies', ['action' => 'index']) }}" :active="request()->routeIs('agent.pharmacies')">
+                    {{ __('Pharmacies') }}
+                </x-responsive-nav-link>
+            @endif
+            @if (Auth::user()->role == 'agent')
+                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('agent.pharmacies', ['action' => 'index']) }}" :active="request()->routeIs('agent.pharmacies')">
+                    {{ __('Pharmacies') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('agent.packages', ['action' => 'index']) }}" :active="request()->routeIs('agent.packages')">
+                    {{ __('Packages') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
+                    {{ __('Messages') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('agent.cases', ['action' => 'index']) }}" :active="request()->routeIs('agent.cases')">
+                    {{ __('Cases') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
+                    {{ __('Contracts') }}
+                </x-responsive-nav-link>
+            @endif
+            @if (Auth::user()->role == 'staff')
+                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
+                    {{ __('Sell medicine') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
+                    {{ __('Document Sales') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
+                    {{ __('Notifications') }}
+                </x-responsive-nav-link>
+            @endif
+
         </div>
 
         <!-- Responsive Settings Options -->
