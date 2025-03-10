@@ -338,7 +338,7 @@
         {{-- Display our agents, show their profile picture, name, phone and email,   in a row scrolling horizontally --}}
         <section class="py-5">
             <div class="container">
-                <h2 class="text-center mb-4 text-primary h5">Our Agents</h2>
+                <h2 class="text-center mb-4 text-primary h3">Our Agents</h2>
                 {{-- make the row scrollable horizontally --}}
                 <div class="row flex-nowrap overflow-auto">
                     <div class="col-md-4">
@@ -351,11 +351,14 @@
                                     <h5 class="card-title">{{ App\Models\User::where('id', 1)->first()->name }}
                                     </h5>
                                     <p class="card-text">
-                                        {{ App\Models\User::where('id', 1)->first()->phone }},<br>
+                                        {{ App\Models\User::where('id', 1)->first()->phone }}<br>
                                         <span
                                             class="text-primary">{{ App\Models\User::where('id', 1)->first()->email }}</span>
                                         <br> Clients:
                                         {{ App\Models\User::where('id', 1)->first()->agent->count() }}
+                                        {{-- put button to whatsApp chat with this agent --}}
+                                        <a href="https://wa.me/{{ App\Models\User::where('id', 1)->first()->phone }}"
+                                            class="btn btn-success btn-sm"><i class="bi bi-chat" ></i> Chat</a>
                                     </p>
                                 </div>
                             </div>
@@ -371,9 +374,12 @@
                                         style="width: 100px; height: 100px;">
                                     <div>
                                         <h5 class="card-title">{{ $agent->name }}</h5>
-                                        <p class="card-text">{{ $agent->phone }}, <br>
+                                        <p class="card-text">{{ $agent->phone }} <br>
                                             <span class="text-primary">{{ $agent->email }}</span>
                                             <br> Clients: {{ $agent->agent->count() }}
+                                            {{-- put button to whatsApp chat with this agent --}}
+                                            <a href="https://wa.me/{{ $agent->phone }}" target="_blank"
+                                                class="btn btn-success btn-sm"><i class="bi bi-chat" ></i> Chat</a>
                                         </p>
                                     </div>
                                 </div>
