@@ -197,14 +197,93 @@
                                                 class="btn btn-primary">Upgrade</a>
                                         @endif
                                     @endif
-
-                                    {{-- @if ($activeContracts->count() > 0 && $activeContracts->first()->package->id != $package->id)
-                                    <a href="{{ route('contracts.users.upgrade', ['package_id'=>$package->id, 'owner_id'=>session('owner_id')]) }}"
-                                        class="btn btn-success">Renew</a>
-                                    @endif --}}
+                                    {{-- show the package details in a modal --}}
+                                    <a href="#" class="btn text-light btn-danger btn-info" data-bs-toggle="modal"
+                                        data-bs-target="#packageModal{{ $package->id }}"><i class="bi bi-eye" ></i> More</a>
                                 </td>
                             </tr>
-                            {{-- @endif --}}
+
+                            {{-- Modal to show package details USE ABOVE particulars: --}}
+                            <div class="modal fade" id="packageModal{{ $package->id }}" tabindex="-1"
+                                aria-labelledby="packageModalLabel{{ $package->id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="packageModalLabel{{ $package->id }}">
+                                                {{ $package->name }}
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close">
+                                                {{-- <span aria-hidden="true">&times;</span> --}}
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">    
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Package Details</h5>
+                                                    <p class="card-text">
+                                                        <strong>Name:</strong> {{ $package->name }}
+                                                        <br>
+                                                        <strong>Price:</strong> {{ $package->price }}
+                                                        <br>
+                                                        <strong>Description:</strong> {{ $package->description }}
+                                                        <br>
+                                                        <strong>Duration:</strong> {{ $package->duration }}
+                                                        <br>
+                                                        <strong>Features:</strong>
+                                                    <ul class="list-unstyled ">
+                                                        <li>✔ {{ $package->number_of_pharmacists }} pharmacist per
+                                                            1 Pharmacy</li>
+                                                        <li>✔ {{ $package->number_of_owner_accounts }} Owner
+                                                            account</li>
+                                                        <li>✔ {{ $package->number_of_admin_accounts }} Admin
+                                                            account</li>
+                                                        <li>✔ {{ $package->number_of_pharmacies }} pharmacy</li>
+                                                        <li>✔ {{ $package->number_of_medicines }} Medicines per
+                                                            Pharmacy</li>
+                                                        <li>✔ In App Notification </li>
+                                                        @if ($package->email_notification)
+                                                            <li>✔ Email Notification </li>
+                                                        @endif
+                                                        @if ($package->sms_notifications)
+                                                            <li>✔ SMS Notifications </li>
+                                                        @endif
+                                                        @if ($package->whatsapp_chat)
+                                                            <li>✔ WhatsApp Chat </li>
+                                                        @endif
+                                                        @if ($package->reports)
+                                                            <li>✔ Sales Reporting </li>
+                                                        @endif
+                                                        @if ($package->analytics)
+                                                            <li>✔ Sales Analytics </li>
+                                                        @endif
+                                                        @if ($package->receipts)
+                                                            <li>✔ Receipts </li>
+                                                        @endif
+                                                        @if ($package->stock_management)
+                                                            <li>✔ Stocks Management </li>
+                                                        @endif
+                                                        @if ($package->staff_management)
+                                                            <li>✔ Staffs Management </li>
+                                                        @endif
+                                                        @if ($package->stock_transfer)
+                                                            <li>✔ Stocks Transfer </li>
+                                                        @endif
+                                                        <li>✔ Free Online support</li>
+                                                        <li>✔ Works on PC, Mac, mobile and Tablet</li>
+                                                    </ul>
+                                                    <br>
+                                                    </p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         @endforeach
                     @else
                         <tr>

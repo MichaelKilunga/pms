@@ -260,15 +260,15 @@
                                     </thead>
                                     <tbody>
                                         ${response.sales.map((sale, index) => `
-                                                                <tr>
-                                                                    <td>${index + 1}</td>
-                                                                    <td>${sale.date}</td>
-                                                                    <td class="text-left">${sale.item['name']}</td>
-                                                                    <td>${sale.quantity}</td>
-                                                                    <td>${sale.quantity*(sale.stock['selling_price'])}</td>
-                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
-                                                                </tr>
-                                                            `).join('')}
+                                                                                <tr>
+                                                                                    <td>${index + 1}</td>
+                                                                                    <td>${sale.date}</td>
+                                                                                    <td class="text-left">${sale.item['name']}</td>
+                                                                                    <td>${sale.quantity}</td>
+                                                                                    <td>${sale.quantity*(sale.stock['selling_price'])}</td>
+                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
+                                                                                </tr>
+                                                                            `).join('')}
                                             ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
                                     </tbody>
                                 </table>
@@ -281,6 +281,13 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Batch Number</th>
+
+                                            <th>Buying Price</th>
+                                            <th>Selling Price</th>
+                                            <th>Expiry Date</th>
+                                            <th>Low Stock When</th>
+                                            <th>Supplier name</th>
+
                                             <th>Medicine</th>
                                             <th>Stocked Quantity</th>
                                             <th>Remained Quantity</th>
@@ -291,16 +298,23 @@
                                     </thead>
                                     <tbody>
                                         ${response.stocks.map((stock, index) => `
-                                                                    <tr>
-                                                                        <td>${index + 1}</td>
-                                                                        <td>${stock.batch_number}</td>
-                                                                        <td class="text-left">${stock.item['name']}</td>
-                                                                        <td>${stock.quantity}</td>
-                                                                        <td>${stock.remain_Quantity}</td>
-                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
-                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
-                                                                        ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
-                                                                    </tr>`).join('')}
+                                                                                    <tr>
+                                                                                        <td>${index + 1}</td>
+                                                                                        <td>${stock.batch_number}</td>
+
+                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
+                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
+                                                                                        <td>${stock.expire_date}</td>
+                                                                                        <td>${stock.low_stock_percentage}</td>
+                                                                                        <td>${stock.supplier}</td>  
+                                                                                                    
+                                                                                        <td class="text-left">${stock.item['name']}</td>
+                                                                                        <td>${stock.quantity}</td>
+                                                                                        <td>${stock.remain_Quantity}</td>
+                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
+                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
+                                                                                        ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
+                                                                                    </tr>`).join('')}
                                             ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
                                     </tbody>
                                 </table>
@@ -371,6 +385,31 @@
                             // alert(response.error);
                         }
 
+                        let columnDefs = [];
+                        if (category == 'stocks') {
+                            columnDefs = [{
+                                    targets: 2,
+                                    visible: false,
+                                    searchable: false
+                                },
+                                {
+                                    targets: 3,
+                                    visible: false
+                                },
+                                {
+                                    targets: 4,
+                                    visible: false
+                                },
+                                {
+                                    targets: 5,
+                                    visible: false
+                                },
+                                {
+                                    targets: 6,
+                                    visible: false
+                                }
+                            ];
+                        }
 
                         // Initialize DataTable, but count the number of rows in the table first, if it is greater than 0, then destroy the table and reinitialize it, otherwise skip the initialization
                         if (response.rows > 0) {
@@ -380,6 +419,8 @@
                                 searching: true, // Enable search bar
                                 ordering: true, // Enable column sorting
                                 info: true, // Enable information display
+                                lengthMenu: [10, 25, 50, 100], // Dropdown for records per page
+                                pageLength: 10, // Default number of records per page
                                 dom: 'Bfrtip', // Add Buttons to the table
                                 buttons: [{
                                         extend: 'csvHtml5',
@@ -392,10 +433,11 @@
                                         title: 'Reports',
                                         text: 'Download PDF',
                                         className: 'btn btn-secondary reportsDownloadButton',
-                                        orientation: 'portrait', // Landscape orientation for PDF
+                                        orientation: 'landscape', // Landscape orientation for PDF
                                         pageSize: 'A4' // A4 page size
                                     }
                                 ],
+                                columnDefs: columnDefs,
                                 error: function(settings, helpPage, message) {
                                     console.error('DataTables Error:',
                                         message); // Log the error to the console
