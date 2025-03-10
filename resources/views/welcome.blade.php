@@ -339,32 +339,41 @@
         <section class="py-5">
             <div class="container">
                 <h2 class="text-center mb-4">Our Agents</h2>
-                <div class="row">
-                    <div class="col-md-4 mb-4">
+                {{-- make the row scrollable horizontally --}}
+                <div class="row flex-nowrap overflow-auto">
+                    <div class="col-md-4">
                         <div class="card">
                             <div class="card-body d-flex">
                                 <img src="{{ asset('storage/' . App\Models\User::where('id', 1)->first()->profile_photo_path) }}"
                                     alt="Picture" class="img-fluid rounded-circle mb-3"
                                     style="width: 100px; height: 100px;">
                                 <div>
-                                    <h5 class="card-title">{{ App\Models\User::where('id', 1)->first()->name }}</h5>
-                                    <p class="card-text">{{ App\Models\User::where('id', 1)->first()->phone }},<br> <span class="text-primary" >{{ App\Models\User::where('id', 1)->first()->email }} </span> 
+                                    <h5 class="card-title">{{ App\Models\User::where('id', 1)->first()->name }}
+                                    </h5>
+                                    <p class="card-text">
+                                        {{ App\Models\User::where('id', 1)->first()->phone }},<br>
+                                        <span
+                                            class="text-primary">{{ App\Models\User::where('id', 1)->first()->email }}</span>
                                         <br> Clients:
-                                        {{ App\Models\User::where('id', 1)->first()->agent->count() }}</p>
+                                        {{ App\Models\User::where('id', 1)->first()->agent->count() }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     @foreach ($agents as $agent)
-                        <div class="col-md-4 mb-4">
+                        <div class="col-md-4">
                             <div class="card">
                                 <div class="card-body d-flex">
                                     <img src="{{ asset('storage/' . $agent->profile_photo_path) }}" alt="Picture"
                                         class="img-fluid rounded-circle mb-3" style="width: 100px; height: 100px;">
                                     <div>
                                         <h5 class="card-title">{{ $agent->name }}</h5>
-                                        <p class="card-text">{{ $agent->phone }}, <br><span class="text-primary" >{{ $agent->email }}</span> 
-                                            <br> Clients: {{ $agent->agent->count() }}</p>
+                                        <p class="card-text">{{ $agent->phone }}, <br>
+                                            <span class="text-primary">{{ $agent->email }}</span>
+                                            <br> Clients: {{ $agent->agent->count() }}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
