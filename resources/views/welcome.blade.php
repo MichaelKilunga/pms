@@ -344,7 +344,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <img src="{{ asset('storage/' . App\Models\User::where('id',1)->first()->profile_picture) }}"
-                                    alt="Agent Profile Picture" class="img-fluid rounded-circle mb-3"
+                                    alt="Picture" class="img-fluid rounded-circle mb-3"
                                     style="width: 100px; height: 100px;">
                                 <h5 class="card-title">{{ App\Models\User::where('id',1)->first()->name }}</h5>
                                 <p class="card-text">{{ App\Models\User::where('id',1)->first()->phone }}</p>
@@ -359,7 +359,7 @@
                             <div class="card">
                                 <div class="card-body">
                                     <img src="{{ asset('storage/' . $agent->profile_picture) }}"
-                                        alt="Agent Profile Picture" class="img-fluid rounded-circle mb-3"
+                                        alt="Picture" class="img-fluid rounded-circle mb-3"
                                         style="width: 100px; height: 100px;">
                                     <h5 class="card-title">{{ $agent->name }}</h5>
                                     <p class="card-text">{{ $agent->phone }}</p>
