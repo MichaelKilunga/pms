@@ -344,7 +344,7 @@
                     <div class="col-md-4">
                         <div class="card">
                             <div class="card-body d-flex">
-                                <img src="{{ asset('storage/' . App\Models\User::where('id', 1)->first()->profile_photo_path) }}"
+                                <img src="{{ asset(App\Models\User::where('id', 1)->first()->profile_photo_path ? 'storage/' . App\Models\User::where('id', 1)->first()->profile_photo_path : 'storage/default.png') }}"
                                     alt="Picture" class="img-fluid rounded-circle mb-3"
                                     style="width: 100px; height: 100px;">
                                 <div>
@@ -366,8 +366,9 @@
                         <div class="col-md-4">
                             <div class="card">
                                 <div class="card-body d-flex">
-                                    <img src="{{ asset('storage/' . $agent->profile_photo_path) }}" alt="Picture"
-                                        class="img-fluid rounded-circle mb-3" style="width: 100px; height: 100px;">
+                                    <img src="{{ asset($agent->profile_photo_path ? 'storage/' . $agent->profile_photo_path : 'storage/default.png') }}"
+                                        alt="Picture" class="img-fluid rounded-circle mb-3"
+                                        style="width: 100px; height: 100px;">
                                     <div>
                                         <h5 class="card-title">{{ $agent->name }}</h5>
                                         <p class="card-text">{{ $agent->phone }}, <br>
