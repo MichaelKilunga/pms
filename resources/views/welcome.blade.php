@@ -338,7 +338,7 @@
         {{-- Display our agents, show their profile picture, name, phone and email,   in a row scrolling horizontally --}}
         <section class="py-5">
             <div class="container">
-                <h2 class="text-center mb-4">Our Agents</h2>
+                <h2 class="text-center mb-4 text-primary h5">Our Agents</h2>
                 {{-- make the row scrollable horizontally --}}
                 <div class="row flex-nowrap overflow-auto">
                     <div class="col-md-4">
