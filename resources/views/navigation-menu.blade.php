@@ -199,13 +199,13 @@
                 <x-nav-link href="{{ route('contracts') }}" :active="request()->routeIs('contracts')">
                     {{ __('Contracts') }}
                 </x-nav-link>
-                <x-nav-link href="{{ route('agent.packages',['action'=>'index']) }}" :active="request()->routeIs('agent.packages')">
+                <x-nav-link href="{{ route('agent.packages', ['action' => 'index']) }}" :active="request()->routeIs('agent.packages')">
                     {{ __('Agent\'s Contracts') }}
                 </x-nav-link>
                 <x-nav-link href="{{ route('update.contracts') }}" :active="request()->routeIs('update.contracts')">
                     {{ __('Schedules') }}
                 </x-nav-link>
-                <x-nav-link href="{{ route('agent.pharmacies',['action'=>'index']) }}" :active="request()->routeIs('agent.pharmacies')">
+                <x-nav-link href="{{ route('agent.pharmacies', ['action' => 'index']) }}" :active="request()->routeIs('agent.pharmacies')">
                     {{ __('Pharmacies') }}
                 </x-nav-link>
             @endif
@@ -213,19 +213,19 @@
                 <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                     {{ __('Dashboard') }}
                 </x-nav-link>
-                <x-nav-link href="{{ route('agent.pharmacies',['action'=>'index']) }}" :active="request()->routeIs('agent.pharmacies')">
+                <x-nav-link href="{{ route('agent.pharmacies', ['action' => 'index']) }}" :active="request()->routeIs('agent.pharmacies')">
                     {{ __('Pharmacies') }}
                 </x-nav-link>
-                <x-nav-link href="{{ route('agent.packages',['action'=>'index']) }}" :active="request()->routeIs('agent.packages')">
+                <x-nav-link href="{{ route('agent.packages', ['action' => 'index']) }}" :active="request()->routeIs('agent.packages')">
                     {{ __('Packages') }}
                 </x-nav-link>
-                <x-nav-link href="{{ route('agent.messages',['action'=>'index']) }}" :active="request()->routeIs('agent.messages')">
+                <x-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
                     {{ __('Messages') }}
                 </x-nav-link>
-                <x-nav-link href="{{ route('agent.cases',['action'=>'index']) }}" :active="request()->routeIs('agent.cases')">
+                <x-nav-link href="{{ route('agent.cases', ['action' => 'index']) }}" :active="request()->routeIs('agent.cases')">
                     {{ __('Cases') }}
                 </x-nav-link>
-                <x-nav-link href="{{ route('agent.contracts',['action'=>'index']) }}" :active="request()->routeIs('agent.contracts')">
+                <x-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
                     {{ __('Contracts') }}
                 </x-nav-link>
             @endif
@@ -236,19 +236,19 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
-                {{ __('Sell medicine') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
-                {{ __('Document Sales') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                {{ __('Notifications') }}
-            </x-responsive-nav-link>
             @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
+                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
+                    {{ __('Sell medicine') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
+                    {{ __('Document Sales') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
+                    {{ __('Notifications') }}
+                </x-responsive-nav-link>
                 <x-responsive-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
                     {{ __('All medicine') }}
                 </x-responsive-nav-link>
