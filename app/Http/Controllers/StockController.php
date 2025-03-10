@@ -272,15 +272,6 @@ class StockController extends Controller
                     throw new Exception('Validate File input\'s error: '.$e->getMessage());
                 }
 
-
-                // if ($validator->fails()) {
-                //     throw new Exception('Validate File data error: '.$validator->errors()->first());
-                // }
-
-                // if ($validator->fails()) {
-                //     return redirect()->back()->withErrors($validator)->with('error', 'Validation error in CSV data.');
-                // }
-
                 // Check if the item exists
                 try {
                     $item = Items::firstOrCreate(
@@ -298,7 +289,7 @@ class StockController extends Controller
                         'staff_id' => $staff_id,
                         'item_id' => $item->id,
                         'quantity' => $row['quantity'],
-                        'remain_quantity' => $row['quantity'],
+                        'remain_Quantity' => $row['quantity'],
                         'low_stock_percentage' => $row['low_stock_percentage'],
                         'buying_price' => $row['buying_price'],
                         'selling_price' => $row['selling_price'],
@@ -311,6 +302,7 @@ class StockController extends Controller
                     throw new Exception('Create Stock Error: ' . $e->getMessage());
                 }
             }
+            
             return redirect()->route('stock')->with('success', 'Medicines and stock imported successfully!');
         } catch (Exception $e) {
 
