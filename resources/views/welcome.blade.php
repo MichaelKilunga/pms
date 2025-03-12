@@ -403,7 +403,7 @@
     <footer class="footer">
         <div class="container">
             <p class="mb-0">&copy; 2024 {{ env('APP_NAME') }}. All rights reserved.</p>
-            <p>Built by <a href="https://skylinksolutions.com" class="text-light">SKYLINK SOLUTIONS</a></p>
+            <p>Built by <a href="https://skylinksolutions.co.tz" class="text-light">SKYLINK SOLUTIONS</a></p>
         </div>
     </footer>
 

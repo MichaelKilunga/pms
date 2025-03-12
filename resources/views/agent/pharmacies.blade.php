@@ -278,7 +278,7 @@
         </div>
     </div>
 
-    <!-- Modal to create a new pharmacyz -->
+    <!-- Modal to create a new pharmacy -->
     <div class="modal fade" id="addPharmacyModal" tabindex="-1" aria-labelledby="addPharmacyModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
