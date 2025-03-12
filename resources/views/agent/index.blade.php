@@ -149,10 +149,14 @@
                 var myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: {!! json_encode($pharmacies) !!},
+                        labels: {
+                            ['Pharmacy 1', 'Pharmacy 2', 'Pharmacy 3', 'Pharmacy 4', 'Pharmacy 5'],
+                        },
                         datasets: [{
                                 label: 'Income',
-                                data: {!! json_encode($incomes) !!},
+                                data: {
+                                    [100, 200, 150, 300, 250],
+                                },
                                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                                 borderColor: 'rgba(75, 192, 192, 1)',
                                 borderWidth: 1
