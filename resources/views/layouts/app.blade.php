@@ -26,6 +26,14 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css">
+
+    <!-- include summernote css/js -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Select CSS -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.14/css/bootstrap-select.min.css">
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -167,14 +175,6 @@
                 });
             @endif
 
-            // @if (session('notification'))
-            //     Swal.fire({
-            //         // icon: 'notification',
-            //         title: '{{ session('notification') }}',
-            //         timer: 2000
-            //     });
-            // @endif
-
             $(document).ready(function() {
                 $('#Table')
                     .DataTable({
@@ -190,7 +190,8 @@
                 });
                 @if (!session('success') && !session('error') && !session('info'))
                     // $(".chosen").chosen({
-                    $("select").chosen({
+                    $("select").not("#conversationRecipients").chosen({
+                        // $("select").chosen({
                         width: "100%",
                         no_results_text: "No matches found!",
                     });
@@ -339,9 +340,15 @@
 
         //capture active printers and append them to the modal select dropdown after id="selectPrinter"
         $(document).ready(function() {
-            if (true) {
-                $('#printerModal').modal('show');
-            }
+            // if (true) {
+            //     $('#printerModal').modal('show');
+            // }
+            $('.summernote').summernote({
+                height: 90, // set editor height
+                minHeight: null, // set minimum height of editor
+                maxHeight: null, // set maximum height of editor
+                focus: true // set focus to editable area after initializing summernote
+            });
         });
     </script>
 
@@ -386,6 +393,12 @@
     <!-- Include Buttons extensions -->
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+    <!-- include summernote css/js -->
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
+
+    <!-- Bootstrap Select JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.14/js/bootstrap-select.min.js"></script>
 
 </body>
 

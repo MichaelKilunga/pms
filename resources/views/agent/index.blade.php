@@ -15,7 +15,11 @@
                 </a>
                 <button class="list-group-item list-group-item-action align-items-center" data-bs-toggle="modal"
                     data-bs-target="#unreadMessagesModal">
-                    <i class="bi bi-chat me-2"></i> Unread Messages
+                    <i class="bi bi-chat-dots me-2"></i> Unread Messages
+                </button>
+                <button class="list-group-item list-group-item-action align-items-center" data-bs-toggle="modal"
+                    data-bs-target="#createConversationModal">
+                    <i class="bi bi-people me-2"></i> Create Conversation
                 </button>
                 <button class="list-group-item list-group-item-action align-items-center" data-bs-toggle="modal"
                     data-bs-target="#reportCaseModal">
@@ -182,6 +186,61 @@
         </div>
     </div>
 
+    <!-- Create Conversation Modal -->
+    <div class="modal  fade" id="createConversationModal" tabindex="-1" aria-labelledby="createConversationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createConversationModalLabel">
+                        <i class="bi bi-people me-2"></i> Create New Conversation
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createConversationForm">
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="conversationTitle" class="form-label">Title</label>
+                            <input type="text" class="rounded form-control" id="conversationTitle" name="title"
+                                required>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="conversationDescription" class="form-label">Description</label>
+                            <textarea class="form-control summernote" id="conversationDescription" name="description" rows="3"></textarea>
+                        </div>
+
+                        <!-- Select Recipients -->
+                        <div class="mb-3">
+                            <label for="conversationRecipients" class="form-label fw-bold">
+                                <i class="bi bi-people-fill text-primary"></i> Select Recipients
+                            </label>
+
+                            <!-- Search Input -->
+                            <input type="text" class="form-control mb-2" id="searchRecipients"
+                                placeholder="Search recipients...">
+
+                            <!-- Checkbox List Container -->
+                            <div id="recipientsList" class="border rounded p-2"
+                                style="max-height: 100px; overflow-y: auto;">
+                                <p class="text-muted text-center">Loading recipients...</p>
+                            </div>
+
+                            <small class="text-muted">Select users to add them to the conversation.</small>
+                        </div>
+
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="createConversationButton" class="btn btn-primary w-100">
+                            <i class="bi bi-send"></i> Create Conversation
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {{-- Report Case Modal --}}
     <div class="modal fade" id="reportCaseModal" tabindex="-1" aria-labelledby="reportCaseModalLabel"
@@ -252,6 +311,8 @@
             </div>
         </div>
     </div>
+
+
     {{-- Modal for Confirmation --}}
     <script>
         document.getElementById("reportCaseForm").addEventListener("submit", function(event) {
@@ -279,171 +340,39 @@
 
     {{-- For Messages --}}
     <script>
-        // document.addEventListener("DOMContentLoaded", function() {
-        //     const messagesContainer = document.getElementById("messagesContainer");
-        //     const loadingSpinner = document.getElementById("loadingSpinner");
-        //     const searchInput = document.getElementById("searchInput");
-        //     let currentExpandedConversation = null;
-
-        //     function fetchUnreadMessages() {
-        //         fetch("{{ route('agent.messages', ['action' => 'unread']) }}")
-        //             .then(response => response.json())
-        //             .then(data => {
-        //                 loadingSpinner.style.display = "none";
-
-        //                 if (data.length === 0) {
-        //                     messagesContainer.innerHTML =
-        //                         `<div class="alert alert-info text-center">No unread messages</div>`;
-        //                     return;
-        //                 }
-
-        //                 // Catch error if exists
-        //                 if (data.error) {
-        //                     console.log(data.error);
-        //                     throw new Error(data.error);
-        //                     return;
-        //                 }
-
-        //                 // Filter conversations based on search input
-        //                 const searchQuery = searchInput.value.toLowerCase();
-        //                 const filteredConversations = data.filter(conversation =>
-        //                     conversation.title.toLowerCase().includes(searchQuery) ||
-        //                     (conversation.description && conversation.description.toLowerCase().includes(
-        //                         searchQuery))
-        //                 );
-
-        //                 messagesContainer.innerHTML = filteredConversations.map(conversation => {
-        //                     if (conversation.messages.length === 0) {
-        //                         return ''; // Skip conversations with no unread messages
-        //                     }
-
-        //                     return `
-        //             <div class="card mb-3 shadow-sm">
-        //                 <div class="card-body">
-        //                     <h5 class="card-title text-primary">
-        //                         <i class="bi bi-chat-dots"></i> ${conversation.title}
-        //                     </h5>
-        //                     <p class="card-text">${conversation.description || 'No description available'}</p>
-
-        //                     <button class="btn btn-sm btn-outline-primary float-end" 
-        //                         data-bs-toggle="collapse" 
-        //                         data-bs-target="#messages-${conversation.id}" 
-        //                         aria-expanded="false" 
-        //                         aria-controls="messages-${conversation.id}">
-        //                         ${currentExpandedConversation === conversation.id ? 'Collapse' : 'Expand'}
-        //                     </button>
-
-        //                     <hr>
-
-        //                     <div id="messages-${conversation.id}" class="collapse ${currentExpandedConversation === conversation.id ? 'show' : ''}">
-        //                         ${conversation.messages.map(message => `
-        //                                 <div class="message">
-        //                                     <h6 class="card-title text-secondary">
-        //                                         <i class="bi bi-person-circle"></i> ${message.sender.name}
-        //                                     </h6>
-        //                                     <p class="card-text">${message.content}</p>
-        //                                     <small class="text-muted">
-        //                                         <i class="bi bi-clock"></i> ${new Date(message.created_at).toLocaleString()}
-        //                                     </small>
-        //                                     <button class="btn btn-sm btn-success float-end mark-read" data-id="${message.id}">
-        //                                         <i class="bi bi-check-circle"></i> Mark as Read
-        //                                     </button>
-        //                                 </div>
-        //                                 <hr>
-        //                             `).join('')}
-        //                     </div>
-        //                 </div>
-        //             </div>
-        //         `;
-        //                 }).join("");
-
-        //                 // Event listeners for "Mark as Read" buttons
-        //                 document.querySelectorAll(".mark-read").forEach(button => {
-        //                     button.addEventListener("click", function() {
-        //                         markAsRead(this.getAttribute("data-id"));
-        //                     });
-        //                 });
-
-        //                 // Event listener for collapse/expand buttons
-        //                 document.querySelectorAll('[data-toggle="collapse"]').forEach(button => {
-        //                     button.addEventListener("click", function() {
-        //                         const conversationId = this.closest('.card').querySelector('h5')
-        //                             .innerText;
-        //                         if (currentExpandedConversation === conversationId) {
-        //                             currentExpandedConversation = null;
-        //                         } else {
-        //                             currentExpandedConversation = conversationId;
-        //                         }
-        //                     });
-        //                 });
-        //             })
-        //             .catch(error => {
-        //                 console.error("Error fetching messages:", error);
-        //                 messagesContainer.innerHTML =
-        //                     `<div class="alert alert-danger text-center">Failed to load messages</div>`;
-        //             });
-        //     }
-
-        //     function markAsRead(id) {
-        //         fetch(`{{ route('agent.messages', ['action' => 'markRead']) }}/${id}`, {
-        //                 method: "POST"
-        //             })
-        //             .then(response => response.json())
-        //             .then(data => {
-        //                 if (data.success) {
-        //                     document.querySelector(`button[data-id="${id}"]`).closest(".message").remove();
-        //                     if (document.querySelectorAll(".message").length === 0) {
-        //                         messagesContainer.innerHTML =
-        //                             `<div class="alert alert-info text-center">No unread messages</div>`;
-        //                     }
-        //                 }
-        //                 if (data.error) {
-        //                     console.log(data.error);
-        //                     throw new Error(data.error);
-        //                     return;
-        //                 }
-        //             })
-        //             .catch(error => console.error("Error marking message as read:", error));
-        //     }
-
-        //     // Search filter event listener
-        //     searchInput.addEventListener("input", fetchUnreadMessages);
-
-        //     // Fetch messages when the modal is shown
-        //     document.getElementById("unreadMessagesModal").addEventListener("show.bs.modal", fetchUnreadMessages);
-        // });
         document.addEventListener("DOMContentLoaded", function() {
-    const messagesContainer = document.getElementById("messagesContainer");
-    const loadingSpinner = document.getElementById("loadingSpinner");
-    const searchInput = document.getElementById("searchInput");
-    let currentExpandedConversation = null;
+            const messagesContainer = document.getElementById("messagesContainer");
+            const loadingSpinner = document.getElementById("loadingSpinner");
+            const searchInput = document.getElementById("searchInput");
+            let currentExpandedConversation = null;
 
-    function fetchUnreadMessages() {
-        fetch("{{ route('agent.messages', ['action' => 'unread']) }}")
-            .then(response => response.json())
-            .then(data => {
-                loadingSpinner.style.display = "none";
+            function fetchUnreadMessages() {
+                fetch("{{ route('agent.messages', ['action' => 'unread']) }}")
+                    .then(response => response.json())
+                    .then(data => {
+                        loadingSpinner.style.display = "none";
 
-                if (data.length === 0) {
-                    messagesContainer.innerHTML =
-                        `<div class="alert alert-info text-center">No unread messages</div>`;
-                    return;
-                }
+                        if (data.length === 0) {
+                            messagesContainer.innerHTML =
+                                `<div class="alert alert-info text-center">No unread messages</div>`;
+                            return;
+                        }
 
-                // Catch error if exists
-                if (data.error) {
-                    console.log(data.error);
-                    throw new Error(data.error);
-                }
+                        // Catch error if exists
+                        if (data.error) {
+                            console.log(data.error);
+                            throw new Error(data.error);
+                        }
 
-                // Filter conversations based on search input
-                const searchQuery = searchInput.value.toLowerCase();
-                const filteredConversations = data.filter(conversation =>
-                    conversation.title.toLowerCase().includes(searchQuery) ||
-                    (conversation.description && conversation.description.toLowerCase().includes(searchQuery))
-                );
+                        // Filter conversations based on search input
+                        const searchQuery = searchInput.value.toLowerCase();
+                        const filteredConversations = data.filter(conversation =>
+                            conversation.title.toLowerCase().includes(searchQuery) ||
+                            (conversation.description && conversation.description.toLowerCase().includes(
+                                searchQuery))
+                        );
 
-                messagesContainer.innerHTML = filteredConversations.map(conversation => `
+                        messagesContainer.innerHTML = filteredConversations.map(conversation => `
                     <div class="card mb-3 shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title text-primary">
@@ -461,90 +390,244 @@
                             <div id="messages-${conversation.id}" class="messages-container" 
                                  style="display: ${currentExpandedConversation === conversation.id ? 'block' : 'none'};">
                                 ${conversation.messages.map(message => `
-                                    <div class="message">
-                                        <h6 class="card-title text-secondary">
-                                            <i class="bi bi-person-circle"></i> ${message.sender.name}
-                                        </h6>
-                                        <p class="card-text">${message.content}</p>
-                                        <small class="text-muted">
-                                            <i class="bi bi-clock"></i> ${new Date(message.created_at).toLocaleString()}
-                                        </small>
-                                        <button class="btn btn-sm btn-success float-end mark-read" data-id="${message.id}">
-                                            <i class="bi bi-check-circle"></i> Mark as Read
-                                        </button>
-                                    </div>
-                                    <hr>
-                                `).join('')}
+                                        <div class="message">
+                                            <h6 class="card-title text-secondary">
+                                                <i class="bi bi-person-circle"></i> ${message.sender.name}
+                                            </h6>
+                                            <p class="card-text">${message.content}</p>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock"></i> ${new Date(message.created_at).toLocaleString()}
+                                            </small>
+                                            <button class="btn btn-sm btn-success float-end mark-read" data-id="${message.id}">
+                                                <i class="bi bi-check-circle"></i> Mark as Read
+                                            </button>
+                                            <button class="btn btn-sm btn-primary float-end me-2 reply-btn" data-id="${conversation.id}">
+                                                <i class="bi bi-arrow-repeat"></i> Reply
+                                            </button>
+                                        </div>
+                                        <hr>
+                                    `).join('')}
                             </div>
+
+                            <div id="reply-section-${conversation.id}" class="reply-section" style="display:none;">
+                                <textarea class="form-control mb-2" id="newMessage-${conversation.id}" placeholder="Write a reply..."></textarea>
+                                <button class="btn btn-sm btn-primary send-btn" data-id="${conversation.id}">
+                                    <i class="bi bi-send"></i> Send
+                                </button>
+                            </div>
+
                         </div>
                     </div>
                 `).join("");
 
-                // Event listeners for "Mark as Read" buttons
-                document.querySelectorAll(".mark-read").forEach(button => {
-                    button.addEventListener("click", function() {
-                        markAsRead(this.getAttribute("data-id"));
-                    });
-                });
+                        // Event listeners for "Mark as Read" buttons
+                        document.querySelectorAll(".mark-read").forEach(button => {
+                            button.addEventListener("click", function() {
+                                markAsRead(this.getAttribute("data-id"));
+                            });
+                        });
 
-                // Event listener for expand/collapse buttons
-                document.querySelectorAll(".toggle-btn").forEach(button => {
-                    button.addEventListener("click", function() {
-                        const conversationId = this.getAttribute("data-id");
-                        const messagesDiv = document.getElementById(`messages-${conversationId}`);
+                        // Event listener for expand/collapse buttons
+                        document.querySelectorAll(".toggle-btn").forEach(button => {
+                            button.addEventListener("click", function() {
+                                const conversationId = this.getAttribute("data-id");
+                                const messagesDiv = document.getElementById(
+                                    `messages-${conversationId}`);
+                                const replySection = document.getElementById(
+                                    `reply-section-${conversationId}`);
 
-                        if (currentExpandedConversation === conversationId) {
-                            messagesDiv.style.display = "none";
-                            this.textContent = "Expand";
-                            currentExpandedConversation = null;
-                        } else {
-                            // Collapse any open conversation
-                            document.querySelectorAll(".messages-container").forEach(div => div.style.display = "none");
-                            document.querySelectorAll(".toggle-btn").forEach(btn => btn.textContent = "Expand");
+                                if (currentExpandedConversation === conversationId) {
+                                    messagesDiv.style.display = "none";
+                                    replySection.style.display = "none";
+                                    this.textContent = "Expand";
+                                    currentExpandedConversation = null;
+                                } else {
+                                    // Collapse any open conversation
+                                    document.querySelectorAll(".messages-container").forEach(
+                                        div => div.style.display = "none");
+                                    document.querySelectorAll(".toggle-btn").forEach(btn => btn
+                                        .textContent = "Expand");
 
-                            // Expand the selected one
-                            messagesDiv.style.display = "block";
-                            this.textContent = "Collapse";
-                            currentExpandedConversation = conversationId;
-                        }
-                    });
-                });
-            })
-            .catch(error => {
-                console.error("Error fetching messages:", error);
-                messagesContainer.innerHTML =
-                    `<div class="alert alert-danger text-center">Failed to load messages</div>`;
-            });
-    }
+                                    // Expand the selected one
+                                    messagesDiv.style.display = "block";
+                                    this.textContent = "Collapse";
+                                    currentExpandedConversation = conversationId;
 
-    function markAsRead(id) {
-        fetch(`{{ route('agent.messages', ['action' => 'markRead']) }}/${id}`, {
-                method: "POST"
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.querySelector(`button[data-id="${id}"]`).closest(".message").remove();
-                    if (document.querySelectorAll(".message").length === 0) {
+                                    // Show reply section
+                                    replySection.style.display = "block";
+                                }
+                            });
+                        });
+
+                        // Event listener for Reply buttons
+                        document.querySelectorAll(".reply-btn").forEach(button => {
+                            button.addEventListener("click", function() {
+                                const conversationId = this.getAttribute("data-id");
+                                const replySection = document.getElementById(
+                                    `reply-section-${conversationId}`);
+                                replySection.style.display = "block";
+                            });
+                        });
+
+                        // Event listener for Send buttons
+                        document.querySelectorAll(".send-btn").forEach(button => {
+                            button.addEventListener("click", function() {
+                                const conversationId = this.getAttribute("data-id");
+                                const messageContent = document.getElementById(
+                                    `newMessage-${conversationId}`).value;
+
+                                if (messageContent.trim() === "") {
+                                    alert("Please enter a message.");
+                                    return;
+                                }
+
+                                sendReply(conversationId, messageContent);
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error fetching messages:", error);
                         messagesContainer.innerHTML =
-                            `<div class="alert alert-info text-center">No unread messages</div>`;
+                            `<div class="alert alert-danger text-center">Failed to load messages</div>`;
+                    });
+            }
+
+            function markAsRead(id) {
+                fetch(`{{ route('agent.messages', ['action' => 'markRead']) }}/${id}`, {
+                        method: "POST"
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.querySelector(`button[data-id="${id}"]`).closest(".message").remove();
+                            if (document.querySelectorAll(".message").length === 0) {
+                                messagesContainer.innerHTML =
+                                    `<div class="alert alert-info text-center">No unread messages</div>`;
+                            }
+                        }
+                        if (data.error) {
+                            console.log(data.error);
+                            throw new Error(data.error);
+                        }
+                    })
+                    .catch(error => console.error("Error marking message as read:", error));
+            }
+
+            // Function to send the reply
+            function sendReply(conversationId, messageContent) {
+                fetch("{{ route('agent.messages', ['action' => 'sendReply']) }}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            conversationId: conversationId,
+                            message: messageContent
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Reply sent successfully!");
+                            document.getElementById(`newMessage-${conversationId}`).value = ""; // Clear input
+                            fetchUnreadMessages(); // Reload messages
+                        } else {
+                            alert("Failed to send reply: " + data.error);
+                        }
+                    })
+                    .catch(error => console.error("Error sending reply:", error));
+            }
+
+            // Search filter event listener
+            searchInput.addEventListener("input", fetchUnreadMessages);
+
+            // Fetch messages when the modal is shown
+            document.getElementById("unreadMessagesModal").addEventListener("show.bs.modal", fetchUnreadMessages);
+        });
+    </script>
+
+    {{-- For Creating Conversations --}}
+    <script>
+        $(document).ready(function() {
+            // Fetch and Populate Recipients Dynamically
+            // Open modal and fetch recipients
+            $("#createConversationModal").on("show.bs.modal", function() {
+                const recipientsList = $("#recipientsList");
+                recipientsList.html('<p class="text-muted text-center">Loading recipients...</p>');
+
+                $.ajax({
+                    url: "{{ route('agent.messages', ['action' => 'getRecipients']) }}",
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        // Populate checkboxes
+                        recipientsList.html(
+                            data.map(user => `
+                        <div class="form-check">
+                            <input class="form-check-input recipient-checkbox" type="checkbox" 
+                                   name="recipients[]" value="${user.id}" id="recipient-${user.id}">
+                            <label class="form-check-label" for="recipient-${user.id}">
+                                ${user.name}
+                            </label>
+                        </div>
+                    `).join("")
+                        );
+                    },
+                    error: function() {
+                        recipientsList.html(
+                            '<p class="text-danger text-center">Failed to load users</p>');
                     }
-                }
-                if (data.error) {
-                    console.log(data.error);
-                    throw new Error(data.error);
-                }
-            })
-            .catch(error => console.error("Error marking message as read:", error));
-    }
+                });
+            });
 
-    // Search filter event listener
-    searchInput.addEventListener("input", fetchUnreadMessages);
+            // Live search functionality
+            $("#searchRecipients").on("keyup", function() {
+                const searchText = $(this).val().toLowerCase();
+                $(".recipient-checkbox").each(function() {
+                    const label = $(this).next("label").text().toLowerCase();
+                    $(this).closest(".form-check").toggle(label.includes(searchText));
+                });
+            });
 
-    // Fetch messages when the modal is shown
-    document.getElementById("unreadMessagesModal").addEventListener("show.bs.modal", fetchUnreadMessages);
-});
+            //  Handle Form Submission for Creating Conversations
+            $("#createConversationForm").on("submit", function(event) {
+                event.preventDefault();
 
+                const formData = new FormData(this);
+
+                $.ajax({
+                    url: "{{ route('agent.messages', ['action' => 'createConversation']) }}", // Update with actual route
+                    type: "POST",
+                    data: formData,
+                    processData: false, // Prevent jQuery from processing data
+                    contentType: false, // Prevent jQuery from setting content type
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    success: function(data) {
+                        if (data.success) {
+                            alert("Conversation created successfully!");
+                            $("#createConversationForm")[0].reset(); // Reset form
+                            // refresh the page
+                            window.location.reload();
+                            $("#recipientsList").html(""); // Clear recipients list
+
+                            // Close modal
+                            $("#createConversationModal").modal("hide");
+                        } else {
+                            alert("Failed to create conversation: " + data.error);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // refresh the page
+                        window.location.reload();
+                        console.error("Error creating conversation:", error);
+                        alert("An error occurred. Please try again.");
+                    }
+                });
+            });
+        });
     </script>
 
     {{-- script for id="pharmaciesVsIncomeChart" --}}

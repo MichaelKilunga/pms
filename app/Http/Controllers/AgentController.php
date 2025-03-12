@@ -223,7 +223,53 @@ class AgentController extends Controller
                 return response()->json($conversations);
             } catch (\Exception $e) {
                 // Return the conversations with their unread messages in a json response
-                return response()->json(['error'=>$e->getMessage()]);                
+                return response()->json(['error' => $e->getMessage()]);
+            }
+        }
+
+        if ($request->action == 'createConversation') {
+            try {
+                // validate
+                $request->validate([
+                    'recipients' => 'required|array',
+                    'recipients.*' => 'required|integer',
+
+                    'title' => 'required|string',
+                    'description' => 'required|string',
+                ]);
+                // create conversation
+                $conversation = Conversation::create([
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'status' => 'open',
+                    'creator_id' => Auth::user()->id,
+                ]);
+
+                // add each participants to the conversation
+                foreach ($request->recipients as $user_id) {
+                    $conversation->participants()->attach($user_id);
+                }
+
+                return response()->json(['success' => 'Conversation created successfully']);
+            } catch (\Exception $e) {
+                // Return the conversations with their unread messages in a json response
+                return response()->json(['error' => $e->getMessage()]);
+            }
+        }
+
+        // return recepients for a conversations
+        if ($request->action == 'getRecipients') {
+            try {
+                // fetch users with same role as the authenticated user, and  super admin
+                $users = User::where('role', Auth::user()->role)->get();
+                // add the super admin, id = 1
+                $users->push(User::find(1));
+
+                return response()->json($users);
+            }
+            catch (\Exception $e) {
+                // Return the conversations with their unread messages in a json response
+                return response()->json(['error' => $e->getMessage()]);
             }
         }
 
