@@ -248,6 +248,8 @@ class AgentController extends Controller
                 // add each participants to the conversation
                 foreach ($request->recipients as $user_id) {
                     $conversation->participants()->attach($user_id);
+                    // attach the authenticated user to the conversation
+                    $conversation->participants()->attach(Auth::user()->id);
                 }
 
                 return response()->json(['success' => 'Conversation created successfully']);
