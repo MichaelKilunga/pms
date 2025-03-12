@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contract;
+use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\Package;
 use App\Models\Pharmacy;
 use App\Models\User;
@@ -174,17 +176,75 @@ class AgentController extends Controller
         }
     }
 
-    public function messages(Request $request){
+    public function messages(Request $request)
+    {
+        if ($request->action == 'index' || !$request->action) {
+
+            // dd(Auth::user()->conversations);
+            // dd(Conversation::first()->participants);
+            // dd(Message::find(1)->usersWhoRead);
+
+            // $messages = Message::where('agent_id', Auth::user()->id)->orderBy('created_at', 'desc')->get();
+            // return view('agent.messages', compact('messages'));
+            return redirect()->back()->with('info', 'This module is still under Construction, thanks for your patience!');
+        }
+        if ($request->action == 'delete') {
+            try {
+                $message = Message::find($request->id);
+                // dd($message);
+                Message::destroy($message->id);
+                return redirect()->back()->with('success', 'Message deleted successfully');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', $e->getMessage());
+            }
+        }
+        if ($request->action == 'read') {
+            try {
+                $message = Message::find($request->id);
+                // dd($message);
+                $message->is_read = 1;
+                $message->save();
+                return redirect()->back()->with('success', 'Message marked as read successfully');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', $e->getMessage());
+            }
+        }
+
+        if ($request->action == 'unread') {
+            try {
+                // Fetch all conversations for the authenticated user
+                $conversations = Auth::user()->conversations()
+                    ->with(['messages' => function ($query) {
+                        $query->where('status', 'unread')->with('sender'); // Only fetch unread messages
+                    }])
+                    ->get();
+
+                // Return the conversations with their unread messages in a json response
+                return response()->json($conversations);
+            } catch (\Exception $e) {
+                // Return the conversations with their unread messages in a json response
+                return response()->json(['error'=>$e->getMessage()]);                
+            }
+        }
+
+        if ($request->action == 'delete_all') {
+            try {
+                Message::where('agent_id', Auth::user()->id)->delete();
+                return redirect()->back()->with('success', 'All messages deleted successfully');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', $e->getMessage());
+            }
+        }
+    }
+
+    public function cases(Request $request)
+    {
         // dd($request->all());
         return redirect()->back()->with('info', 'This module is still under Construction, thanks for your patience!');
     }
 
-    public function cases(Request $request){
-        // dd($request->all());
-        return redirect()->back()->with('info', 'This module is still under Construction, thanks for your patience!');
-    }
-    
-    public function contracts(Request $request){
+    public function contracts(Request $request)
+    {
         // dd($request->all());
         return redirect()->back()->with('info', 'This module is still under Construction, thanks for your patience!');
     }

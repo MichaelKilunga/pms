@@ -97,11 +97,25 @@ class User extends Authenticatable
         return $this->hasMany(SaleNote::class, 'staff_id');
     }
 
-    public function ownerCurrentContract(){
-        return $this->hasOne(Contract::class,'owner_id')->where('is_current_contract', true);
+    public function ownerCurrentContract()
+    {
+        return $this->hasOne(Contract::class, 'owner_id')->where('is_current_contract', true);
     }
 
-    public function agent(){
+    public function agent()
+    {
         return $this->hasMany(Pharmacy::class, 'agent_id');
+    }
+
+    public function conversations()
+    {
+        return $this->belongsToMany(Conversation::class, 'conversations_users', 'user_id', 'conversation_id')
+            ->withTimestamps();  // Optional, if you want to store created_at and updated_at
+    }
+
+    public function readMessages(){
+        return $this->belongsToMany(Message::class, 'message_user_read', 'user_id', 'message_id')
+            ->withPivot('read_at')
+            ->withTimestamps();
     }
 }
