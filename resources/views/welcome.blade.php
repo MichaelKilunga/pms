@@ -142,7 +142,7 @@
             @auth
                 <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg me-2">Go to Dashboard</a>
             @else
-                <a href="{{ route('register') }}" class="btn btn-primary btn-lg me-2">Get Started</a>
+                <a href="{{ route('register') }}" class="btn btn-primary btn-lg me-2">Become Agent</a>
                 <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg">Login</a>
             @endauth
         </div>
@@ -395,7 +395,7 @@
     <section class="py-5 text-center">
         <div class="container">
             <h3 class="mb-4">Join thousands of businesses growing with Our System!</h3>
-            <a href="{{ route('register') }}" class="btn btn-success btn-lg">Sign Up Now</a>
+            <a href="{{ route('register') }}" class="btn btn-success btn-lg">Become Agent</a>
         </div>
     </section>
 
