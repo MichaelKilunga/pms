@@ -1,23 +1,30 @@
 @extends('agent.app')
 
 @section('content')
-    <div class="container-fluid mt-3">
+    <div class="container">
         <div class="row">
-            <!-- Conversations Sidebar -->
+            <!-- Sidebar: Conversations List -->
             <div class="col-md-4">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-chat-left-dots"></i> Conversations</span>
-                        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#createConversationModal">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between">
+                        <h5 class="mb-0"><i class="bi bi-chat-dots"></i> Conversations</h5>
+                        <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#createConversationModal">
                             <i class="bi bi-plus-circle"></i> New
                         </button>
                     </div>
                     <div class="card-body p-2">
-                        <input type="text" id="searchConversations" class="form-control mb-2"
-                            placeholder="Search conversations...">
-                        <div id="conversationsList" class="list-group">
-                            <!-- Conversations will be dynamically loaded here -->
-                        </div>
+                        <input type="text" id="searchConversations" class="form-control mb-2" placeholder="Search...">
+
+                        <ul class="list-group" id="conversationsList">
+                            @foreach ($conversations as $conversation)
+                                <li class="list-group-item d-flex justify-content-between align-items-center conversation-item"
+                                    data-id="{{ $conversation->id }}">
+                                    <span><i class="bi bi-chat-left-text"></i> {{ $conversation->title }}</span>
+                                    <span
+                                        class="badge bg-danger">{{ count($conversation->messages->whereNull('read_at')) }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -25,18 +32,18 @@
             <!-- Chat Panel -->
             <div class="col-md-8">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-dark text-white">
-                        <h5 id="conversationTitle" class="mb-0">Select a conversation</h5>
+                    <div class="card-header bg-secondary text-white d-flex justify-content-between">
+                        <h5 class="mb-0"><i class="bi bi-envelope"></i> Messages</h5>
+                        <button id="leaveConversation" class="btn btn-sm btn-danger d-none"><i class="bi bi-x-circle"></i>
+                            Leave</button>
                     </div>
-                    <div class="card-body" id="chatContainer" style="height: 400px; overflow-y: auto;">
-                        <!-- Messages will be loaded here -->
+                    <div class="card-body" id="messagesPanel">
+                        <div class="alert alert-info text-center">Select a conversation to view messages</div>
                     </div>
-                    <div class="card-footer">
-                        <div class="d-flex">
-                            <input type="text" id="newMessage" class="form-control" placeholder="Type a message...">
-                            <button class="btn btn-primary ms-2" id="sendMessage">
-                                <i class="bi bi-send"></i> Send
-                            </button>
+                    <div class="card-footer d-none" id="messageInputArea">
+                        <div class="input-group">
+                            <input type="text" id="messageInput" class="form-control" placeholder="Type a message...">
+                            <button class="btn btn-primary" id="sendMessage"><i class="bi bi-send"></i></button>
                         </div>
                     </div>
                 </div>
@@ -45,27 +52,35 @@
     </div>
 
     <!-- Create Conversation Modal -->
-    <div class="modal fade" id="createConversationModal" tabindex="-1" aria-labelledby="createConversationModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="createConversationModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="createConversationModalLabel">New Conversation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-chat-square-dots"></i> Create Conversation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="createConversationForm">
                         <div class="mb-3">
-                            <label for="conversationTitle" class="form-label">Title</label>
-                            <input type="text" class="form-control" id="conversationTitle" required>
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" name="title" required>
+                        </div>
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="conversationDescription" class="form-label">Description</label>
+                            <textarea class="form-control summernote" id="conversationDescription" name="description" rows="3"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="conversationRecipients" class="form-label">Select Recipients</label>
-                            <div id="recipientsList" class="form-check">
-                                <!-- Dynamically populated recipient checkboxes -->
-                            </div>
+                            <label class="form-label">Participants</label>
+                            <select class="form-select" id="conversationParticipants" name="recipients[]" multiple
+                                live-search="true" data-live-search-style="contains"
+                                data-live-search-placeholder="Search...">
+                                @foreach ($users as $user)
+                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Create</button>
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-save"></i> Create</button>
                     </form>
                 </div>
             </div>
@@ -76,133 +91,102 @@
         $(document).ready(function() {
             let currentConversationId = null;
 
-            // Load Conversations
-            function loadConversations() {
-                $.ajax({
-                    url: "{{ route('agent.messages', ['action' => 'getConversations']) }}",
-                    type: "GET",
-                    success: function(data) {
-                        let listHTML = "";
-                        data.forEach(convo => {
-                            listHTML += `
-                        <a href="#" class="list-group-item list-group-item-action conversation-item" data-id="${convo.id}">
-                            <i class="bi bi-chat-left"></i> ${convo.title}
-                        </a>`;
-                        });
-                        $("#conversationsList").html(listHTML);
-                    }
+            // Search Conversations
+            $("#searchConversations").on("input", function() {
+                let query = $(this).val().toLowerCase();
+                $(".conversation-item").each(function() {
+                    $(this).toggle($(this).text().toLowerCase().includes(query));
                 });
-            }
-
-            // Load Messages when a conversation is clicked
-            $(document).on("click", ".conversation-item", function() {
-                currentConversationId = $(this).data("id");
-                $("#conversationTitle").text($(this).text().trim());
-                loadMessages(currentConversationId);
             });
 
-            function loadMessages(conversationId) {
-                $.ajax({
-                    url: `{{ route('agent.messages', ['action' => 'getMessages']) }}/${conversationId}`,
-                    type: "GET",
-                    success: function(data) {
-                        let messagesHTML = "";
-                        data.messages.forEach(msg => {
-                            messagesHTML += `
-                        <div class="message p-2 border-bottom">
-                            <strong>${msg.sender.name}:</strong>
-                            <p>${msg.content}</p>
-                            <small class="text-muted">${msg.created_at}</small>
-                            <button class="btn btn-sm btn-warning edit-message" data-id="${msg.id}"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-danger delete-message" data-id="${msg.id}"><i class="bi bi-trash"></i></button>
-                        </div>`;
-                        });
-                        $("#chatContainer").html(messagesHTML);
-                    }
+            // Load Messages when clicking a conversation
+            $(".conversation-item").on("click", function() {
+                currentConversationId = $(this).data("id");
+                $("#messagesPanel").html(
+                    '<div class="text-center my-3"><div class="spinner-border"></div></div>');
+                $("#messageInputArea, #leaveConversation").removeClass("d-none");
+
+                $.get(`/messages/${currentConversationId}`, function(data) {
+                    let messagesHtml = data.messages.map(msg =>
+                        `<div class="mb-2">
+                    <strong>${msg.sender.name}</strong>: ${msg.content}
+                    <small class="text-muted float-end">${new Date(msg.created_at).toLocaleString()}</small>
+                </div><hr>`
+                    ).join("");
+
+                    $("#messagesPanel").html(messagesHtml ||
+                        '<div class="alert alert-warning">No messages</div>');
                 });
-            }
+            });
 
             // Send Message
             $("#sendMessage").on("click", function() {
-                let message = $("#newMessage").val().trim();
-                if (!message || !currentConversationId) return;
+                let content = $("#messageInput").val().trim();
+                if (!content || !currentConversationId) return;
+
+                $.post(`/messages/${currentConversationId}`, {
+                    content,
+                    _token: "{{ csrf_token() }}"
+                }, function(response) {
+                    if (response.success) {
+                        $("#messagesPanel").append(
+                            `<div class="mb-2">
+                        <strong>You</strong>: ${content}
+                        <small class="text-muted float-end">${new Date().toLocaleString()}</small>
+                    </div><hr>`
+                        );
+                        $("#messageInput").val("");
+                    } else {
+                        alert("Message failed!");
+                    }
+                });
+            });
+
+            // Create Conversation
+            $("#createConversationForm").on("submit", function(event) {
+                event.preventDefault();
+
+                const formData = new FormData(this);
 
                 $.ajax({
-                    url: "{{ route('agent.messages', ['action' => 'sendMessage']) }}",
+                    url: "{{ route('agent.messages', ['action' => 'createConversation']) }}", // Update with actual route
                     type: "POST",
-                    data: {
-                        conversation_id: currentConversationId,
-                        content: message,
-                        _token: "{{ csrf_token() }}"
+                    data: formData,
+                    processData: false, // Prevent jQuery from processing data
+                    contentType: false, // Prevent jQuery from setting content type
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
                     },
-                    success: function() {
-                        $("#newMessage").val("");
-                        loadMessages(currentConversationId);
+                    success: function(data) {
+                        if (data.success) {
+                            alert("Conversation created successfully!");
+                            $("#createConversationForm")[0].reset(); // Reset form
+                            // refresh the page
+                            window.location.reload();
+                            $("#recipientsList").html(""); // Clear recipients list
+
+                            // Close modal
+                            $("#createConversationModal").modal("hide");
+                        } else {
+                            alert("Failed to create conversation: " + data.error);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // refresh the page
+                        window.location.reload();
+                        console.error("Error creating conversation:", error);
+                        alert("An error occurred. Please try again.");
                     }
                 });
             });
 
-            // Edit Message
-            $(document).on("click", ".edit-message", function() {
-                let messageId = $(this).data("id");
-                let newContent = prompt("Edit your message:");
-                if (!newContent) return;
-
-                $.ajax({
-                    url: `{{ route('agent.messages', ['action' => 'editMessage']) }}/${messageId}`,
-                    type: "POST",
-                    data: {
-                        content: newContent,
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function() {
-                        loadMessages(currentConversationId);
-                    }
-                });
+            // Leave Conversation
+            $("#leaveConversation").on("click", function() {
+                currentConversationId = null;
+                $("#messagesPanel").html(
+                    '<div class="alert alert-info text-center">Select a conversation</div>');
+                $("#messageInputArea, #leaveConversation").addClass("d-none");
             });
-
-            // Delete Message
-            $(document).on("click", ".delete-message", function() {
-                let messageId = $(this).data("id");
-                if (!confirm("Are you sure you want to delete this message?")) return;
-
-                $.ajax({
-                    url: `{{ route('agent.messages', ['action' => 'deleteMessage']) }}/${messageId}`,
-                    type: "DELETE",
-                    data: {
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function() {
-                        loadMessages(currentConversationId);
-                    }
-                });
-            });
-
-            // Create a New Conversation
-            $("#createConversationForm").on("submit", function(e) {
-                e.preventDefault();
-                let title = $("#conversationTitle").val();
-                let recipients = $("input[name='recipients[]']:checked").map(function() {
-                    return this.value;
-                }).get();
-
-                $.ajax({
-                    url: "{{ route('agent.messages', ['action' => 'createConversation']) }}",
-                    type: "POST",
-                    data: {
-                        title: title,
-                        recipients: recipients,
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function() {
-                        $("#createConversationModal").modal("hide");
-                        loadConversations();
-                    }
-                });
-            });
-
-            // Load Conversations on Page Load
-            loadConversations();
         });
     </script>
 @endsection

@@ -320,9 +320,9 @@
                 <x-responsive-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
                     {{ __('Messages') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('agent.cases', ['action' => 'index']) }}" :active="request()->routeIs('agent.cases')">
+                {{-- <x-responsive-nav-link href="{{ route('agent.cases', ['action' => 'index']) }}" :active="request()->routeIs('agent.cases')">
                     {{ __('Cases') }}
-                </x-responsive-nav-link>
+                </x-responsive-nav-link> --}}
                 <x-responsive-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
                     {{ __('Contracts') }}
                 </x-responsive-nav-link>

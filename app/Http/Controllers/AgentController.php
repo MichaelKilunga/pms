@@ -182,14 +182,16 @@ class AgentController extends Controller
             // return  all conversations, their messages, and their users
             try {
                 // Fetch all conversations for the authenticated user
-                $conversations = Auth::user()->conversations()
-                    ->with(['messages' => function ($query) {
-                        $query->with('sender'); // Only fetch unread messages
-                    }])
+                $conversations = Conversation::with(['messages' => function ($query) {
+                    $query->with(['sender', 'usersWhoRead']); // Only fetch unread messages
+                }, 'participants'])
                     ->get();
-                dd($conversations);
-                // Return the conversations with their unread messages to a agent.messages.blade.php view
-                return view('agent.messages', compact('conversations'));
+
+                $users = User::where('role', Auth::user()->role)->get();
+                // add the super admin, id = 1
+                $users->push(User::find(1));
+
+                return view('agent.messages', compact('conversations', 'users'));
             } catch (\Exception $e) {
                 // Return the conversations with their unread messages in a json response
                 return response()->json(['error' => $e->getMessage()]);
@@ -299,7 +301,6 @@ class AgentController extends Controller
 
     public function contracts(Request $request)
     {
-        // dd($request->all());
         return redirect()->back()->with('info', 'This module is still under Construction, thanks for your patience!');
     }
 }
