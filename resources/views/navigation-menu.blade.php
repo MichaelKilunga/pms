@@ -225,9 +225,9 @@
                 <x-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
                     {{ __('Messages') }}
                 </x-nav-link>
-                <x-nav-link href="{{ route('agent.cases', ['action' => 'index']) }}" :active="request()->routeIs('agent.cases')">
+                {{-- <x-nav-link href="{{ route('agent.cases', ['action' => 'index']) }}" :active="request()->routeIs('agent.cases')">
                     {{ __('Cases') }}
-                </x-nav-link>
+                </x-nav-link> --}}
                 <x-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
                     {{ __('Contracts') }}
                 </x-nav-link>
