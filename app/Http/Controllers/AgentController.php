@@ -178,6 +178,23 @@ class AgentController extends Controller
 
     public function messages(Request $request)
     {
+        if ($request->action == 'index' || !$request->action) {
+            // return  all conversations, their messages, and their users
+            try {
+                // Fetch all conversations for the authenticated user
+                $conversations = Auth::user()->conversations()
+                    ->with(['messages' => function ($query) {
+                        $query->with('sender'); // Only fetch unread messages
+                    }])
+                    ->get();
+                dd($conversations);
+                // Return the conversations with their unread messages to a agent.messages.blade.php view
+                return view('agent.messages', compact('conversations'));
+            } catch (\Exception $e) {
+                // Return the conversations with their unread messages in a json response
+                return response()->json(['error' => $e->getMessage()]);
+            }
+        }
         if ($request->action == 'delete') {
             try {
                 $message = Message::find($request->id);
@@ -270,23 +287,6 @@ class AgentController extends Controller
                 return redirect()->back()->with('success', 'All messages deleted successfully');
             } catch (\Exception $e) {
                 return redirect()->back()->with('error', $e->getMessage());
-            }
-        }
-        if ($request->action == 'index' || !$request->action) {
-            // return  all conversations, their messages, and their users
-            try {
-                // Fetch all conversations for the authenticated user
-                $conversations = Auth::user()->conversations()
-                    ->with(['messages' => function ($query) {
-                        $query->where('status', 'unread')->with('sender'); // Only fetch unread messages
-                    }])
-                    ->get();
-                // dd($conversations);
-                // Return the conversations with their unread messages to a agent.messages.blade.php view
-                return view('agent.messages', compact('conversations'));
-            } catch (\Exception $e) {
-                // Return the conversations with their unread messages in a json response
-                return response()->json(['error' => $e->getMessage()]);
             }
         }
     }
