@@ -24,6 +24,7 @@ use App\Notifications\SmsNotification;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ContractUpdateController;
 use App\Http\Controllers\SaleNoteController;
+use App\Http\Controllers\SalesReturnController;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 
@@ -122,6 +123,17 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::put('sales', [SalesController::class, 'update'])->name('sales.update');
     Route::delete('sales/delete/{id}', [SalesController::class, 'destroy'])->name('sales.destroy');
 
+    //create sales return
+    Route::get('salesReturns', [SalesReturnController::class, 'salesReturns'])->name('salesReturns');
+    Route::get('salesReturns/create', [SalesReturnController::class, 'createSalesReturns'])->name('salesReturns.create');
+    Route::post('salesReturns', [SalesReturnController::class, 'storeSalesReturns'])->name('salesReturns.store');
+    Route::get('salesReturns/{id}', [SalesReturnController::class, 'showSalesReturns'])->name('salesReturns.show');
+    Route::put('salesReturns', [SalesReturnController::class, 'updateSalesReturns'])->name('salesReturns.update');
+    Route::delete('salesReturns/delete/{id}', [SalesReturnController::class, 'destroySalesReturns'])->name('salesReturns.destroy');
+    Route::get('salesReturns/{id}/edit', [SalesReturnController::class, 'editSalesReturns'])->name('salesReturns.edit');
+
+    
+    
     Route::get('allReceipts', [SalesController::class, 'allReceipts'])->name('allReceipts');
     Route::get('print/lastReceipt', [SalesController::class, 'printLastReceipt'])->name('print.lastReceipt');
     Route::get('printReceipt', [SalesController::class, 'printReceipt'])->name('printReceipt');

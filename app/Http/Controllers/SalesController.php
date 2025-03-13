@@ -52,7 +52,7 @@ class SalesController extends BaseController
     {
         // Get sales data for the pharmacies owned by the authenticated user
 
-        $sales = Sales::with('item')->where('pharmacy_id', session('current_pharmacy_id'))
+        $sales = Sales::with('item')->where('pharmacy_id', session('current_pharmacy_id'))->orderBy('date', 'desc')
             ->get();
 
         $printerEnabled = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
