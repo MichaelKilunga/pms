@@ -228,9 +228,9 @@
                 {{-- <x-nav-link href="{{ route('agent.cases', ['action' => 'index']) }}" :active="request()->routeIs('agent.cases')">
                     {{ __('Cases') }}
                 </x-nav-link> --}}
-                <x-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
+                {{-- <x-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
                     {{ __('Contracts') }}
-                </x-nav-link>
+                </x-nav-link> --}}
             @endif
         </div>
         {{-- </span> --}}
@@ -326,9 +326,9 @@
                 {{-- <x-responsive-nav-link href="{{ route('agent.cases', ['action' => 'index']) }}" :active="request()->routeIs('agent.cases')">
                     {{ __('Cases') }}
                 </x-responsive-nav-link> --}}
-                <x-responsive-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
+                {{-- <x-responsive-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
                     {{ __('Contracts') }}
-                </x-responsive-nav-link>
+                </x-responsive-nav-link> --}}
             @endif
             @if (Auth::user()->role == 'staff')
                 <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
