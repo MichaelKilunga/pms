@@ -132,6 +132,9 @@
                 <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
                     {{ __('Sell medicine') }}
                 </x-nav-link>
+                <x-nav-link href="{{ route('salesReturns') }}" :active="request()->routeIs('salesReturns')">
+                    {{ __('Sales Returns') }}
+                </x-nav-link>
                 <x-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
                     {{ __('Document Sales') }}
                 </x-nav-link>
