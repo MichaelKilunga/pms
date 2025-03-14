@@ -12,7 +12,9 @@ class CreateMessagesTable extends Migration
             $table->id();
             $table->unsignedBigInteger('sender_id');
             $table->text('content');
-            $table->enum('status', ['unread', 'read','deleted'])->default('unread');
+            $table->enum('status', ['unread', 'read', 'deleted'])->default('unread');
+            // parent message id
+            $table->foreignId('parent_message_id')->nullable()->constrained('messages')->onDelete('no action');
             $table->timestamps();
 
             // Optional fields
@@ -20,7 +22,7 @@ class CreateMessagesTable extends Migration
             $table->string('attachment')->nullable();
             $table->enum('message_type', ['text', 'image', 'file', 'voice'])->default('text');
             $table->boolean('is_urgent')->default(false);
-            $table->unsignedBigInteger('conversation_id');//->nullable();
+            $table->unsignedBigInteger('conversation_id'); //->nullable();
             $table->softDeletes();
 
             // Foreign keys

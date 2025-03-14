@@ -18,6 +18,7 @@ class Message extends Model
         'attachment',      // Optional attachment ( file path )
         'message_type',    // 'text', 'image', 'file', 'voice'
         'is_urgent',       // Boolean indicating if the message is urgent
+        'parent_message_id', // Optional parent message ID
     ];
 
     // Relationship with Conversation

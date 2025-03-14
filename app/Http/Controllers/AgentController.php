@@ -268,6 +268,60 @@ class AgentController extends Controller
             }
         }
 
+        // get conversation messages
+        if ($request->action == 'getMessages') {
+            try {
+                // Fetch conversation messages with sender and users who read
+                $messages = Message::with(['sender', 'usersWhoRead'])
+                    ->where('conversation_id', $request->conversation_id)
+                    ->get();
+
+                // Return the messages in JSON format
+                return response()->json([
+                    'success' => true,
+                    'messages' => $messages
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
+        // send message
+        if ($request->action == 'sendMessage') {
+            try {
+                // validate
+                $request->validate([
+                    'conversation_id' => 'required|integer',
+                    'content' => 'required|string',
+                ]);
+
+                // return response()->json([
+                //     'success' => true,
+                //     'message' => $request->all()
+                // ]);
+
+                // create message
+                $message = Message::create([
+                    'conversation_id' => $request->conversation_id,
+                    'sender_id' => Auth::user()->id,
+                    'content' => $request->content,
+                    'status' => 'unread',
+                ]);
+
+                // return response
+                return response()->json([
+                    'success' => true,
+                    'message' => $message ? 'Message sent successfully' : 'Message not sent'
+                ]);
+            } catch (\Exception $e) {
+                // Return the conversations with their unread messages in a json response
+                return response()->json(['success' => false, 'error' => $e->getMessage()]);
+            }
+        }
+
         // return recepients for a conversations
         if ($request->action == 'getRecipients') {
             try {

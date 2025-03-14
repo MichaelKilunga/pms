@@ -345,6 +345,7 @@
             const loadingSpinner = document.getElementById("loadingSpinner");
             const searchInput = document.getElementById("searchInput");
             let currentExpandedConversation = null;
+            let currentReplyMessageId = null;
 
             function fetchUnreadMessages() {
                 fetch("{{ route('agent.messages', ['action' => 'unread']) }}")
@@ -390,27 +391,27 @@
                             <div id="messages-${conversation.id}" class="messages-container" 
                                  style="display: ${currentExpandedConversation === conversation.id ? 'block' : 'none'};">
                                 ${conversation.messages.map(message => `
-                                        <div class="message">
-                                            <h6 class="card-title text-secondary">
-                                                <i class="bi bi-person-circle"></i> ${message.sender.name}
-                                            </h6>
-                                            <p class="card-text">${message.content}</p>
-                                            <small class="text-muted">
-                                                <i class="bi bi-clock"></i> ${new Date(message.created_at).toLocaleString()}
-                                            </small>
-                                            <button class="btn btn-sm btn-success float-end mark-read" data-id="${message.id}">
-                                                <i class="bi bi-check-circle"></i> Mark as Read
-                                            </button>
-                                            <button class="btn btn-sm btn-primary float-end me-2 reply-btn" data-id="${conversation.id}">
-                                                <i class="bi bi-arrow-repeat"></i> Reply
-                                            </button>
-                                        </div>
-                                        <hr>
-                                    `).join('')}
+                                                                                                                                <div class="message">
+                                                                                                                                    <h6 class="card-title text-secondary">
+                                                                                                                                        <i class="bi bi-person-circle"></i> ${message.sender.name}
+                                                                                                                                    </h6>
+                                                                                                                                    <p class="card-text">${message.content}</p>
+                                                                                                                                    <small class="text-muted">
+                                                                                                                                        <i class="bi bi-clock"></i> ${new Date(message.created_at).toLocaleString()}
+                                                                                                                                    </small>
+                                                                                                                                    <button class="btn btn-sm btn-success float-end mark-read" data-id="${message.id}">
+                                                                                                                                        <i class="bi bi-check-circle"></i> Mark as Read
+                                                                                                                                    </button>
+                                                                                                                                    <button class="btn btn-sm btn-primary float-end me-2 reply-btn" data-sender-name="${message.sender.name}" data-message-id="${message.id}" data-id="${conversation.id}">
+                                                                                                                                        <i class="bi bi-arrow-repeat"></i> Reply
+                                                                                                                                    </button>
+                                                                                                                                </div>
+                                                                                                                                <hr>
+                                                                                                                            `).join('')}
                             </div>
 
-                            <div id="reply-section-${conversation.id}" class="reply-section" style="display:none;">
-                                <textarea class="form-control mb-2" id="newMessage-${conversation.id}" placeholder="Write a reply..."></textarea>
+                            <div id="reply-section-${conversation.id}" class="mt-4 reply-section" style="display:none;">
+                                <textarea class="form-control mb-2" id="newMessage-${conversation.id}" placeholder="Write a Comment..."></textarea>                                
                                 <button class="btn btn-sm btn-primary send-btn" data-id="${conversation.id}">
                                     <i class="bi bi-send"></i> Send
                                 </button>
@@ -463,8 +464,22 @@
                         document.querySelectorAll(".reply-btn").forEach(button => {
                             button.addEventListener("click", function() {
                                 const conversationId = this.getAttribute("data-id");
+                                currentReplyMessageId = $(this).data("message-id");
+                                const currentReplyMessageSenderName = $(this).data(
+                                    "sender-name");
                                 const replySection = document.getElementById(
                                     `reply-section-${conversationId}`);
+                                // append a button to create a new sms instead
+                                $(replySection).append(`<button class="btn btn-sm btn-danger new-sms" data-id="${conversationId}">
+                                    <i class="bi bi-x"></i>new</button>`);
+                                // append a reply name to the begining of the reply section
+                                const replySectionInputField = `#newMessage-${conversationId}`;
+                                $(replySectionInputField).val(
+                                    `@${currentReplyMessageSenderName} - `
+                                ).css({
+                                    "background-color": "#e0f7fa", // Light blue background
+                                    "font-weight": "bold"
+                                }).focus();
                                 replySection.style.display = "block";
                             });
                         });
@@ -480,10 +495,42 @@
                                     alert("Please enter a message.");
                                     return;
                                 }
-
-                                sendReply(conversationId, messageContent);
+                                // check if  message is reply
+                                if (currentReplyMessageId === null) {
+                                    sendNewMessage(conversationId, messageContent);
+                                }
+                                if (currentReplyMessageId !== null) {
+                                    sendReply(conversationId, parentMessageId,
+                                        messageContent);
+                                }
                             });
                         });
+
+
+                        // event listener for new sms instead button
+                        document.querySelectorAll(".new-sms").forEach(button => {
+                            button.addEventListener("click", function() {
+                                const conversationId = this.getAttribute("data-id");
+                                alert(conversationId);
+                                const replySectionInputField = `#newMessage-${conversationId}`;
+                                const replySection = document.getElementById(
+                                    `reply-section-${conversationId}`);
+
+                                $(replySectionInputField).val("").focus();
+
+                                // Remove aria-hidden before interacting with the input
+                                if (replySection) {
+                                    replySection.removeAttribute("aria-hidden");
+                                }
+
+                                currentReplyMessageId = null;
+                                currentReplyMessageSenderName = null;
+
+                                // Remove this button
+                                this.remove();
+                            });
+                        });
+
                     })
                     .catch(error => {
                         console.error("Error fetching messages:", error);
@@ -514,7 +561,7 @@
             }
 
             // Function to send the reply
-            function sendReply(conversationId, messageContent) {
+            function sendReply(conversationId, parentMessageId, messageContent) {
                 fetch("{{ route('agent.messages', ['action' => 'sendReply']) }}", {
                         method: "POST",
                         headers: {
@@ -523,6 +570,7 @@
                         },
                         body: JSON.stringify({
                             conversationId: conversationId,
+                            parentMessageId: parentMessageId,
                             message: messageContent
                         })
                     })
@@ -530,7 +578,8 @@
                     .then(data => {
                         if (data.success) {
                             alert("Reply sent successfully!");
-                            document.getElementById(`newMessage-${conversationId}`).value = ""; // Clear input
+                            document.getElementById(`newMessage-${conversationId}`).value =
+                                ""; // Clear input
                             fetchUnreadMessages(); // Reload messages
                         } else {
                             alert("Failed to send reply: " + data.error);
@@ -539,11 +588,39 @@
                     .catch(error => console.error("Error sending reply:", error));
             }
 
+            // Function to send a new message
+            function sendNewMessage(conversationId, messageContent) {
+                fetch("{{ route('agent.messages', ['action' => 'sendMessage']) }}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            conversation_id: conversationId,
+                            content: messageContent
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            document.getElementById(`newMessage-${conversationId}`).value =
+                                ""; // Clear input
+                            fetchUnreadMessages(); // Reload messages
+                        } else {
+                            alert("Failed to send comment: " + data.error);
+                        }
+                    })
+                    .catch(error => console.error("Error sending comment:", error));
+            }
+
             // Search filter event listener
             searchInput.addEventListener("input", fetchUnreadMessages);
 
             // Fetch messages when the modal is shown
-            document.getElementById("unreadMessagesModal").addEventListener("show.bs.modal", fetchUnreadMessages);
+            document.getElementById("unreadMessagesModal").addEventListener("show.bs.modal",
+                fetchUnreadMessages);
         });
     </script>
 
