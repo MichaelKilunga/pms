@@ -126,9 +126,9 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     //create sales return
     Route::get('salesReturns', [SalesReturnController::class, 'salesReturns'])->name('salesReturns');
     Route::get('salesReturns/create', [SalesReturnController::class, 'createSalesReturns'])->name('salesReturns.create');
-    Route::post('salesReturns', [SalesReturnController::class, 'storeSalesReturns'])->name('salesReturns.store');
+    Route::post('salesReturns/store', [SalesReturnController::class, 'storeSalesReturns'])->name('salesReturns.store');
     Route::get('salesReturns/{id}', [SalesReturnController::class, 'showSalesReturns'])->name('salesReturns.show');
-    Route::put('salesReturns', [SalesReturnController::class, 'updateSalesReturns'])->name('salesReturns.update');
+    Route::post('salesReturns/update', [SalesReturnController::class, 'updateSalesReturns'])->name('salesReturns.update');
     Route::delete('salesReturns/delete/{id}', [SalesReturnController::class, 'destroySalesReturns'])->name('salesReturns.destroy');
     Route::get('salesReturns/{id}/edit', [SalesReturnController::class, 'editSalesReturns'])->name('salesReturns.edit');
 

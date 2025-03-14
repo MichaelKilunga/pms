@@ -32,4 +32,9 @@ class Sales extends Model
     {
         return $this->belongsTo(Items::class,'item_id');
     }
+
+    public function salesReturn()
+    {
+        return $this->hasOne(SalesReturn::class, 'sale_id');
+    }
 }

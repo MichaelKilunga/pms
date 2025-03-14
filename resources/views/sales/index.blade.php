@@ -88,10 +88,13 @@
                                 </div>
 
                                 <!-- Create Sales Return Link -->
-                                <a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#salesReturnModal{{ $sale->id }}" data-sale-id="{{ $sale->id }}">
-                                    <i class="bi bi-arrow-return-left"></i>
-                                </a>
+                                @if (!$sale->salesReturn)
+                                    <a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#salesReturnModal{{ $sale->id }}"
+                                        data-sale-id="{{ $sale->id }}">
+                                        <i class="bi bi-arrow-return-left"></i>
+                                    </a>
+                                @endif
 
                                 {{-- sales return modal --}}
                                 <div class="modal fade" id="salesReturnModal{{ $sale->id }}" tabindex="-1"
@@ -99,9 +102,10 @@
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title" id="salesReturnModalLabel">Return Sales for <span class="text-primary"> {{ $sale->item->name}}</span></h5>
+                                                <h5 class="modal-title" id="salesReturnModalLabel">Return Sales for <span
+                                                        class="text-primary"> {{ $sale->item->name }}</span></h5>
                                                 {{-- onclick="this.reset the closest form" --}}
-                                                
+
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                     aria-label="Close"></button>
                                             </div>
@@ -110,12 +114,15 @@
                                                 action="{{ route('salesReturns.store') }}">
                                                 @csrf
                                                 <div class="modal-body">
-                                                    <input type="hidden" name="sale_id" id="sale_id" value="{{ $sale->id }}">
+                                                    <input type="hidden" name="sale_id" id="sale_id"
+                                                        value="{{ $sale->id }}">
 
                                                     <div class="mb-3">
                                                         <label for="quantity" class="form-label">Quantity to Return</label>
                                                         <input type="number" name="quantity" class="form-control"
-                                                            id="quantity" min="1" max="{{$sale->quantity}}" value="{{$sale->quantity}}" placeholder="Enter quantity to return" required>
+                                                            id="quantity" readonly min="1"
+                                                            max="{{ $sale->quantity }}" value="{{ $sale->quantity }}"
+                                                            placeholder="Enter quantity to return" required>
                                                     </div>
 
                                                     <div class="mb-3">
@@ -123,27 +130,26 @@
                                                         <textarea name="reason" class="form-control" id="reason" rows="3" placeholder="Enter reason to return sales"></textarea>
                                                     </div>
 
-                                                    <div class="mb-3">
+                                                    <div class="mb-3 hidden">
                                                         <label for="return_status" class="form-label">Return Status</label>
-                                                        <select name="return_status" class="form-select" id="return_status">
+                                                        <select name="return_status" class="form-select"
+                                                            id="return_status">
                                                             <option selected value="pending" selected>Pending</option>
-                                                            {{-- <option value="approved">Approved</option>
-                                                            <option value="rejected">Rejected</option> --}}
                                                         </select>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal" >Close</button>
+                                                        data-bs-dismiss="modal">Close</button>
                                                     <button type="submit" class="btn btn-primary">Submit Return</button>
                                                 </div>
                                             </form>
                                         </div>
                                     </div>
                                 </div>
-          
+
                                 <!-- Edit Modal -->
-                                <a href="#" class="btn btn-success btn-sm" hidden data-bs-toggle="modal" 
+                                <a href="#" class="btn btn-success btn-sm" hidden data-bs-toggle="modal"
                                     data-bs-target="#editSaleModal{{ $sale->id }}">
                                     <i class="bi bi-pencil"></i>
                                 </a>
