@@ -141,6 +141,9 @@
                 <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
                     {{ __('Notifications') }}
                 </x-nav-link>
+                <x-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
+                    {{ __('Messages') }}
+                </x-nav-link>
             @endif
             @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
                 <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
@@ -178,6 +181,9 @@
                 </x-nav-link>
                 <x-nav-link href="{{ route('myContracts') }}" :active="request()->routeIs('myContracts')">
                     {{ __('Contracts') }}
+                </x-nav-link>
+                <x-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
+                    {{ __('Messages') }}
                 </x-nav-link>
             @endif
             @if (Auth::user()->role == 'super')
@@ -283,6 +289,9 @@
                 <x-responsive-nav-link href="{{ route('myContracts') }}" :active="request()->routeIs('myContracts')">
                     {{ __('Contracts') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
+                    {{ __('Messages') }}
+                </x-responsive-nav-link>
             @endif
             @if (Auth::user()->role == 'super')
                 <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
@@ -357,6 +366,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
                     {{ __('Notifications') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
+                    {{ __('Messages') }}
                 </x-responsive-nav-link>
             @endif
 
