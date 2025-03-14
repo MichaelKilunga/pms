@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Items;
 use App\Models\SalesReturn;
 use App\Models\Sale;
 use App\Models\Sales;
+use App\Models\Stock;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\InAppNotification;
+use Illuminate\Support\Facades\Notification;
 
 class SalesReturnController extends Controller
 {
@@ -15,8 +20,20 @@ class SalesReturnController extends Controller
      */
     public function salesReturns()
     {
-        $returns = SalesReturn::with(['sale', 'staff', 'approvedBy'])->orderBy('date', 'desc')
-        ->get();
+
+        if (Auth::user()->role == 'owner') {
+            $returns = SalesReturn::with(['sale', 'staff', 'approvedBy'])
+                ->where('pharmacy_id', session('current_pharmacy_id'))
+                ->orderBy('date', 'desc')->orderBy('date', 'desc')
+                ->get();
+        } else {
+            $returns = SalesReturn::with(['sale', 'staff', 'approvedBy'])
+                ->where('pharmacy_id', session('current_pharmacy_id'))
+                ->where('staff_id', Auth::user()->id) // Add this condition to filter by the logged-in user's ID
+                ->orderBy('date', 'desc')->orderBy('date', 'desc')
+                ->get();
+        }
+
         return view('sales_returns.index', compact('returns'));
     }
 
@@ -33,32 +50,35 @@ class SalesReturnController extends Controller
      */
     public function storeSalesReturns(Request $request)
     {
-        // dd($request->all());
-        $request->validate([
-            'sale_id' => 'required|exists:sales,id',
-            'quantity' => 'required|integer|min:1',
-            'reason' => 'nullable|string',
-        ]);
-       
+        try {
+            $request->validate([
+                'sale_id' => 'required|exists:sales,id',
+                'quantity' => 'required|integer|min:1',
+                'reason' => 'nullable|string',
+            ]);
 
-        $sale = Sales::findOrFail($request->sale_id);
 
-        $salesReturn = SalesReturn::create([
-            'sale_id' => $request->sale_id,
-            'pharmacy_id' => $sale->pharmacy_id,
-            'item_id' => $sale->item_id,
-            'staff_id' => Auth::user()->id, // Assuming logged-in user
-            'quantity' => $request->quantity,
-             // Pro-rated refund
-            'refund_amount' => $sale->total_price * ($request->quantity / $sale->quantity), // Pro-rated refund
-            'reason' => $request->reason,
-            'return_status' => 'pending',
-            'date' => now(),
-        ]);
+            $sale = Sales::findOrFail($request->sale_id);
 
-         //redirect back to sales page
-        return redirect()->back()->with('success', 'Sales return created successfully.');
+            $salesReturn = SalesReturn::create([
+                'sale_id' => $request->sale_id,
+                'quantity' => $request->quantity,
+                'refund_amount' => $sale->total_price * ($request->quantity / $sale->quantity), // Pro-rated refund
+                'reason' => $request->reason,
+                'return_status' => 'pending',
+                'pharmacy_id' => session('current_pharmacy_id'),
+                'staff_id' => Auth::user()->id,
+                'date' => now(),
+            ]);
 
+            // debug
+            // dd($salesReturn);
+
+            //redirect back to sales page
+            return redirect()->back()->with('success', 'Sales return created successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
     /**
@@ -72,18 +92,78 @@ class SalesReturnController extends Controller
     /**
      * Approve or reject a sales return.
      */
-    public function update(Request $request, SalesReturn $salesReturn)
+    public function updateSalesReturns(Request $request)
     {
-        $request->validate([
-            'return_status' => 'required|in:approved,rejected',
-        ]);
+
+        try {
+            $request->validate([
+                'return_status' => 'required|in:approved,rejected',
+                'return_id' => 'required|exists:sales_returns,id',
+                // 'stock_id' => 'required|exists:stocks,id',
+            ]);
+
+            //debug
+            // dd($request->all());
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        // dd($request->all());
+
+        //update sales return status set return status to approved or rejected and approved by to the logged in user
+        $salesReturn = SalesReturn::findOrFail($request->return_id);
+        $sale = Sales::findOrFail($salesReturn->sale_id);
+
+        // dd($sale);
 
         $salesReturn->update([
             'return_status' => $request->return_status,
-            'approved_by' => auth()->id(), // Assuming logged-in admin
+            'approved_by' => Auth::user()->id, // Assuming logged-in admin
         ]);
 
-        return response()->json(['message' => 'Sales return updated successfully.']);
+
+
+        // delete from slaes table if return is approved
+        if ($request->return_status == 'approved') {
+            $sale = Sales::findOrFail($salesReturn->sale_id);
+
+            // update item quantity in the stock 
+            $stock = Stock::findOrFail($sale->stock_id);
+            $stock->update([
+                'remain_Quantity' => $stock->remain_Quantity + $salesReturn->quantity,
+            ]);
+            // fetch sales returns with staff, sale and approvedBy
+            $salesReturn = SalesReturn::with(['sale' => function ($query) {
+                $query->with('item');
+            }, 'staff', 'approvedBy'])
+                ->where('id', $request->return_id)
+                ->first();
+
+            // dd($salesReturn);
+
+            //delete sale
+            try {
+                // send notification to the user who made the sale and the user who approved the return
+                $this->notify($salesReturn->approvedBy, 'You have approved a sales return of ' . $salesReturn->sale->item->name . ', Quantity:' . $salesReturn->sale->quantity . ' requested by ' . $salesReturn->staff->name, 'success');
+                $this->notify($salesReturn->staff, 'Returns for sales of ' . $salesReturn->sale->item->name . ', Quantity:' . $salesReturn->sale->quantity . ' has been approved by ' . $salesReturn->approvedBy->name, 'success');
+                // delete sale and returns
+                SalesReturn::destroy($salesReturn->id);
+                Sales::destroy($sale->id);
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', $e->getMessage());
+            }
+        } else {
+            // send notification to the user who made the sale and the user who approved the return
+            $salesReturn = SalesReturn::with(['sale' => function ($query) {
+                $query->with('item');
+            }, 'staff', 'approvedBy'])
+                ->where('id', $request->return_id)
+                ->first();
+            $this->notify($salesReturn->approvedBy, 'You have rejected a sales return of ' . $salesReturn->sale->item->name . ', Quantity:' . $salesReturn->sale->quantity . ' requested by ' . $salesReturn->staff->name, 'danger');
+            $this->notify($salesReturn->staff, 'Returns for sales of ' . $salesReturn->sale->item->name . ', Quantity:' . $salesReturn->sale->quantity . ' has been rejected by ' . $salesReturn->approvedBy->name, 'danger');
+        }
+        return redirect()->back()->with('success', 'Sales return ' . $request->return_status . ' successfully.');
     }
 
     /**
@@ -93,5 +173,14 @@ class SalesReturnController extends Controller
     {
         $salesReturn->delete();
         return response()->json(['message' => 'Sales return deleted successfully.']);
+    }
+
+    private function notify(User $user, string $message, string $type): void
+    {
+        $notification = [
+            'message' => $message,
+            'type' => $type,
+        ];
+        $user->notify(new InAppNotification($notification));
     }
 }

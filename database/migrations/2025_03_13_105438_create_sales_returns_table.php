@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('sales_returns', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sale_id')->constrained('sales')->onDelete('cascade'); // Reference to the original sale
+            // $table->foreignId('sale_id')->constrained('sales')->onDelete('cascade');
+            $table->foreignId('sale_id')->constrained('sales')->onDelete('cascade');
             $table->foreignId('pharmacy_id')->constrained('pharmacies')->onDelete('cascade');
-            $table->foreignId('item_id')->constrained('items')->onDelete('cascade');
             $table->foreignId('staff_id')->constrained('users')->onDelete('cascade'); // User processing the return
             $table->integer('quantity');
             $table->decimal('refund_amount', 8, 2)->nullable(); // Refund amount if applicable

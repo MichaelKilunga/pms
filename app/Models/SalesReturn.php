@@ -12,7 +12,6 @@ class SalesReturn extends Model
     protected $fillable = [
         'sale_id',
         'pharmacy_id',
-        'item_id',
         'staff_id',
         'quantity',
         'refund_amount',
@@ -52,13 +51,5 @@ class SalesReturn extends Model
     public function pharmacy()
     {
         return $this->belongsTo(Pharmacy::class);
-    }
-
-    /**
-     * Get the item associated with the sales return.
-     */
-    public function item()
-    {
-        return $this->belongsTo(Items::class);
     }
 }
