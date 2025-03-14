@@ -75,7 +75,7 @@ class SalesReturnController extends Controller
             // dd($salesReturn);
 
             //redirect back to sales page
-            return redirect()->back()->with('success', 'Sales return created successfully.');
+            return redirect()->back()->with('success', 'Sales return requested successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -150,20 +150,25 @@ class SalesReturnController extends Controller
                 // delete sale and returns
                 SalesReturn::destroy($salesReturn->id);
                 Sales::destroy($sale->id);
+                return redirect()->back()->with('success', 'Sales return approved successfully.');
             } catch (\Exception $e) {
                 return redirect()->back()->with('error', $e->getMessage());
             }
         } else {
-            // send notification to the user who made the sale and the user who approved the return
-            $salesReturn = SalesReturn::with(['sale' => function ($query) {
-                $query->with('item');
-            }, 'staff', 'approvedBy'])
-                ->where('id', $request->return_id)
-                ->first();
-            $this->notify($salesReturn->approvedBy, 'You have rejected a sales return of ' . $salesReturn->sale->item->name . ', Quantity:' . $salesReturn->sale->quantity . ' requested by ' . $salesReturn->staff->name, 'danger');
-            $this->notify($salesReturn->staff, 'Returns for sales of ' . $salesReturn->sale->item->name . ', Quantity:' . $salesReturn->sale->quantity . ' has been rejected by ' . $salesReturn->approvedBy->name, 'danger');
+            try {
+                // send notification to the user who made the sale and the user who approved the return
+                $salesReturn = SalesReturn::with(['sale' => function ($query) {
+                    $query->with('item');
+                }, 'staff', 'approvedBy'])
+                    ->where('id', $request->return_id)
+                    ->first();
+                $this->notify($salesReturn->approvedBy, 'You have rejected a sales return of ' . $salesReturn->sale->item->name . ', Quantity:' . $salesReturn->sale->quantity . ' requested by ' . $salesReturn->staff->name, 'danger');
+                $this->notify($salesReturn->staff, 'Returns for sales of ' . $salesReturn->sale->item->name . ', Quantity:' . $salesReturn->sale->quantity . ' has been rejected by ' . $salesReturn->approvedBy->name, 'danger');
+                return redirect()->back()->with('success', 'Sales return rejected successfully.');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', $e->getMessage());
+            }
         }
-        return redirect()->back()->with('success', 'Sales return ' . $request->return_status . ' successfully.');
     }
 
     /**
