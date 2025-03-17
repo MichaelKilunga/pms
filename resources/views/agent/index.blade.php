@@ -344,6 +344,10 @@
             let currentReplyMessageId = null;
 
             function fetchUnreadMessages() {
+
+                // loged user id
+                var AuthUserId = "{{ Auth::user()->id }}";
+
                 fetch("{{ route('agent.messages', ['action' => 'unread']) }}")
                     .then(response => response.json())
                     .then(data => {
@@ -370,52 +374,57 @@
                         );
 
                         messagesContainer.innerHTML = filteredConversations.map(conversation => `
-                    <div class="card mb-3 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title text-primary">
-                                <i class="bi bi-chat-dots"></i> ${conversation.title}
-                            </h5>
-                            <p class="card-text">${conversation.description || 'No description available'}</p>
+                            <div class="card mb-3 shadow">
+                                <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-chat-dots"></i> ${conversation.title}
+                                    </h6>
+                                    <button class="btn btn-sm btn-light toggle-btn" data-id="${conversation.id}">
+                                        ${currentExpandedConversation === conversation.id ? 'Collapse' : 'Expand'}
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text text-muted">${conversation.description || 'No description available'}</p>
 
-                            <button class="btn btn-sm btn-outline-primary float-end toggle-btn" 
-                                data-id="${conversation.id}">
-                                ${currentExpandedConversation === conversation.id ? 'Collapse' : 'Expand'}
-                            </button>
+                                    <div id="messages-${conversation.id}" class="messages-container p-2 border rounded bg-light"
+                                        style="max-height: 300px; overflow-y: auto; display: ${currentExpandedConversation === conversation.id ? 'block' : 'none'};">
+                                        ${conversation.messages.map(message => `
+                                                <div class="d-flex ${message.sender.id === AuthUserId ? 'justify-content-end' : 'justify-content-start'} mb-2">
+                                                    <div class="p-2 rounded ${message.sender.id === AuthUserId ? 'bg-primary text-white' : 'bg-white border'}" style="max-width: 75%;">
+                                                        <h6 class="mb-1 text-secondary">
+                                                            <i class="bi bi-person-circle"></i> ${message.sender.name}
+                                                        </h6>
+                                                        <p class="mb-1">${message.content}</p>
+                                                        <div class="d-flex justify-content-between">
+                                                            <small class="text-muted">
+                                                                <i class="bi bi-clock"></i> ${new Date(message.created_at).toLocaleString()}
+                                                            </small>
+                                                            <div>
+                                                                <button class="btn btn-sm btn-outline-primary reply-btn" data-sender-name="${message.sender.name}" data-message-id="${message.id}" data-id="${conversation.id}">
+                                                                    <i class="bi bi-arrow-repeat"></i> Reply
+                                                                </button>
+                                                                <button hidden class="btn btn-sm btn-outline-success mark-read" data-id="${message.id}">
+                                                                    <i class="bi bi-check-circle"></i> Read
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                    </div>
 
-                            <hr>
-
-                            <div id="messages-${conversation.id}" class="messages-container" 
-                                 style="display: ${currentExpandedConversation === conversation.id ? 'block' : 'none'};">
-                                ${conversation.messages.map(message => `
-                                                                                                                                                                            <div class="message">
-                                                                                                                                                                                <h6 class="card-title text-secondary">
-                                                                                                                                                                                    <i class="bi bi-person-circle"></i> ${message.sender.name}
-                                                                                                                                                                                </h6>
-                                                                                                                                                                                <p class="card-text">${message.content}</p>
-                                                                                                                                                                                <small class="text-muted">
-                                                                                                                                                                                    <i class="bi bi-clock"></i> ${new Date(message.created_at).toLocaleString()}
-                                                                                                                                                                                </small>
-                                                                                                                                                                                <button hidden class="btn btn-sm btn-success float-end mark-read" data-id="${message.id}">
-                                                                                                                                                                                    <i class="bi bi-check-circle"></i> Mark as Read
-                                                                                                                                                                                </button>
-                                                                                                                                                                                <button class="btn btn-sm btn-primary float-end me-2 reply-btn" data-sender-name="${message.sender.name}" data-message-id="${message.id}" data-id="${conversation.id}">
-                                                                                                                                                                                    <i class="bi bi-arrow-repeat"></i> Reply
-                                                                                                                                                                                </button>
-                                                                                                                                                                            </div>
-                                                                                                                                                                            <hr>
-                                                                                                                                                                        `).join('')}
+                                    <div id="reply-section-${conversation.id}" class="mt-3 d-none">
+                                        <textarea class="form-control summernote" id="newMessage-${conversation.id}" placeholder="Write a comment..."></textarea>
+                                        <div class="d-flex justify-content-end mt-2">
+                                            <button class="btn btn-sm btn-primary send-btn" data-id="${conversation.id}">
+                                                <i class="bi bi-send"></i> Send
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                        `).join("");
 
-                            <div id="reply-section-${conversation.id}" class="mt-4 reply-section" style="display:none;">
-                                <textarea class="form-control mb-2 summernote" id="newMessage-${conversation.id}" placeholder="Write a Comment..."></textarea>                                
-                                <button class="btn btn-sm btn-primary send-btn" data-id="${conversation.id}">
-                                    <i class="bi bi-send"></i> Send
-                                </button>
-                            </div>
-
-                        </div>
-                    </div>
-                `).join("");
 
                         // Event listeners for "Mark as Read" buttons
                         document.querySelectorAll(".mark-read").forEach(button => {
