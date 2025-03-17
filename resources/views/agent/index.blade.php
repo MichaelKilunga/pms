@@ -15,14 +15,10 @@
                 </a>
                 <button class="list-group-item list-group-item-action align-items-center" data-bs-toggle="modal"
                     data-bs-target="#unreadMessagesModal">
-                    <i class="bi bi-chat-dots me-2"></i> Unread Messages
+                    <i class="bi bi-chat-dots me-2"></i> Reported Cases
                 </button>
                 <button class="list-group-item list-group-item-action align-items-center" data-bs-toggle="modal"
                     data-bs-target="#createConversationModal">
-                    <i class="bi bi-people me-2"></i> Create Conversation
-                </button>
-                <button class="list-group-item list-group-item-action align-items-center" data-bs-toggle="modal"
-                    data-bs-target="#reportCaseModal">
                     <i class="bi bi-exclamation-triangle me-2"></i> Report Case
                 </button>
             </div>
@@ -391,27 +387,27 @@
                             <div id="messages-${conversation.id}" class="messages-container" 
                                  style="display: ${currentExpandedConversation === conversation.id ? 'block' : 'none'};">
                                 ${conversation.messages.map(message => `
-                                                                                                                                <div class="message">
-                                                                                                                                    <h6 class="card-title text-secondary">
-                                                                                                                                        <i class="bi bi-person-circle"></i> ${message.sender.name}
-                                                                                                                                    </h6>
-                                                                                                                                    <p class="card-text">${message.content}</p>
-                                                                                                                                    <small class="text-muted">
-                                                                                                                                        <i class="bi bi-clock"></i> ${new Date(message.created_at).toLocaleString()}
-                                                                                                                                    </small>
-                                                                                                                                    <button class="btn btn-sm btn-success float-end mark-read" data-id="${message.id}">
-                                                                                                                                        <i class="bi bi-check-circle"></i> Mark as Read
-                                                                                                                                    </button>
-                                                                                                                                    <button class="btn btn-sm btn-primary float-end me-2 reply-btn" data-sender-name="${message.sender.name}" data-message-id="${message.id}" data-id="${conversation.id}">
-                                                                                                                                        <i class="bi bi-arrow-repeat"></i> Reply
-                                                                                                                                    </button>
-                                                                                                                                </div>
-                                                                                                                                <hr>
-                                                                                                                            `).join('')}
+                                                                                                                                                                            <div class="message">
+                                                                                                                                                                                <h6 class="card-title text-secondary">
+                                                                                                                                                                                    <i class="bi bi-person-circle"></i> ${message.sender.name}
+                                                                                                                                                                                </h6>
+                                                                                                                                                                                <p class="card-text">${message.content}</p>
+                                                                                                                                                                                <small class="text-muted">
+                                                                                                                                                                                    <i class="bi bi-clock"></i> ${new Date(message.created_at).toLocaleString()}
+                                                                                                                                                                                </small>
+                                                                                                                                                                                <button hidden class="btn btn-sm btn-success float-end mark-read" data-id="${message.id}">
+                                                                                                                                                                                    <i class="bi bi-check-circle"></i> Mark as Read
+                                                                                                                                                                                </button>
+                                                                                                                                                                                <button class="btn btn-sm btn-primary float-end me-2 reply-btn" data-sender-name="${message.sender.name}" data-message-id="${message.id}" data-id="${conversation.id}">
+                                                                                                                                                                                    <i class="bi bi-arrow-repeat"></i> Reply
+                                                                                                                                                                                </button>
+                                                                                                                                                                            </div>
+                                                                                                                                                                            <hr>
+                                                                                                                                                                        `).join('')}
                             </div>
 
                             <div id="reply-section-${conversation.id}" class="mt-4 reply-section" style="display:none;">
-                                <textarea class="form-control mb-2" id="newMessage-${conversation.id}" placeholder="Write a Comment..."></textarea>                                
+                                <textarea class="form-control mb-2 summernote" id="newMessage-${conversation.id}" placeholder="Write a Comment..."></textarea>                                
                                 <button class="btn btn-sm btn-primary send-btn" data-id="${conversation.id}">
                                     <i class="bi bi-send"></i> Send
                                 </button>
@@ -469,9 +465,32 @@
                                     "sender-name");
                                 const replySection = document.getElementById(
                                     `reply-section-${conversationId}`);
-                                // append a button to create a new sms instead
-                                $(replySection).append(`<button class="btn btn-sm btn-danger new-sms" data-id="${conversationId}">
-                                    <i class="bi bi-x"></i>new</button>`);
+                                // append a button to create a new sms instead if is not there yet
+                                if ($("#new-sms").length === 0) {
+                                    $(replySection).append(`<button class="btn btn-sm btn-danger" id="new-sms" data-id="${conversationId}">
+                                    <i class="bi bi-arrow-repeat"></i>new</button>`);
+                                }
+                                // event listener for new sms instead button
+                                document.getElementById("new-sms").addEventListener("click",
+                                    function() {
+                                        const conversationId = this.getAttribute("data-id");
+                                        // alert(conversationId);
+                                        const replySectionInputField =
+                                            `#newMessage-${conversationId}`;
+                                        const replySection = document.getElementById(
+                                            `reply-section-${conversationId}`);
+
+                                        $(replySectionInputField).val("").focus();
+
+                                        // Remove aria-hidden before interacting with the input
+                                        if (replySection) {
+                                            replySection.removeAttribute("aria-hidden");
+                                        }
+
+                                        currentReplyMessageId = null;
+                                        currentReplyMessageSenderName = null;
+                                    });
+
                                 // append a reply name to the begining of the reply section
                                 const replySectionInputField = `#newMessage-${conversationId}`;
                                 $(replySectionInputField).val(
@@ -500,34 +519,9 @@
                                     sendNewMessage(conversationId, messageContent);
                                 }
                                 if (currentReplyMessageId !== null) {
-                                    sendReply(conversationId, parentMessageId,
+                                    sendReply(conversationId, currentReplyMessageId,
                                         messageContent);
                                 }
-                            });
-                        });
-
-
-                        // event listener for new sms instead button
-                        document.querySelectorAll(".new-sms").forEach(button => {
-                            button.addEventListener("click", function() {
-                                const conversationId = this.getAttribute("data-id");
-                                alert(conversationId);
-                                const replySectionInputField = `#newMessage-${conversationId}`;
-                                const replySection = document.getElementById(
-                                    `reply-section-${conversationId}`);
-
-                                $(replySectionInputField).val("").focus();
-
-                                // Remove aria-hidden before interacting with the input
-                                if (replySection) {
-                                    replySection.removeAttribute("aria-hidden");
-                                }
-
-                                currentReplyMessageId = null;
-                                currentReplyMessageSenderName = null;
-
-                                // Remove this button
-                                this.remove();
                             });
                         });
 

@@ -39,4 +39,9 @@ class Message extends Model
             ->withPivot('read_at')
             ->withTimestamps();
     }
+
+    // Relationship with Parent Message
+    public function parentMessage(){
+        return $this->belongsTo(Message::class, 'parent_message_id');
+    }
 }

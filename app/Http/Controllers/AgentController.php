@@ -182,10 +182,19 @@ class AgentController extends Controller
             // return  all conversations, their messages, and their users
             try {
                 // Fetch all conversations for the authenticated user
-                $conversations = Conversation::with(['messages' => function ($query) {
+                $conversations = Conversation::whereHas('creator', function ($query) {
+                    $query->where('role', Auth::user()->role);
+                })->with(['messages' => function ($query) {
                     $query->with(['sender', 'usersWhoRead']); // Only fetch unread messages
                 }, 'participants'])
-                    ->get();
+                    ->get()
+                    // Add all other conversations he is a participant in
+                    ->merge(Conversation::whereHas('participants', function ($query) {
+                        $query->where('user_id', Auth::user()->id);
+                    })->with(['messages' => function ($query) {
+                        $query->with(['sender', 'usersWhoRead']); // Only fetch unread messages
+                    }, 'participants'])
+                        ->get());
 
                 $users = User::where('role', Auth::user()->role)->get();
                 // add the super admin, id = 1
@@ -198,15 +207,28 @@ class AgentController extends Controller
             }
         }
         if ($request->action == 'delete') {
+
             try {
                 $message = Message::find($request->id);
-                // dd($message);
+
+                if (!$message) {
+                    return response()->json(['success' => false, 'message' => 'Message not found']);
+                }
+
                 Message::destroy($message->id);
-                return redirect()->back()->with('success', 'Message deleted successfully');
+
+                return response()->json([
+                    'success' => 'true',
+                    'message' => 'Message deleted successfully'
+                ]);
             } catch (\Exception $e) {
-                return redirect()->back()->with('error', $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
             }
         }
+
         if ($request->action == 'read') {
             try {
                 $message = Message::find($request->id);
@@ -272,7 +294,9 @@ class AgentController extends Controller
         if ($request->action == 'getMessages') {
             try {
                 // Fetch conversation messages with sender and users who read
-                $messages = Message::with(['sender', 'usersWhoRead'])
+                $messages = Message::with(['sender', 'usersWhoRead', 'parentMessage'=>function($query){
+                    $query->with('sender');
+                }])
                     ->where('conversation_id', $request->conversation_id)
                     ->get();
 
@@ -298,11 +322,6 @@ class AgentController extends Controller
                     'content' => 'required|string',
                 ]);
 
-                // return response()->json([
-                //     'success' => true,
-                //     'message' => $request->all()
-                // ]);
-
                 // create message
                 $message = Message::create([
                     'conversation_id' => $request->conversation_id,
@@ -315,6 +334,41 @@ class AgentController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => $message ? 'Message sent successfully' : 'Message not sent'
+                ]);
+            } catch (\Exception $e) {
+                // Return the conversations with their unread messages in a json response
+                return response()->json(['success' => false, 'error' => $e->getMessage()]);
+            }
+        }
+
+        // send reply
+        if ($request->action == 'sendReply') {
+            try {
+                // validate
+                $request->validate([
+                    'conversationId' => 'required|integer',
+                    'parentMessageId' => 'required|integer',
+                    'message' => 'required|string',
+                ]);
+
+                // return response()->json([
+                //     'success' => true,
+                //     'message' => $request->all()
+                // ]);
+
+                // create message
+                $message = Message::create([
+                    'conversation_id' => $request->conversationId,
+                    'sender_id' => Auth::user()->id,
+                    'content' => $request->message,
+                    'status' => 'unread',
+                    'parent_message_id' => $request->parentMessageId,
+                ]);
+
+                // return response
+                return response()->json([
+                    'success' => true,
+                    'message' => $message ? 'Message replied successfully' : 'Message not replied'
                 ]);
             } catch (\Exception $e) {
                 // Return the conversations with their unread messages in a json response

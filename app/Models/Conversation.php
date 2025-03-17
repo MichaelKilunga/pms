@@ -28,4 +28,9 @@ class Conversation extends Model
         return $this->belongsToMany(User::class, 'conversations_users', 'conversation_id', 'user_id')
             ->withTimestamps();
     }
+
+    // Relationship: One conversation has one creator
+    public function creator(){
+        return $this->belongsTo(User::class, 'creator_id');
+    }
 }
