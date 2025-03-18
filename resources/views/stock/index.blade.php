@@ -1,6 +1,7 @@
 @extends('stock.app')
 
 @section('content')
+@php $medicines = App\Models\Items::where('pharmacy_id', session('current_pharmacy_id'))->get(); @endphp
     <div class="container mt-4">
         {{-- @foreach ($medicines as $x)
             {{$x->id}}
@@ -17,8 +18,10 @@
             </div>
         </div>
 
+
+        {{-- there are deleted data here --}}
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover" id="Table">
+            <table class="table table-striped table-bordered table-hover" id="tableOfStocks">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -28,218 +31,19 @@
                         <th>Buying Price</th>
                         <th>Selling Price</th>
                         <th>Remain Quantity</th>
-                        {{-- <th>Low Stock</th> --}}
-                        {{-- <th>In Date</th> --}}
-                        {{-- <th>Expire Date</th> --}}
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach ($stocks as $stock)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $stock->batch_number }}</td>
-                            <td>{{ $stock->supplier }}</td>
-                            <td>{{ \Illuminate\Support\Str::words($stock->item->name, 3, '...') }}</td>
-                            <td>{{ $stock->buying_price }}</td>
-                            <td>{{ $stock->selling_price }}</td>
-                            {{-- <td>{{ $stock->quantity }}</td> --}}
-                            <td>{{ $stock->remain_Quantity }}</td>
-                            {{-- <td>{{ $stock->low_stock_percentage }}</td> --}}
-                            {{-- <td>{{ $stock->in_date }}</td> --}}
-                            {{-- <td>{{ $stock->expire_date }}</td> --}}
-                            <td>
-                                @if ($stock->expire_date < now())
-                                    <span class="text-danger">Expired</span>
-                                @endif
-
-                                @if (
-                                    !($stock->expire_date < now()) &&
-                                        !($stock->low_stock_percentage > $stock->remain_Quantity) &&
-                                        !($stock->remain_Quantity < 1))
-                                    <span class="text-success   "><i class="bi bi-check fs-3"></i>fine!</span>
-                                @endif
-
-                                @if ($stock->expire_date < now() && $stock->low_stock_percentage > $stock->remain_Quantity)
-                                    <span class="text-danger">,</span>
-                                @endif
-                                @if ($stock->remain_Quantity < 1)
-                                    <span class="text-danger">Out of Stock</span>
-                                @elseif ($stock->low_stock_percentage > $stock->remain_Quantity)
-                                    <span class="text-danger">Low stock threshold</span>
-                                @endif
-                            </td>
-                            <td>
-                                <div class="row">
-                                    <!-- View Stock Modal -->
-                                    <div class="col-3">
-                                        <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#viewStockModal{{ $stock->id }}">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                    </div>
-
-                                    <!-- Edit Stock Modal -->
-                                    <div class="col-3">
-                                        <a href="#" class="btn btn-success btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#editStockModal{{ $stock->id }}">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                    </div>
-
-                                    <!-- Delete Stock Form -->
-                                    <div class="col-3">
-                                        <form action="{{ route('stock.destroy', $stock->id) }}" method="POST"
-                                            style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            {{-- @if ($stock->quantity == $stock->remain_Quantity) --}}
-                                                <button type="submit"
-                                                    onclick="return confirm('Do you want to delete this stock?')"
-                                                    class="btn btn-danger btn-sm">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            {{-- @endif --}}
-                                        </form>
-                                    </div>
-
-                                    {{-- VIEW MODAL --}}
-                                    <div class="modal fade" id="viewStockModal{{ $stock->id }}" tabindex="-1"
-                                        aria-labelledby="viewStockModalLabel{{ $stock->id }}" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="viewStockModalLabel{{ $stock->id }}">
-                                                        Stock
-                                                        Details</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div><strong>Stock Name:</strong> {{ $stock->item->name }}</div>
-                                                    <div><strong>Stock Name:</strong> {{ $stock->batch_number }}</div>
-                                                    <div><strong>Stock Name:</strong> {{ $stock->supplier }}</div>
-                                                    <div><strong>Buying Price:</strong> {{ $stock->buying_price }}</div>
-                                                    <div><strong>Selling Price:</strong> {{ $stock->selling_price }}</div>
-                                                    <div><strong>Stoked Quantity:</strong> {{ $stock->quantity }}</div>
-                                                    <div><strong>Remain Quantity:</strong> {{ $stock->remain_Quantity }}
-                                                    </div>
-                                                    <div><strong>Low stock:</strong>
-                                                        {{ $stock->low_stock_percentage }}</div>
-                                                    <div><strong>In Date:</strong> {{ $stock->in_date }}</div>
-                                                    <div><strong>Expire Date:</strong> {{ $stock->expire_date }}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {{-- EDIT MODAL --}}
-                                    <div class="modal fade" id="editStockModal{{ $stock->id }}" tabindex="-1"
-                                        aria-labelledby="editStockModalLabel{{ $stock->id }}" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="editStockModalLabel{{ $stock->id }}">
-                                                        Edit
-                                                        Stock</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <form action="{{ route('stock.update', $stock->id) }}" method="POST">
-                                                        @csrf
-                                                        @method('PUT')
-                                                        <input type="text" class="form-control" name="id"
-                                                            value="{{ $stock->id }}" hidden>
-                                                        <div class="mb-3">
-                                                            <label for="item" class="form-label">Stock Name</label>
-                                                            <input type="text" class="form-control" name="item_name"
-                                                                value="{{ $stock->item->name }}" readonly>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="item" class="form-label">Batch Number</label>
-                                                            <input type="text" class="form-control" name="batch_number"
-                                                                value="{{ $stock->batch_number }}" readonly>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="item" class="form-label">Supplier Name</label>
-                                                            <input type="text" class="form-control" name="supplier"
-                                                                value="{{ $stock->supplier }}" required>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="buying_price" class="form-label">Buying
-                                                                Price</label>
-                                                            <input type="number" class="form-control"
-                                                                {{-- {{ $stock->quantity == $stock->remain_Quantity ? '' : 'readonly' }} --}}
-                                                                name="buying_price" value="{{ $stock->buying_price }}"
-                                                                required>
-                                                        </div>
-
-                                                        <div class="mb-3">
-                                                            <label for="selling_price" class="form-label">Selling
-                                                                Price</label>
-                                                            <input type="number" class="form-control"
-                                                                {{-- {{ $stock->quantity == $stock->remain_Quantity ? '' : 'readonly' }} --}}
-                                                                name="selling_price" value="{{ $stock->selling_price }}"
-                                                                required>
-                                                        </div>
-
-                                                        <div class="mb-3">
-                                                            <label for="quantity" class="form-label">Stocked
-                                                                Quantity</label>
-                                                            <input type="number" class="form-control"
-                                                                {{-- {{ $stock->quantity == $stock->remain_Quantity ? '' : 'readonly' }} --}}
-                                                                name="quantity" value="{{ $stock->quantity }}" required>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="quantity" class="form-label">Remain
-                                                                Quantity</label>
-                                                            <input type="number" class="form-control"
-                                                                name="remain_Quantity"
-                                                                value="{{ $stock->remain_Quantity }}" readonly required
-                                                                title="You cannot edit">
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="quantity" class="form-label">Low stock</label>
-                                                            <input type="number" class="form-control"
-                                                                name="low_stock_percentage"
-                                                                value="{{ $stock->low_stock_percentage }}" required>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="in_date" class="form-label">In Date</label>
-                                                            <input type="text" class="form-control" name="in_date"
-                                                                value="{{ $stock->created_at }}" readonly required>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="expire_date" class="form-label">Expire
-                                                                Date</label>
-                                                            <input type="date" class="form-control" name="expire_date"
-                                                                {{-- {{ $stock->quantity == $stock->remain_Quantity ? '' : 'readonly' }} --}}
-                                                                value="{{ $stock->expire_date }}" required>
-                                                        </div>
-                                                        <button type="submit" class="btn btn-success">Update
-                                                            Stock</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
             </table>
         </div>
+
+
     </div>
 
 
-
     {{-- <!-- Create Stock Modal --> --}}
-    <div class="modal fade" id="createStockModal" tabindex="-1" aria-labelledby="createStockModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="createStockModal" tabindex="-1" aria-labelledby="createStockModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header text-center bg-primary text-white">
@@ -564,6 +368,61 @@
             $('#batch_number').val(formattedDate); // Use .val() to set the value of the input
             $('#batch_number_').val(formattedDate); // Use .val() to set the value of the input
             $('#batch_number__').val(formattedDate); // Use .val() to set the value of the input
+        });
+
+
+        $(document).ready(function() {
+            $('#tableOfStocks').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: "{{ route('stock') }}", // Laravel route
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'batch_number',
+                        name: 'batch_number'
+                    },
+                    {
+                        data: 'supplier',
+                        name: 'supplier'
+                    },
+                    {
+                        data: 'medicine_name',
+                        name: 'medicine_name'
+                    },
+                    {
+                        data: 'buying_price',
+                        name: 'buying_price'
+                    },
+                    {
+                        data: 'selling_price',
+                        name: 'selling_price'
+                    },
+                    {
+                        data: 'remain_Quantity',
+                        name: 'remain_Quantity'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
+                order: [
+                    [1, 'asc']
+                ] // Default sorting by Batch Number
+            });
         });
     </script>
 @endsection

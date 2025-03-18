@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
+use Yajra\DataTables\Facades\DataTables;
 
 
 
@@ -21,17 +22,193 @@ class StockController extends Controller
     /**
      * Display a listing of the stock.
      */
-    public function index()
+    // public function index(Request $request)
+    // {
+
+    //     $query = Stock::with('staff', 'item')->where('pharmacy_id', session('current_pharmacy_id'));
+    //     $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
+
+    //     if ($request->has('search')) {
+    //         $query->whereHas('item', function ($q) use ($request) {
+    //             $q->where('name', 'like', '%' . $request->search . '%');
+    //         });
+    //     }
+
+    //     $stocks = $query->paginate(50);
+    //     // $stocks = $query->get();
+
+    //     // if ($request->has('export')) {
+    //     //     $stocks = $query->get();
+    //     //     return Excel::download(new StockExport($stocks), 'stock.xlsx');
+    //     // }
+
+    //     if ($request->has('search')) {
+    //         // return json response
+    //         return response()->json([
+    //             'stocks' => $stocks,
+    //             'medicines' => $medicines,
+    //         ]);
+    //     }
+    //     return view('stock.index', compact('stocks', 'medicines'));
+    // }
+
+    public function index(Request $request)
     {
-        // Get stocks for pharmacies owned by the authenticated user
-        // $pharmacies = Pharmacy::where('owner_id', auth::id())->pluck('id');
-        $stocks = Stock::with('staff', 'item')->where('pharmacy_id', session('current_pharmacy_id'))->get();
         $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
+        if ($request->ajax()) {
+            $stocks = Stock::with('item', 'staff') // Load relationships
+                ->where('pharmacy_id', session('current_pharmacy_id'));
+                // ->orderBy('remain_Quantity', 'desc');
+                // ->where('remain_Quantity','>',0);
 
-        // $medicines = Medicine::where('name', '!=', 'name')->get();
-        // dd($medicines);
+            return DataTables::of($stocks)
+                ->addIndexColumn() // Adds auto-incrementing column
+                ->editColumn('medicine_name', function ($stock) {
+                    return \Illuminate\Support\Str::words($stock->item->name, 3, '...');
+                })
+                ->editColumn('status', function ($stock) {
+                    if ($stock->expire_date < now()) {
+                        return '<span class="text-danger">Expired</span>';
+                    }
+                    if ($stock->remain_Quantity < 1) {
+                        return '<span class="text-danger">Out of Stock</span>';
+                    }
+                    if ($stock->low_stock_percentage > $stock->remain_Quantity) {
+                        return '<span class="text-danger">Low stock threshold</span>';
+                    }
+                    return '<span class="text-success"><i class="bi bi-check fs-3"></i>Fine</span>';
+                })
+                ->addColumn('actions', function ($stock) {
+                    return '
+                        <div class="d-flex">
+                            <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#viewStockModal' . $stock->id . '">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-success btn-sm ms-1" data-bs-toggle="modal"
+                                data-bs-target="#editStockModal' . $stock->id . '">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form action="' . route('stock.destroy', $stock->id) . '" method="POST"
+                                style="display:inline;">
+                                ' . csrf_field() . '
+                                ' . method_field('DELETE') . '
+                                <button type="submit" onclick="return confirm(\'Do you want to delete this stock?\')"
+                                    class="btn btn-danger btn-sm ms-1">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+    
+                        <!-- View Stock Modal -->
+                        <div class="modal fade" id="viewStockModal' . $stock->id . '" tabindex="-1"
+                            aria-labelledby="viewStockModalLabel' . $stock->id . '" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Stock Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div><strong>Stock Name:</strong> ' . ($stock->item->name ?? 'N/A') . '</div>
+                                        <div><strong>Batch Number:</strong> ' . $stock->batch_number . '</div>
+                                        <div><strong>Supplier:</strong> ' . $stock->supplier . '</div>
+                                        <div><strong>Buying Price:</strong> ' . $stock->buying_price . '</div>
+                                        <div><strong>Selling Price:</strong> ' . $stock->selling_price . '</div>
+                                        <div><strong>Stocked Quantity:</strong> ' . $stock->quantity . '</div>
+                                        <div><strong>Remain Quantity:</strong> ' . $stock->remain_Quantity . '</div>
+                                        <div><strong>Low stock:</strong> ' . $stock->low_stock_percentage . '</div>
+                                        <div><strong>In Date:</strong> ' . $stock->in_date . '</div>
+                                        <div><strong>Expire Date:</strong> ' . $stock->expire_date . '</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <!-- Edit Stock Modal -->
+                        <div class="modal fade" id="editStockModal' . $stock->id . '" tabindex="-1"
+                            aria-labelledby="editStockModalLabel' . $stock->id . '" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Edit Stock</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="' . route('stock.update', $stock->id) . '" method="POST">
+                                            ' . csrf_field() . '
+                                            ' . method_field('PUT') . '
+                                            <input type="hidden" name="id" value="' . $stock->id . '">
+                                            <div class="mb-3">
+                                                <label for="item" class="form-label">Stock Name</label>
+                                                <input type="text" class="form-control" name="item_name"
+                                                    value="' . ($stock->item->name ?? '') . '" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="batch_number" class="form-label">Batch Number</label>
+                                                <input type="text" class="form-control" name="batch_number"
+                                                    value="' . $stock->batch_number . '" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="supplier" class="form-label">Supplier Name</label>
+                                                <input type="text" class="form-control" name="supplier"
+                                                    value="' . $stock->supplier . '" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="buying_price" class="form-label">Buying Price</label>
+                                                <input type="number" class="form-control" name="buying_price"
+                                                    value="' . $stock->buying_price . '" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="selling_price" class="form-label">Selling Price</label>
+                                                <input type="number" class="form-control" name="selling_price"
+                                                    value="' . $stock->selling_price . '" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="quantity" class="form-label">Stocked Quantity</label>
+                                                <input type="number" class="form-control" name="quantity"
+                                                    value="' . $stock->quantity . '" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="remain_Quantity" class="form-label">Remain Quantity</label>
+                                                <input type="number" class="form-control" name="remain_Quantity"
+                                                    value="' . $stock->remain_Quantity . '" readonly required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="low_stock_percentage" class="form-label">Low Stock</label>
+                                                <input type="number" class="form-control" name="low_stock_percentage"
+                                                    value="' . $stock->low_stock_percentage . '" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="expire_date" class="form-label">Expire Date</label>
+                                                <input type="date" class="form-control" name="expire_date"
+                                                    value="' . $stock->expire_date . '" required>
+                                            </div>
+                                            <div class="mb-3 hidden">
+                                                <label for="in_date" class="form-label">In Date</label>
+                                                <input type="text" class="form-control" name="in_date"
+                                                    value="' . $stock->in_date . '" readonly required>
+                                            </div>
+                                            <button type="submit" class="btn btn-success">Update Stock</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ';
+                })
+                ->rawColumns(['status', 'actions']) // Allow HTML rendering
+                ->filterColumn('medicine_name', function ($query, $keyword) {
+                    $query->whereHas('item', function ($q) use ($keyword) {
+                        $q->where('name', 'LIKE', "%{$keyword}%");
+                    });
+                })
+                ->make(true);
+        }
 
-        return view('stock.index', compact('stocks', 'medicines'));
+        return view('stock.index');
     }
 
     /**
@@ -269,7 +446,7 @@ class StockController extends Controller
                         'supplier' => 'required|string|max:255',
                     ]);
                 } catch (Exception $e) {
-                    throw new Exception('Validate File input\'s error: '.$e->getMessage());
+                    throw new Exception('Validate File input\'s error: ' . $e->getMessage());
                 }
 
                 // Check if the item exists
@@ -302,7 +479,7 @@ class StockController extends Controller
                     throw new Exception('Create Stock Error: ' . $e->getMessage());
                 }
             }
-            
+
             return redirect()->route('stock')->with('success', 'Medicines and stock imported successfully!');
         } catch (Exception $e) {
 

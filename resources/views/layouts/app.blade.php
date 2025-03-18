@@ -38,6 +38,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    {{-- select2 --}}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
     <!-- Styles -->
     {{-- @livewireStyles --}}
     <style>
@@ -184,16 +187,18 @@
                         info: true // Enable information display
                     });
 
-                $(".onReport").chosen({
+                $(".onReport").select2({
                     width: "100%",
                     no_results_text: "No matches found!",
+                    allowClear: true
                 });
                 @if (!session('success') && !session('error') && !session('info'))
                     // $(".chosen").chosen({
-                    $("select").not("#conversationRecipients").chosen({
+                    $("select").not("#conversationRecipients").select2({
                         // $("select").chosen({
                         width: "100%",
                         no_results_text: "No matches found!",
+                        allowClear: true
                     });
                 @endif
             });
@@ -399,6 +404,10 @@
 
     <!-- Bootstrap Select JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.14/js/bootstrap-select.min.js"></script>
+
+    {{-- Select2 JS --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
 
 </body>
 
