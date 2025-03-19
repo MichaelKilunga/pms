@@ -32,4 +32,10 @@ class Items extends Model
     {
         return $this->hasMany(Sales::class);
     }
+
+    // Get the latest stock of this item added to the stock table
+    public function lastStock()
+    {
+        return $this->hasOne(Stock::class, 'item_id')->latestOfMany('created_at');
+    }
 }

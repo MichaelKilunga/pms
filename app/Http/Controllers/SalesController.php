@@ -63,7 +63,7 @@ class SalesController extends BaseController
         } else {
             $usePrinter = false;
         }
-        $medicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->with('item')->get();
+        $medicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity','>',0)->with('item')->get();
         // dd($medicines);
 
         return view('sales.index', compact('sales', 'medicines', 'usePrinter'));

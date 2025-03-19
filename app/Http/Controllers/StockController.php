@@ -52,9 +52,14 @@ class StockController extends Controller
     //     return view('stock.index', compact('stocks', 'medicines'));
     // }
 
+    // public function debug(){
+    //    $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->with('lastStock')->first();
+    //    dd($medicines);
+    // }
+
     public function index(Request $request)
     {
-        $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
+        // $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
         if ($request->ajax()) {
             $stocks = Stock::with('item', 'staff') // Load relationships
                 ->where('pharmacy_id', session('current_pharmacy_id'));
