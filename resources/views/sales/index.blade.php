@@ -233,8 +233,8 @@
                                 <input type="text" name="stock_id[]" hidden required>
                                 <div class="col-md-4">
                                     <label for="medicines" class="form-label">Medicine</label>
-                                    <select name="item_id[]" class="form-select chosen" required>
-                                    <option selected disabled value="">Select medicine</option>
+                                    <select name="item_id[]" class="form-select salesChosen" required>
+                                        <option selected value=""></option>
                                         @foreach ($medicines as $medicine)
                                             <option value="{{ $medicine->id }}">
                                                 {{ $medicine->item->name }} <br><strong
@@ -340,26 +340,32 @@
     <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            initializeChosen();
-
             // Initialize Chosen for dynamically added rows
             function initializeChosen() {
-                $(".chosen").each(function() {
-                    let $select = $(this);
-                    let $modal = $select.closest(
-                        ".modal"); // Check if inside a modal
-                    $select.select2({
-                        width: "100%",
-                        no_results_text: "No matches found!",
-                        allowClear: true,
-                        dropdownParent: $modal.length ? $modal : $(
-                            "body") // Use modal if inside one
+                $(document).ready(function() {
+                    $(".salesChosen").each(function() {
+                        let $select = $(this);
+                        let $modal = $select.closest(".modal"); // Check if inside a modal
+
+                        $select.select2({
+                            width: "100%",
+                            placeholder: "Select an option", // Placeholder for better UX
+                            allowClear: true, // Allow deselection
+                            language: {
+                                noResults: function() {
+                                    return "No matches found!";
+                                }
+                            },
+                            dropdownParent: $modal.length ? $modal : $(
+                                "body") // Use modal if inside one
+                        });
+                    }).on("select2:select select2:unselect", function() {
+                        const row = $(this).closest(".sale-entry")[0];
+                        tellPrice(row);
+                        calculateAmount(row);
                     });
-                }).on("change", function() {
-                    const row = $(this).closest(".sale-entry")[0];
-                    tellPrice(row);
-                    calculateAmount(row);
                 });
+
             }
 
             // Reusable Functions
@@ -428,8 +434,8 @@
                 newRow.innerHTML = `
                             <input type="text" name="stock_id[]" hidden required>
                             <div class="col-md-4">
-                                <select name="item_id[]" data-row-id="item_id[]" class="form-select chosen" required>
-                                    <option selected disabled value="">Select medicine</option>
+                                <select name="item_id[]" data-row-id="item_id[]" class="form-select salesChosen" required>
+                                    <option selected disabled value="">Select Item</option>
                                     @foreach ($medicines as $medicine)
                                         <option value="{{ $medicine->id }}">
                                                 {{ $medicine->item->name }} <br><strong class="text-danger">Exp:({{ \Carbon\Carbon::parse($medicine->expire_date)->format('m/Y') }})</strong>
