@@ -72,7 +72,7 @@
                             <div class="row mb-3 stock-entry align-items-end gx-2 gy-2">
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label for="item_id" class="form-label fw-bold">Medicine Name</label>
-                                    <select name="item_id[]" class="form-select chosen shadow-sm" required>
+                                    <select name="item_id[]" class="form-select medicineSelect chosen shadow-sm" required>
                                         <option selected value="">Select medicine...</option>
                                         @foreach ($medicines as $medicine)
                                             <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
@@ -81,15 +81,15 @@
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Buying Price</label>
-                                    <input type="number" class="form-control shadow-sm" name="buying_price[]" required>
+                                    <input type="number" min="1" class="form-control shadow-sm" name="buying_price[]" required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Selling Price</label>
-                                    <input type="number" class="form-control shadow-sm" name="selling_price[]" required>
+                                    <input type="number" min="1" class="form-control shadow-sm" name="selling_price[]" required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Quantity</label>
-                                    <input type="number" class="form-control shadow-sm" name="quantity[]" required>
+                                    <input type="number" min="1" class="form-control shadow-sm" name="quantity[]" required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Low stock</label>
@@ -244,101 +244,94 @@
 
     <script>
         // STOCKS ONLY
-        document.getElementById('addStockBtn').addEventListener('click', function() {
-            const stockFields = document.getElementById('stockFields');
-
-            const newStockEntry = document.createElement('div');
-            newStockEntry.classList.add('row', 'mb-3', 'stock-entry', 'align-items-end', 'gx-2', 'gy-2');
-            newStockEntry.innerHTML = `
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                <label class="form-label fw-bold">Medicine Name</label>
-                <select name="item_id[]" class="form-select  shadow-sm chosen" required>
-                    <option selected value="">Select medicine...</option>
-                    @foreach ($medicines as $medicine)
-                        <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                <label class="form-label fw-bold">Buying Price</label>
-                <input type="number" class="form-control  shadow-sm" name="buying_price[]" required>
-            </div>
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                <label class="form-label fw-bold">Selling Price</label>
-                <input type="number" class="form-control  shadow-sm" name="selling_price[]" required>
-            </div>
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                <label class="form-label fw-bold">Quantity</label>
-                <input type="number" class="form-control  shadow-sm" name="quantity[]" required>
-            </div>
-           <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                 <label class="form-label fw-bold">Low stock</label>
-                 <input type="number" class="form-control  shadow-sm" name="low_stock_percentage[]" min="1" required>
-            </div>
-           <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
-                <label class="form-label fw-bold">In Date</label>
-              <input type="text" class="form-control  shadow-sm" name="in_date[]" value="{{ now() }}"
-              required>
-            </div>
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                <label class="form-label fw-bold">Expire Date</label>
-                <input type="date" class="form-control  shadow-sm" name="expire_date[]" required>
-            </div>
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2 d-flex justify-content-center">
-                <button type="button" class="btn btn-danger btn-sm  shadow-sm remove-stock-entry">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-            `;
-
-            stockFields.appendChild(newStockEntry);
-
-            $(".chosen").each(function() {
-                let $select = $(this);
-                let $modal = $select.closest(
-                    ".modal"); // Check if inside a modal
-                $select.select2({
-                    width: "100%",
-                    no_results_text: "No matches found!",
-                    allowClear: true,
-                    dropdownParent: $modal.length ? $modal : $(
-                        "body") // Use modal if inside one
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Chosen for dynamically added rows
+            function initializeChosen() {
+                $(".chosen").each(function() {
+                    let $select = $(this);
+                    let $modal = $select.closest(
+                        ".modal"); // Check if inside a modal
+                    $select.select2({
+                        width: "100%",
+                        no_results_text: "No matches found!",
+                        allowClear: true,
+                        dropdownParent: $modal.length ? $modal : $(
+                            "body") // Use modal if inside one
+                    });
+                }).on("change", function() {
+                    const row = $(this).closest(".stock-entry")[0];
+                    setStockFieldsData(row);
                 });
+            }
+
+            // function to pass the buying_price, selling_price, and low_stock_percentage quantity to the input fields
+            function setStockFieldsData(row) {
+                const medicines = @json($medicines);
+                const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
+                // Find the selected medicine
+                const selectedMedicine = medicines.find(medicine => medicine.id == selectedMedicineId);
+                if (selectedMedicine.last_stock) {
+                    // set the buying_price, selling_price, and low_stock_percentage field's value
+                    row.querySelector('[name="buying_price[]"]').value = selectedMedicine.last_stock.buying_price;
+                    row.querySelector('[name="selling_price[]"]').value = selectedMedicine.last_stock.selling_price;
+                    row.querySelector('[name="low_stock_percentage[]"]').value = selectedMedicine.last_stock
+                        .low_stock_percentage;
+                }else{
+                    // clear the buying_price, selling_price, and low_stock_percentage field's value
+                    row.querySelector('[name="buying_price[]"]').value = '';
+                    row.querySelector('[name="selling_price[]"]').value = '';
+                    row.querySelector('[name="low_stock_percentage[]"]').value = '';
+                }
+            }
+
+            initializeChosen();
+
+            // listen for changes in the .medicineSelect field to call for a function to set the stock fields data
+            document.querySelectorAll('.stock-entry').forEach(row => {
+                let itemSelect = row.querySelector('[name="item_id[]"]');
+                if (itemSelect) {
+                    itemSelect.addEventListener('change', function() {
+                        setStockFieldsData(row);
+                    });
+                }
             });
 
-            newStockEntry.querySelector('.remove-stock-entry').addEventListener('click', function() {
-                newStockEntry.remove();
-            });
-        });
 
-        //MEDICINES + STOCKS
-        document.getElementById('addMedicineStockBtn').addEventListener('click', function() {
-            const medicineStockFields = document.getElementById('medicineStockFields');
+            // Add a new stock entry when the button is clicked
+            document.getElementById('addStockBtn').addEventListener('click', function() {
 
-            const newStockEntry = document.createElement('div');
-            newStockEntry.classList.add('row', 'mb-3', 'stock-entry', 'align-items-end', 'gx-2', 'gy-2');
-            newStockEntry.innerHTML = `
+                const stockFields = document.getElementById('stockFields');
+
+                const newStockEntry = document.createElement('div');
+                newStockEntry.classList.add('row', 'mb-3', 'stock-entry', 'align-items-end', 'gx-2',
+                    'gy-2');
+                newStockEntry.innerHTML = `
                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                     <label class="form-label fw-bold">Medicine Name</label>
-                    <input type="text" class="form-control shadow-sm" name="item_name[]" required>
+                    <select name="item_id[]" class="form-select medicineSelect  shadow-sm chosen" required>
+                        <option selected value="">Select medicine...</option>
+                        @foreach ($medicines as $medicine)
+                            <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                     <label class="form-label fw-bold">Buying Price</label>
-                    <input type="number" class="form-control  shadow-sm" name="buying_price[]" required>
+                    <input type="number" min="1" class="form-control  shadow-sm" name="buying_price[]" required>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                     <label class="form-label fw-bold">Selling Price</label>
-                    <input type="number" class="form-control  shadow-sm" name="selling_price[]" required>
+                    <input type="number" min="1" class="form-control  shadow-sm" name="selling_price[]" required>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                     <label class="form-label fw-bold">Quantity</label>
-                    <input type="number" class="form-control  shadow-sm" name="quantity[]" required>
+                    <input type="number" min="1" class="form-control  shadow-sm" name="quantity[]" required>
                 </div>
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                     <label class="form-label fw-bold">Low stock</label>
-                    <input type="number" class="form-control  shadow-sm" name="low_stock_percentage[]" min="1" required>
+                    <input type="number" min="1" class="form-control  shadow-sm" name="low_stock_percentage[]" min="1" required>
                 </div>
-            <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
+                <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
                     <label class="form-label fw-bold">In Date</label>
                 <input type="text" class="form-control  shadow-sm" name="in_date[]" value="{{ now() }}"
                 required>
@@ -352,7 +345,67 @@
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
-            `;
+                `;
+
+                
+                stockFields.appendChild(newStockEntry);
+
+                initializeChosen();
+
+                newStockEntry.querySelector('.remove-stock-entry').addEventListener('click', function() {
+                    newStockEntry.remove();
+                });
+
+                // Add event listener to the new stock entry
+                newStockEntry.querySelector('[name="item_id[]"]').addEventListener('change', function() {
+                    setStockFieldsData(newStockEntry);
+                });
+            });
+        });
+
+        //MEDICINES + STOCKS
+        document.getElementById('addMedicineStockBtn').addEventListener('click', function() {
+            const medicineStockFields = document.getElementById('medicineStockFields');
+
+            const newStockEntry = document.createElement('div');
+            newStockEntry.classList.add('row', 'mb-3', 'stock-entry', 'align-items-end', 'gx-2',
+                'gy-2');
+            newStockEntry.innerHTML = `
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                            <label class="form-label fw-bold">Medicine Name</label>
+                            <input type="text" class="form-control shadow-sm" name="item_name[]" required>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                            <label class="form-label fw-bold">Buying Price</label>
+                            <input type="number" class="form-control  shadow-sm" name="buying_price[]" required>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                            <label class="form-label fw-bold">Selling Price</label>
+                            <input type="number" class="form-control  shadow-sm" name="selling_price[]" required>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                            <label class="form-label fw-bold">Quantity</label>
+                            <input type="number" class="form-control  shadow-sm" name="quantity[]" required>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                            <label class="form-label fw-bold">Low stock</label>
+                            <input type="number" class="form-control  shadow-sm" name="low_stock_percentage[]" min="1" required>
+                        </div>
+                        <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
+                            <label class="form-label fw-bold">In Date</label>
+                        <input type="text" class="form-control  shadow-sm" name="in_date[]" value="{{ now() }}"
+                        required>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                            <label class="form-label fw-bold">Expire Date</label>
+                            <input type="date" class="form-control  shadow-sm" name="expire_date[]" required>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-2 d-flex justify-content-center">
+                            <button type="button" class="btn btn-danger btn-sm  shadow-sm remove-stock-entry">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                `;
 
             medicineStockFields.appendChild(newStockEntry);
 
@@ -387,11 +440,7 @@
             $('#batch_number__').val(formattedDate); // Use .val() to set the value of the input
         });
 
-
         $(document).ready(function() {
-            // log the laravel data  $medicine = {{ $medicine }}; as js json in console
-            // console.log("{{ $medicine }}");
-
             $('#tableOfStocks').DataTable({
                 processing: true,
                 serverSide: true,
