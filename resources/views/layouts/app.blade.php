@@ -194,11 +194,17 @@
                 });
                 @if (!session('success') && !session('error') && !session('info'))
                     // $(".chosen").chosen({
-                    $("select").not("#conversationRecipients").select2({
-                        // $("select").chosen({
-                        width: "100%",
-                        no_results_text: "No matches found!",
-                        allowClear: true
+                    $("select").not("#conversationRecipients").each(function() {
+                        let $select = $(this);
+                        let $modal = $select.closest(".modal"); // Check if inside a modal
+
+                        $select.select2({
+                            width: "100%",
+                            no_results_text: "No matches found!",
+                            allowClear: true,
+                            dropdownParent: $modal.length ? $modal : $(
+                                "body") // Use modal if inside one
+                        });
                     });
                 @endif
             });
