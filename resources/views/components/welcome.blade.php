@@ -415,24 +415,28 @@
                     <div class="form-floating mb-2">
                         <input type="text" class="form-control" id="floatingName" name="name"
                             placeholder="Amoxicillin" required>
-                        <label class="form-label" for="floatingName">Medicine Name<span class="text-danger">*</span></label>
+                        <label class="form-label" for="floatingName">Medicine Name<span
+                                class="text-danger">*</span></label>
                     </div>
                     <div class="row mb-2">
                         <div class="col-md-6 form-floating">
                             <input type="number" min="1" class="form-control" id="floatingQuantity"
                                 name="quantity" placeholder="50" required>
-                            <label class="form-label" for="floatingQuantity">Quantity<span class="text-danger">*</span></label>
+                            <label class="form-label" for="floatingQuantity">Quantity<span
+                                    class="text-danger">*</span></label>
                         </div>
                         <div class="col-md-6 form-floating">
                             <input type="number" min="1" class="form-control" id="floatingUnitPrice"
                                 name="unit_price" placeholder="200" required>
-                            <label class="form-label" for="floatingUnitPrice">Unit Price<span class="text-danger">*</span></label>
+                            <label class="form-label" for="floatingUnitPrice">Unit Price<span
+                                    class="text-danger">*</span></label>
                         </div>
                     </div>
                     <div class="form-floating mb-2">
                         <input type="text" class="form-control" id="floatingDescription" name="description"
                             placeholder="Sold for headache">
-                        <label class="form-label" for="floatingDescription">Description <span class="text-success">(optional)</span></label>
+                        <label class="form-label" for="floatingDescription">Description <span
+                                class="text-success">(optional)</span></label>
                     </div>
 
                     <input readonly hidden type="text" name="pharmacy_id" placeholder="Pharmacy ID"
@@ -603,14 +607,28 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize Chosen for dynamically added rows
         function initializeChosen() {
-            $(".chosen").chosen({
-                width: "100%",
-                no_results_text: "No matches found!",
-                allow_single_deselect: true,
-            }).on("change", function() {
-                const row = $(this).closest(".sale-entry")[0];
-                tellPrice(row);
-                calculateAmount(row);
+            $(document).ready(function() {
+                $(".chosen").each(function() {
+                    let $select = $(this);
+                    let $modal = $select.closest(".modal"); // Check if inside a modal
+
+                    $select.select2({
+                        width: "100%",
+                        placeholder: "Select an option", // Placeholder for better UX
+                        focus: true,
+                        language: {
+                            noResults: function() {
+                                return "No matches found!";
+                            }
+                        },
+                        dropdownParent: $modal.length ? $modal : $(
+                            "body") // Use modal if inside one
+                    });
+                }).on("select2:select select2:unselect", function() {
+                    const row = $(this).closest(".sale-entry")[0];
+                    tellPrice(row);
+                    calculateAmount(row);
+                });
             });
         }
 
