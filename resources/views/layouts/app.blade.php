@@ -203,8 +203,6 @@
                     $("select").not("#conversationRecipients").each(function() {
                         let $select = $(this);
                         let $modal = $select.closest(".modal"); // Check if inside a modal
-                        // check iif the select is not with class salesChosen
-                        // if (!$select.hasClass("salesChosen")) {
                         //     $select.select2({
                         //         width: "100%",
                         //         no_results_text: "No matches found!",
@@ -212,7 +210,6 @@
                         //         dropdownParent: $modal.length ? $modal : $(
                         //             "body") // Use modal if inside one
                         //     });
-                        // }
                     });
                 @endif
             });
