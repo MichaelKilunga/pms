@@ -14,7 +14,13 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'], 'build')
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js'], 'build') --}}
+    {{-- <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}"> --}}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ asset('assets/js/bootstrap.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Styles -->
