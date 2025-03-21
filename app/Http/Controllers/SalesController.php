@@ -19,6 +19,7 @@ use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\Printer;
+use Yajra\DataTables\Facades\DataTables;
 
 use Illuminate\Routing\Controller as BaseController;
 
@@ -48,25 +49,146 @@ class SalesController extends BaseController
     /**
      * Display a listing of sales.
      */
-    public function index()
+    public function index(Request $request)
     {
         // Get sales data for the pharmacies owned by the authenticated user
 
-        $sales = Sales::with(['item','salesReturn'])->where('pharmacy_id', session('current_pharmacy_id'))->orderBy('date', 'desc')
-            ->get();
+        // $sales = Sales::with(['item','salesReturn'])->where('pharmacy_id', session('current_pharmacy_id'))->orderBy('date', 'desc')
+        //     ->get();
 
-            // dd($sales);
+        if ($request->ajax()) {
+            $sales = Sales::with(['item', 'salesReturn'])
+                ->where('sales.pharmacy_id', session('current_pharmacy_id'))
+                ->orderBy('date', 'desc');
 
-        $printerEnabled = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
-        if ($printerEnabled) {
-            $usePrinter = $printerEnabled->use_printer;
-        } else {
-            $usePrinter = false;
+            return DataTables::of($sales)
+                ->addIndexColumn() // Adds an index column
+                ->addColumn('sales_name', function ($sale) {
+                    return $sale->item->name;
+                })
+                ->addColumn('price', function ($sale) {
+                    return number_format($sale->total_price / max($sale->quantity, 1), 2);
+                })
+                ->addColumn('quantity', function ($sale) {
+                    return $sale->quantity;
+                })
+                ->addColumn('total_price', function ($sale) {
+                    return number_format($sale->total_price, 2);
+                })
+                ->addColumn('date', function ($sale) {
+                    return $sale->date;
+                })
+                ->addColumn('actions', function ($sale) {
+                    return '
+                        <div class="d-flex justify-content-between">
+                            <!-- View Modal -->
+                            <a href="#" class="btn btn-primary  btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#viewSaleModal'. $sale->id .'">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                
+                            <!-- View Sale Modal -->
+                            <div class="modal fade" id="viewSaleModal'. $sale->id .'" tabindex="-1"
+                                aria-labelledby="viewSaleModalLabel'. $sale->id .'" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="viewSaleModalLabel'. $sale->id .'">Sale Details</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div><strong>Sales Name:</strong> '. htmlspecialchars($sale->item->name, ENT_QUOTES, 'UTF-8') .'</div>
+                                            <div><strong>Price:</strong> '. ($sale->quantity > 0 ? number_format($sale->total_price / $sale->quantity, 2) : 'N/A') .'</div>
+                                            <div><strong>Quantity:</strong> '. $sale->quantity .'</div>
+                                            <div><strong>Amount:</strong> '. number_format($sale->total_price, 2) .'</div>
+                                            <div><strong>Date:</strong> '. $sale->date .'</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <!-- Sales Return Link (Only if salesReturn is NULL) -->
+                            '. ($sale->salesReturn == null ? '
+                                <a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#salesReturnModal'. $sale->id .'">
+                                    <i class="bi bi-arrow-return-left"></i>
+                                </a>
+                            ' : '') .'
+                
+                            <!-- Sales Return Modal -->
+                            <div class="modal fade" id="salesReturnModal'. $sale->id .'" tabindex="-1"
+                                aria-labelledby="salesReturnModalLabel'. $sale->id .'" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="salesReturnModalLabel'. $sale->id .'">Return Sales for 
+                                                <span class="text-primary">'. htmlspecialchars($sale->item->name, ENT_QUOTES, 'UTF-8') .'</span>
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                
+                                        <form id="salesReturnForm" method="POST" action="'. route('salesReturns.store') .'">
+                                            '. csrf_field() .'
+                                            <div class="modal-body">
+                                                <input type="hidden" name="sale_id" value="'. $sale->id .'">
+                
+                                                <div class="mb-3">
+                                                    <label for="quantity" class="form-label">Quantity to Return</label>
+                                                    <input type="number" name="quantity" class="form-control" readonly min="1"
+                                                        max="'. $sale->quantity .'" value="'. $sale->quantity .'"
+                                                        required>
+                                                </div>
+                
+                                                <div class="mb-3">
+                                                    <label for="reason" class="form-label">Reason for Return</label>
+                                                    <textarea name="reason" class="form-control" rows="3"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-primary">Submit Return</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <!-- Edit Button (Hidden) -->
+                            <a href="#" class="btn btn-success btn-sm" hidden data-bs-toggle="modal"
+                                data-bs-target="#editSaleModal'. $sale->id .'">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                
+                            <!-- Delete Form (Hidden) -->
+                            <form action="'. route('sales.destroy', $sale->id) .'" method="POST" style="display:inline;">
+                                '. csrf_field() .'
+                                '. method_field('DELETE') .'
+                                <button type="submit" hidden class="btn btn-sm btn-danger"
+                                    onclick="return confirm(\'Are you sure to delete this sale?\')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    ';
+                })                
+                ->rawColumns(['actions'])
+                ->make(true);
         }
-        $medicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity','>',0)->with('item')->get();
-        // dd($medicines);
 
-        return view('sales.index', compact('sales', 'medicines', 'usePrinter'));
+        // dd($sales);
+
+        // $printerEnabled = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
+        // if ($printerEnabled) {
+        //     $usePrinter = $printerEnabled->use_printer;
+        // } else {
+        //     $usePrinter = false;
+        // }
+        // $medicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->with('item')->get();
+        // // dd($medicines);
+
+        // return view('sales.index', compact('sales', 'medicines', 'usePrinter'));
+        return view('sales.index');
+
     }
 
     /**

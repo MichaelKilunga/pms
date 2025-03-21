@@ -1,6 +1,7 @@
 @extends('sales.app')
 
 @section('content')
+    @php $medicines = App\Models\Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->with('item')->get(); @endphp
     <div class="container mt-4">
         <!-- Header -->
         <div class="d-flex justify-content-between mb-3">
@@ -31,7 +32,7 @@
         <hr class="mb-2">
 
         <!-- Sales Table -->
-        <div class="table-responsive shadow-sm rounded-3">
+        {{-- <div class="table-responsive shadow-sm rounded-3">
             <table class="table table-striped table-hover table-bordered align-middle" id="Table">
                 <thead class="table-primary">
                     <tr>
@@ -39,8 +40,7 @@
                         <th>Sales Name</th>
                         <th>Price</th>
                         <th>Quantity</th>
-                        {{-- <th>Stock Id</th> --}}
-                        <th>Total Price</th> <!-- New column for calculated amount -->
+                        <th>Total Price</th>
                         <th>Date</th>
                         <th>Actions</th>
                     </tr>
@@ -52,9 +52,7 @@
                             <td>{{ $sale->item->name }}</td>
                             <td>{{ $sale->total_price / $sale->quantity }}</td>
                             <td>{{ $sale->quantity }}</td>
-                            {{-- <td>{{ $sale->stock_id }}</td> --}}
                             <td class="amount-cell">{{ $sale->total_price }}</td>
-                            <!-- Display calculated amount -->
                             <td>{{ $sale->date }}</td>
                             <td>
                                 <!-- View Modal -->
@@ -96,7 +94,7 @@
                                     </a>
                                 @endif
 
-                                {{-- sales return modal --}}
+                                <!-- sales return modal -->
                                 <div class="modal fade" id="salesReturnModal{{ $sale->id }}" tabindex="-1"
                                     aria-labelledby="salesReturnModalLabel" aria-hidden="true">
                                     <div class="modal-dialog">
@@ -104,7 +102,7 @@
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="salesReturnModalLabel">Return Sales for <span
                                                         class="text-primary"> {{ $sale->item->name }}</span></h5>
-                                                {{-- onclick="this.reset the closest form" --}}
+                                                <!-- onclick="this.reset the closest form" -->
 
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                     aria-label="Close"></button>
@@ -213,12 +211,29 @@
                     @endforeach
                 </tbody>
             </table>
+        </div> --}}
+
+        <div class="table-responsive shadow-sm rounded-3">
+            <table class="table table-striped table-hover table-bordered align-middle" id="salesTable">
+                <thead class="table-primary">
+                    <tr>
+                        <th>#</th>
+                        <th>Sales Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total Price</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
         </div>
+
+
     </div>
 
     <!-- Create Sales Modal -->
-    <div class="modal fade" id="createSalesModal" tabindex="-1" aria-labelledby="createSalesModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="createSalesModal" tabindex="-1" aria-labelledby="createSalesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
@@ -256,8 +271,8 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Amount</label>
-                                    <input type="number" class="form-control amount" name="amount[]"
-                                        placeholder="Amount" readonly>
+                                    <input type="number" class="form-control amount" name="amount[]" placeholder="Amount"
+                                        readonly>
                                 </div>
                                 <div class="col-md-0" hidden>
                                     <label class="form-label">Date</label>
@@ -533,6 +548,48 @@
 
             });
 
+        });
+
+        // Datatables  for sales table
+        $(document).ready(function() {
+            $('#salesTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: "{{ route('sales') }}",
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'sales_name',
+                        name: 'item.name'
+                    },
+                    {
+                        data: 'price',
+                        name: 'price'
+                    },
+                    {
+                        data: 'quantity',
+                        name: 'quantity'
+                    },
+                    {
+                        data: 'total_price',
+                        name: 'total_price'
+                    },
+                    {
+                        data: 'date',
+                        name: 'date'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        orderable: false,
+                        searchable: false
+                    }
+                ]
+            });
         });
     </script>
 @endsection

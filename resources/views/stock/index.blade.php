@@ -81,15 +81,18 @@
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Buying Price</label>
-                                    <input type="number" min="1" class="form-control shadow-sm" name="buying_price[]" required>
+                                    <input type="number" min="1" class="form-control shadow-sm"
+                                        name="buying_price[]" required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Selling Price</label>
-                                    <input type="number" min="1" class="form-control shadow-sm" name="selling_price[]" required>
+                                    <input type="number" min="1" class="form-control shadow-sm"
+                                        name="selling_price[]" required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Quantity</label>
-                                    <input type="number" min="1" class="form-control shadow-sm" name="quantity[]" required>
+                                    <input type="number" min="1" class="form-control shadow-sm" name="quantity[]"
+                                        required>
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Low stock</label>
@@ -276,7 +279,7 @@
                     row.querySelector('[name="selling_price[]"]').value = selectedMedicine.last_stock.selling_price;
                     row.querySelector('[name="low_stock_percentage[]"]').value = selectedMedicine.last_stock
                         .low_stock_percentage;
-                }else{
+                } else {
                     // clear the buying_price, selling_price, and low_stock_percentage field's value
                     row.querySelector('[name="buying_price[]"]').value = '';
                     row.querySelector('[name="selling_price[]"]').value = '';
@@ -347,7 +350,7 @@
                 </div>
                 `;
 
-                
+
                 stockFields.appendChild(newStockEntry);
 
                 initializeChosen();

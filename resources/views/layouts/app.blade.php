@@ -187,10 +187,10 @@
             $(document).ready(function() {
                 $('#Table')
                     .DataTable({
-                        paging: true, // Enable paging
+                        paging: false, // Enable paging
                         searching: true, // Enable search bar
                         ordering: true, // Enable column sorting
-                        info: true // Enable information display
+                        info: false // Enable information display
                     });
 
                 $(".onReport").select2({
