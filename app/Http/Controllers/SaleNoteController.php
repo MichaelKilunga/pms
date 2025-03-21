@@ -298,48 +298,102 @@ class SaleNoteController extends Controller
     public function promoteSalesNotesAsOne(Request $request)
     {
         try {
-            $request->validate([
-                'batch_number' => 'required|numeric',
-                'supplier_name' => 'required|string',
-                'date' => 'required|date',
-
-                'sale_note_ids' => 'required|string',
-
-                'name' => 'required|string',
-                'buying_price' => 'required|numeric',
-                'selling_price' => 'required|numeric',
-                'stocked_quantity' => 'required|numeric',
-                'low_stock_quantity' => 'required|numeric',
-                'expiry_date' => 'required|date',
-            ]);
-
             // dd($request->all());
-            $stockValues = $request;
-            // create a stock record
-            $stock = $this->createStock($stockValues);
+            // check if is promoting to existing
+            if (isset($request->promoteToExisting)) {
+                $request->validate([
+                    'batch_number' => 'required|numeric',
+                    'supplier_name' => 'required|string',
+                    'date' => 'required|date',
 
-            // get the sale note ids
-            $saleNoteIds = explode(',', $request->sale_note_ids);
-            // create a sales record for each sale note
-            $salesValues = new Request();
-            $salesValues['item_id'] = $stock->item_id;
-            $salesValues['stock_id'] = $stock->id;
+                    'sale_note_ids' => 'required|string',
 
-            foreach ($saleNoteIds as $saleNoteId) {
-                $saleNote = SaleNote::where('id', $saleNoteId)->first();
+                    'item_id' => 'required|integer|exists:items,id',
 
-                $salesValues['staff_id'] = $saleNote->staff_id;
-                $salesValues['quantity'] = $saleNote->quantity;
-                $salesValues['total_price'] = $saleNote->unit_price * $saleNote->quantity;
-                $salesValues['date'] = $saleNote->created_at;
+                    'buying_price' => 'required|numeric',
+                    'selling_price' => 'required|numeric',
+                    'stocked_quantity' => 'required|numeric',
+                    'low_stock_quantity' => 'required|numeric',
+                    'expiry_date' => 'required|date',
+                ]);
 
-                $sale = $this->storeSales($salesValues);
+                // dd($request->all());
 
-                $saleNote->status = 'promoted';
-                $saleNote->save();
+                $stockValues = $request;
+
+                // // pass item name
+                $stockValues['name'] = Items::where('id', $request->item_id)->first()->name;
+
+                // dd($stockValues->all());
+
+                // create a stock record
+                $stock = $this->createStock($stockValues);
+
+                // get the sale note ids
+                $saleNoteIds = explode(',', $request->sale_note_ids);
+                // create a sales record for each sale note
+                $salesValues = new Request();
+                $salesValues['item_id'] = $stock->item_id;
+                $salesValues['stock_id'] = $stock->id;
+
+                foreach ($saleNoteIds as $saleNoteId) {
+                    $saleNote = SaleNote::where('id', $saleNoteId)->first();
+
+                    $salesValues['staff_id'] = $saleNote->staff_id;
+                    $salesValues['quantity'] = $saleNote->quantity;
+                    $salesValues['total_price'] = $saleNote->unit_price * $saleNote->quantity;
+                    $salesValues['date'] = $saleNote->created_at;
+
+                    $sale = $this->storeSales($salesValues);
+
+                    $saleNote->status = 'promoted';
+                    $saleNote->save();
+                }
+                return redirect()->route('salesNotes')->with('success', 'Sale Notes promoted successfully.');
+            } else {
+                $request->validate([
+                    'batch_number' => 'required|numeric',
+                    'supplier_name' => 'required|string',
+                    'date' => 'required|date',
+
+                    'sale_note_ids' => 'required|string',
+
+                    'name' => 'required|string',
+                    'buying_price' => 'required|numeric',
+                    'selling_price' => 'required|numeric',
+                    'stocked_quantity' => 'required|numeric',
+                    'low_stock_quantity' => 'required|numeric',
+                    'expiry_date' => 'required|date',
+                ]);
+
+                // dd($request->all());
+
+                $stockValues = $request;
+                // create a stock record
+                $stock = $this->createStock($stockValues);
+
+                // get the sale note ids
+                $saleNoteIds = explode(',', $request->sale_note_ids);
+                // create a sales record for each sale note
+                $salesValues = new Request();
+                $salesValues['item_id'] = $stock->item_id;
+                $salesValues['stock_id'] = $stock->id;
+
+                foreach ($saleNoteIds as $saleNoteId) {
+                    $saleNote = SaleNote::where('id', $saleNoteId)->first();
+
+                    $salesValues['staff_id'] = $saleNote->staff_id;
+                    $salesValues['quantity'] = $saleNote->quantity;
+                    $salesValues['total_price'] = $saleNote->unit_price * $saleNote->quantity;
+                    $salesValues['date'] = $saleNote->created_at;
+
+                    $sale = $this->storeSales($salesValues);
+
+                    $saleNote->status = 'promoted';
+                    $saleNote->save();
+                }
+                return redirect()->route('salesNotes')->with('success', 'Sale Notes promoted successfully.');
             }
-
-            return redirect()->route('salesNotes')->with('success', 'Sale Notes promoted successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -371,11 +425,21 @@ class SaleNoteController extends Controller
 
         //a loop to add the medicine name to the items table and stock to the stock table
         try {
-            $item = Items::create([
-                'pharmacy_id' => $pharmacy_id,
-                'category_id' => 1,
-                'name' => $stockValues->name,
-            ]);
+            // dd($stockValues->all());
+            // initialize $item
+            $item = null;
+            // check if is promoting to existing
+            if (isset($stockValues->promoteToExisting)) {
+                $item = Items::where('id', $stockValues->item_id)->first();
+            } else {
+                $item = Items::create([
+                    'pharmacy_id' => $pharmacy_id,
+                    'category_id' => 1,
+                    'name' => $stockValues->name,
+                ]);
+            }
+
+            // dd($item);
 
             $stock = Stock::create([
                 'pharmacy_id' => $pharmacy_id,

@@ -1,6 +1,8 @@
 @extends('sales_notes.app')
 
 @section('content')
+    @php $medicines = App\Models\Items::where('pharmacy_id', session('current_pharmacy_id'))->with('lastStock')->get(); @endphp
+
     <div class="container mt-4">
         <div class="row">
             <div class="col-12 text-center">
@@ -15,22 +17,29 @@
             </div>
             <div class="col-md-6 d-flex mt-2 gap-2">
                 @if (Auth::user()->role != 'staff')
-                <button id="buttonToPromoteAll" class=" btn btn-warning text-dark"><small class="smallest">Promote All</small></button>
-                <button id="buttonToPromoteSelected" class=" btn btn-warning text-dark"><small class="smallest">Promote Separate</small></button>
-                <button id="buttonToPromoteSelectedAsOne" class=" btn btn-warning text-dark"><small class="smallest">Promote as One</small></button>
-                <button id="buttonToPromoteToExisting" class=" btn btn-warning text-dark"><small class="smallest">Promote To Existing</small></button>
+                    <button id="buttonToPromoteAll" class=" btn btn-warning text-dark"><small class="smallest">Promote
+                            All</small></button>
+                    <button id="buttonToPromoteSelected" class=" btn btn-warning text-dark"><small class="smallest">Promote
+                            Separate</small></button>
+                    <button id="buttonToPromoteSelectedAsOne" class=" btn btn-warning text-dark"><small
+                            class="smallest">Promote as One</small></button>
+                    <button id="buttonToPromoteToExistingStock" class=" btn btn-warning text-dark"><small
+                            class="smallest">Promote To Existing</small></button>
                 @endif
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSalesNoteModal"><small class="md-smallest">+ New</small></button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSalesNoteModal"><small
+                        class="md-smallest">+ New</small></button>
             </div>
         </div>
 
         <div class="table-responsive mt-3">
             {{-- a row to display total sales note count and total sales amount --}}
             <div class="d-flex justify-content-end align-items-center mb-3">
-                <div class="text-end mx-2"><span class="text-primary"> Total Sales Note: </span> <span class="text-danger">{{ $salesNotes->count() }}</span>, </div>
-                <div class="text-end mx-2">  <span class="text-primary">Total Amount:</span>
-                    <span class="text-danger">{{ number_format($totalSalesMadeToday)}}/=</span> TZS</div>
+                <div class="text-end mx-2"><span class="text-primary"> Total Sales Note: </span> <span
+                        class="text-danger">{{ $salesNotes->count() }}</span>, </div>
+                <div class="text-end mx-2"> <span class="text-primary">Total Amount:</span>
+                    <span class="text-danger">{{ number_format($totalSalesMadeToday) }}/=</span> TZS
                 </div>
+            </div>
             <table class="table table-bordered table-striped" id="SaleNoteTable">
                 <thead class="table-light">
                     <tr>
@@ -257,14 +266,14 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Promote Selected Sales Notes</h5>
-                        {{-- Button to promote to existing items --}}
-                        <button type="button" class="btn btn-outline-success promoteToExistingItems"
+                        <!-- Button to promote to existing items -->
+                        {{-- <button type="button" class="btn btn-outline-success promoteToExistingItems"
                             id="promoteMultipleToExistingItems">Promote to Existing
-                            items </button>
-                        {{-- Button to promote to existing stocks --}}
-                        <button type="button" class="btn btn-outline-success promoteToExistingStocks"
+                            items </button> --}}
+                        <!-- Button to promote to existing stocks -->
+                        {{-- <button type="button" class="btn btn-outline-success promoteToExistingStocks"
                             id="promoteMultipleToExistingStocks">Promote to
-                            Existing Stocks </button>
+                            Existing Stocks </button> --}}
                         <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                     </div>
                     <div id="promotionPannel" class="modal-body">
@@ -316,6 +325,27 @@
         </div>
     </div>
 
+    {{-- Modal for promoting multiple sales notes to existing stock of items as one at once --}}
+    {{-- <div class="modal fade" id="promoteSelectedSaleNoteAsOneToExistingStockModal" role="dialog">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <form action="{{ route('salesNotes.promoteAsOne') }}" id="promoteSaleNoteAsOneToExistingForm" method="POST">
+                    @csrf                    
+                    <div id="asOneToExistingPromotionPannel" class="modal-body">
+
+                        <!-- This will be populated with one row of items -->
+
+                    </div>
+                    <div class="justify-content-between modal-footer">
+                        <button id="closeAsOneToExistingPromotionModal" type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" id="submitPromotion" class="btn btn-success">Promote</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div> --}}
+
     <script>
         $(document).ready(function() {
             // Initialize DataTable
@@ -323,6 +353,47 @@
 
             // Store selected sales note IDs
             var selectedSalesNotes = [];
+            var promoteToExisting = false;
+
+            // Initialize chosen/select2
+            function initializeChosen() {
+                $(".chosen").each(function() {
+                    let $select = $(this);
+                    let $modal = $select.closest(
+                        ".modal"); // Check if inside a modal
+                    $select.select2({
+                        width: "100%",
+                        no_results_text: "No matches found!",
+                        allowClear: true,
+                        dropdownParent: $modal.length ? $modal : $(
+                            "body") // Use modal if inside one
+                    });
+                }).on("change", function() {
+                    const row = $(this).closest(".stock-entry")[0];
+                    setStockFieldsData(row);
+                });
+            }
+
+            function setStockFieldsData(row) {
+                const medicines = @json($medicines);
+                const selectedMedicineId = $(row).find('[name="item_id"]').val();
+
+                // Find the selected medicine
+                const selectedMedicine = medicines.find(medicine => medicine.id == selectedMedicineId);
+
+                if (selectedMedicine && selectedMedicine.last_stock) {
+                    // Set values using jQuery
+                    $(row).find('[name="buying_price"]').val(selectedMedicine.last_stock.buying_price);
+                    // $(row).find('[name="selling_price"]').val(selectedMedicine.last_stock.selling_price);
+                    $(row).find('[name="low_stock_quantity"]').val(selectedMedicine.last_stock
+                        .low_stock_percentage);
+                } else {
+                    // Clear the fields
+                    $(row).find('[name="buying_price"], [name="low_stock_quantity"]').val(
+                        '');
+                }
+            }
+
 
             // Enable row selection, (select row on clicking on its number(first column))
             $('#SaleNoteTable tbody')
@@ -810,6 +881,159 @@
                 }
             });
 
+            // Open the modal for promoting to Existing when "Promote to existing" button is clicked
+            $('#buttonToPromoteToExistingStock').on('click', function(e) {
+                e.preventDefault();
+
+                if (selectedSalesNotes.length === 0) {
+                    alert('Please select at least one sales note to promote.');
+                    return;
+                }
+
+                // Populate the modal with selected IDs
+                promoteToExisting = true;
+                var hasSameUnitPrice = true;
+                var firstSelectedUnitPrice = 0;
+                var firstSelectedName = '';
+                var differentNames = false;
+                var sumOfAllQuantities = 0;
+                //Edit the body of the modal to include rows of each item
+                $('#asOnePromotionPannel').empty(); // Clear previous rows
+                // Loop through all rows and add them to the modal
+                $('#asOnePromotionPannel').append(`
+                            <div class="form-group mb-3 row">
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control batch_number" type="text" id="batch_number" name="batch_number"
+                                    placeholder="Batch Number" required readonly>
+                                <label class="form-label" for="batch_number">Batch Number</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control" type="text" name="supplier_name"
+                                    placeholder="Supplier Name" required>
+                                <label class="form-label" for="supplier_name">Supplier Name</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input class="form-control" type="date" value="{{ date('Y-m-d') }}"
+                                    name="date" placeholder="Entry Date" required>
+                                <label class="form-label" for="date">Entry Date</label>
+                            </div>
+                            </div>
+                            <div class="form-group mb-3 row">
+                                <span class="col-md-12 row text-primary" id="selectedSalesNotesNames"></span>
+                            </div>
+                `);
+
+                selectedSalesNotes.forEach(function(saleNoteId) {
+                    // Find the row with the matching ID
+                    var row = table.row(`:contains(${saleNoteId})`);
+                    // Get the row name and quantity from the third column
+                    var rowName = $(row.node()).find('td:nth-child(3)').text();
+                    var rowQuantity = $(row.node()).find('td:nth-child(4)').text();
+                    sumOfAllQuantities += parseInt(rowQuantity);
+                    var UnitPrice = $(row.node()).find('td:nth-child(5)').text();
+
+                    // Compare the unit price of the first selected sales note to the all other selected sales notes, if they are not the same, then exit the loop
+                    if (selectedSalesNotes.indexOf(saleNoteId) === 0) {
+                        firstSelectedUnitPrice = UnitPrice;
+                        firstSelectedName = rowName;
+                    }
+
+                    if (UnitPrice !== firstSelectedUnitPrice) {
+                        hasSameUnitPrice = false;
+                        alert('Select sales notes with the same unit price.');
+                    }
+
+
+                    // Check if all selected sales notes have the same unit price
+                    if (!hasSameUnitPrice) {
+                        // exit the loop if the unit price is not the same
+                        return;
+                    } else if (rowName.toLowerCase().indexOf(firstSelectedName.toLowerCase()) < 0 &&
+                        !differentNames) {
+                        // if firstSelectedName is not 80% equal to rowName, then alert but don't exit the loop
+                        differentNames = true;
+                        alert('Names are not 80% equal. [' + rowName + '] and [' +
+                            firstSelectedName + ']');
+                    }
+
+                    // Append the list of selected sales notes names with their quantities  and unit prices at id="selectedSalesNotesNames"
+                    $('#selectedSalesNotesNames').append(`
+                                <p class="col-md-6 mb-3"><strong class="text-dark">Name:</strong> ${rowName} | <strong class="text-dark">Quantity:</strong> ${rowQuantity}</p>
+                            `);
+                });
+
+                // Append the row to the modal
+                $('#asOnePromotionPannel').append(
+                    `
+                    <input readonly type="text" hidden required name="promoteToExisting" value="${promoteToExisting}">
+                        <div class="form-group mb-3 row promote-entry">
+                            <div hidden class="hidden form-floating">
+                                <input readonly type="text" required name="sale_note_ids" value="${selectedSalesNotes.join(',')}">
+                            </div>
+                            <div class="col-md-2">
+                                <select name="item_id" class="form-select medicineSelect  shadow-sm chosen" required>
+                                    <option selected value="">Select medicine...</option>
+                                    @foreach ($medicines as $medicine)
+                                        <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="number" required name="buying_price"
+                                    placeholder="Buying Price">
+                                <label class="form-label" for="buying_price">Buying Price</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="number" required name="selling_price"
+                                    placeholder="Selling Price" value="${firstSelectedUnitPrice}" readonly>
+                                <label class="form-label" for="selling_price">Unit Price</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="number" min="${sumOfAllQuantities}" required name="stocked_quantity"
+                                    placeholder="Stocked Quantity" value="${sumOfAllQuantities}">
+                                <label class="form-label" for="stocked_quantity">Quantity</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="number" required name="low_stock_quantity" placeholder="Low Stock Quantity">
+                                <label class="form-label" for="low_stock_quantity">Low Stock</label>
+                            </div>
+                            <div class="col-md-2 form-floating">
+                                <input class="form-control" type="date"
+                                    required name="expiry_date" placeholder="Expiry Date">
+                                <label class="form-label" for="expiry_date">Expire Date</label>
+                            </div>
+                        </div>`
+                );
+
+                // genarate batch number and initialize chosen/select2
+                $(document).ready(function() {
+                    initializeChosen();
+
+                    // listen for changes in the .medicineSelect field to call for a function to set the stock fields data
+                    $(document).on('change', '.promote-entry select[name="item_id"]', function() {
+                        let row = $(this).closest(
+                        '.promote-entry'); // Get the closest parent row
+                        setStockFieldsData(row[0]); // Pass the DOM element to the function
+                    });
+
+                    const today = new Date();
+                    const year = today.getFullYear(); // Get the full year
+                    const month = String(today.getMonth() + 1).padStart(2,
+                        '0'); // Months are zero-based, pad with leading zero if needed
+                    const day = String(today.getDate()).padStart(2,
+                        '0'); // Pad day with leading zero if needed
+                    const formattedDate =
+                        `${year}${month}${day}`; // Combine to form YYYYMMDD format
+                    $('.batch_number').val(
+                        formattedDate); // Use .val() to set the value of the input
+                });
+
+                // Show the modal
+                if (hasSameUnitPrice) {
+                    $('#promoteSelectedSaleNoteAsOneModal').modal('show');
+                }
+            });
+
             // when the modal is closed, clear the selected sales notes array
             $('#closePromotionModal').on('click', function(e) {
                 e.preventDefault();
@@ -871,15 +1095,6 @@
                 });
             });
 
-            // add existing stocks data when user click on the button "promote to Existing Stocks"
-            $(document).ready(function() {
-                $('.promoteToExistingStocks').on('click', function() {
-                    alert('This module is still under development! Thank you for your patience.');
-                });
-                $('.promoteToExistingItems').on('click', function() {
-                    alert('This module is still under development! Thank you for your patience.');
-                });
-            });
         });
     </script>
 @endsection
