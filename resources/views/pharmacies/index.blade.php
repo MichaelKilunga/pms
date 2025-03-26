@@ -7,8 +7,8 @@
             <div>
                 {{-- @show('create pharmacy') --}}
                 {{-- @show('create pharmacy button') --}}
-                    <a href="{{ route('pharmacies.create') }}" class="btn btn-success" data-bs-toggle="modal"
-                        data-bs-target="#addPharmacyModal">Add New Pharmacy</a>
+                <a href="{{ route('pharmacies.create') }}" class="btn btn-success" data-bs-toggle="modal"
+                    data-bs-target="#addPharmacyModal">Add New Pharmacy</a>
                 {{-- @endshow --}}
             </div>
         </div>
@@ -121,38 +121,38 @@
             </table>
         </div>
     </div>
-@endsection
 
-<!-- Modal -->
-<div class="modal fade" id="addPharmacyModal" tabindex="-1" aria-labelledby="addPharmacyModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addPharmacyModalLabel">Add New Pharmacy</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Pharmacy Form -->
-                <form id="pharmacyForm" method="POST" action="{{ route('pharmacies.store') }}">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Pharmacy Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="location" class="form-label">Pharmacy Location</label>
-                        <textarea class="form-control" id="location" name="location"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <input type="hidden" name="pharmacy_id" value="{{ session('current_pharmacy_id') }}">
-                    </div>
-                    <div class="mb-3">
-                        <button type="submit" class="btn btn-primary">Save Pharmacy</button>
-                    </div>
-                </form>
+    <!-- Modal -->
+    <div class="modal fade" id="addPharmacyModal" tabindex="-1" aria-labelledby="addPharmacyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPharmacyModalLabel">Add New Pharmacy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Pharmacy Form -->
+                    <form id="pharmacyForm" method="POST" action="{{ route('pharmacies.store') }}">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Pharmacy Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Pharmacy Location</label>
+                            <textarea class="form-control" id="location" name="location"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <input type="hidden" name="pharmacy_id" value="{{ session('current_pharmacy_id') }}">
+                        </div>
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">Save Pharmacy</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-{{-- {{$Pharmacy}} --}}
+    {{-- {{$Pharmacy}} --}}
+@endsection

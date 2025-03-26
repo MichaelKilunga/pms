@@ -64,7 +64,7 @@ class DashboardController extends Controller
             return view('agent.index', compact('totalPharmacies', 'totalPackages', 'activePharmacies', 'inactivePharmacies', 'totalMessages', 'totalCases'));
         }
 
-        $sellMedicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->with('item')->get();
+        $sellMedicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->with('item')->get();
         $totalMedicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->count();
         $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
         $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today())->sum('total_price');

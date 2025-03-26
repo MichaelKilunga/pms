@@ -14,10 +14,6 @@ use Illuminate\Support\Facades\Hash;
 
 class AgentController extends Controller
 {
-    // public function messages(){
-    //     $messages = Messages::all();
-    //     return  view('agent.message', compact('messages'));
-    // }
 
     public function pharmacies(Request $request)
     {

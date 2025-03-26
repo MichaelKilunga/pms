@@ -67,7 +67,7 @@
                                 </div>
 
 
-                                <a href="#" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                <a href="#" class="btn btn-success disabled btn-sm" data-bs-toggle="modal" 
                                     data-bs-target="#editCategoryModal{{ $category->id }}"><i class="bi bi-pencil"></i></a>
                                 <!-- Edit Category Modal -->
                                 <div class="modal fade" id="editCategoryModal{{ $category->id }}" tabindex="-1"
@@ -117,7 +117,7 @@
                                     style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
+                                    <button type="submit" disabled
                                         onclick="return confirm('Are you sure you want to delete this category?')"
                                         class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
                                 </form>
@@ -128,7 +128,6 @@
             </table>
         </div>
     </div>
-@endsection
 
 <!-- Modal -->
 <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
@@ -161,3 +160,5 @@
         </div>
     </div>
 </div>
+
+@endsection
