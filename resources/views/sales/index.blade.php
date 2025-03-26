@@ -30,189 +30,7 @@
             </div>
         </div>
         <hr class="mb-2">
-
         <!-- Sales Table -->
-        {{-- <div class="table-responsive shadow-sm rounded-3">
-            <table class="table table-striped table-hover table-bordered align-middle" id="Table">
-                <thead class="table-primary">
-                    <tr>
-                        <th>#</th>
-                        <th>Sales Name</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Total Price</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($sales as $sale)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $sale->item->name }}</td>
-                            <td>{{ $sale->total_price / $sale->quantity }}</td>
-                            <td>{{ $sale->quantity }}</td>
-                            <td class="amount-cell">{{ $sale->total_price }}</td>
-                            <td>{{ $sale->date }}</td>
-                            <td>
-                                <!-- View Modal -->
-                                <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#viewSaleModal{{ $sale->id }}">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-
-                                <!-- View Sale Modal -->
-                                <div class="modal fade" id="viewSaleModal{{ $sale->id }}" tabindex="-1"
-                                    aria-labelledby="viewSaleModalLabel{{ $sale->id }}" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="viewSaleModalLabel{{ $sale->id }}">Sale
-                                                    Details</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div><strong>Sales Name:</strong> {{ $sale->item->name }}</div>
-                                                <div><strong>Price:</strong> {{ $sale->total_price / $sale->quantity }}
-                                                </div>
-                                                <div><strong>Quantity:</strong> {{ $sale->quantity }}</div>
-                                                <div><strong>Amount:</strong> {{ $sale->total_price }}
-                                                </div> <!-- Display amount here -->
-                                                <div><strong>Date:</strong> {{ $sale->date }}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Create Sales Return Link -->
-                                @if (!$sale->salesReturn)
-                                    <a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#salesReturnModal{{ $sale->id }}"
-                                        data-sale-id="{{ $sale->id }}">
-                                        <i class="bi bi-arrow-return-left"></i>
-                                    </a>
-                                @endif
-
-                                <!-- sales return modal -->
-                                <div class="modal fade" id="salesReturnModal{{ $sale->id }}" tabindex="-1"
-                                    aria-labelledby="salesReturnModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="salesReturnModalLabel">Return Sales for <span
-                                                        class="text-primary"> {{ $sale->item->name }}</span></h5>
-                                                <!-- onclick="this.reset the closest form" -->
-
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-
-                                            <form id="salesReturnForm" method="POST"
-                                                action="{{ route('salesReturns.store') }}">
-                                                @csrf
-                                                <div class="modal-body">
-                                                    <input type="hidden" name="sale_id" id="sale_id"
-                                                        value="{{ $sale->id }}">
-
-                                                    <div class="mb-3">
-                                                        <label for="quantity" class="form-label">Quantity to Return</label>
-                                                        <input type="number" name="quantity" class="form-control"
-                                                            id="quantity" readonly min="1"
-                                                            max="{{ $sale->quantity }}" value="{{ $sale->quantity }}"
-                                                            placeholder="Enter quantity to return" required>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label for="reason" class="form-label">Reason for Return</label>
-                                                        <textarea name="reason" class="form-control" id="reason" rows="3" placeholder="Enter reason to return sales"></textarea>
-                                                    </div>
-
-                                                    <div class="mb-3 hidden">
-                                                        <label for="return_status" class="form-label">Return Status</label>
-                                                        <select name="return_status" class="form-select"
-                                                            id="return_status">
-                                                            <option selected value="pending" selected>Pending</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Close</button>
-                                                    <button type="submit" class="btn btn-primary">Submit Return</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Edit Modal -->
-                                <a href="#" class="btn btn-success btn-sm" hidden data-bs-toggle="modal"
-                                    data-bs-target="#editSaleModal{{ $sale->id }}">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-
-                                <!-- Edit Sale Modal -->
-                                <div class="modal fade" hidden id="editSaleModal{{ $sale->id }}" tabindex="-1"
-                                    aria-labelledby="editSaleModalLabel{{ $sale->id }}" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="editSaleModalLabel{{ $sale->id }}">Edit
-                                                    Sale</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="{{ route('sales.update', $sale->id) }}" method="POST">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    <input type="number" name="id" class="form-control"
-                                                        value="{{ $sale->id }}" hidden readonly>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Sales Name</label>
-                                                        <input type="text" class="form-control"
-                                                            value="{{ $sale->item->name }}" readonly>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Total Price</label>
-                                                        <input type="number" class="form-control" name="total_price"
-                                                            value="{{ $sale->total_price }}" readonly required>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Quantity</label>
-                                                        <input type="number" class="form-control" name="quantity"
-                                                            value="{{ $sale->quantity }}" required>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Date</label>
-                                                        <input type="text" class="form-control"
-                                                            value="{{ $sale->date }}" readonly>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-success">Update</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Delete Form -->
-                                <form action="{{ route('sales.destroy', $sale->id) }}" method="POST"
-                                    style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" hidden disabled="true" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Are you sure to delete this sale?')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div> --}}
-
         <div class="table-responsive shadow-sm rounded-3">
             <table class="table table-striped table-hover table-bordered align-middle" id="salesTable">
                 <thead class="table-primary">
@@ -249,7 +67,7 @@
                                 <div class="col-md-4">
                                     <label for="medicines" class="form-label">Medicine</label>
                                     <select name="item_id[]" class="form-select salesChosen" required>
-                                        <option selected value=""></option>
+                                        <option selected value="">Select medicine</option>
                                         @foreach ($medicines as $medicine)
                                             <option value="{{ $medicine->id }}">
                                                 {{ $medicine->item->name }} <br><strong
@@ -364,16 +182,17 @@
 
                         $select.select2({
                             width: "100%",
-                            placeholder: "Select an option", // Placeholder for better UX
-                            allowClear: true, // Allow deselection
-                            language: {
-                                noResults: function() {
-                                    return "No matches found!";
-                                }
-                            },
                             dropdownParent: $modal.length ? $modal : $(
                                 "body") // Use modal if inside one
                         });
+
+                        // Auto-focus the search input when dropdown opens
+                        $select.on("select2:open", function() {
+                            document.querySelector(
+                                    ".select2-container--open .select2-search__field")
+                                .focus();
+                        });
+
                     }).on("select2:select select2:unselect", function() {
                         const row = $(this).closest(".sale-entry")[0];
                         tellPrice(row);
@@ -450,7 +269,7 @@
                             <input type="text" name="stock_id[]" hidden required>
                             <div class="col-md-4">
                                 <select name="item_id[]" data-row-id="item_id[]" class="form-select salesChosen" required>
-                                    <option selected disabled value="">Select Item</option>
+                                    <option selected disabled value="">Select medicine</option>
                                     @foreach ($medicines as $medicine)
                                         <option value="{{ $medicine->id }}">
                                                 {{ $medicine->item->name }} <br><strong class="text-danger">Exp:({{ \Carbon\Carbon::parse($medicine->expire_date)->format('m/Y') }})</strong>

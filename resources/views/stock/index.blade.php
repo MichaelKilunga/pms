@@ -256,11 +256,16 @@
                         ".modal"); // Check if inside a modal
                     $select.select2({
                         width: "100%",
-                        no_results_text: "No matches found!",
-                        allowClear: true,
                         dropdownParent: $modal.length ? $modal : $(
                             "body") // Use modal if inside one
                     });
+
+                    // Auto-focus the search input when dropdown opens
+                    $select.on("select2:open", function() {
+                        document.querySelector(".select2-container--open .select2-search__field")
+                            .focus();
+                    });
+
                 }).on("change", function() {
                     const row = $(this).closest(".stock-entry")[0];
                     setStockFieldsData(row);

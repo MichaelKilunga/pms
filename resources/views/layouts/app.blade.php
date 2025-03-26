@@ -18,37 +18,25 @@
         rel="stylesheet">
     <link rel='stylesheet' href='https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css'>
 
-    {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"> --}}
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
-    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css"> --}}
-
     <!-- include summernote css/js -->
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
 
-    <!-- Bootstrap Select CSS -->
-    {{-- <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.14/css/bootstrap-select.min.css"> --}}
 
-    <!-- Scripts -->
-    {{-- @vite(['resources/css/app.css', 'resources/js/app.js'], 'build') --}}
-    {{-- <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}"> --}}
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('assets/js/bootstrap.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     {{-- select2 --}}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    {{-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> --}}
 
     <!-- Styles -->
-    {{-- @livewireStyles --}}
     <style>
         .chosen-container .chosen-single {
             height: calc(2.5rem + 2px);
@@ -91,25 +79,6 @@
 </head>
 
 <body class="font-sans antialiased">
-
-    {{-- TAWK START --}}
-    <!--Start of Tawk.to Script-->
-    {{-- <script type="text/javascript">
-        var Tawk_API = Tawk_API || {},
-            Tawk_LoadStart = new Date();
-        (function() {
-            var s1 = document.createElement("script"),
-                s0 = document.getElementsByTagName("script")[0];
-            s1.async = true;
-            s1.src = 'https://embed.tawk.to/67810ca9af5bfec1dbe9b008/1ih81itsi';
-            s1.charset = 'UTF-8';
-            s1.setAttribute('crossorigin', '*');
-            s0.parentNode.insertBefore(s1, s0);
-        })();
-    </script> --}}
-    <!--End of Tawk.to Script-->
-    {{-- TAWK END --}}
-
 
     {{-- <x-banner /> --}}
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -187,29 +156,38 @@
             $(document).ready(function() {
                 $('#Table')
                     .DataTable({
-                        paging: false, // Enable paging
+                        paging: true, // Enable paging
                         searching: true, // Enable search bar
                         ordering: true, // Enable column sorting
                         info: false // Enable information display
-                    });
+
+                    })
+                    .columns.adjust()
+                    .responsive.recalc();
 
                 $(".onReport").select2({
                     width: "100%",
-                    no_results_text: "No matches found!",
-                    allowClear: true
+                    minimumResultsForSearch: 5,
                 });
 
                 @if (!session('success') && !session('error') && !session('info'))
                     $("select").not("#conversationRecipients").each(function() {
                         let $select = $(this);
                         let $modal = $select.closest(".modal"); // Check if inside a modal
-                            $select.select2({
-                                width: "100%",
-                                no_results_text: "No matches found!",
-                                allowClear: true,
-                                dropdownParent: $modal.length ? $modal : $(
-                                    "body") // Use modal if inside one
-                            });
+                        $select.select2({
+                            width: "100%",
+                            minimumResultsForSearch: 5,
+                            dropdownParent: $modal.length ? $modal : $(
+                                "body") // Use modal if inside one
+                        });
+
+                        // Auto-focus the search input when dropdown opens
+                        $select.on("select2:open", function() {
+                            document.querySelector(
+                                    ".select2-container--open .select2-search__field")
+                                .focus();
+                        });
+
                     });
                 @endif
             });
@@ -354,7 +332,7 @@
             setInterval(checkNotifications, 15000); // 60000 ms = 1 minute
         });
 
-        //capture active printers and append them to the modal select dropdown after id="selectPrinter"
+        //SUMMERNOTE
         $(document).ready(function() {
             // if (true) {
             //     $('#printerModal').modal('show');
@@ -388,15 +366,15 @@
             updateClock();
         });
     </script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    {{-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> --}}
+
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js">
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js"></script> --}}
+    {{-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> --}}
 
     {{-- FOR DOWNLOADING REPORTS --}}
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
@@ -413,13 +391,7 @@
     <!-- include summernote css/js -->
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
 
-    <!-- Bootstrap Select JS -->
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.14/js/bootstrap-select.min.js"></script> --}}
-
-    {{-- Select2 JS --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
-
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </body>
 
 </html>

@@ -281,8 +281,8 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <h4 class="text-center">Stock Summary</h4>
-                        <div class="table-responsive">
-                            <table id="Table" class="table table-striped table-hover text-center">
+                        <div class="table-responsive mt-2">
+                            <table id="Table" class="table table-striped table-hover">
                                 <thead>
                                     <tr>
                                         <th>Medicine</th>
@@ -614,15 +614,13 @@
 
                     $select.select2({
                         width: "100%",
-                        placeholder: "Select an option", // Placeholder for better UX
-                        focus: true,
-                        language: {
-                            noResults: function() {
-                                return "No matches found!";
-                            }
-                        },
+                        minimumResultsForSearch: 5,
                         dropdownParent: $modal.length ? $modal : $(
                             "body") // Use modal if inside one
+                    }).on("select2:open", function() {
+                        document.querySelector(
+                                ".select2-container--open .select2-search__field")
+                            .focus();
                     });
                 }).on("select2:select select2:unselect", function() {
                     const row = $(this).closest(".sale-entry")[0];
