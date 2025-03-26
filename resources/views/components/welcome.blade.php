@@ -217,7 +217,7 @@
                             <form id="search_form" class="row gy-2 gx-3 align-items-center justify-content-center">
                                 <hr>
                                 <div class="col-auto">
-                                    <input id="medicine" type="text" name="searchValue" class="search">
+                                    <input id="medicine" type="text" name="searchValue" class="form-control search">
                                 </div>
                                 <div class="col-auto">
                                     <button type="submit" class="btn btn-primary"><i
