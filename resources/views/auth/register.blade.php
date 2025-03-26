@@ -8,21 +8,18 @@
 
         <form method="POST" action="{{ route('register') }}">
             @csrf
-
+            <h1 class="h3 text-center text-primary" >Agent Registration Form</h1>
             <div>
                 <x-label for="name" value="{{ __('Name') }}" />
                 <x-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required
                     autofocus autocomplete="name" placeholder="Pill Point" />
             </div>
 
-            <div class="mt-4">
-                <x-label for="role" value="{{ __('Role') }}" />
-                <select name="role" id="role"
-                    class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                    required>
-                    {{-- <option class="w-50" value="">-- Select a Role --</option> --}}
-                    <option class="w-50" {{old('role')=='agent'?'selected':''}} value="agent">Agent</option>
-                    {{-- <option class="w-50" {{old('role')=='agent'?'selected':''}} value="owner">Owner</option> --}}
+            <div class="mt-4 hidden form-group">
+                <x-label for="role" value="{{ __('Role : Agent') }}" />
+                <select name="role" id="role" class="w-50 form-control" required>
+                    <option selected class="w-50" {{ old('role') == 'agent' ? 'selected' : '' }} value="agent">Agent
+                    </option>
                 </select>
             </div>
 
