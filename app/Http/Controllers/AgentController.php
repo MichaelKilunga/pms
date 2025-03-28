@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Agent;
 use App\Models\Contract;
 use App\Models\Conversation;
 use App\Models\Message;
@@ -290,7 +291,7 @@ class AgentController extends Controller
         if ($request->action == 'getMessages') {
             try {
                 // Fetch conversation messages with sender and users who read
-                $messages = Message::with(['sender', 'usersWhoRead', 'parentMessage'=>function($query){
+                $messages = Message::with(['sender', 'usersWhoRead', 'parentMessage' => function ($query) {
                     $query->with('sender');
                 }])
                     ->where('conversation_id', $request->conversation_id)
@@ -406,5 +407,215 @@ class AgentController extends Controller
     public function contracts(Request $request)
     {
         return redirect()->back()->with('info', 'This module is still under Construction, thanks for your patience!');
+    }
+
+    public function completeRegistration(Request $request)
+    {
+        if ($request->action == 'index') {
+            $me = Auth::user()->isAgent;
+            if (Auth::user()->role == 'super') {
+                // $agents = Agent::with('user')->get();
+                // fetch all user with role agents and their data from table agents
+                $agents = User::with('isAgent')->where('role', 'agent')->get();
+                // dd($agents[4]->isAgent);
+                return view('agent.complete', compact('me', 'agents'));
+            }
+
+            return view('agent.complete', compact('me'));
+        }
+
+        // Store agent data
+        if ($request->action == 'store') {
+            try {
+                $request->validate([
+                    'country' => 'required|string|max:100',
+                    'NIN' => 'required|string|max:50|unique:agents',
+                    'address' => 'required|string',
+                    // 'signed_agreement_form' => 'required|file|mimes:pdf,jpg,png|max:2048',
+                    'document_attachment_1_name' => 'required|string',
+                    'document_attachment_1' => 'required|file|mimes:pdf,jpg,png|max:2048',
+                    'acceptTerms' => 'accepted',
+                    'ruleOfLaw' => 'accepted',
+                    'verifyInformations' => 'accepted',
+                ]);
+
+
+                // Handle document uploads
+                // $signedAgreementPath = $request->file('signed_agreement_form')->store('documents');
+                $compulsoryDocumentPath = $request->file('document_attachment_1')->store('documents', 'public');
+
+
+                $agent = [];
+                $agent['country'] = $request->country;
+                $agent['NIN'] = $request->NIN;
+                $agent['address'] = $request->address;
+                // $agent->signed_agreement_form = $signedAgreementPath;
+                $agent['registration_status'] = 'step_2';
+                $agent['document_attachment_1_name'] = $request->document_attachment_1_name;
+                $agent['document_attachment_1'] = $compulsoryDocumentPath;
+                $agent['request_date'] = now();
+
+                // Handle optional documents
+                for ($i = 2; $i <= 3; $i++) {
+                    $docNameField = "document_attachment_{$i}_name";
+                    $docFileField = "document_attachment_{$i}";
+                    if ($request->hasFile($docFileField)) {
+                        $documentPath = $request->file($docFileField)->store('documents', 'public');
+                        $agent[$docNameField] = $request->$docNameField;
+                        $agent[$docFileField] = $documentPath;
+                    }
+                }
+
+                $me = Auth::user()->isAgent;
+                if ($me) {
+                    Agent::where('user_id', Auth::user()->id)->update($agent);
+                } else {
+                    Agent::create([
+                        'user_id' => Auth::user()->id,
+                        'country' => $request->country,
+                        'NIN' => $request->NIN,
+                        'address' => $request->address,
+                        'document_attachment_1_name' => $request->document_attachment_1_name,
+                        'document_attachment_1' => $compulsoryDocumentPath,
+                        'document_attachment_2_name' => $agent['document_attachment_2_name'],
+                        'document_attachment_2' => $agent['document_attachment_2'],
+                        'document_attachment_3_name' => $agent['document_attachment_3_name'],
+                        'document_attachment_3' => $agent['document_attachment_3'],
+                        'request_date' => now(),
+                        'registration_status' => 'step_2',
+                    ]);
+                }
+                return redirect()->back()->with('success', 'Step 1 is completed successfully.');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', $e->getMessage());
+            }
+        }
+
+        // Update agent's data
+        if ($request->action == 'update') {
+            $agent = Agent::find($request->agent_id);
+
+            if (!$agent) {
+                return redirect()->back()->with('error', 'Agent not found.');
+            }
+
+            $agent->country = $request->country ?? $agent->country;
+            $agent->NIN = $request->NIN ?? $agent->NIN;
+            $agent->address = $request->address ?? $agent->address;
+
+            // Update signed agreement if uploaded
+            if ($request->hasFile('signed_agreement_form')) {
+                $signedAgreementPath = $request->file('signed_agreement_form')->store('documents');
+                $agent->signed_agreement_form = $signedAgreementPath;
+            }
+
+            // Update compulsory document if uploaded
+            if ($request->hasFile('document_attachment_1')) {
+                $compulsoryDocumentPath = $request->file('document_attachment_1')->store('documents');
+                $agent->document_attachment_1 = $compulsoryDocumentPath;
+            }
+
+            // Update optional documents
+            for ($i = 2; $i <= 3; $i++) {
+                $docNameField = "document_attachment_{$i}_name";
+                $docFileField = "document_attachment_{$i}";
+                if ($request->hasFile($docFileField)) {
+                    $documentPath = $request->file($docFileField)->store('documents');
+                    $agent->$docNameField = $request->$docNameField;
+                    $agent->$docFileField = $documentPath;
+                }
+            }
+
+            $agent->save();
+
+            return redirect()->back()->with('success', 'Agent information updated successfully!');
+        }
+
+        // next step
+        if ($request->action == 'next_step') {
+            $agent = Auth::user()->isAgent;
+            if ($agent) {
+                $agent->registration_status = 'step_3';
+                $agent->save();
+                return redirect()->back()->with('success', 'Step 2 is completed successfully.');
+            } else {
+                return redirect()->back()->with('error', 'Agent not found.');
+            }
+        }
+
+        // verify
+        if ($request->action == 'verify') {
+            // dd($request->all());
+            $agent = Agent::find($request->id);
+            if ($request->set_status == "accepted") {
+                $agent->status = 'verified';
+                $agent->verified_by = Auth::user()->id;
+                $agent->verified_date = now();
+                $agent->save();
+                return redirect()->back()->with('success', 'Agent is verified successfully.');
+            }
+            if ($request->set_status == 'rejected') {
+                $agent->status = 'unverified';
+                $agent->verified_by = Auth::user()->id;
+                $agent->verified_date = now();
+                $agent->registration_status = 'incomplete';
+                $agent->save();
+                return redirect()->back()->with('success', 'Agent is rejected successfully.');
+            }
+        }
+
+        // upload aggreement form
+        if ($request->action == 'upload_agreement_form') {
+            // dd($request->all());
+            $agent = Agent::find($request->agent_id);
+            if ($agent) {
+                $agent->signed_agreement_form = $request->file('signed_agreement_form')->store('documents', 'public');
+                $agent->registration_status = 'complete';
+                $agent->save();
+                return redirect()->back()->with('success', 'Agreement form uploaded successfully.');
+            } else {
+                return redirect()->back()->with('error', 'Agent not found.');
+            }
+        }
+
+        // generate agent code
+        if ($request->action == 'generateAgentCode') {
+            // dd($request->all());
+            $agent = Agent::find($request->id);
+            if ($agent) {
+                $agent->agent_code = $this->generateAgentCode();
+                $agent->save();
+                return redirect()->back()->with('success', 'Agent code generated successfully.');
+            } else {
+                return redirect()->back()->with('error', 'Agent not found.');
+            }
+        }
+
+        // restart step 2
+        if ($request->action == 'restart_steps') {
+            $agent = Auth::user()->isAgent;
+            if ($agent) {
+                $agent->registration_status = 'step_1';
+                $agent->save();
+                return redirect()->back()->with('success', 'Step 2 restarted successfully.');
+            } else {
+                return redirect()->back()->with('error', 'Agent not found.');
+            }
+        }
+    }
+
+    public function generateAgentCode()
+    {
+        $lastAgent = Agent::where('agent_code', '!=', null)->orderBy('id', 'desc')->first();
+        if ($lastAgent) {
+            $lastCode = $lastAgent->agent_code;
+            $lastNumber = intval(substr($lastCode, -4));
+            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+            $newCode = 'PILLPOINTONE/AG/' . $newNumber;
+            return $newCode;
+        } else {
+            $newCode = 'PILLPOINTONE/AG/0001';
+            return $newCode;
+        }
     }
 }

@@ -132,8 +132,8 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::delete('salesReturns/delete/{id}', [SalesReturnController::class, 'destroySalesReturns'])->name('salesReturns.destroy');
     Route::get('salesReturns/{id}/edit', [SalesReturnController::class, 'editSalesReturns'])->name('salesReturns.edit');
 
-    
-    
+
+
     Route::get('allReceipts', [SalesController::class, 'allReceipts'])->name('allReceipts');
     Route::get('print/lastReceipt', [SalesController::class, 'printLastReceipt'])->name('print.lastReceipt');
     Route::get('printReceipt', [SalesController::class, 'printReceipt'])->name('printReceipt');
@@ -221,22 +221,28 @@ Route::middleware(['auth'])->group(function () {
 
 
     // Agent routes
-    Route::get('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
-    Route::post('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
+    Route::get('agent/complete-registration', [AgentController::class, 'completeRegistration'])->name('agent.completeRegistration');
+    Route::post('agent/complete-registration', [AgentController::class, 'completeRegistration'])->name('agent.completeRegistration');
 
-    Route::get('agent/cases', [AgentController::class, 'cases'])->name('agent.cases');
-    Route::post('agent/cases', [AgentController::class, 'cases'])->name('agent.cases');
+    Route::middleware(['eligible:registered'])->group(function () {
 
-    Route::get('agent/pharmacies', [AgentController::class, 'pharmacies'])->name('agent.pharmacies');
-    Route::post('agent/pharmacies/create', [AgentController::class, 'pharmacies'])->name('agent.pharmacies.store');
-    Route::put('agent/pharmacies/{id}', [AgentController::class, 'pharmacies'])->name('agent.pharmacies.update');
-    Route::delete('agent/pharmacies/{id}', [AgentController::class, 'pharmacies'])->name('agent.pharmacies.destroy');
+        Route::get('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
+        Route::post('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
 
-    Route::get('agent/packages', [AgentController::class, 'packages'])->name('agent.packages');
-    Route::post('agent/packages', [AgentController::class, 'packages'])->name('agent.packages.manage');
+        Route::get('agent/cases', [AgentController::class, 'cases'])->name('agent.cases');
+        Route::post('agent/cases', [AgentController::class, 'cases'])->name('agent.cases');
 
-    Route::get('agent/contracts', [AgentController::class, 'contracts'])->name('agent.contracts');
-    Route::post('agent/contracts', [AgentController::class, 'contracts'])->name('agent.contracts');
+        Route::get('agent/pharmacies', [AgentController::class, 'pharmacies'])->name('agent.pharmacies');
+        Route::post('agent/pharmacies/create', [AgentController::class, 'pharmacies'])->name('agent.pharmacies.store');
+        Route::put('agent/pharmacies/{id}', [AgentController::class, 'pharmacies'])->name('agent.pharmacies.update');
+        Route::delete('agent/pharmacies/{id}', [AgentController::class, 'pharmacies'])->name('agent.pharmacies.destroy');
+
+        Route::get('agent/packages', [AgentController::class, 'packages'])->name('agent.packages');
+        Route::post('agent/packages', [AgentController::class, 'packages'])->name('agent.packages.manage');
+
+        Route::get('agent/contracts', [AgentController::class, 'contracts'])->name('agent.contracts');
+        Route::post('agent/contracts', [AgentController::class, 'contracts'])->name('agent.contracts');
+    });
 });
 
 Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {

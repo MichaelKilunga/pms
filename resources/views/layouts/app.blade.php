@@ -33,7 +33,7 @@
 
     {{-- select2 --}}
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    
+
     <!-- Styles -->
     <style>
         .chosen-container .chosen-single {
@@ -253,6 +253,11 @@
                         return; // Exit if the link is for opening a modal
                     }
 
+                    // if the url points to open an asset file return
+                    if ($this.attr('href').includes('storage/')) {
+                        return;
+                    }
+
                     // Disable the link/button
                     // $this.addClass('bg-light border border-danger text-danger text-muted')
                     //     .css('pointer-events', 'none')
@@ -364,7 +369,7 @@
             updateClock();
         });
     </script>
-    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

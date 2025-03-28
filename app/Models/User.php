@@ -118,4 +118,9 @@ class User extends Authenticatable
             ->withPivot('read_at')
             ->withTimestamps();
     }
+
+    public function isAgent()
+    {
+        return $this->hasOne(Agent::class, 'user_id');
+    }
 }

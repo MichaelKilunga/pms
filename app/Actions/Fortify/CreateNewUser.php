@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use App\Models\Agent;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -46,6 +47,11 @@ class CreateNewUser implements CreatesNewUsers
                 'Welcome on board! Follow the instructions to continue.',
                 'success'
             );
+            // add this agent to agent's list
+            Agent::create([
+                'user_id' => $user->id,
+                'registration_status' => 'step_1'
+            ]);
         } 
         if ($input['role'] == 'owner') {
             $this->notify(

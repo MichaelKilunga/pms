@@ -170,7 +170,7 @@
                         <label for="role" class="form-label">Role</label>
                         <select class="form-select" id="role" name="role" required>
                             <option value="" disabled selected>Select Role</option>
-                            <option value="admin">Admin</option>
+                            {{-- <option value="admin">Admin</option> --}}
                             <option value="staff">Pharmacist</option>
                         </select>
                     </div>

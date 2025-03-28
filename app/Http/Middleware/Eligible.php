@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Agent;
 use App\Models\Contract;
 use App\Models\Items;
 use App\Models\Package;
@@ -31,6 +32,32 @@ class Eligible
             return $next($request);
         }
 
+        // check if agent has completed registration
+        if ($action === 'registered') {
+            if (Auth::user()->role === 'agent') {
+                $agent = Auth::user()->isAgent;
+                if ($agent != null) {
+                    if ($agent->registration_status != 'complete') {
+                        return redirect()->route('agent.completeRegistration', [
+                            'action' => 'index'
+                        ])->with('info', 'Please complete your registration to continue!');
+                    }
+                } else {
+                    // create new agent
+                    $agent = Agent::create([
+                        'user_id' => Auth::user()->id,
+                        'registration_status' => 'step_1'
+                    ]);
+                    return redirect()->route('agent.completeRegistration', [
+                        'action' => 'index'
+                    ])->with('info', 'Please complete your registration to continue!');
+                }
+                if ($agent->registration_status === 'complete') {
+                    return $next($request);
+                }
+            }
+        }
+
         // Current user
         $user = Auth::user();
         $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
@@ -38,7 +65,7 @@ class Eligible
         if (!$pharmacy && Auth::user()->role == 'owner') {
             // return redirect()->route('dashboard')->with('error', 'No pharmacy found in the session.');
             // $owner = Auth::user();
-            if(Auth::user()->pharmacies->count() < 1){
+            if (Auth::user()->pharmacies->count() < 1) {
                 if ($action == "create pharmacy") {
                     return $next($request);
                 }
@@ -46,8 +73,7 @@ class Eligible
                 if ($action != "create pharmacy") {
                     return redirect()->route('dashboard')->with('info', 'You don\'t have any pharmacy, select or create one to continue!');
                 }
-            }
-            else{
+            } else {
                 return redirect()->route('dashboard')->with('info', 'Select a pharmacy to continue!');
             }
         }

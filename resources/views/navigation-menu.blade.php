@@ -124,7 +124,7 @@
         {{-- <span class="flex justify-between h-16"> --}}
 
         <!-- Navigation Links -->
-        <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex h-16">
+        <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex overflow-auto">
             @if (Auth::user()->role == 'staff')
                 <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                     {{ __('Dashboard') }}
@@ -223,6 +223,9 @@
                 <x-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
                     {{ __('Messages') }}
                 </x-nav-link>
+                <x-nav-link href="{{ route('agent.completeRegistration', ['action' => 'index']) }}" :active="request()->routeIs('agent.completeRegistration')">
+                    {{ __('Agents Registration') }}
+                </x-nav-link>
             @endif
             @if (Auth::user()->role == 'agent')
                 <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
@@ -237,9 +240,9 @@
                 <x-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
                     {{ __('Messages') }}
                 </x-nav-link>
-                {{-- <x-nav-link href="{{ route('agent.cases', ['action' => 'index']) }}" :active="request()->routeIs('agent.cases')">
-                    {{ __('Cases') }}
-                </x-nav-link> --}}
+                <x-nav-link href="{{ route('agent.completeRegistration', ['action' => 'index']) }}" :active="request()->routeIs('agent.completeRegistration')">
+                    {{ __('Complete Registration') }}
+                </x-nav-link>
                 {{-- <x-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
                     {{ __('Contracts') }}
                 </x-nav-link> --}}
@@ -330,6 +333,9 @@
                 <x-responsive-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
                     {{ __('Messages') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('agent.completeRegistration', ['action' => 'index']) }}" :active="request()->routeIs('agent.completeRegistration')">
+                    {{ __('Agents Registration') }}
+                </x-responsive-nav-link>
             @endif
             @if (Auth::user()->role == 'agent')
                 <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
@@ -343,6 +349,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
                     {{ __('Messages') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('agent.completeRegistration', ['action' => 'index']) }}" :active="request()->routeIs('agent.completeRegistration')">
+                    {{ __('Complete Registration') }}
                 </x-responsive-nav-link>
                 {{-- <x-responsive-nav-link href="{{ route('agent.cases', ['action' => 'index']) }}" :active="request()->routeIs('agent.cases')">
                     {{ __('Cases') }}

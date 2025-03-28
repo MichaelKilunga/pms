@@ -54,10 +54,22 @@ class DashboardController extends Controller
         }
 
         if (Auth::user()->role == "agent") {
-            $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
-            $totalPackages = Package::where('owner_id', Auth::user()->id)->count();
-            $activePharmacies = Pharmacy::where('owner_id', Auth::user()->id)->where('status', 'active')->count();
-            $inactivePharmacies = Pharmacy::where('owner_id', Auth::user()->id)->where('status', 'inactive')->count();
+            // get all pharmacies under this agent
+            $totalPharmacies = Pharmacy::where('agent_id', Auth::user()->id)->count();
+            $totalPackages = Package::count();
+
+            $activePharmacies  = Pharmacy::where('agent_id', Auth::user()->id)
+                ->whereHas('owner', function ($query) {
+                    $query->whereHas('contracts', function ($query) {
+                        $query->where('is_current_contract', 1)
+                            ->where('status', 'active');
+                    });
+                })
+                ->count();
+
+            // inactive pharmacies
+            $inactivePharmacies = $totalPharmacies - $activePharmacies;
+
             $totalMessages = 0;
             $totalCases = 0;
 
