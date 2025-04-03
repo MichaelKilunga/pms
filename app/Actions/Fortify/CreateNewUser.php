@@ -42,17 +42,20 @@ class CreateNewUser implements CreatesNewUsers
         ]);
 
         if ($input['role'] == 'agent') {
+            
             $this->notify(
                 $user,
                 'Welcome on board! Follow the instructions to continue.',
                 'success'
             );
+
             // add this agent to agent's list
             Agent::create([
                 'user_id' => $user->id,
                 'registration_status' => 'step_1'
             ]);
-        } 
+        }
+
         if ($input['role'] == 'owner') {
             $this->notify(
                 $user,

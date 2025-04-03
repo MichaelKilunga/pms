@@ -137,12 +137,12 @@
     <!-- Hero Section -->
     <div class="hero">
         <div class="container">
-            <h1 class="display-4 fw-bold">Welcome to Pharmacy Management System (PILLPOINT)</h1>
+            <h1 class="display-4 fw-bold">Welcome to Pharmacy Management System (PILLPOINTONE)</h1>
             <p class="lead">A powerful solution for managing your Pharmacies</p>
             @auth
                 <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg me-2">Go to Dashboard</a>
             @else
-                <a href="{{ route('register') }}" class="btn btn-primary btn-lg me-2">Become Agent</a>
+                <a onclick="return (confirm('Still under maintanance!') && false)" href="{{ route('register') }}" class="btn btn-primary btn-lg me-2">Become Agent</a>
                 <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg">Login</a>
             @endauth
         </div>
@@ -336,7 +336,7 @@
         </section>
     @else
         {{-- Display our agents, show their profile picture, name, phone and email,   in a row scrolling horizontally --}}
-        <section class="py-5">
+        <section hidden class="hidden py-5">
             <div class="container">
                 <h2 class="text-center mb-4 text-primary h3">Our Agents</h2>
                 {{-- make the row scrollable horizontally --}}
@@ -395,7 +395,7 @@
     <section class="py-5 text-center">
         <div class="container">
             <h3 class="mb-4">Join thousands of businesses growing with Our System!</h3>
-            <a href="{{ route('register') }}" class="btn btn-success btn-lg">Become Agent</a>
+            <a onclick="return (confirm('Still under maintanance!') && false)" href="{{ route('register') }}" class="btn btn-success btn-lg">Become Agent</a>
         </div>
     </section>
 
