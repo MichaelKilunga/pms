@@ -4,11 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditingTrait;
 
-class Package extends Model
+class Package extends Model implements Auditable
 {
     use HasFactory;
+    use AuditingTrait;
 
+    protected $auditEvents = [
+        'created',
+        'updated',
+        'deleted',
+        'restored',  // Soft deletes, if applicable
+        'saved',     // General save event
+    ];
+    
     protected $fillable = [
         'name',
         'price',

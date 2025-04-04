@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'eligible' => \App\Http\Middleware\Eligible::class,
             'show' => \App\Http\Middleware\Show::class,
+            'logActivity' => \App\Http\Middleware\LogActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

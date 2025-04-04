@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\AuditController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PharmacyController;
 use App\Http\Controllers\StaffController;
@@ -32,7 +33,6 @@ Route::get('/', function () {
     //return welcome view with packages
     return view('welcome', ['packages' => Package::where('id', '!=', 1)->get(), 'agents' => User::where('role', 'agent')->get()]);
 });
-
 
 Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::get('schedule', function () {
@@ -73,8 +73,6 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::get('/medicines/import', [MedicineImportController::class, 'showImportForm'])->name('medicines.import-form');
     Route::post('/medicines/import', [MedicineImportController::class, 'import'])->name('medicines.import');
 
-
-
     // Route::resource('medicines', ItemsController::class);
     Route::get('medicines', [ItemsController::class, 'index'])->name('medicines');
 
@@ -84,12 +82,12 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
         Route::post('medicineStock', [StockController::class, 'MS_store'])->name('medicineStock.store');
         Route::post('/import', [ItemsController::class, 'importStore'])->name('importStore');
     });
+
     Route::get('medicines/search', [ItemsController::class, 'search'])->name('medicines.search');
     Route::get('medicines/{id}', [ItemsController::class, 'show'])->name('medicines.show');
     Route::put('medicines/update/{id}', [ItemsController::class, 'update'])->name('medicines.update');
     Route::delete('medicines/delete/{id}', [ItemsController::class, 'destroy'])->name('medicines.destroy');
     Route::get('/import', [ItemsController::class, 'import'])->name('import');
-
 
     Route::get('pharmacies', [PharmacyController::class, 'index'])->name('pharmacies');
     Route::get('pharmacies/create', [PharmacyController::class, 'create'])->name('pharmacies.create');
@@ -159,7 +157,6 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     //     Route::get('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
     // });
 });
-
 
 Route::middleware(['auth'])->group(function () {
     // Route::resource('dashboard', DashboardController::class);
@@ -243,6 +240,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('agent/contracts', [AgentController::class, 'contracts'])->name('agent.contracts');
         Route::post('agent/contracts', [AgentController::class, 'contracts'])->name('agent.contracts');
     });
+
+    // AUDITS
+    Route::get('/audits', [AuditController::class, 'index'])->name('audits.index');
+    // get base64 image
+    Route::get('/get_logo', [AuditController::class, 'getImage'])->name('audits.getImage');
+
 });
 
 Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {

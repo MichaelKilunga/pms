@@ -5,10 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditingTrait;
 
-class Pharmacy extends Model
+class Pharmacy extends Model implements Auditable
 {
     use HasFactory;
+    use AuditingTrait;
+    
     protected $fillable = [
         'name',
         'location',
@@ -16,6 +20,13 @@ class Pharmacy extends Model
         'package_id',
         'status',
         'agent_id',
+    ];
+    protected $auditEvents = [
+        'created',
+        'updated',
+        'deleted',
+        'restored',  // Soft deletes, if applicable
+        'saved',     // General save event
     ];
 
     public function owner()

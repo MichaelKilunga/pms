@@ -5,12 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditingTrait;
 
-class Stock extends Model
+class Stock extends Model implements Auditable
 {
     use HasFactory;
+    use AuditingTrait;
+
     protected $fillable = [
         'staff_id', 'pharmacy_id', 'item_id', 'quantity','remain_Quantity','low_stock_percentage', 'buying_price', 'selling_price', 'in_date','expire_date','batch_number','supplier',
+    ];
+    protected $auditEvents = [
+        'created',
+        'updated',
+        'deleted',
+        'restored',  // Soft deletes, if applicable
+        'saved',     // General save event
     ];
 
     public function staff()

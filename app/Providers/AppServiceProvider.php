@@ -33,5 +33,9 @@ class AppServiceProvider extends ServiceProvider
             $middleware = App::make(\App\Http\Middleware\Show::class);
             return $middleware->handle($request, function () {}, $action) === null;
         });
+
+        // login and logout events listeners
+        
+
     }
 }

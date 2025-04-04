@@ -260,15 +260,15 @@
                                     </thead>
                                     <tbody>
                                         ${response.sales.map((sale, index) => `
-                                                                                            <tr>
-                                                                                                <td>${index + 1}</td>
-                                                                                                <td>${sale.date}</td>
-                                                                                                <td class="text-left">${sale.item['name']}</td>
-                                                                                                <td>${sale.quantity}</td>
-                                                                                                <td>${sale.quantity*(sale.stock['selling_price'])}</td>
-                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
-                                                                                            </tr>
-                                                                                        `).join('')}
+                                                                                                                                                                                        <tr>
+                                                                                                                                                                                            <td>${index + 1}</td>
+                                                                                                                                                                                            <td>${sale.date}</td>
+                                                                                                                                                                                            <td class="text-left">${sale.item['name']}</td>
+                                                                                                                                                                                            <td>${sale.quantity}</td>
+                                                                                                                                                                                            <td>${sale.quantity*(sale.stock['selling_price'])}</td>
+                                                                                                                                                                                            <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
+                                                                                                                                                                                        </tr>
+                                                                                                                                                                                    `).join('')}
                                             ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
                                     </tbody>
                                 </table>
@@ -298,23 +298,23 @@
                                     </thead>
                                     <tbody>
                                         ${response.stocks.map((stock, index) => `
-                                                                                                <tr>
-                                                                                                    <td>${index + 1}</td>
-                                                                                                    <td>${stock.batch_number}</td>
+                                                                                                                                                                                            <tr>
+                                                                                                                                                                                                <td>${index + 1}</td>
+                                                                                                                                                                                                <td>${stock.batch_number}</td>
 
-                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
-                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
-                                                                                                    <td>${stock.expire_date}</td>
-                                                                                                    <td>${stock.low_stock_percentage}</td>
-                                                                                                    <td>${stock.supplier}</td>  
-                                                                                                                
-                                                                                                    <td class="text-left">${stock.item['name']}</td>
-                                                                                                    <td>${stock.quantity}</td>
-                                                                                                    <td>${stock.remain_Quantity}</td>
-                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
-                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
-                                                                                                    ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
-                                                                                                </tr>`).join('')}
+                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
+                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
+                                                                                                                                                                                                <td>${stock.expire_date}</td>
+                                                                                                                                                                                                <td>${stock.low_stock_percentage}</td>
+                                                                                                                                                                                                <td>${stock.supplier}</td>  
+                                                                                                                                                                                                            
+                                                                                                                                                                                                <td class="text-left">${stock.item['name']}</td>
+                                                                                                                                                                                                <td>${stock.quantity}</td>
+                                                                                                                                                                                                <td>${stock.remain_Quantity}</td>
+                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
+                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
+                                                                                                                                                                                                ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
+                                                                                                                                                                                            </tr>`).join('')}
                                             ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
                                     </tbody>
                                 </table>
@@ -414,52 +414,224 @@
                         // Initialize DataTable, but count the number of rows in the table first, if it is greater than 0, then destroy the table and reinitialize it, otherwise skip the initialization
                         if (response.rows > 0) {
                             $('.reportsTable').DataTable().destroy(); // Destroy the old table
-                            $('.reportsTable').DataTable({
-                                paging: true, // Enable paging
-                                searching: true, // Enable search bar
-                                ordering: true, // Enable column sorting
-                                info: true, // Enable information display
-                                lengthMenu: [10, 25, 50, 100], // Dropdown for records per page
-                                pageLength: 10, // Default number of records per page
-                                dom: 'Bfrtip', // Add Buttons to the table
-                                buttons: [{
-                                        extend: 'csvHtml5',
-                                        title: 'Reports',
-                                        text: 'Download CSV',
-                                        className: 'btn btn-primary reportsDownloadButton',
-                                        exportOptions: {
-                                            // columns: ':visible', // Export only visible columns
-                                            format: {
-                                                body: function(data, row, column, node) {
-                                                    return $('<div>').html(data)
-                                                    .text() // Convert HTML to plain text
-                                                        .replace(/\s+/g,
-                                                        ' ') // Replace multiple spaces with a single space
-                                                        .replace(/\u00A0/g,
-                                                        '') // Remove non-breaking spaces (&nbsp;)
-                                                        .replace(/TSh|TZS|,/g,
-                                                        '') // Remove currency symbols and commas
-                                                        .trim(); // Remove leading and trailing spaces
+                            getBase64Image(function(logoBase64) {
+                                // alert(logoBase64);
+                                $('.reportsTable').DataTable({
+                                    paging: true, // Enable paging
+                                    searching: true, // Enable search bar
+                                    ordering: true, // Enable column sorting
+                                    info: true, // Enable information display
+                                    lengthMenu: [10, 25, 50,
+                                        100
+                                    ], // Dropdown for records per page
+                                    pageLength: 10, // Default number of records per page
+                                    dom: 'Bfrtip', // Add Buttons to the table
+                                    buttons: [{
+                                            extend: 'csvHtml5',
+                                            title: '',
+                                            text: 'Download CSV',
+                                            className: 'btn btn-primary reportsDownloadButton',
+                                            exportOptions: {
+                                                // columns: ':visible', // Export only visible columns
+                                                format: {
+                                                    body: function(data, row,
+                                                        column, node) {
+                                                        return $('<div>').html(
+                                                                data)
+                                                            .text() // Convert HTML to plain text
+                                                            .replace(/\s+/g,
+                                                                ' '
+                                                            ) // Replace multiple spaces with a single space
+                                                            .replace(/\u00A0/g,
+                                                                ''
+                                                            ) // Remove non-breaking spaces (&nbsp;)
+                                                            .replace(
+                                                                /TSh|TZS|,/g,
+                                                                ''
+                                                            ) // Remove currency symbols and commas
+                                                            .trim(); // Remove leading and trailing spaces
+                                                    }
                                                 }
-                                            }
 
+                                            },
+                                            customize: function(csv) {
+                                                let reportType =
+                                                    "Sales Report"; // Replace with dynamic report type if needed
+                                                let dateRange =
+                                                    "From: 2024-04-01 To: 2024-04-30";
+                                                let customHeader =
+                                                    `"Company Name","${reportType}","${dateRange}"\n`;
+                                                return customHeader +
+                                                    csv; // Prepend custom header to CSV file
+                                            }
+                                        },
+                                        {
+                                            extend: 'pdfHtml5',
+                                            title: '',
+                                            text: 'Download PDF',
+                                            className: 'btn btn-secondary reportsDownloadButton',
+                                            orientation: 'portrait', // Landscape orientation for PDF
+                                            pageSize: 'A4', // A4 page size
+                                            customize: function(doc) {
+                                                let reportType = category ===
+                                                    "sales" ? "Sales Report" :
+                                                    "Stocks Report";
+                                                let printDate =
+                                                    "From: pillpointone.com \n Date: " +
+                                                    new Date().toLocaleString();
+
+                                                // Header Layout: Logo on Left, Title on Right
+                                                let headerLayout = {
+                                                    columns: [
+                                                        // Left Side: Logo (if available)
+                                                        {
+                                                            image: logoBase64 ||
+                                                                '', // Use logo if available
+                                                            width: 80, // Adjust size as needed
+                                                            alignment: 'left',
+                                                            margin: [0,
+                                                                0,
+                                                                10,
+                                                                0
+                                                            ] // Spacing
+                                                        },
+                                                        // Right Side: Report Titles
+                                                        {
+                                                            stack: [{
+                                                                    text: "PHARMACY MANAGEMENT SYSTEM",
+                                                                    fontSize: 18,
+                                                                    color: '#0000FF', // Blue
+                                                                    bold: true,
+                                                                    alignment: 'left'
+                                                                },
+                                                                {
+                                                                    text: "(PILLPOINTONE)",
+                                                                    fontSize: 17,
+                                                                    italics: true,
+                                                                    color: '#FF0000', // Red
+                                                                    alignment: 'left'
+                                                                },
+                                                                {
+                                                                    text: reportType,
+                                                                    fontSize: 15,
+                                                                    color: '#008000', // Green
+                                                                    bold: true,
+                                                                    alignment: 'left',
+                                                                    margin: [
+                                                                        0,
+                                                                        5,
+                                                                        0,
+                                                                        0
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    text: 'FROM: ' +
+                                                                        start +
+                                                                        ' TO: ' +
+                                                                        end,
+                                                                    fontSize: 12,
+                                                                    italics: true,
+                                                                    alignment: 'left',
+                                                                    margin: [
+                                                                        0,
+                                                                        0,
+                                                                        0,
+                                                                        20
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            width: '*'
+                                                        }
+                                                    ],
+                                                    margin: [0, 0, 0,
+                                                        10
+                                                    ] // Space after the header
+                                                };
+
+                                                //  Print Date (Below header, right-aligned)
+                                                let printDateText = {
+                                                    text: printDate,
+                                                    fontSize: 10,
+                                                    italics: true,
+                                                    alignment: 'right',
+                                                    margin: [0, 0, 0, 10]
+                                                };
+
+                                                //  **Apply Table Styles**
+                                                doc.styles.tableHeader = {
+                                                    bold: true,
+                                                    fontSize: 12,
+                                                    color: 'white',
+                                                    fillColor: '#333', // Dark gray header
+                                                    alignment: 'center'
+                                                };
+                                                doc.styles.tableBody = {
+                                                    fontSize: 10,
+                                                    color: '#000', // Black text
+                                                    alignment: 'center'
+                                                };
+
+                                                doc.content.unshift(
+                                                    printDateText
+                                                ); // Add print date
+
+                                                doc.content.unshift(
+                                                    headerLayout
+                                                );
+
+                                                // Format Table Borders
+                                                doc.content.forEach(function(
+                                                    content) {
+                                                    if (content.table) {
+                                                        content
+                                                            .layout = {
+                                                                hLineWidth: function(
+                                                                    i,
+                                                                    node
+                                                                ) {
+                                                                    return 0.5;
+                                                                }, // Horizontal lines
+                                                                vLineWidth: function(
+                                                                    i,
+                                                                    node
+                                                                ) {
+                                                                    return 0.5;
+                                                                }, // Vertical lines
+                                                                hLineColor: function(
+                                                                    i,
+                                                                    node
+                                                                ) {
+                                                                    return '#aaa';
+                                                                }, // Light gray lines
+                                                                vLineColor: function(
+                                                                    i,
+                                                                    node
+                                                                ) {
+                                                                    return '#aaa';
+                                                                } // Light gray lines
+                                                            };
+                                                        // Set all columns to auto-adjust width
+                                                        content.table
+                                                            .widths =
+                                                            Array(
+                                                                content
+                                                                .table
+                                                                .body[0]
+                                                                .length)
+                                                            .fill('*');
+                                                    }
+                                                });
+                                            }
                                         }
-                                    },
-                                    {
-                                        extend: 'pdfHtml5',
-                                        title: 'Reports',
-                                        text: 'Download PDF',
-                                        className: 'btn btn-secondary reportsDownloadButton',
-                                        orientation: 'landscape', // Landscape orientation for PDF
-                                        pageSize: 'A4' // A4 page size
+                                    ],
+                                    columnDefs: columnDefs,
+                                    error: function(settings, helpPage, message) {
+                                        console.error('DataTables Error:',
+                                            message
+                                        ); // Log the error to the console
+                                        // Optionally handle specific errors here
                                     }
-                                ],
-                                columnDefs: columnDefs,
-                                error: function(settings, helpPage, message) {
-                                    console.error('DataTables Error:',
-                                        message); // Log the error to the console
-                                    // Optionally handle specific errors here
-                                }
+                                });
                             });
                         }
                     },
@@ -499,6 +671,23 @@
                                 position: 'top'
                             }
                         }
+                    }
+                });
+            }
+
+            // Fetch the base64 image before initializing DataTables
+            function getBase64Image(callback) {
+                $.ajax({
+                    url: "/get_logo", // Create this route in Laravel
+                    type: "GET",
+                    success: function(response) {
+                        // console.log("Logo fetched successfully:", response);
+                        callback(response.base64); // Pass Base64 image to callback
+                    },
+                    error: function(error) {
+                        // console.error("Error fetching logo. Using default.");
+                        console.log("Response Error:", error.responseText);
+                        callback(null); // If error, use null
                     }
                 });
             }

@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditingTrait;
 
-class Message extends Model
+class Message extends Model implements Auditable
 {
     use HasFactory;
+    use AuditingTrait;
 
     protected $fillable = [
         'conversation_id', // Foreign key to conversations
@@ -19,6 +22,13 @@ class Message extends Model
         'message_type',    // 'text', 'image', 'file', 'voice'
         'is_urgent',       // Boolean indicating if the message is urgent
         'parent_message_id', // Optional parent message ID
+    ];
+    protected $auditEvents = [
+        'created',
+        'updated',
+        'deleted',
+        'restored',  // Soft deletes, if applicable
+        'saved',     // General save event
     ];
 
     // Relationship with Conversation

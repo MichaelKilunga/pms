@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditingTrait;
 
-class PrinterSetting extends Model
+class PrinterSetting extends Model implements Auditable
 {
+    use HasFactory;
+    use AuditingTrait;
+    
     // Schema::create('printer_settings', function (Blueprint $table) {
     //     $table->id();
     //     $table->string('name');
@@ -14,7 +20,13 @@ class PrinterSetting extends Model
     //     $table->foreignId('pharmacy_id')->constrained('pharmacies')->onDelete('cascade');
     //     $table->timestamps();
     // });
-
+    protected $auditEvents = [
+        'created',
+        'updated',
+        'deleted',
+        'restored',  // Soft deletes, if applicable
+        'saved',     // General save event
+    ];
     protected $fillable = [
         'name',
         'ip_address',

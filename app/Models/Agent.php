@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditingTrait;
 
-class Agent extends Model
+class Agent extends Model implements Auditable
 {
     use HasFactory;
+    use AuditingTrait;
 
     protected $fillable = [
         'user_id',
@@ -27,6 +30,13 @@ class Agent extends Model
         'verified_by',
         'verified_date',
         'address',
+    ];
+    protected $auditEvents = [
+        'created',
+        'updated',
+        'deleted',
+        'restored',  // Soft deletes, if applicable
+        'saved',     // General save event
     ];
 
     // Relationship with User

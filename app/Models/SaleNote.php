@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditingTrait;
 
-class SaleNote extends Model
+class SaleNote extends Model implements Auditable
 {
+    use  HasFactory;
+    use AuditingTrait;
+
     /* Schema::create('sale_notes', function (Blueprint $table) {
         $table->id();
         //name
@@ -31,6 +37,13 @@ class SaleNote extends Model
         'description',
         'pharmacy_id',
         'staff_id',
+    ];
+    protected $auditEvents = [
+        'created',
+        'updated',
+        'deleted',
+        'restored',  // Soft deletes, if applicable
+        'saved',     // General save event
     ];
 
     public function pharmacy()

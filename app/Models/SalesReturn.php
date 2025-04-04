@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditingTrait;
 
-class SalesReturn extends Model
+class SalesReturn extends Model implements Auditable
 {
     use HasFactory;
+    use AuditingTrait;
 
     protected $fillable = [
         'sale_id',
@@ -19,6 +22,13 @@ class SalesReturn extends Model
         'return_status',
         'approved_by',
         'date',
+    ];
+    protected $auditEvents = [
+        'created',
+        'updated',
+        'deleted',
+        'restored',  // Soft deletes, if applicable
+        'saved',     // General save event
     ];
 
     /**

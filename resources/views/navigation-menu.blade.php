@@ -226,6 +226,9 @@
                 <x-nav-link href="{{ route('agent.completeRegistration', ['action' => 'index']) }}" :active="request()->routeIs('agent.completeRegistration')">
                     {{ __('Agents Registration') }}
                 </x-nav-link>
+                <x-nav-link href="{{ route('audits.index') }}" :active="request()->routeIs('audits.index')">
+                    {{ __('Activities') }}
+                </x-nav-link>
             @endif
             @if (Auth::user()->role == 'agent')
                 <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
