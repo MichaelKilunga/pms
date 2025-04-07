@@ -12,6 +12,8 @@ class LogSuccessfulLogout
     {
         if ($event->user) {
             Audit::create([
+                'auditable_type' => get_class($event->user),
+                'auditable_id' => $event->user->id, // Use the user's ID
                 'user_id' => $event->user->id,
                 'event' => 'logout',
                 'old_values' => [],
