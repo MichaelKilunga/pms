@@ -46,7 +46,7 @@
         // initialize datatable
         $(document).ready(function() {
             $('#TableOne').DataTable({
-                "order": [],
+                pagenation: false,
                 // "pageLength": 10,
                 // "lengthMenu": [5, 10, 25, 50, 100],
                 "language": {
