@@ -113,6 +113,8 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::put('stock', [StockController::class, 'update'])->name('stock.update');
     Route::delete('stock/delete/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
     Route::post('/stock/import', [StockController::class, 'import'])->name('importMedicineStock');
+    Route::get('/stock-balances', [StockController::class, 'viewStockBalances'])->name('stocks.balance');
+
 
     Route::get('sales', [SalesController::class, 'index'])->name('sales');
     Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');

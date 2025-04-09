@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -491,4 +492,27 @@ class StockController extends Controller
             return redirect()->back()->with('error', 'Error processing the file: ' . $e->getMessage());
         }
     }
+
+     //stock balance 
+    public function viewStockBalances()
+{
+    $pharmacyId = session('current_pharmacy_id');
+
+    $stockBalances = Stock::select(
+            'item_id',
+            DB::raw('SUM(quantity) as quantity'),
+            DB::raw('SUM(remain_Quantity) as remain_Quantity')
+        )
+        ->where('pharmacy_id', $pharmacyId)
+        ->groupBy('item_id')
+        ->with('item') // eager load item name
+        //paginate 
+        ->paginate(10);
+        // ->get();
+
+    return view('stock.balance', compact('stockBalances'));
 }
+}
+
+
+
