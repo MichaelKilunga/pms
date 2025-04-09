@@ -38,10 +38,8 @@
                         </tr>
                     @endforelse
                 </tbody>
-                <tfoot>
-                    {{ $stockBalances->links() }}
-                </tfoot>
             </table>
+            {{ $stockBalances->links() }}
         </div>
     </div>
 @endsection
