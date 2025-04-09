@@ -7,7 +7,7 @@
 
         {{-- <hr class="mb-2"> --}}
         <div class="table-responsive">
-            <table class="table table-bordered table-striped table-hover" id="Table">
+            <table class="table table-bordered table-striped table-hover" id="TableOne">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -42,4 +42,28 @@
             {{ $stockBalances->links() }}
         </div>
     </div>
+    <script>
+        // initialize datatable
+        $(document).ready(function() {
+            $('#TableOne').DataTable({
+                "order": [],
+                // "pageLength": 10,
+                // "lengthMenu": [5, 10, 25, 50, 100],
+                "language": {
+                    "lengthMenu": "Show _MENU_ entries",
+                    "zeroRecords": "No records found",
+                    "info": "Showing page _PAGE_ of _PAGES_",
+                    "infoEmpty": "No records available",
+                    "infoFiltered": "(filtered from _MAX_ total records)",
+                    "search": "Search:",
+                    // "paginate": {
+                    //     "first": "First",
+                    //     "last": "Last",
+                    //     "next": "Next",
+                    //     "previous": "Previous"
+                    // }
+                }
+            });
+        });
+    </script>
 @endsection
