@@ -38,6 +38,9 @@
                         </tr>
                     @endforelse
                 </tbody>
+                <tfoot>
+                    {{ $stockBalances->links() }}
+                </tfoot>
             </table>
         </div>
     </div>
