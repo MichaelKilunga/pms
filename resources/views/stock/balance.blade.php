@@ -12,8 +12,9 @@
                     <tr>
                         <th>#</th>
                         <th>Medicine Name</th>
-                        <th>Stocked Quantity</th>
-                        <th>Remaining Quantity</th>
+                        {{-- <th>Stocked Quantity</th> --}}
+                        <th>Stocked Remaining Quantity</th>
+                        <th>Expired remaining Quantity</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -22,8 +23,13 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $stock->item->name }}</td>
-                            <td>{{ $stock->quantity }}</td>
-                            <td>{{ $stock->remain_Quantity }}</td>
+                            {{-- <td>{{ $stock->quantity }}</td> --}}
+                            <td class="text-dark fw-bold">{{ $stock->remain_Quantity }}</td>
+                            @if ($stock->expired_remain_Quantity > 0)
+                            <td class="text-danger fw-bold">{{ $stock->expired_remain_Quantity }}</td>
+                            @else
+                            <td class="text-dark fw-bold">{{ $stock->expired_remain_Quantity }}</td>
+                            @endif
                             <td>
                                 @if ($stock->remain_Quantity > 0)
                                 <span class="text-success fw-bold"><p>Available</p></span>
@@ -33,9 +39,9 @@
                             </td>
                         </tr>
                     @empty
-                        <tr>
-                            <td colspan="5" class="text-center">No stock records found.</td>
-                        </tr>
+                        {{-- <tr>
+                            <td colspan="6" class="text-center">No stock records found.</td>
+                        </tr> --}}
                     @endforelse
                 </tbody>
             </table>
@@ -53,7 +59,6 @@
                     "lengthMenu": "Show _MENU_ entries",
                     "zeroRecords": "No records found",
                     "info": "Showing page _PAGE_ of _PAGES_",
-                    "infoEmpty": "No records available",
                     "infoFiltered": "(filtered from _MAX_ total records)",
                     "search": "Search:",
                     // "paginate": {

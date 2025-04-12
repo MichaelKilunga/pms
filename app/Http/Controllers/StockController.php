@@ -15,48 +15,12 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 
 
 class StockController extends Controller
 {
-    /**
-     * Display a listing of the stock.
-     */
-    // public function index(Request $request)
-    // {
-
-    //     $query = Stock::with('staff', 'item')->where('pharmacy_id', session('current_pharmacy_id'));
-    //     $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
-
-    //     if ($request->has('search')) {
-    //         $query->whereHas('item', function ($q) use ($request) {
-    //             $q->where('name', 'like', '%' . $request->search . '%');
-    //         });
-    //     }
-
-    //     $stocks = $query->paginate(50);
-    //     // $stocks = $query->get();
-
-    //     // if ($request->has('export')) {
-    //     //     $stocks = $query->get();
-    //     //     return Excel::download(new StockExport($stocks), 'stock.xlsx');
-    //     // }
-
-    //     if ($request->has('search')) {
-    //         // return json response
-    //         return response()->json([
-    //             'stocks' => $stocks,
-    //             'medicines' => $medicines,
-    //         ]);
-    //     }
-    //     return view('stock.index', compact('stocks', 'medicines'));
-    // }
-
-    // public function debug(){
-    //    $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->with('lastStock')->first();
-    //    dd($medicines);
-    // }
 
     public function index(Request $request)
     {
@@ -286,6 +250,7 @@ class StockController extends Controller
         return redirect()->route('stock')->with('success', 'Stock added successfully!');
     }
 
+    // add stock and medicines at a time
     public function MS_store(Request $request)
     {
         try {
@@ -499,16 +464,15 @@ class StockController extends Controller
     $pharmacyId = session('current_pharmacy_id');
 
     $stockBalances = Stock::select(
-            'item_id',
-            DB::raw('SUM(quantity) as quantity'),
-            DB::raw('SUM(remain_Quantity) as remain_Quantity')
-        )
-        ->where('pharmacy_id', $pharmacyId)
-        ->groupBy('item_id')
-        ->with('item') // eager load item name
-        //paginate 
-        ->paginate(10);
-        // ->get();
+        'item_id',
+        DB::raw('SUM(quantity) as quantity'),
+        DB::raw("SUM(CASE WHEN expire_date > datetime('now') THEN remain_Quantity ELSE 0 END) as remain_Quantity"),
+        DB::raw("SUM(CASE WHEN expire_date <= datetime('now') THEN remain_Quantity ELSE 0 END) as expired_remain_Quantity")
+    )
+    ->where('pharmacy_id', $pharmacyId)
+    ->groupBy('item_id')
+    ->with('item')
+    ->paginate(10);
 
     return view('stock.balance', compact('stockBalances'));
 }
