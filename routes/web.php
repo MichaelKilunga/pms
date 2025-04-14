@@ -28,6 +28,8 @@ use App\Http\Controllers\SaleNoteController;
 use App\Http\Controllers\SalesReturnController;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\StockTransferController;
+
 
 Route::get('/', function () {
     //return welcome view with packages
@@ -114,7 +116,14 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::delete('stock/delete/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
     Route::post('/stock/import', [StockController::class, 'import'])->name('importMedicineStock');
     Route::get('/stock-balances', [StockController::class, 'viewStockBalances'])->name('stocks.balance');
-
+    
+    //stock stransfer
+    Route::get('stockTransfers', [StockTransferController::class, 'index'])->name('stockTransfers');
+    Route::get('/stock-transfers', [StockTransferController::class, 'index'])->name('stockTransfers.index');
+    Route::post('stockTransfers', [StockTransferController::class, 'store'])->name('stockTransfers.store');
+    Route::delete('stockTransfers/{id}', [StockTransferController::class, 'destroy'])->name('stockTransfers.destroy');
+    Route::get('stockTransfers/{id}/confirm', [StockTransferController::class, 'confirm'])->name('stockTransfers.confirm');
+    Route::get('stockTransfers/{id}/print', [StockTransferController::class, 'print'])->name('stockTransfers.print');
 
     Route::get('sales', [SalesController::class, 'index'])->name('sales');
     Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');

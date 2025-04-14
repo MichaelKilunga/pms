@@ -167,6 +167,9 @@
                 {{-- stock balances --}}
                 <x-nav-link href="{{ route('stocks.balance') }}" :active="request()->routeIs('stocks.balance')">
                     {{ __('Stock Balance') }}
+                </x-nav-link> 
+                <x-nav-link href="{{ route('stockTransfers') }}" :active="request()->routeIs('stockTransfers')">
+                    {{ __('Stock Transfers') }}
                 </x-nav-link>
 
                 <x-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
@@ -288,6 +291,9 @@
                 {{-- stock balances --}}
                 <x-responsive-nav-link href="{{ route('stocks.balance') }}" :active="request()->routeIs('stocks.balance')">
                     {{ __('Stock Balance') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('stockTransfers') }}" :active="request()->routeIs('stockTransfers')">
+                    {{ __('Stock Transfers') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
                     {{ __('Pharmacist') }}
