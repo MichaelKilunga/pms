@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Stock;
 use App\Models\StockTransfer;
 use App\Models\Pharmacy;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StockTransferController extends Controller
 {
@@ -55,17 +57,30 @@ class StockTransferController extends Controller
     //store stock transfer
     public function store(Request $request)
     {
-        $request->validate([
-            'stock_id.*' => 'required|exists:stocks,id',
-            'quantity.*' => 'required|integer|min:1',
-            'to_pharmacy_id' => 'nullable|exists:pharmacies,id',
-            'to_pharmacy_name' => 'nullable|string|max:255',
-            'tin_number' => 'nullable|string|max:255',
-            'transfer_date' => 'required|date',
-            'notes' => 'nullable|string',
-        ]);
+        try {
 
-    //   dd($request->to_pharmacy_name);
+            $request->validate([
+                'stock_id.*' => 'required|exists:stocks,id',
+                'quantity.*' => 'required|integer|min:1',
+                // check if exists in pharmacies id or is equal to 0
+                'to_pharmacy_id' => [
+                    'required',
+                    Rule::in(array_merge(
+                        [0],
+                        Pharmacy::pluck('id')->toArray()
+                    )),
+                ],
+                'to_pharmacy_name' => 'nullable|string|max:255',
+                'tin_number' => 'nullable|string|max:255',
+                'transfer_date' => 'required|date',
+                'notes' => 'nullable|string',
+            ]);
+            // dd($request->all());
+        } catch (\Exception $e) {
+            // dd($e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
 
         // call pharmacy id of the current user
         $fromPharmacyId = session('current_pharmacy_id');
@@ -74,7 +89,7 @@ class StockTransferController extends Controller
             StockTransfer::create([
                 'stock_id' => $stockId,
                 'quantity' => $request->quantity[$index],
-                'to_pharmacy_id' => $request->to_pharmacy_id,
+                'to_pharmacy_id' => $request->to_pharmacy_id == 0 ? null :  $request->to_pharmacy_id,
                 'to_pharmacy_name' => $request->to_pharmacy_name,
                 'to_pharmacy_tin' => $request->tin_number,
                 'transfer_date' => $request->transfer_date,
@@ -82,12 +97,12 @@ class StockTransferController extends Controller
                 'transferred_by' => Auth::id(),
                 'from_pharmacy_id' => $fromPharmacyId,
             ]);
-
+        }
+        foreach ($request->stock_id as $index => $stockId) {
             // Update the stock quantity
             $stock = Stock::findOrFail($stockId);
             $stock->remain_Quantity -= $request->quantity[$index];
             $stock->save();
-
         }
 
         return redirect()->route('stockTransfers.index')->with('success', 'Stock transferred successfully.');
@@ -114,8 +129,14 @@ class StockTransferController extends Controller
     public function confirm($id)
     {
         $transfer = StockTransfer::findOrFail($id);
-        $transfer->status = 'completed';
-        $transfer->save();
+        // $transfer->status = 'completed';
+        // $transfer->save();
+
+        // update the other transfers made
+        $otherTransfers = StockTransfer::where('from_pharmacy_id', $transfer->from_pharmacy_id)
+            // ->where('to_pharmacy_id', $transfer->to_pharmacy_id)
+            ->where('created_at', $transfer->created_at)
+            ->update(['status' => 'completed']);
 
         return redirect()->route('stockTransfers.index')->with('success', 'Stock transfer confirmed and completed successfully.');
     }
@@ -126,7 +147,7 @@ class StockTransferController extends Controller
         $transfer = StockTransfer::with(['stock.item', 'fromPharmacy', 'toPharmacy', 'transferredBy'])
             ->where('from_pharmacy_id', session('current_pharmacy_id'))
             ->where('created_at', StockTransfer::find($id)->created_at);
- 
+
         return view('stockTransfers.print', compact('transfer'));
     }
 }

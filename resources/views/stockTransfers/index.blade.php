@@ -91,7 +91,7 @@
                                         <form action="{{ route('stockTransfers.print', $transfer->id) }}" method="GET">
                                             @csrf
                                             <button type="submit" class="btn btn btn-outline-dark btn-sm mx-2"
-                                                onclick="return confirm('Are you sure you want to print this stock transfer ?')"><i
+                                                onclick="return confirm('Confirm first to be able to print.') && false"><i
                                                     class="bi bi-printer"></i></button>
                                         </form>
                                     </div>

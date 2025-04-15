@@ -82,8 +82,7 @@
                 {{ $transfer->first()->toPharmacy->name ?? $transfer->first()->to_pharmacy_name }}</p>
             <p><strong>To Pharmacy TIN :</strong> {{ $transfer->first()->to_pharmacy_tin }}</p>
             <p><strong>Description:</strong> {{ $transfer->first()->notes }}</p>
-            <p><strong>Transfer ID:</strong> {{ $transfer->first()->id }}</p>
-
+            {{-- <p><strong>Transfer ID:</strong> {{ $transfer->first()->id }}</p> --}}
             <p><strong>Transfer At:</strong> {{ $transfer->first()->created_at->format('Y-m-d H:i:s') }}</p>
             <p><strong>Transfer Status:</strong> {{ $transfer->first()->status }}</p>
 
