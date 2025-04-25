@@ -112,8 +112,7 @@
         aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="row g-0">
-                    <div class="col-md-12 bg-white ">
+                <div class="row g-0" bg-white ">
                         <div class="modal-header bg-primary text-white">
                             <h5 class="modal-title fw-bold text-white" id="addStockTransfersModalLabel">Transfer Stock</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
