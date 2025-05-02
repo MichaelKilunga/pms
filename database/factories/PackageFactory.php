@@ -20,7 +20,6 @@ class PackageFactory extends Factory
         'name'=>'TRIAL PACKAGE',
         'price'=>0,
         'duration'=>14,
-        'features'=>'free everything',
         'status'=>'active',
         ];
     }
