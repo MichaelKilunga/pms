@@ -76,7 +76,23 @@ class DashboardController extends Controller
             return view('agent.index', compact('totalPharmacies', 'totalPackages', 'activePharmacies', 'inactivePharmacies', 'totalMessages', 'totalCases'));
         }
 
-        $sellMedicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->with('item')->get();
+        // Group all stocks by items and calculate the total quantity for each item
+        // $sellMedicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->with('item')->get();
+        $sellMedicines = Stock::select(
+            // generate a new id for each row by concatenating item_id and selling_price
+                            DB::raw("item_id || selling_price as id"),
+                            'item_id',
+                            DB::raw("SUM(remain_Quantity) as remain_Quantity"),
+                            'selling_price'
+                        )
+                        ->where('pharmacy_id', session('current_pharmacy_id'))
+                        ->where('expire_date', '>', now())
+                        ->groupBy('item_id', 'selling_price')
+                        ->with('item')
+                        ->get();
+
+                        // dd($sellMedicines);
+
         $totalMedicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->count();
         $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
         $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today())->sum('total_price');

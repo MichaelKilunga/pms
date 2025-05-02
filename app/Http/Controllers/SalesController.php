@@ -67,13 +67,13 @@ class SalesController extends BaseController
                     return $sale->item->name;
                 })
                 ->addColumn('price', function ($sale) {
-                    return number_format($sale->total_price / max($sale->quantity, 1), 2);
+                    return number_format($sale->total_price, 0);
                 })
                 ->addColumn('quantity', function ($sale) {
                     return $sale->quantity;
                 })
                 ->addColumn('total_price', function ($sale) {
-                    return number_format($sale->total_price, 2);
+                    return number_format($sale->total_price*$sale->quantity, 0);
                 })
                 ->addColumn('date', function ($sale) {
                     return $sale->date;
@@ -98,9 +98,9 @@ class SalesController extends BaseController
                                         </div>
                                         <div class="modal-body">
                                             <div><strong>Sales Name:</strong> '. htmlspecialchars($sale->item->name, ENT_QUOTES, 'UTF-8') .'</div>
-                                            <div><strong>Price:</strong> '. ($sale->quantity > 0 ? number_format($sale->total_price / $sale->quantity, 2) : 'N/A') .'</div>
+                                            <div><strong>Price:</strong> '. ($sale->quantity > 0 ? number_format($sale->total_price / 1, 0) : 'N/A') .'</div>
                                             <div><strong>Quantity:</strong> '. $sale->quantity .'</div>
-                                            <div><strong>Amount:</strong> '. number_format($sale->total_price, 2) .'</div>
+                                            <div><strong>Amount:</strong> '. number_format($sale->total_price*$sale->quantity, 0) .'</div>
                                             <div><strong>Date:</strong> '. $sale->date .'</div>
                                         </div>
                                     </div>
@@ -214,7 +214,22 @@ class SalesController extends BaseController
 
         // item_id represents the stock_id here
 
-        // dd($request->stock_id);
+        
+        /* extract the id from "item_id" request data by detecting price digits from right to left of item_id, and then get the remained right digits as id
+            if the price is 1500 and item_id is 231000 then the id will be 23 */
+            $newItemIds = [];
+
+            foreach ($request->item_id as $key => $item_id) {
+                $price = $request->total_price[$key];
+                $priceDigits = strlen((string) $price);
+                $id = substr($item_id, 0, -$priceDigits); // Extract from left
+                $newItemIds[$key] = $id;
+            }
+            
+            $request->merge(['item_id' => $newItemIds]);
+            
+            // dd($request->all());
+
         // Validate the incoming request data for all rows of sales
         try {
             $request->validate([
@@ -223,7 +238,8 @@ class SalesController extends BaseController
                 // 'staff_id' => 'required|exists:users,id',
 
                 'item_id' => 'required|array',         // Ensure it's an array of item IDs
-                'item_id.*' => 'required|exists:stocks,id', // Validate each item ID in the array
+                // 'item_id.*' => 'required|exists:stocks,id', // Validate each item ID in the array
+                'item_id.*' => 'required|exists:items,id', // Validate each item ID in the array
 
                 'quantity' => 'required|array',        // Ensure it's an array of quantities
                 'quantity.*' => 'required|integer|min:1', // Validate each quantity
@@ -241,31 +257,83 @@ class SalesController extends BaseController
             return redirect()->back()->with('error', 'Not added because: ' . $e->getMessage());
         }
 
-
         // Retrieve the pharmacy_id and staff_id for the sale record
         $pharmacyId = session('current_pharmacy_id'); // Ensure this is set correctly in your session
         $staffId = Auth::user()->id;
 
-
+        // dd($request->all());
 
         // Loop through the arrays of item data and create individual sale records
         try {
             foreach ($request->item_id as $key => $item_id) {
 
-                //update remaning stock
-                $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $item_id)->first();
-                $remainQuantity = $stock->remain_Quantity - $request->quantity[$key];
-                $stock->update(['remain_Quantity' => $remainQuantity]);
+                // store quantity in a temporary variable
+                $temp_quantity = $request->quantity[$key];
+                
+                while($temp_quantity > 0){
+                    // dd($total_price[$key]);
+                    // fetch all unxpired stocks of this item_id where the quantity is greater than 0, order them by the expire date ascendingly
+                    $stocks = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('selling_price',$request->total_price[$key])->where('item_id', $request->item_id[$key])->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->orderBy('expire_date', 'asc')->first();
+                    // dd($stocks);
 
-                Sales::create([
-                    'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
-                    'staff_id' => $staffId,                // Use the staff_id from the authenticated user
-                    'item_id' => $stock->item_id,
-                    'quantity' => $request->quantity[$key],
-                    'stock_id' => $request->stock_id[$key],
-                    'total_price' => $request->amount[$key],
-                    'date' => $request->date[$key],
-                ]);
+                    // check if temporary quantity is greater than the stock quantity
+                    if($temp_quantity > $stocks->remain_Quantity){
+                        // update the temporary quantity to the remaining quantity
+                        $temp_quantity = $temp_quantity - $stocks->remain_Quantity;
+
+                        // make sales
+                        $thisSale = Sales::create([
+                            'pharmacy_id' => $pharmacyId,
+                            'staff_id' => $staffId,
+                            'item_id' => $item_id,
+                            'quantity' => $stocks->remain_Quantity,
+                            'total_price' => $request->total_price[$key],
+                            'amount' => $request->total_price[$key]*$stocks->remain_Quantity,
+                            'date' => $request->date[$key],
+                            'stock_id' => $stocks->id,
+                        ]);
+
+                        if($thisSale){
+                            // update the stock quantity to 0
+                            $stocks->update(['remain_Quantity' => 0]);
+                        }
+                    }else{
+                        
+                        // make sales
+                        $thisSale =  Sales::create([
+                            'pharmacy_id' => $pharmacyId,
+                            'staff_id' => $staffId,
+                            'item_id' => $item_id,
+                            'quantity' => $temp_quantity,
+                            'total_price' => $request->total_price[$key],
+                            'amount' => $request->total_price[$key]*$temp_quantity,
+                            'date' => $request->date[$key],
+                            'stock_id' => $stocks->id,
+                        ]);
+
+                        if($thisSale){
+                            // update the stock quantity to the remaining quantity
+                            $stocks->update(['remain_Quantity' => $stocks->remain_Quantity - $temp_quantity]);
+                            // update the temporary quantity to 0
+                            $temp_quantity = 0;
+                        }
+                    }
+
+                //update remaning stock
+                // $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $item_id)->first();
+                // $remainQuantity = $stock->remain_Quantity - $request->quantity[$key];
+                // $stock->update(['remain_Quantity' => $remainQuantity]);
+
+                // Sales::create([
+                //     'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
+                //     'staff_id' => $staffId,                // Use the staff_id from the authenticated user
+                //     'item_id' => $stock->item_id,
+                //     'quantity' => $request->quantity[$key],
+                //     'stock_id' => $request->stock_id[$key],
+                //     'total_price' => $request->amount[$key],
+                //     'date' => $request->date[$key],
+                // ]);
+            }
             }
 
             // $printing = $this->printSaleReceipt($saleDate[0]);           

@@ -1,7 +1,21 @@
 @extends('sales.app')
 
 @section('content')
-    @php $medicines = App\Models\Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->with('item')->get(); @endphp
+    @php 
+    // $medicines = App\Models\Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->with('item')->get(); 
+    $medicines = App\Models\Stock::select(
+            // generate a new id for each row by concatenating item_id and selling_price
+                            \DB::raw("item_id || selling_price as id"),
+                            'item_id',
+                            \DB::raw("SUM(remain_Quantity) as remain_Quantity"),
+                            'selling_price'
+                        )
+                        ->where('pharmacy_id', session('current_pharmacy_id'))
+                        ->where('expire_date', '>', now())
+                        ->groupBy('item_id', 'selling_price')
+                        ->with('item')
+                        ->get();
+    @endphp
     <div class="container mt-4">
         <!-- Header -->
         <div class="d-flex justify-content-between mb-3">
