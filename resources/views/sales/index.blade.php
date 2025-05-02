@@ -84,8 +84,9 @@
                                         <option selected value="">Select medicine</option>
                                         @foreach ($medicines as $medicine)
                                             <option value="{{ $medicine->id }}">
-                                                {{ $medicine->item->name }} <br><strong
-                                                    class="text-danger">Exp:({{ \Carbon\Carbon::parse($medicine->expire_date)->format('m/Y') }})</strong>
+                                                {{ $medicine->item->name }} 
+                                                <br><strong
+                                                class="text-danger">({{ number_format($medicine->selling_price) }}Tsh)</strong>
                                             </option>
                                         @endforeach
                                     </select>
