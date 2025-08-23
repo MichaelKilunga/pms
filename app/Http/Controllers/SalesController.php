@@ -211,22 +211,23 @@ class SalesController extends BaseController
         $saleDate = $request->input('date');
 
         // dd($saleDate[0]);
+        // dd($request->all());
 
         // item_id represents the stock_id here
 
         
         /* extract the id from "item_id" request data by detecting price digits from right to left of item_id, and then get the remained right digits as id
             if the price is 1500 and item_id is 231000 then the id will be 23 */
-            $newItemIds = [];
+            // $newItemIds = [];
 
-            foreach ($request->item_id as $key => $item_id) {
-                $price = $request->total_price[$key];
-                $priceDigits = strlen((string) $price);
-                $id = substr($item_id, 0, -$priceDigits); // Extract from left
-                $newItemIds[$key] = $id;
-            }
+            // foreach ($request->item_id as $key => $item_id) {
+            //     $price = $request->total_price[$key];
+            //     $priceDigits = strlen((string) $price);
+            //     $id = substr($item_id, 0, -$priceDigits); // Extract from left
+            //     $newItemIds[$key] = $id;
+            // }
             
-            $request->merge(['item_id' => $newItemIds]);
+            // $request->merge(['item_id' => $newItemIds]);
             
             // dd($request->all());
 

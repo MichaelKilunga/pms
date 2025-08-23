@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('staff_id')->constrained('users')->onDelete('cascade'); // User making the sale
             $table->foreignId('stock_id')->constrained('stocks')->onDelete('cascade'); // User making the sale
             $table->integer('quantity');
-            $table->decimal('total_price', 8, 0);
+            $table->decimal('total_price', 12, 0);
             $table->timestamp('date');
             $table->timestamps();
         });

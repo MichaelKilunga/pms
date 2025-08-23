@@ -644,10 +644,11 @@
 
         function tellPrice(row) {
             let medicines = @json($sellMedicines); // Convert medicines to a JS array
-            const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
+            // console.log(@json($sellMedicines));
+            let selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
 
             // Find the selected medicine
-            const selectedMedicine = medicines.find(medicine => medicine.id == selectedMedicineId);
+            let selectedMedicine = medicines.find(medicine => medicine.id == selectedMedicineId);
 
             row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
             // console.log(selectedMedicine.id);
@@ -725,7 +726,7 @@
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
-                `;
+            `;
 
 
             salesFields.appendChild(newRow);

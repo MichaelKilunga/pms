@@ -1,7 +1,7 @@
 @extends('sales.app')
 
 @section('content')
-    @php 
+    {{-- @php 
     // $medicines = App\Models\Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->with('item')->get(); 
     $medicines = App\Models\Stock::select(
             // generate a new id for each row by concatenating item_id and selling_price
@@ -15,7 +15,28 @@
                         ->groupBy('item_id', 'selling_price')
                         ->with('item')
                         ->get();
+                        // dd($medicines);
+    @endphp --}}
+
+    @php
+        use App\Models\Stock;
+        use Illuminate\Support\Facades\DB;
+
+        $medicines = Stock::select(
+                DB::raw("CONCAT(item_id, '-', selling_price) as id"), // safe MySQL concat
+                'item_id',
+                DB::raw("SUM(remain_Quantity) as remain_Quantity"),
+                'selling_price'
+            )
+            ->where('pharmacy_id', session('current_pharmacy_id'))
+            ->where('expire_date', '>', now())
+            ->groupBy('item_id', 'selling_price')
+            ->with('item')
+            ->get();
+            // dd($medicines->all());
     @endphp
+
+
     <div class="container mt-4">
         <!-- Header -->
         <div class="d-flex justify-content-between mb-3">
@@ -231,13 +252,14 @@
             function tellPrice(row) {
                 let medicines = @json($medicines); // Convert medicines to a JS array
                 const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
-
+                
                 // Find the selected medicine
                 const selectedMedicine = medicines.find(medicine => medicine.id == selectedMedicineId);
-
+                
                 row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
                 // console.log(selectedMedicine.id);
-
+                
+                // return;
                 if (selectedMedicine) {
                     // Set the total price to the medicine price (formatted with "TZS")
                     row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price}`;

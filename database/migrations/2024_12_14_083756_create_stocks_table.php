@@ -20,8 +20,8 @@ return new class extends Migration
             $table->integer('remain_Quantity')->nullable(false);  // Shouldn't be nullable
             $table->integer('low_stock_percentage')->nullable(false);  // Shouldn't be nullable            
             $table->timestamp('expire_date');
-            $table->decimal('buying_price', 10, 2);
-            $table->decimal('selling_price', 10, 2);
+            $table->decimal('buying_price', 12, 2);
+            $table->decimal('selling_price', 12, 2);
             $table->foreignId('staff_id')->constrained('users')->onDelete('cascade'); // User making the stock
             $table->foreignId('item_id')->constrained('items')->onDelete('cascade'); // User making the stock
             $table->foreignId('pharmacy_id')->constrained('pharmacies')->onDelete('cascade');

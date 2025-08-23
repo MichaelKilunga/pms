@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('packages', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->decimal('price', 8, 2); // Cost of the package
+            $table->decimal('price', 12, 2); // Cost of the package
             $table->string('duration'); // e.g., 'Monthly', 'Yearly'
             $table->text('features')->nullable(); // JSON or Text for features
             $table->boolean('status')->default(true); // Active or Inactive

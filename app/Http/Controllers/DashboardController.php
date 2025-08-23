@@ -78,20 +78,34 @@ class DashboardController extends Controller
 
         // Group all stocks by items and calculate the total quantity for each item
         // $sellMedicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->with('item')->get();
+        // $sellMedicines = Stock::select(
+        //     // generate a new id for each row by concatenating item_id and selling_price
+        //                     DB::raw("item_id || selling_price as id"),
+        //                     'item_id',
+        //                     DB::raw("SUM(remain_Quantity) as remain_Quantity"),
+        //                     'selling_price'
+        //                 )
+        //                 ->where('pharmacy_id', session('current_pharmacy_id'))
+        //                 ->where('expire_date', '>', now())
+        //                 ->groupBy('item_id', 'selling_price')
+        //                 ->with('item')
+        //                 ->get();
+
         $sellMedicines = Stock::select(
             // generate a new id for each row by concatenating item_id and selling_price
-                            DB::raw("item_id || selling_price as id"),
-                            'item_id',
-                            DB::raw("SUM(remain_Quantity) as remain_Quantity"),
-                            'selling_price'
-                        )
-                        ->where('pharmacy_id', session('current_pharmacy_id'))
-                        ->where('expire_date', '>', now())
-                        ->groupBy('item_id', 'selling_price')
-                        ->with('item')
-                        ->get();
+            DB::raw("CONCAT(item_id, '-', selling_price) as id"),
+            'item_id',
+            DB::raw("SUM(remain_Quantity) as remain_Quantity"),
+            'selling_price'
+        )
+            ->where('pharmacy_id', session('current_pharmacy_id'))
+            ->where('expire_date', '>', now())
+            ->groupBy('item_id', 'selling_price')
+            ->with('item')
+            ->get();
 
-                        // dd($sellMedicines);
+
+        // dd($sellMedicines);
 
         $totalMedicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->count();
         $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
@@ -116,6 +130,25 @@ class DashboardController extends Controller
         session(['pharmacy_name' => Pharmacy::where('id', session('current_pharmacy_id'))->value('name')]);
         session(['location' => Pharmacy::where('id', session('current_pharmacy_id'))->value('location')]);
 
+        // $itemsSummary = DB::table('items')
+        //     ->leftJoin('sales', function ($join) use ($pharmacyId) {
+        //         $join->on('items.id', '=', 'sales.item_id')
+        //             ->where('sales.pharmacy_id', '=', $pharmacyId);
+        //     })
+        //     ->leftJoin('stocks', function ($join) use ($pharmacyId) {
+        //         $join->on('items.id', '=', 'stocks.item_id')
+        //             ->where('stocks.pharmacy_id', '=', $pharmacyId);
+        //     })
+        //     ->select(
+        //         'items.name as medicine_name',
+        //         DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales'),
+        //         DB::raw('COALESCE(stocks.remain_Quantity, 0) as total_stock')
+        //     )
+        //     // ->whereDate('sales.created_at', Carbon::today())
+        //     ->groupBy('items.id', 'items.name')
+        //     ->havingRaw('SUM(sales.quantity) > 0') // Exclude items with no sales
+        //     ->get();
+
         $itemsSummary = DB::table('items')
             ->leftJoin('sales', function ($join) use ($pharmacyId) {
                 $join->on('items.id', '=', 'sales.item_id')
@@ -128,13 +161,14 @@ class DashboardController extends Controller
             ->select(
                 'items.name as medicine_name',
                 DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales'),
-                DB::raw('COALESCE(stocks.remain_Quantity, 0) as total_stock')
+                DB::raw('COALESCE(SUM(stocks.remain_Quantity), 0) as total_stock')
             )
-            // ->whereDate('sales.created_at', Carbon::today())
             ->groupBy('items.id', 'items.name')
             ->havingRaw('SUM(sales.quantity) > 0') // Exclude items with no sales
             ->get();
 
+
+        
         if (Auth::user()->role == "staff") {
             $itemsSummary = DB::table('items')
                 ->leftJoin('sales', function ($join) use ($pharmacyId) {
