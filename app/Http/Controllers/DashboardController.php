@@ -182,11 +182,11 @@ class DashboardController extends Controller
                 ->select(
                     'items.name as medicine_name',
                     DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales'),
-                    DB::raw('COALESCE(stocks.remain_Quantity, 0) as total_stock')
+                    DB::raw('COALESCE(SUM(stocks.remain_Quantity), 0) as total_stock') // ✅ fix here
                 )
                 ->where('sales.staff_id', Auth::user()->id)
                 ->groupBy('items.id', 'items.name')
-                ->havingRaw('SUM(sales.quantity) > 0') // Exclude items with no sales
+                ->havingRaw('SUM(sales.quantity) > 0')
                 ->get();
         }
         $medicineNames = $itemsSummary->pluck('medicine_name');
