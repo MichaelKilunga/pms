@@ -108,22 +108,22 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Total Revenue</td>
+                        <td>Today Sales</td>
                         <td>TZS {{ number_format($salesSummary['total_revenue'], 2) }}</td>
                     </tr>
                     <tr>
-                        <td>Total Cost</td>
+                        <td>Today Stock Cost</td>
                         <td>TZS {{ number_format($salesSummary['total_cost'], 2) }}</td>
                     </tr>
                     <tr>
-                        <td>Profit/Loss</td>
+                        <td>Today Profit/Loss</td>
                         <td class="{{ $salesSummary['profit_loss'] >= 0 ? 'positive' : 'negative' }}">
                             TZS {{ number_format($salesSummary['profit_loss'], 2) }}
                             ({{ $salesSummary['profit_loss'] >= 0 ? 'Profit' : 'Loss' }})
                         </td>
                     </tr>
                     <tr>
-                        <td>Total Transactions</td>
+                        <td>Today Transactions</td>
                         <td>{{ $salesSummary['total_transactions'] }}</td>
                     </tr>
                 </tbody>
@@ -202,7 +202,7 @@
                         <th>Item Name</th>
                         <th>Current Stock</th>
                         <th>Total Stock</th>
-                        <th>Low Stock %</th>
+                        <th>Low Stock</th>
                         <th>Batch Number</th>
                     </tr>
                 </thead>
@@ -212,7 +212,7 @@
                         <td>{{ $stock->item->name ?? 'N/A' }}</td>
                         <td>{{ $stock->remain_Quantity }}</td>
                         <td>{{ $stock->quantity }}</td>
-                        <td>{{ $stock->low_stock_percentage }}%</td>
+                        <td>{{ $stock->low_stock }}</td>
                         <td>{{ $stock->batch_number }}</td>
                     </tr>
                     @endforeach
@@ -250,8 +250,8 @@
         @endif
 
         <div class="footer">
-            <p>This report was automatically generated on {{ now()->format('M j, Y \a\t g:i A') }}</p>
-            <p>© {{ $pharmacy->name }} - Pharmacy Management System</p>
+            <p>This report was automatically generated on {{ now()->format('M j, Y \a\t g:i A') }}</p>  
+            <p>© {{ $pharmacy->name }} - PILLPOINT - <span style="color: #dc3545">Pharmacy Management System</span></p>
         </div>
     </div>
 </body>
