@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class MigrateAllData extends Command
 {
     protected $signature = 'db:migrate-all-data';
-    protected $description = 'Migrate all tables and data from SQLite → MySQL, handling nullable and empty values';
+    protected $description = 'Migrate all tables and data from SQLite → MySQL, handling nullable and date values';
 
     // Columns that should be null if empty
     protected $nullableColumns = [
@@ -26,9 +26,11 @@ class MigrateAllData extends Command
     public function handle()
     {
         $this->info('Starting data migration from SQLite → MySQL...');
+
+        // Disable foreign key checks
         DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        // Step 1: Determine migration order
+        // Step 1: Determine migration order from MySQL migrations table
         $migrationFiles = DB::connection('mysql')
             ->table('migrations')
             ->orderBy('batch')
@@ -81,10 +83,27 @@ class MigrateAllData extends Command
                 $data = $chunk->map(function ($row) use ($table) {
                     $row = (array) $row;
 
-                    // Convert empty strings to null for nullable columns
+                    // 1. Nullable columns → null if empty
                     if (isset($this->nullableColumns[$table])) {
                         foreach ($this->nullableColumns[$table] as $col) {
                             if (!array_key_exists($col, $row) || $row[$col] === '') {
+                                $row[$col] = null;
+                            }
+                        }
+                    }
+
+                    // 2. Sanitize date/datetime columns
+                    foreach ($row as $col => $value) {
+                        if ($value !== null && preg_match('/_date|_at$/', $col)) {
+                            try {
+                                $date = new \DateTime($value);
+                                $year = (int)$date->format('Y');
+                                if ($year < 1000 || $year > 9999) {
+                                    $row[$col] = null;
+                                } else {
+                                    $row[$col] = $date->format('Y-m-d H:i:s');
+                                }
+                            } catch (\Exception $e) {
                                 $row[$col] = null;
                             }
                         }
@@ -101,7 +120,9 @@ class MigrateAllData extends Command
             $this->line("  - Migrated " . count($rows) . " rows.");
         }
 
+        // Re-enable foreign key checks
         DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
+
         $this->info('✅ Data migration completed successfully!');
     }
 }
