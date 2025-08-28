@@ -8,39 +8,51 @@ use Illuminate\Support\Facades\DB;
 class MigrateAllData extends Command
 {
     protected $signature = 'db:migrate-all-data';
-    protected $description = 'Migrate all tables and data from SQLite to MySQL in parent-before-child order, truncating first, without Doctrine.';
+    protected $description = 'Migrate all tables and data from SQLite → MySQL, handling nullable columns and missing tables';
+
+    // Define columns that may not exist in remote but appear in SQLite
+    protected $nullableColumns = [
+        'users' => ['current_team_id'],
+        // Add other tables/columns here if needed
+    ];
 
     public function handle()
     {
         $this->info('Starting data migration from SQLite → MySQL...');
 
-        // Disable foreign key checks during migration
+        // Disable foreign key checks
         DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        // Step 1: Get all SQLite tables
+        // Step 1: Determine tables order from migrations
+        $migrationFiles = DB::connection('mysql')
+            ->table('migrations')
+            ->orderBy('batch')
+            ->orderBy('migration')
+            ->pluck('migration');
+
+        $orderedTables = [];
+        foreach ($migrationFiles as $migration) {
+            if (preg_match('/create_(.*?)_table/', $migration, $matches)) {
+                $orderedTables[] = $matches[1];
+            }
+        }
+
+        // Step 2: Get all SQLite tables
         $sqliteTables = DB::connection('sqlite_old')
             ->select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
         $sqliteTables = collect($sqliteTables)->pluck('name')->toArray();
 
-        // Step 2: Define foreign key relationships manually
-        // Format: 'child_table' => ['parent_table1', 'parent_table2']
-        $foreignKeys = [
-            'staff' => ['pharmacies', 'users'],
-            'stocks' => ['items', 'pharmacies'],
-            'sales' => ['items', 'pharmacies', 'users'],
-            'sales_returns' => ['sales', 'pharmacies', 'users'],
-            'messages' => ['users', 'conversations'],
-            'conversations_users' => ['conversations', 'users'],
-            // Add other child->parent relationships as needed
-        ];
+        // Step 3: Merge order from migrations + leftover tables
+        $tables = collect($orderedTables)
+            ->merge(array_diff($sqliteTables, $orderedTables))
+            ->filter(fn($table) => $table !== 'migrations')
+            ->values();
 
-        // Step 3: Topological sort with cyclic detection
-        $tables = $this->sortTablesByForeignKeys($sqliteTables, $foreignKeys);
-
-        // Step 4: Truncate & migrate each table
+        // Step 4: Migrate each table
         foreach ($tables as $table) {
             $this->info("Migrating table: {$table}");
 
+            // Skip table if it doesn't exist in SQLite
             try {
                 $rows = DB::connection('sqlite_old')->table($table)->get();
             } catch (\Exception $e) {
@@ -48,12 +60,12 @@ class MigrateAllData extends Command
                 continue;
             }
 
-            // Truncate target table
+            // Truncate MySQL table if exists
             try {
                 DB::connection('mysql')->table($table)->truncate();
                 $this->line("  - Truncated MySQL table {$table}");
             } catch (\Exception $e) {
-                $this->warn("  - Could not truncate {$table} (maybe doesn’t exist in MySQL). Skipping insert.");
+                $this->warn("  - Could not truncate {$table} (maybe missing in MySQL). Skipping insert.");
                 continue;
             }
 
@@ -64,8 +76,32 @@ class MigrateAllData extends Command
 
             // Insert in chunks
             foreach ($rows->chunk(500) as $chunk) {
-                $data = $chunk->map(fn($row) => (array) $row)->toArray();
-                DB::connection('mysql')->table($table)->insert($data);
+                $data = $chunk->map(function ($row) use ($table) {
+                    $row = (array) $row;
+
+                    // Sanitize nullable columns
+                    if (isset($this->nullableColumns[$table])) {
+                        foreach ($this->nullableColumns[$table] as $col) {
+                            if (!array_key_exists($col, $row) || $row[$col] === '') {
+                                $row[$col] = null;
+                            }
+                        }
+                    }
+
+                    // Remove columns that do not exist in MySQL
+                    try {
+                        DB::connection('mysql')->getSchemaBuilder()->getColumnListing($table);
+                    } catch (\Exception $e) {
+                        // skip if table missing
+                        return [];
+                    }
+
+                    return $row;
+                })->filter()->toArray();
+
+                if (!empty($data)) {
+                    DB::connection('mysql')->table($table)->insert($data);
+                }
             }
 
             $this->line("  - Migrated " . count($rows) . " rows.");
@@ -75,47 +111,5 @@ class MigrateAllData extends Command
         DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $this->info('✅ Data migration completed successfully!');
-    }
-
-    /**
-     * Topological sort of tables based on foreign keys, appends cyclic tables at the end
-     */
-    private function sortTablesByForeignKeys(array $tables, array $foreignKeys): array
-    {
-        $sorted = [];
-        $visited = [];
-        $cyclicTables = [];
-
-        $visit = function ($table) use (&$visit, &$sorted, &$visited, &$cyclicTables, $foreignKeys) {
-            if (isset($visited[$table])) {
-                if ($visited[$table] === true) return; // already processed
-                $cyclicTables[$table] = true; // mark as cyclic
-                return;
-            }
-
-            $visited[$table] = false; // visiting
-
-            if (isset($foreignKeys[$table])) {
-                foreach ($foreignKeys[$table] as $parent) {
-                    $visit($parent);
-                }
-            }
-
-            $visited[$table] = true;
-            if (!in_array($table, $sorted)) {
-                $sorted[] = $table;
-            }
-        };
-
-        foreach ($tables as $table) {
-            $visit($table);
-        }
-
-        // Append cyclic tables at the end
-        if (!empty($cyclicTables)) {
-            $sorted = array_merge($sorted, array_keys($cyclicTables));
-        }
-
-        return $sorted;
     }
 }
