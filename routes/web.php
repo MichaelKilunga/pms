@@ -172,7 +172,7 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     // Route::resource('dashboard', DashboardController::class);
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/sales/filter', [DashboardController::class, 'filterSales'])->name('sales.filter');
+    Route::get('/sales/filter/{duration}', [DashboardController::class, 'filterSales'])->name('sales.filter');
 
 
     Route::get('/contracts', [ContractController::class, 'indexSuperAdmin'])->name('contracts');

@@ -109,11 +109,11 @@ class DashboardController extends Controller
 
         $totalMedicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->count();
         $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
-        $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today())->sum('total_price');
+        $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today())->sum(DB::raw('total_price * quantity'));
 
         if (Auth::user()->role == "staff") {
             $staff = Staff::where('user_id', Auth::user()->id)->first();
-            $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id', $staff->id)->sum('total_price');
+            $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id', $staff->id)->sum(DB::raw('total_price * quantity'));
         }
 
         $totalStaff = Staff::where('pharmacy_id', session('current_pharmacy_id'))->count(); // Adjust as needed
@@ -168,7 +168,7 @@ class DashboardController extends Controller
             ->get();
 
 
-        
+
         if (Auth::user()->role == "staff") {
             $itemsSummary = DB::table('items')
                 ->leftJoin('sales', function ($join) use ($pharmacyId) {
@@ -199,10 +199,11 @@ class DashboardController extends Controller
         $filter = 'day';
         $query = Sales::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today());
 
-        $filteredTotalSales = $query->sum('total_price');
+        $filteredTotalSales = $query->sum(DB::raw('total_price * quantity'));
+        // dd($filteredTotalSales);
         if (Auth::user()->role == "staff") {
             // $staff = Staff::where('user_id', Auth::user()->id)->first();
-            $filteredTotalSales = $query->where('staff_id', Auth::user()->id)->sum('total_price');
+            $filteredTotalSales = $query->where('staff_id', Auth::user()->id)->sum(DB::raw('total_price * quantity'));
             // dd($filteredTotalSales);
         }
 
@@ -263,7 +264,7 @@ class DashboardController extends Controller
             }
         } else {
             $staff = Staff::where('user_id', Auth::user()->id)->first();
-            $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id',  Auth::user()->id)->whereDate('created_at', Carbon::today())->sum('total_price');
+            $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id',  Auth::user()->id)->whereDate('created_at', Carbon::today())->sum(DB::raw('total_price * quantity'));
             return view('dashboard', compact(
                 'pharmacy',
                 'totalMedicines',
@@ -283,91 +284,98 @@ class DashboardController extends Controller
         }
     }
 
-    public function filterSales(Request $request)
+    public function filterSales($duration)
     {
-        $duration = $request->filter;
-        $pharmacyId = session('current_pharmacy_id');
+        try {
+            $pharmacyId = session('current_pharmacy_id');
 
-        $query = Sales::where('pharmacy_id', $pharmacyId);
+            $query = Sales::where('pharmacy_id', $pharmacyId);
 
-        if (Auth::user()->role == "staff") {
-            // $staff = Staff::where('user_id', Auth::user()->id)->first();
-            // dd($staff);
-            $query->where('staff_id', Auth::user()->id);
+            if (Auth::user()->role == "staff") {
+                $query->where('staff_id', Auth::user()->id);
+            }
+
+            switch ($duration) {
+                case 'day':
+                    $query->whereDate('created_at', Carbon::today());
+                    $filteredSales = DB::table('items')
+                        ->leftJoin('sales', function ($join) use ($pharmacyId) {
+                            $join->on('items.id', '=', 'sales.item_id')
+                                ->where('sales.pharmacy_id', '=', $pharmacyId);
+                        })
+                        ->select(
+                            'items.name as medicine_name',
+                            DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales')
+                        )
+                        ->whereDate('sales.created_at', Carbon::today()) // Correctly filter by date
+                        ->groupBy('items.id', 'items.name')
+                        ->get();
+                    break;
+                case 'week':
+                    $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                    $filteredSales = DB::table('items')
+                        ->leftJoin('sales', function ($join) use ($pharmacyId) {
+                            $join->on('items.id', '=', 'sales.item_id')
+                                ->where('sales.pharmacy_id', '=', $pharmacyId);
+                        })
+                        ->select(
+                            'items.name as medicine_name',
+                            DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales')
+                        )
+                        ->whereBetween('sales.created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+                        ->groupBy('items.id', 'items.name')
+                        ->get();
+                    break;
+                case 'month':
+                    $query->whereMonth('created_at', Carbon::now()->month);
+                    $filteredSales = DB::table('items')
+                        ->leftJoin('sales', function ($join) use ($pharmacyId) {
+                            $join->on('items.id', '=', 'sales.item_id')
+                                ->where('sales.pharmacy_id', '=', $pharmacyId);
+                        })
+                        ->select(
+                            'items.name as medicine_name',
+                            DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales')
+                        )
+                        ->whereMonth('sales.created_at', Carbon::now()->month)
+                        ->groupBy('items.id', 'items.name')
+                        ->get();
+                    break;
+                case 'year':
+                    $query->whereYear('created_at', Carbon::now()->year);
+                    $filteredSales = DB::table('items')
+                        ->leftJoin('sales', function ($join) use ($pharmacyId) {
+                            $join->on('items.id', '=', 'sales.item_id')
+                                ->where('sales.pharmacy_id', '=', $pharmacyId);
+                        })
+                        ->select(
+                            'items.name as medicine_name',
+                            DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales')
+                        )
+                        ->whereYear('sales.created_at', Carbon::now()->year)
+                        ->groupBy('items.id', 'items.name')
+                        ->get();
+                    break;
+                default:
+                    throw new \Exception('Invalid time period');
+            }
+
+            $filteredTotalSales = $query->sum(DB::raw('total_price * quantity'));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'fetched successfully',
+                'filteredTotalSales' => $filteredTotalSales ?? 0,
+                'medicineNames' => $filteredSales->pluck('medicine_name'),
+                'medicineSales' => $filteredSales->pluck('total_sales')
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
         }
-
-        switch ($duration) {
-            case 'day':
-                $query->whereDate('created_at', Carbon::today());
-                $filteredSales = DB::table('items')
-                    ->leftJoin('sales', function ($join) use ($pharmacyId) {
-                        $join->on('items.id', '=', 'sales.item_id')
-                            ->where('sales.pharmacy_id', '=', $pharmacyId);
-                    })
-                    ->select(
-                        'items.name as medicine_name',
-                        DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales')
-                    )
-                    ->whereDate('sales.created_at', Carbon::today()) // Correctly filter by date
-                    ->groupBy('items.id', 'items.name')
-                    ->get();
-                break;
-            case 'week':
-                $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
-                $filteredSales = DB::table('items')
-                    ->leftJoin('sales', function ($join) use ($pharmacyId) {
-                        $join->on('items.id', '=', 'sales.item_id')
-                            ->where('sales.pharmacy_id', '=', $pharmacyId);
-                    })
-                    ->select(
-                        'items.name as medicine_name',
-                        DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales')
-                    )
-                    ->whereBetween('sales.created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-                    ->groupBy('items.id', 'items.name')
-                    ->get();
-                break;
-            case 'month':
-                $query->whereMonth('created_at', Carbon::now()->month);
-                $filteredSales = DB::table('items')
-                    ->leftJoin('sales', function ($join) use ($pharmacyId) {
-                        $join->on('items.id', '=', 'sales.item_id')
-                            ->where('sales.pharmacy_id', '=', $pharmacyId);
-                    })
-                    ->select(
-                        'items.name as medicine_name',
-                        DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales')
-                    )
-                    ->whereMonth('sales.created_at', Carbon::now()->month)
-                    ->groupBy('items.id', 'items.name')
-                    ->get();
-                break;
-            case 'year':
-                $query->whereYear('created_at', Carbon::now()->year);
-                $filteredSales = DB::table('items')
-                    ->leftJoin('sales', function ($join) use ($pharmacyId) {
-                        $join->on('items.id', '=', 'sales.item_id')
-                            ->where('sales.pharmacy_id', '=', $pharmacyId);
-                    })
-                    ->select(
-                        'items.name as medicine_name',
-                        DB::raw('COALESCE(SUM(sales.total_price), 0) as total_sales')
-                    )
-                    ->whereYear('sales.created_at', Carbon::now()->year)
-                    ->groupBy('items.id', 'items.name')
-                    ->get();
-                break;
-            default:
-                return response()->json(['error' => 'Invalid filter'], 400);
-        }
-
-        $filteredTotalSales = $query->sum('total_price');
-
-        return response()->json([
-            'filteredTotalSales' => $filteredTotalSales ?? 0,
-            'medicineNames' => $filteredSales->pluck('medicine_name'),
-            'medicineSales' => $filteredSales->pluck('total_sales')
-        ]);
     }
 
 

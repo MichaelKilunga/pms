@@ -100,7 +100,7 @@
                         <h6>
                             <i class="bi bi-currency-exchange fs-3# me-2"></i>Today Sales
                         </h6>
-                        <p class="fs-5 fw-bold">{{ $totalSales }}</p>
+                        <p class="fs-5 fw-bold">{{ number_format($totalSales, 2) }}</p>
                     </div>
                 </div>
             </div>
@@ -163,7 +163,7 @@
                         <h6>
                             <i class="bi bi-currency-exchange fs-3# me-2"></i>Today Sales
                         </h6>
-                        <p class="fs-5 fw-bold">{{ $totalSales }}</p>
+                        <p class="fs-5 fw-bold">{{ number_format($totalSales, 2) }} TZS</p>
                     </div>
                 </div>
             </div>
@@ -255,7 +255,7 @@
                                     </select>
                                 </div>
                                 <div class="col-auto">
-                                    <button type="submit" class="btn btn-primary">Apply Filter</button>
+                                    <button id="apply-filter-btn" type="submit" class="btn btn-primary">Apply Filter</button>
                                 </div>
                             </form>
 
@@ -263,7 +263,7 @@
                             <div class="mt-3 text-center">
                                 <h5 class="fw-bold">
                                     Total Sales in Selected Range: <span
-                                        class="text-success total-sales">{{ $filteredTotalSales }} TZS</span>
+                                        class="text-success total-sales">{{ number_format($filteredTotalSales) }} TZS</span>
                                 </h5>
                             </div>
                         </div>
@@ -508,7 +508,7 @@
         $('#filter-Form').on('submit', function(event) {
             event.preventDefault();
 
-            var filterValue = $('select[name="filter"]').val();
+            var duration = $('select[name="filter"]').val();
 
             // Update loading state
             $('.total-sales')
@@ -527,41 +527,158 @@
 
             // Perform AJAX request
             $.ajax({
-                url: '{{ route('sales.filter') }}',
+                url: `/sales/filter/${duration}`,
                 method: 'GET',
-                data: {
-                    filter: filterValue
-                },
-                dataType: 'json',
                 success: function(response) {
-                    // Update total sales text
+                    if(response.success){
+                        console.log(response);
+                        // alert('Succeeded:  '+response.message);
+                        $('.total-sales')
+                            .removeClass('text-muted')
+                            .addClass('text-success')
+                            .text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS'
+                            }).format(response.filteredTotalSales));
+
+                        $('.salesGraph').removeClass('text-muted').removeClass('text-danger')
+                            .addClass('text-success');
+                        $('#salesGraph').removeAttr('hidden');
+                        $('.remove-spinner').remove();
+
+                        // Update the graph
+                        salesChart.data.labels = response.medicineNames;
+                        salesChart.data.datasets[0].data = response.medicineSales;
+                        salesChart.update();
+                    }else{
+                        console.log(response);
+                        $('.total-sales')
+                            .removeClass('text-muted')
+                            .addClass('text-danger')
+                            .text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS'
+                            }).format(0));
+
+                        $('.salesGraph').removeClass('text-muted').removeClass('text-success')
+                            .addClass('text-danger');
+                        $('#salesGraph').removeAttr('hidden');
+                        $('.remove-spinner').remove();
+
+                        salesChart.data.labels = [];
+                        salesChart.data.datasets[0].data = [];
+                        salesChart.update();
+                    }
+                },
+                error: function(xhr) {
+                    console.log(xhr);
+                    // alert('Errored: ' + xhr.statusText);
                     $('.total-sales')
-                        .removeClass('text-muted')
-                        .addClass('text-success')
+                        .removeClass('text-success')
+                        .addClass('text-danger')
                         .text(new Intl.NumberFormat('en-TZ', {
                             style: 'currency',
                             currency: 'TZS'
-                        }).format(response.filteredTotalSales));
+                        }).format(0));
 
+                    
                     $('.salesGraph').removeClass('text-muted').removeClass('text-danger')
                         .addClass('text-success');
                     $('#salesGraph').removeAttr('hidden');
-                    $('.remove-spinner ').remove();
+                    $('.remove-spinner').remove();
 
                     // Update the graph
-                    salesChart.data.labels = response.medicineNames;
-                    salesChart.data.datasets[0].data = response.medicineSales;
+                    salesChart.data.labels =[];
+                    salesChart.data.datasets[0].data = [];
                     salesChart.update();
-                },
-                error: function(error) {
-                    console.error('Error fetching sales data:', error);
-                    $('.total-sales')
-                        .text('There is an Error!')
-                        .removeClass('text-success')
-                        .addClass('text-danger');
                 }
             });
         });
+
+        // Filter Form Submission
+        // $('#filter-Form').on('submit', function(event) {
+        //     event.preventDefault();
+
+        //     var filterValue = $('select[name="filter"]').val();
+
+        //     // Update loading state
+        //     $('.total-sales')
+        //         .removeClass('text-success')
+        //         .addClass('text-muted')
+        //         .html(
+        //             '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>'
+        //         );
+
+        //     $('#salesGraph').attr('hidden', true);
+        //     $('.salesGraph')
+        //         .addClass('text-muted')
+        //         .append(
+        //             '<div class="spinner-border remove-spinner spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>'
+        //         );
+
+        //     // Perform GET request
+        //     $.get('/sales/filter', { filter: filterValue }, function(response) {
+        //         // alert(response.message);
+
+        //         if (response.success) {
+        //             $('.total-sales')
+        //                 .removeClass('text-muted text-danger')
+        //                 .addClass('text-success')
+        //                 .text(new Intl.NumberFormat('en-TZ', {
+        //                     style: 'currency',
+        //                     currency: 'TZS'
+        //                 }).format(response.filteredTotalSales));
+
+        //             $('.salesGraph').removeClass('text-muted text-danger').addClass('text-success');
+        //             $('#salesGraph').removeAttr('hidden');
+        //             $('.remove-spinner').remove();
+
+        //             // Update the graph
+        //             salesChart.data.labels = response.medicineNames;
+        //             salesChart.data.datasets[0].data = response.medicineSales;
+        //             salesChart.update();
+        //         } else {
+        //             alert('False: ' + response.message);
+                    
+        //             $('.total-sales')
+        //                 .removeClass('text-muted text-success')
+        //                 .addClass('text-danger')
+        //                 .text(new Intl.NumberFormat('en-TZ', {
+        //                     style: 'currency',
+        //                     currency: 'TZS'
+        //                 }).format(0));
+
+        //             $('.salesGraph').removeClass('text-muted text-success').addClass('text-danger');
+        //             $('#salesGraph').removeAttr('hidden');
+        //             $('.remove-spinner').remove();
+
+        //             salesChart.data.labels = [];
+        //             salesChart.data.datasets[0].data = [];
+        //             salesChart.update();
+        //         }
+        //     }, 'json') // <--- explicitly expect JSON
+        //     .fail(function(xhr) {
+        //         console.error("Server error:", xhr.responseText);
+        //         alert('Error fetching sales data: ' + xhr.statusText);
+
+        //         $('.total-sales')
+        //             .removeClass('text-success')
+        //             .addClass('text-danger')
+        //             .text(new Intl.NumberFormat('en-TZ', {
+        //                 style: 'currency',
+        //                 currency: 'TZS'
+        //             }).format(0));
+
+        //         $('.salesGraph').removeClass('text-muted text-success').addClass('text-danger');
+        //         $('#salesGraph').removeAttr('hidden');
+        //         $('.remove-spinner').remove();
+
+        //         salesChart.data.labels = [];
+        //         salesChart.data.datasets[0].data = [];
+        //         salesChart.update();
+        //     });
+        // });
+
 
         // Search Form Submission
         $('#medicine').on('input', function(event) {

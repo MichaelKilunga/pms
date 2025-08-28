@@ -200,6 +200,9 @@
                     if ($this.is('#hamburger')) {
                         return;
                     }
+                    if ($this.is('#apply-filter-btn')) {
+                        return;
+                    }
                     // if ($this.is('#forAdminImport')) {
                     //     return;
                     // }
