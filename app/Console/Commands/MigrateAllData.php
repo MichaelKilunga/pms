@@ -8,22 +8,27 @@ use Illuminate\Support\Facades\DB;
 class MigrateAllData extends Command
 {
     protected $signature = 'db:migrate-all-data';
-    protected $description = 'Migrate all tables and data from SQLite → MySQL, handling nullable columns and missing tables';
+    protected $description = 'Migrate all tables and data from SQLite → MySQL, handling nullable and empty values';
 
-    // Define columns that may not exist in remote but appear in SQLite
+    // Columns that should be null if empty
     protected $nullableColumns = [
-        'users' => ['current_team_id'],
-        // Add other tables/columns here if needed
+        'users' => [
+            'current_team_id',
+            'email_verified_at',
+            'two_factor_confirmed_at',
+            'two_factor_recovery_codes',
+            'two_factor_secret',
+            'profile_photo_path',
+        ],
+        // Add more tables/columns as needed
     ];
 
     public function handle()
     {
         $this->info('Starting data migration from SQLite → MySQL...');
-
-        // Disable foreign key checks
         DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        // Step 1: Determine tables order from migrations
+        // Step 1: Determine migration order
         $migrationFiles = DB::connection('mysql')
             ->table('migrations')
             ->orderBy('batch')
@@ -42,7 +47,7 @@ class MigrateAllData extends Command
             ->select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
         $sqliteTables = collect($sqliteTables)->pluck('name')->toArray();
 
-        // Step 3: Merge order from migrations + leftover tables
+        // Step 3: Merge order + leftover tables
         $tables = collect($orderedTables)
             ->merge(array_diff($sqliteTables, $orderedTables))
             ->filter(fn($table) => $table !== 'migrations')
@@ -52,7 +57,6 @@ class MigrateAllData extends Command
         foreach ($tables as $table) {
             $this->info("Migrating table: {$table}");
 
-            // Skip table if it doesn't exist in SQLite
             try {
                 $rows = DB::connection('sqlite_old')->table($table)->get();
             } catch (\Exception $e) {
@@ -60,12 +64,11 @@ class MigrateAllData extends Command
                 continue;
             }
 
-            // Truncate MySQL table if exists
             try {
                 DB::connection('mysql')->table($table)->truncate();
                 $this->line("  - Truncated MySQL table {$table}");
             } catch (\Exception $e) {
-                $this->warn("  - Could not truncate {$table} (maybe missing in MySQL). Skipping insert.");
+                $this->warn("  - Could not truncate {$table}. Skipping insert.");
                 continue;
             }
 
@@ -74,12 +77,11 @@ class MigrateAllData extends Command
                 continue;
             }
 
-            // Insert in chunks
             foreach ($rows->chunk(500) as $chunk) {
                 $data = $chunk->map(function ($row) use ($table) {
                     $row = (array) $row;
 
-                    // Sanitize nullable columns
+                    // Convert empty strings to null for nullable columns
                     if (isset($this->nullableColumns[$table])) {
                         foreach ($this->nullableColumns[$table] as $col) {
                             if (!array_key_exists($col, $row) || $row[$col] === '') {
@@ -88,16 +90,8 @@ class MigrateAllData extends Command
                         }
                     }
 
-                    // Remove columns that do not exist in MySQL
-                    try {
-                        DB::connection('mysql')->getSchemaBuilder()->getColumnListing($table);
-                    } catch (\Exception $e) {
-                        // skip if table missing
-                        return [];
-                    }
-
                     return $row;
-                })->filter()->toArray();
+                })->toArray();
 
                 if (!empty($data)) {
                     DB::connection('mysql')->table($table)->insert($data);
@@ -107,9 +101,7 @@ class MigrateAllData extends Command
             $this->line("  - Migrated " . count($rows) . " rows.");
         }
 
-        // Re-enable foreign key checks
         DB::connection('mysql')->statement('SET FOREIGN_KEY_CHECKS=1;');
-
         $this->info('✅ Data migration completed successfully!');
     }
 }
