@@ -251,7 +251,7 @@
 
         <div class="footer">
             <p>This report was automatically generated on {{ now()->format('M j, Y \a\t g:i A') }}</p>  
-            <p>© {{ $pharmacy->name }} - {{ config('app.name') }} - <span style="color: #dc3545">Pharmacy Management System</span></p>
+            <p>© {{ $pharmacy->name }} - {{ config('app.name') }}  <br> <span style="color: #dc3545">Pharmacy Management System</span></p>
         </div>
     </div>
 </body>
