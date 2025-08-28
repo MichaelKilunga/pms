@@ -9,9 +9,9 @@ use Illuminate\Support\Str;
 class MigrateAllData extends Command
 {
     protected $signature = 'db:migrate-all-data';
-    protected $description = 'Migrate all tables and data from SQLite → MySQL, sanitizing dates, nulls, and not-null columns (remote-safe)';
+    protected $description = 'Migrate SQLite → MySQL (robust): sanitize nulls, numbers, and date formats per-column type';
 
-    // Optional: columns that should explicitly be null if empty (additional safety)
+    // Columns that should explicitly become null when empty
     protected $forceNullColumns = [
         'users' => [
             'current_team_id',
@@ -21,7 +21,7 @@ class MigrateAllData extends Command
             'two_factor_secret',
             'profile_photo_path',
         ],
-        // Add more if needed
+        // add more table => [cols] as needed
     ];
 
     public function handle()
@@ -31,10 +31,10 @@ class MigrateAllData extends Command
         $mysql = DB::connection('mysql');
         $sqlite = DB::connection('sqlite_old');
 
-        // Disable foreign key checks
+        // Disable FK checks (we will handle referential issues by ordering/truncation)
         $mysql->statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        // Determine migration order from MySQL migrations table (best-effort)
+        // Get migration-based ordering (best-effort)
         $orderedTables = [];
         try {
             $migrationFiles = $mysql->table('migrations')->orderBy('batch')->orderBy('migration')->pluck('migration');
@@ -44,34 +44,31 @@ class MigrateAllData extends Command
                 }
             }
         } catch (\Throwable $e) {
-            // migrations table might not exist on remote yet — ignore
-            $orderedTables = [];
+            // ignore if migrations table doesn't exist
         }
 
-        // Get all SQLite tables
+        // Get SQLite tables
         $sqliteTablesRaw = $sqlite->select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
         $sqliteTables = collect($sqliteTablesRaw)->pluck('name')->toArray();
 
-        // Merge migrations order + leftover tables; skip sqlite internal tables
         $tables = collect($orderedTables)
             ->merge(array_diff($sqliteTables, $orderedTables))
             ->filter(fn($t) => $t !== 'migrations')
             ->values()
             ->toArray();
 
-        // Main loop: migrate each table
         foreach ($tables as $table) {
             $this->info("Migrating table: {$table}");
 
-            // Fetch rows from SQLite (skip if table not present)
+            // Read rows from SQLite
             try {
                 $rows = $sqlite->table($table)->get();
             } catch (\Throwable $e) {
-                $this->warn("  - Skipping {$table} (not present in SQLite).");
+                $this->warn("  - Skipping {$table} (not found in SQLite).");
                 continue;
             }
 
-            // If target table does not exist in MySQL, skip
+            // Ensure target table exists in MySQL
             try {
                 $mysql->getSchemaBuilder()->getColumnListing($table);
             } catch (\Throwable $e) {
@@ -79,24 +76,24 @@ class MigrateAllData extends Command
                 continue;
             }
 
-            // Truncate target table (safe fallback to delete())
+            // Truncate (or delete) target
             try {
                 $mysql->table($table)->truncate();
                 $this->line("  - Truncated MySQL table {$table}");
             } catch (\Throwable $e) {
                 $mysql->table($table)->delete();
-                $this->line("  - Truncate failed, deleted all rows in {$table} instead");
+                $this->line("  - Truncate failed; deleted rows in {$table}");
             }
 
             if ($rows->isEmpty()) {
-                $this->line("  - No rows found, skipping.");
+                $this->line("  - No rows to migrate, skipping.");
                 continue;
             }
 
-            // load column metadata from INFORMATION_SCHEMA for the table
+            // Load column metadata for this table
             $colMetaRows = $mysql->select(
-                "SELECT COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT, DATA_TYPE, COLUMN_TYPE 
-                 FROM INFORMATION_SCHEMA.COLUMNS 
+                "SELECT COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT, DATA_TYPE, COLUMN_TYPE
+                 FROM INFORMATION_SCHEMA.COLUMNS
                  WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
                 [env('DB_DATABASE'), $table]
             );
@@ -107,27 +104,22 @@ class MigrateAllData extends Command
                     'nullable' => strtoupper($c->IS_NULLABLE) === 'YES',
                     'default' => $c->COLUMN_DEFAULT,
                     'data_type' => strtolower($c->DATA_TYPE),
-                    'column_type' => $c->COLUMN_TYPE, // useful for enums
+                    'column_type' => $c->COLUMN_TYPE,
                 ];
             }
 
-            // Insert in chunks, sanitizing each row to fit MySQL constraints
-            foreach ($rows->chunk(500) as $chunk) {
-                $batch = $chunk->map(function ($row) use ($table, $colMeta) {
+            // Insert in chunks
+            foreach ($rows->chunk(500) as $chunkIndex => $chunk) {
+                $batch = [];
+                foreach ($chunk as $row) {
                     $row = (array) $row;
 
-                    // Convert common placeholder values to null
+                    // Normalize placeholders
                     foreach ($row as $k => $v) {
-                        if ($v === '?') {
-                            $row[$k] = null;
-                        }
-                        // sqlite sometimes has literals 'NULL' or empty arrays - normalize
-                        if ($v === 'NULL') {
-                            $row[$k] = null;
-                        }
+                        if ($v === '?' || $v === 'NULL') $row[$k] = null;
                     }
 
-                    // Force certain columns null if configured
+                    // Force configured columns to null if missing or empty
                     if (isset($this->forceNullColumns[$table])) {
                         foreach ($this->forceNullColumns[$table] as $col) {
                             if (!array_key_exists($col, $row) || $row[$col] === '') {
@@ -136,73 +128,67 @@ class MigrateAllData extends Command
                         }
                     }
 
-                    // Sanitize dates/datetimes and validate values
+                    // Per-column sanitization using metadata
                     foreach ($row as $col => $val) {
-                        // If MySQL doesn't know this column, we'll keep it — insert will ignore extra keys
                         if (!isset($colMeta[$col])) {
+                            // unknown column - will be ignored by insert
                             continue;
                         }
-
                         $meta = $colMeta[$col];
 
-                        // Normalize empty string to null for nullable columns
-                        if ($val === '' || $val === null) {
+                        // Normalize empty strings
+                        if ($val === '') {
                             if ($meta['nullable']) {
                                 $row[$col] = null;
+                                continue;
+                            } elseif ($meta['default'] !== null) {
+                                $row[$col] = $meta['default'];
                                 continue;
                             }
                         }
 
-                        // DATE/TIME types
-                        if (in_array($meta['data_type'], ['datetime', 'timestamp', 'date', 'time'])) {
+                        // DATE / DATETIME / TIMESTAMP handling
+                        if (in_array($meta['data_type'], ['date', 'datetime', 'timestamp'])) {
+                            // If empty or null
                             if (empty($val)) {
-                                // If column is nullable, set null; else fallback to created_at or now()
                                 if ($meta['nullable']) {
                                     $row[$col] = null;
                                 } else {
-                                    // prefer created_at if exists and valid
+                                    // prefer created_at if valid, else now()
                                     if (isset($row['created_at']) && $this->isValidDate($row['created_at'])) {
-                                        $row[$col] = $this->formatDateForMySQL($row['created_at']);
+                                        $row[$col] = $this->formatDateForMySQL($row['created_at'], $meta['data_type']);
                                     } else {
-                                        $row[$col] = now()->format('Y-m-d H:i:s');
+                                        $row[$col] = $this->formatDateForMySQL(now(), $meta['data_type']);
+                                    }
+                                }
+                                continue;
+                            }
+
+                            // Attempt to parse & format for the specific column type
+                            $formatted = $this->tryFormatDateForType($val, $meta['data_type']);
+                            if ($formatted === null) {
+                                // fallback
+                                if ($meta['nullable']) {
+                                    $row[$col] = null;
+                                } else {
+                                    if (isset($row['created_at']) && $this->isValidDate($row['created_at'])) {
+                                        $row[$col] = $this->formatDateForMySQL($row['created_at'], $meta['data_type']);
+                                    } else {
+                                        $row[$col] = $this->formatDateForMySQL(now(), $meta['data_type']);
                                     }
                                 }
                             } else {
-                                // validate date and reformat if valid, else fallback
-                                if ($this->isValidDate($val)) {
-                                    $row[$col] = $this->formatDateForMySQL($val);
-                                } else {
-                                    if ($meta['nullable']) {
-                                        $row[$col] = null;
-                                    } else {
-                                        if (isset($row['created_at']) && $this->isValidDate($row['created_at'])) {
-                                            $row[$col] = $this->formatDateForMySQL($row['created_at']);
-                                        } else {
-                                            $row[$col] = now()->format('Y-m-d H:i:s');
-                                        }
-                                    }
-                                }
+                                $row[$col] = $formatted;
                             }
                             continue;
                         }
 
-                        // Numeric types
-                        if (in_array($meta['data_type'], ['int', 'bigint', 'smallint', 'mediumint', 'tinyint', 'integer'])) {
+                        // Numeric integer family
+                        if (in_array($meta['data_type'], ['int', 'integer', 'bigint', 'smallint', 'mediumint', 'tinyint'])) {
                             if ($val === '' || $val === null) {
-                                if ($meta['nullable']) {
-                                    $row[$col] = null;
-                                } else {
-                                    // try to use column default, otherwise 0
-                                    $row[$col] = $meta['default'] !== null ? $meta['default'] : 0;
-                                }
+                                $row[$col] = $meta['nullable'] ? null : (($meta['default'] !== null) ? $meta['default'] : 0);
                             } else {
-                                // ensure integer-ish
-                                if (!is_numeric($val)) {
-                                    // try casting, else default/fallback
-                                    $row[$col] = (int) filter_var($val, FILTER_SANITIZE_NUMBER_INT);
-                                } else {
-                                    $row[$col] = (int) $val;
-                                }
+                                $row[$col] = is_numeric($val) ? (int)$val : (int)filter_var($val, FILTER_SANITIZE_NUMBER_INT);
                             }
                             continue;
                         }
@@ -210,19 +196,29 @@ class MigrateAllData extends Command
                         // Decimal/float
                         if (in_array($meta['data_type'], ['decimal', 'double', 'float'])) {
                             if ($val === '' || $val === null) {
-                                if ($meta['nullable']) {
-                                    $row[$col] = null;
-                                } else {
-                                    $row[$col] = $meta['default'] !== null ? $meta['default'] : 0;
-                                }
+                                $row[$col] = $meta['nullable'] ? null : (($meta['default'] !== null) ? $meta['default'] : 0);
                             } else {
-                                // sanitize numeric format
+                                // sanitize numeric string
                                 $row[$col] = is_numeric($val) ? $val : (float) filter_var($val, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
                             }
                             continue;
                         }
 
-                        // ENUM -> use default if value invalid
+                        // JSON
+                        if ($meta['data_type'] === 'json') {
+                            if ($val === '' || $val === null) {
+                                $row[$col] = $meta['default'] !== null ? $meta['default'] : null;
+                            } else {
+                                if (is_string($val) && $this->isJson($val)) {
+                                    $row[$col] = $val;
+                                } else {
+                                    $row[$col] = json_encode($val);
+                                }
+                            }
+                            continue;
+                        }
+
+                        // ENUM -> accept or fallback to default
                         if (Str::startsWith($meta['column_type'], 'enum(')) {
                             if ($val === '' || $val === null) {
                                 $row[$col] = $meta['default'] !== null ? $meta['default'] : null;
@@ -232,91 +228,110 @@ class MigrateAllData extends Command
                             continue;
                         }
 
-                        // JSON column
-                        if ($meta['data_type'] === 'json') {
-                            if ($val === '' || $val === null) {
-                                $row[$col] = $meta['default'] !== null ? $meta['default'] : null;
-                            } else {
-                                // ensure valid JSON
-                                if (is_string($val) && $this->isJson($val)) {
-                                    $row[$col] = $val;
-                                } else {
-                                    // try serialize to JSON
-                                    $row[$col] = json_encode($val);
-                                }
-                            }
-                            continue;
-                        }
-
-                        // For other text/varchar types: if not nullable and empty, set '' or default
+                        // Strings: if not nullable and empty, use default or empty string
                         if (in_array($meta['data_type'], ['varchar', 'text', 'char', 'mediumtext', 'longtext'])) {
                             if (($val === '' || $val === null) && !$meta['nullable']) {
                                 $row[$col] = $meta['default'] !== null ? $meta['default'] : '';
                             }
-                            // otherwise keep value
-                            continue;
                         }
+                    } // end each column
 
-                        // Fallback: for anything else, if value is '' and column not nullable, set default or ''
-                        if (($val === '' || $val === null) && !$meta['nullable']) {
-                            $row[$col] = $meta['default'] !== null ? $meta['default'] : '';
-                        }
-                    }
-
-                    return $row;
-                })->toArray();
-
-                // remove empty rows (defensive)
-                $batch = array_filter($batch, fn($r) => !empty($r));
+                    $batch[] = $row;
+                } // end each row in chunk
 
                 if (!empty($batch)) {
                     try {
                         $mysql->table($table)->insert($batch);
                     } catch (\Throwable $e) {
-                        // log and rethrow with context to help debugging
                         $this->error("Insert failed on table {$table}: " . $e->getMessage());
+                        // Provide a hint & continue with next chunk/table
+                        // optional: write $batch to a debug file here for inspection
                         throw $e;
                     }
                 }
             } // end chunk loop
 
             $this->line("  - Migrated " . count($rows) . " rows.");
-        } // end tables
+        } // end tables loop
 
         // Re-enable FK checks
         $mysql->statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        $this->info('✅ Data migration completed successfully!');
+        $this->info('✅ Data migration completed!');
     }
 
     /**
-     * Validate if a string/value is a valid date for DateTime constructor.
+     * Try to parse various date formats and format for the target MySQL type.
+     * Returns formatted string or null on failure.
+     *
+     * @param mixed $value
+     * @param string $targetType 'date'|'datetime'|'timestamp'
+     * @return string|null
      */
-    private function isValidDate($value): bool
+    private function tryFormatDateForType($value, string $targetType): ?string
     {
-        if (empty($value) || $value === '0000-00-00' || $value === '0000-00-00 00:00:00') {
-            return false;
+        // If it's already a DateTime or Carbon, format directly
+        if ($value instanceof \DateTime) {
+            return $this->formatDateForMySQL($value, $targetType);
         }
+
+        // Clean value: trim, replace T, Z, and multiple spaces; remove stray characters
+        $val = trim((string)$value);
+        $val = str_replace('T', ' ', $val);
+        $val = preg_replace('/Z$/', '', $val);
+        $val = preg_replace('/\s+/', ' ', $val);
+
+        // If looks like YYYYMMDD or YYYYMMDDHHMMSS, try to inject separators
+        if (preg_match('/^\d{8}$/', $val)) { // YYYYMMDD
+            $val = substr($val, 0, 4) . '-' . substr($val, 4, 2) . '-' . substr($val, 6, 2);
+        } elseif (preg_match('/^\d{14}$/', $val)) { // YYYYMMDDHHMMSS
+            $val = substr($val, 0, 4) . '-' . substr($val, 4, 2) . '-' . substr($val, 6, 2) . ' '
+                . substr($val, 8, 2) . ':' . substr($val, 10, 2) . ':' . substr($val, 12, 2);
+        }
+
+        // If the target is DATE and the string contains time, strip time part
+        if ($targetType === 'date') {
+            // extract first YYYY-MM-DD-like pattern
+            if (preg_match('/(\d{4}-\d{2}-\d{2})/', $val, $m)) {
+                $val = $m[1];
+            }
+        }
+
+        // Try DateTime parsing
         try {
-            new \DateTime($value);
-            return true;
-        } catch (\Exception $e) {
-            return false;
+            $dt = new \DateTime($val);
+            $year = (int)$dt->format('Y');
+            if ($year < 1000 || $year > 9999) {
+                return null;
+            }
+            return $this->formatDateForMySQL($dt, $targetType);
+        } catch (\Throwable $e) {
+            return null;
         }
     }
 
     /**
-     * Format date for MySQL DATETIME (Y-m-d H:i:s).
+     * Format a DateTime (or string) into MySQL target type.
+     *
+     * @param \DateTime|string $value
+     * @param string $targetType
+     * @return string
      */
-    private function formatDateForMySQL($value): string
+    private function formatDateForMySQL($value, string $targetType): string
     {
-        $dt = new \DateTime($value);
+        $dt = $value instanceof \DateTime ? $value : new \DateTime($value);
+        if ($targetType === 'date') {
+            return $dt->format('Y-m-d');
+        }
+        // datetime or timestamp
         return $dt->format('Y-m-d H:i:s');
     }
 
-    /**
-     * Quick JSON check
-     */
+    private function isValidDate($value): bool
+    {
+        return (new \DateTime('@0')) ? @strtotime((string)$value) !== false : false;
+    }
+
     private function isJson($string): bool
     {
         if (!is_string($string)) return false;
