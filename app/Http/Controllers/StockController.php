@@ -153,7 +153,7 @@ class StockController extends Controller
                                             </div>
                                             <div class="mb-3">
                                                 <label for="expire_date" class="form-label">Expire Date</label>
-                                                <input type="date" class="form-control" name="expire_date"
+                                                <input type="text" class="form-control" name="expire_date"
                                                     value="' . $stock->expire_date . '" required>
                                             </div>
                                             <div class="mb-3 hidden">
