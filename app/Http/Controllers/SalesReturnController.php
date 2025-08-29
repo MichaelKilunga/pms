@@ -60,16 +60,25 @@ class SalesReturnController extends Controller
 
             $sale = Sales::findOrFail($request->sale_id);
 
-            $salesReturn = SalesReturn::create([
-                'sale_id' => $request->sale_id,
-                'quantity' => $request->quantity,
-                'refund_amount' => $sale->total_price * ($request->quantity / $sale->quantity), // Pro-rated refund
-                'reason' => $request->reason,
-                'return_status' => 'pending',
-                'pharmacy_id' => session('current_pharmacy_id'),
-                'staff_id' => Auth::user()->id,
-                'date' => now(),
-            ]);
+            // if the sale return is already rejected, then update the status to pending
+            if ($sale->salesReturn && $sale->salesReturn->return_status == 'rejected') {
+                $sale->salesReturn->return_status = 'pending';
+                $sale->salesReturn->quantity = $request->quantity;
+                $sale->salesReturn->refund_amount = $sale->total_price * ($request->quantity / $sale->quantity); // Pro-rated refund
+                $sale->salesReturn->reason = $request->reason;
+                $sale->salesReturn->save();
+            } else {
+                $salesReturn = SalesReturn::create([
+                    'sale_id' => $request->sale_id,
+                    'quantity' => $request->quantity,
+                    'refund_amount' => $sale->total_price * ($request->quantity / $sale->quantity), // Pro-rated refund
+                    'reason' => $request->reason,
+                    'return_status' => 'pending',
+                    'pharmacy_id' => session('current_pharmacy_id'),
+                    'staff_id' => Auth::user()->id,
+                    'date' => now(),
+                ]);
+            }
 
             // debug
             // dd($salesReturn);

@@ -108,7 +108,7 @@ class SalesController extends BaseController
                             </div>
                 
                             <!-- Sales Return Link (Only if salesReturn is NULL) -->
-                            '. ($sale->salesReturn == null ? '
+                            '. ((($sale->salesReturn == null) || ($sale->salesReturn->return_status == 'rejected')) ? '
                                 <a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal"
                                     data-bs-target="#salesReturnModal'. $sale->id .'">
                                     <i class="bi bi-arrow-return-left"></i>
