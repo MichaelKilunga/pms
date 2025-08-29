@@ -28,8 +28,8 @@ class StockController extends Controller
         if ($request->ajax()) {
             $stocks = Stock::with('item', 'staff') // Load relationships
                 ->where('pharmacy_id', session('current_pharmacy_id'));
-                // ->orderBy('remain_Quantity', 'desc');
-                // ->where('remain_Quantity','>',0);
+            // ->orderBy('remain_Quantity', 'desc');
+            // ->where('remain_Quantity','>',0);
 
             return DataTables::of($stocks)
                 ->addIndexColumn() // Adds auto-incrementing column
@@ -458,25 +458,22 @@ class StockController extends Controller
         }
     }
 
-     //stock balance 
+    //stock balance 
     public function viewStockBalances()
-{
-    $pharmacyId = session('current_pharmacy_id');
+    {
+        $pharmacyId = session('current_pharmacy_id');
 
-    $stockBalances = Stock::select(
-        'item_id',
-        DB::raw('SUM(quantity) as quantity'),
-        DB::raw("SUM(CASE WHEN expire_date > datetime('now') THEN remain_Quantity ELSE 0 END) as remain_Quantity"),
-        DB::raw("SUM(CASE WHEN expire_date <= datetime('now') THEN remain_Quantity ELSE 0 END) as expired_remain_Quantity")
-    )
-    ->where('pharmacy_id', $pharmacyId)
-    ->groupBy('item_id')
-    ->with('item')
-    ->paginate(10);
+        $stockBalances = Stock::select(
+            'item_id',
+            DB::raw('SUM(quantity) as quantity'),
+            DB::raw("SUM(CASE WHEN expire_date > NOW() THEN remain_Quantity ELSE 0 END) as remain_Quantity"),
+            DB::raw("SUM(CASE WHEN expire_date <= NOW() THEN remain_Quantity ELSE 0 END) as expired_remain_Quantity")
+        )
+            ->where('pharmacy_id', $pharmacyId)
+            ->groupBy('item_id')
+            ->with('item')
+            ->paginate(10);
 
-    return view('stock.balance', compact('stockBalances'));
+        return view('stock.balance', compact('stockBalances'));
+    }
 }
-}
-
-
-
