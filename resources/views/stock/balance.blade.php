@@ -14,7 +14,7 @@
                         <th>Medicine Name</th>
                         {{-- <th>Stocked Quantity</th> --}}
                         <th>Stocked Remaining Quantity</th>
-                        <th>Expired remaining Quantity</th>
+                        <th class="text-danger">Expired Quantity</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -26,15 +26,17 @@
                             {{-- <td>{{ $stock->quantity }}</td> --}}
                             <td class="text-dark fw-bold">{{ $stock->remain_Quantity }}</td>
                             @if ($stock->expired_remain_Quantity > 0)
-                            <td class="text-danger fw-bold">{{ $stock->expired_remain_Quantity }}</td>
+                                <td class="text-danger fw-bold">{{ $stock->expired_remain_Quantity }}</td>
                             @else
-                            <td class="text-dark fw-bold">{{ $stock->expired_remain_Quantity }}</td>
+                                <td class="text-dark fw-bold">{{ $stock->expired_remain_Quantity }}</td>
                             @endif
                             <td>
                                 @if ($stock->remain_Quantity > 0)
-                                <span class="text-success fw-bold"><p>Available</p></span>
+                                    <span class="text-success fw-bold"><p>Available</p></span>
+                                @elseif ($stock->expired_remain_Quantity > 0)
+                                    <span class="text-danger fw-bold">Expired</span>
                                 @else
-                                <span class="text-danger fw-bold">Finished</span>
+                                    <span class="text-warning fw-bold">Finished</span>
                                 @endif
                             </td>
                         </tr>
