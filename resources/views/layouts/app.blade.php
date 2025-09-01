@@ -88,10 +88,11 @@
             <aside class="hidden lg:flex lg:flex-col w-60 bg-white dark:bg-gray-800 border-r dark:border-gray-700">
                 <div class="p-4 min-h-screen overflow-y-auto">
                     {{-- STAFF --}}
-                    @if (Auth::user()->role === 'staff')
+                    @if (Auth::user()->role === 'staff')    
                         @php
                             $salesOpen = request()->routeIs('sales', 'salesReturns', 'salesNotes');
-                            $stockOpen = request()->routeIs('stocks.balance', 'notifications', 'agent.messages');
+                            $stockOpen = request()->routeIs('stocks.balance');
+                            $reportsOpen = request()->routeIs('notifications', 'agent.messages');
                         @endphp
 
                         <nav class="space-y-3">
@@ -146,7 +147,20 @@
                                     class="block px-3 py-2 rounded no-underline {{ request()->routeIs('stocks.balance') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                                         {{ __('Stock Balance') }}
                                     </a>
+                                </div>
+                            </div>
 
+                            {{-- Reports group --}}
+                            <div x-data="{ open: @json($reportsOpen) }" class="space-y-1">
+                                <button @click="open = ! open"
+                                        class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <span class="font-medium">Notifications</span>
+                                    <svg :class="{ 'rotate-90': open }" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" x-cloak x-transition class="pl-4 space-y-1 mt-1">
                                     <a href="{{ route('notifications') }}"
                                     class="block px-3 py-2 rounded no-underline {{ request()->routeIs('notifications') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                                         {{ __('Notifications') }}
@@ -299,6 +313,61 @@
                                     </a>
                                     <a href="{{ route('superadmin.pharmacies') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('superadmin.pharmacies') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                                         {{ __('Pharmacies') }}
+                                    </a>
+
+                                    <a href="{{ route('packages') }}" :active="request()->routeIs('packages')"
+                                        class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('packages') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Packages') }}
+                                    </a>
+
+                                    <a href="{{ route('allMedicines.all') }}" :active="request()->routeIs('allMedicines.all')"
+                                        class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('allMedicines.all') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('All medicines') }}
+                                    </a>
+
+                                    <a href="{{ route('notifications') }}" :active="request()->routeIs('notifications')"
+                                        class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('notifications') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Notifications') }}
+                                    </a>
+
+                                    <a href="{{ route('reports.all') }}" :active="request()->routeIs('reports.all')"
+                                        class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('reports.all') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Reports') }}
+                                    </a>
+
+                                    <a href="{{ route('contracts') }}" :active="request()->routeIs('contracts')"
+                                        class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('contracts') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Contracts') }}
+                                    </a>
+
+                                    <a href="{{ route('agent.packages', ['action' => 'index']) }}" :active="request()->routeIs('agent.packages')"
+                                        class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('agent.packages') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __("Agent's Contracts") }}
+                                    </a>
+
+                                    <a href="{{ route('update.contracts') }}" :active="request()->routeIs('update.contracts')"
+                                        class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('update.contracts') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Schedules') }}
+                                    </a>
+
+                                    <a href="{{ route('agent.pharmacies', ['action' => 'index']) }}" :active="request()->routeIs('agent.pharmacies')"
+                                        class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('agent.pharmacies') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Pharmacies') }}
+                                    </a>
+
+                                    <a href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')"
+                                        class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('agent.messages') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Messages') }}
+                                    </a>
+
+                                    <a href="{{ route('agent.completeRegistration', ['action' => 'index']) }}" :active="request()->routeIs('agent.completeRegistration')"
+                                        class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('agent.completeRegistration') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Agents Registration') }}
+                                    </a>
+
+                                    <a href="{{ route('audits.index') }}" :active="request()->routeIs('audits.index')"
+                                        class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('audits.index') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Activities') }}
                                     </a>
 
                                     {{-- ...other super links (same pattern) --}}
