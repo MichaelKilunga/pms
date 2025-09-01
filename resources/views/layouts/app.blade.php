@@ -82,27 +82,279 @@
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
         @livewire('navigation-menu')
 
-        <!-- Page Heading -->
-        @if (isset($header))
-            <header class="bg-white dark:bg-gray-800 shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
+        <div class="flex">            
+
+            <!-- SIDEBAR (visible only on large screens) -->
+            <aside class="hidden lg:flex lg:flex-col w-60 bg-white dark:bg-gray-800 border-r dark:border-gray-700">
+                <div class="p-4 min-h-screen overflow-y-auto">
+                    {{-- STAFF --}}
+                    @if (Auth::user()->role === 'staff')
+                        @php
+                            $salesOpen = request()->routeIs('sales', 'salesReturns', 'salesNotes');
+                            $stockOpen = request()->routeIs('stocks.balance', 'notifications', 'agent.messages');
+                        @endphp
+
+                        <nav class="space-y-3">
+                            {{-- Dashboard --}}
+                            <div class="w-full">
+                                <a href="{{ route('dashboard') }}"
+                                class="block px-3 py-2 rounded no-underline {{ request()->routeIs('dashboard') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                    {{ __('Dashboard') }}
+                                </a>
+                            </div>
+
+                            {{-- Sales group --}}
+                            <div x-data="{ open: @json($salesOpen) }" class="space-y-1">
+                                <button @click="open = ! open"
+                                        class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <span class="font-medium">Sales</span>
+                                    <svg :class="{ 'rotate-90': open }" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" x-cloak x-transition class="pl-4 space-y-1 mt-1">
+                                    <a href="{{ route('sales') }}"
+                                    class="block px-3 py-2 rounded no-underline {{ request()->routeIs('sales') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Sell medicine') }}
+                                    </a>
+
+                                    <a href="{{ route('salesReturns') }}"
+                                    class="block px-3 py-2 rounded no-underline {{ request()->routeIs('salesReturns') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Sales Returns') }}
+                                    </a>
+
+                                    <a href="{{ route('salesNotes') }}"
+                                    class="block px-3 py-2 rounded no-underline {{ request()->routeIs('salesNotes') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Document Sales') }}
+                                    </a>
+                                </div>
+                            </div>
+
+                            {{-- Stock group --}}
+                            <div x-data="{ open: @json($stockOpen) }" class="space-y-1">
+                                <button @click="open = ! open"
+                                        class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <span class="font-medium">Stock</span>
+                                    <svg :class="{ 'rotate-90': open }" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" x-cloak x-transition class="pl-4 space-y-1 mt-1">
+                                    <a href="{{ route('stocks.balance') }}"
+                                    class="block px-3 py-2 rounded no-underline {{ request()->routeIs('stocks.balance') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Stock Balance') }}
+                                    </a>
+
+                                    <a href="{{ route('notifications') }}"
+                                    class="block px-3 py-2 rounded no-underline {{ request()->routeIs('notifications') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Notifications') }}
+                                    </a>
+
+                                    <a href="{{ route('agent.messages', ['action' => 'index']) }}"
+                                    class="block px-3 py-2 rounded no-underline {{ request()->routeIs('agent.messages') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Messages') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </nav>
+                    @endif
+
+                    {{-- OWNER / ADMIN --}}
+                    @if (Auth::user()->role === 'owner' || Auth::user()->role === 'admin')
+                        @php
+                            $salesOpen = request()->routeIs('sales', 'salesReturns', 'salesNotes');
+                            $invOpen = request()->routeIs('medicines', 'stock', 'stocks.balance', 'stockTransfers');
+                            $manageOpen = request()->routeIs('staff', 'category', 'pharmacies', 'myContracts');
+                            $reportsOpen = request()->routeIs('reports.all', 'notifications', 'agent.messages');
+                        @endphp
+
+                        <nav class="space-y-3">
+                            {{-- Dashboard --}}
+                            <div class="w-full">
+                                <a href="{{ route('dashboard') }}"
+                                class="block px-3 py-2 rounded no-underline {{ request()->routeIs('dashboard') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                    {{ __('Dashboard') }}
+                                </a>
+                            </div>
+
+                            {{-- Sales --}}
+                            <div x-data="{ open: @json($salesOpen) }" class="space-y-1">
+                                <button @click="open = ! open" class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <span class="font-medium">Sales</span>
+                                    <svg :class="{ 'rotate-90': open }" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" x-cloak x-transition class="pl-4 mt-1 space-y-1">
+                                    <a href="{{ route('sales') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('sales') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Sell medicine') }}
+                                    </a>
+                                    <a href="{{ route('salesReturns') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('salesReturns') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Sales Returns') }}
+                                    </a>
+                                    <a href="{{ route('salesNotes') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('salesNotes') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Documented Sales') }}
+                                    </a>
+                                </div>
+                            </div>
+
+                            {{-- Inventory --}}
+                            <div x-data="{ open: @json($invOpen) }" class="space-y-1">
+                                <button @click="open = ! open" class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <span class="font-medium">Inventory</span>
+                                    <svg :class="{ 'rotate-90': open }" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" x-cloak x-transition class="pl-4 mt-1 space-y-1">
+                                    <a href="{{ route('medicines') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('medicines') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('All medicine') }}
+                                    </a>
+                                    <a href="{{ route('stock') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('stock') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Stock') }}
+                                    </a>
+                                    <a href="{{ route('stocks.balance') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('stocks.balance') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Stock Balance') }}
+                                    </a>
+                                    <a href="{{ route('stockTransfers') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('stockTransfers') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Stock Transfers') }}
+                                    </a>
+                                </div>
+                            </div>
+
+                            {{-- Management --}}
+                            <div x-data="{ open: @json($manageOpen) }" class="space-y-1">
+                                <button @click="open = ! open" class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <span class="font-medium">Admin</span>
+                                    <svg :class="{ 'rotate-90': open }" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" x-cloak x-transition class="pl-4 mt-1 space-y-1">
+                                    <a href="{{ route('staff') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('staff') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Pharmacist') }}
+                                    </a>
+                                    <a href="{{ route('category') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('category') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Category') }}
+                                    </a>
+                                    <a href="{{ route('pharmacies') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('pharmacies') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Pharmacies') }}
+                                    </a>
+                                    <a href="{{ route('myContracts') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('myContracts') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Contracts') }}
+                                    </a>
+                                </div>
+                            </div>
+
+                            {{-- Reports --}}
+                            <div x-data="{ open: @json($reportsOpen) }" class="space-y-1">
+                                <button @click="open = ! open" class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <span class="font-medium">Reports</span>
+                                    <svg :class="{ 'rotate-90': open }" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" x-cloak x-transition class="pl-4 mt-1 space-y-1">
+                                    <a href="{{ route('reports.all') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('reports.all') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Reports') }}
+                                    </a>
+                                    <a href="{{ route('notifications') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('notifications') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Notifications') }}
+                                    </a>
+                                    <a href="{{ route('agent.messages', ['action' => 'index']) }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('agent.messages') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Messages') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </nav>
+                    @endif
+
+                    {{-- SUPER --}}
+                    @if (Auth::user()->role === 'super')
+                        @php
+                            $systemOpen = request()->routeIs('dashboard', 'superadmin.users', 'superadmin.pharmacies', 'packages', 'allMedicines.all', 'notifications', 'reports.all', 'contracts', 'agent.packages', 'update.contracts', 'agent.pharmacies', 'agent.messages', 'agent.completeRegistration', 'audits.index');
+                        @endphp
+
+                        <nav class="space-y-3">
+                            <div x-data="{ open: @json($systemOpen) }" class="space-y-1">
+                                <button @click="open = ! open" class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <span class="font-medium">System</span>
+                                    <svg :class="{ 'rotate-90': open }" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" x-cloak x-transition class="pl-4 mt-1 space-y-1">
+                                    <a href="{{ route('dashboard') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('dashboard') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Dashboard') }}
+                                    </a>
+                                    <a href="{{ route('superadmin.users') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('superadmin.users') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('System Users') }}
+                                    </a>
+                                    <a href="{{ route('superadmin.pharmacies') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('superadmin.pharmacies') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Pharmacies') }}
+                                    </a>
+
+                                    {{-- ...other super links (same pattern) --}}
+                                </div>
+                            </div>
+                        </nav>
+                    @endif
+
+                    {{-- AGENT --}}
+                    @if (Auth::user()->role === 'agent')
+                        @php
+                            $agentOpen = request()->routeIs('dashboard', 'agent.pharmacies', 'agent.packages', 'agent.messages', 'agent.completeRegistration', 'agent.contracts');
+                        @endphp
+
+                        <nav class="space-y-3">
+                            <div x-data="{ open: @json($agentOpen) }" class="space-y-1">
+                                <button @click="open = ! open" class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <span class="font-medium">Agent</span>
+                                    <svg :class="{ 'rotate-90': open }" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" x-cloak x-transition class="pl-4 mt-1 space-y-1">
+                                    <a href="{{ route('dashboard') }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('dashboard') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Dashboard') }}
+                                    </a>
+                                    <a href="{{ route('agent.pharmacies', ['action' => 'index']) }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('agent.pharmacies') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Pharmacies') }}
+                                    </a>
+                                    <a href="{{ route('agent.packages', ['action' => 'index']) }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('agent.packages') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Packages') }}
+                                    </a>
+                                    <a href="{{ route('agent.messages', ['action' => 'index']) }}" class="block px-3 py-2 rounded no-underline {{ request()->routeIs('agent.messages') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('Messages') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </nav>
+                    @endif
                 </div>
-            </header>
-        @endif
+            </aside>
 
-        <!-- Page Content -->
 
-        <main>
-            {{ $slot }}
-        </main>
-        <!-- Loader Overlay -->
-        <div id="loader-overlay" class="loader-overlay">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+            <main class="flex-1 p-6">
+                {{ $slot }}
+            </main>
+            
+            <!-- Loader Overlay -->
+            <div id="loader-overlay" class="loader-overlay">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
             </div>
+            <audio id="notification-sound" src="{{ asset('audio/notify.mp3') }}" preload="auto"></audio>
         </div>
-        <audio id="notification-sound" src="{{ asset('audio/notify.mp3') }}" preload="auto"></audio>
     </div>
 
     @stack('modals')

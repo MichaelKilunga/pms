@@ -59,7 +59,9 @@ class SalesController extends BaseController
         if ($request->ajax()) {
             $sales = Sales::with(['item', 'salesReturn'])
                 ->where('sales.pharmacy_id', session('current_pharmacy_id'))
-                ->orderBy('date', 'desc');
+                ->orderBy('date', 'desc')
+                // sold today only
+                ->whereDate('date', today());
 
             return DataTables::of($sales)
                 ->addIndexColumn() // Adds an index column
@@ -73,7 +75,7 @@ class SalesController extends BaseController
                     return $sale->quantity;
                 })
                 ->addColumn('total_price', function ($sale) {
-                    return number_format($sale->total_price*$sale->quantity, 0);
+                    return number_format($sale->total_price * $sale->quantity, 0);
                 })
                 ->addColumn('date', function ($sale) {
                     return $sale->date;
@@ -83,59 +85,59 @@ class SalesController extends BaseController
                         <div class="d-flex justify-content-between">
                             <!-- View Modal -->
                             <a href="#" class="btn btn-primary  btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#viewSaleModal'. $sale->id .'">
+                                data-bs-target="#viewSaleModal' . $sale->id . '">
                                 <i class="bi bi-eye"></i>
                             </a>
                 
                             <!-- View Sale Modal -->
-                            <div class="modal fade" id="viewSaleModal'. $sale->id .'" tabindex="-1"
-                                aria-labelledby="viewSaleModalLabel'. $sale->id .'" aria-hidden="true">
+                            <div class="modal fade" id="viewSaleModal' . $sale->id . '" tabindex="-1"
+                                aria-labelledby="viewSaleModalLabel' . $sale->id . '" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="viewSaleModalLabel'. $sale->id .'">Sale Details</h5>
+                                            <h5 class="modal-title" id="viewSaleModalLabel' . $sale->id . '">Sale Details</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <div><strong>Sales Name:</strong> '. htmlspecialchars($sale->item->name, ENT_QUOTES, 'UTF-8') .'</div>
-                                            <div><strong>Price:</strong> '. ($sale->quantity > 0 ? number_format($sale->total_price / 1, 0) : 'N/A') .'</div>
-                                            <div><strong>Quantity:</strong> '. $sale->quantity .'</div>
-                                            <div><strong>Amount:</strong> '. number_format($sale->total_price*$sale->quantity, 0) .'</div>
-                                            <div><strong>Date:</strong> '. $sale->date .'</div>
+                                            <div><strong>Sales Name:</strong> ' . htmlspecialchars($sale->item->name, ENT_QUOTES, 'UTF-8') . '</div>
+                                            <div><strong>Price:</strong> ' . ($sale->quantity > 0 ? number_format($sale->total_price / 1, 0) : 'N/A') . '</div>
+                                            <div><strong>Quantity:</strong> ' . $sale->quantity . '</div>
+                                            <div><strong>Amount:</strong> ' . number_format($sale->total_price * $sale->quantity, 0) . '</div>
+                                            <div><strong>Date:</strong> ' . $sale->date . '</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                 
                             <!-- Sales Return Link (Only if salesReturn is NULL) -->
-                            '. ((($sale->salesReturn == null) || ($sale->salesReturn->return_status == 'rejected')) ? '
+                            ' . ((($sale->salesReturn == null) || ($sale->salesReturn->return_status == 'rejected')) ? '
                                 <a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#salesReturnModal'. $sale->id .'">
+                                    data-bs-target="#salesReturnModal' . $sale->id . '">
                                     <i class="bi bi-arrow-return-left"></i>
                                 </a>
-                            ' : '') .'
+                            ' : '') . '
                 
                             <!-- Sales Return Modal -->
-                            <div class="modal fade" id="salesReturnModal'. $sale->id .'" tabindex="-1"
-                                aria-labelledby="salesReturnModalLabel'. $sale->id .'" aria-hidden="true">
+                            <div class="modal fade" id="salesReturnModal' . $sale->id . '" tabindex="-1"
+                                aria-labelledby="salesReturnModalLabel' . $sale->id . '" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="salesReturnModalLabel'. $sale->id .'">Return Sales for 
-                                                <span class="text-primary">'. htmlspecialchars($sale->item->name, ENT_QUOTES, 'UTF-8') .'</span>
+                                            <h5 class="modal-title" id="salesReturnModalLabel' . $sale->id . '">Return Sales for 
+                                                <span class="text-primary">' . htmlspecialchars($sale->item->name, ENT_QUOTES, 'UTF-8') . '</span>
                                             </h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                 
-                                        <form id="salesReturnForm" method="POST" action="'. route('salesReturns.store') .'">
-                                            '. csrf_field() .'
+                                        <form id="salesReturnForm" method="POST" action="' . route('salesReturns.store') . '">
+                                            ' . csrf_field() . '
                                             <div class="modal-body">
-                                                <input type="hidden" name="sale_id" value="'. $sale->id .'">
+                                                <input type="hidden" name="sale_id" value="' . $sale->id . '">
                 
                                                 <div class="mb-3">
                                                     <label for="quantity" class="form-label">Quantity to Return</label>
                                                     <input type="number" name="quantity" class="form-control" readonly min="1"
-                                                        max="'. $sale->quantity .'" value="'. $sale->quantity .'"
+                                                        max="' . $sale->quantity . '" value="' . $sale->quantity . '"
                                                         required>
                                                 </div>
                 
@@ -155,14 +157,14 @@ class SalesController extends BaseController
                 
                             <!-- Edit Button (Hidden) -->
                             <a href="#" class="btn btn-success btn-sm" hidden data-bs-toggle="modal"
-                                data-bs-target="#editSaleModal'. $sale->id .'">
+                                data-bs-target="#editSaleModal' . $sale->id . '">
                                 <i class="bi bi-pencil"></i>
                             </a>
                 
                             <!-- Delete Form (Hidden) -->
-                            <form action="'. route('sales.destroy', $sale->id) .'" method="POST" style="display:inline;">
-                                '. csrf_field() .'
-                                '. method_field('DELETE') .'
+                            <form action="' . route('sales.destroy', $sale->id) . '" method="POST" style="display:inline;">
+                                ' . csrf_field() . '
+                                ' . method_field('DELETE') . '
                                 <button type="submit" hidden class="btn btn-sm btn-danger"
                                     onclick="return confirm(\'Are you sure to delete this sale?\')">
                                     <i class="bi bi-trash"></i>
@@ -170,7 +172,7 @@ class SalesController extends BaseController
                             </form>
                         </div>
                     ';
-                })                
+                })
                 ->rawColumns(['actions'])
                 ->make(true);
         }
@@ -188,7 +190,6 @@ class SalesController extends BaseController
 
         // return view('sales.index', compact('sales', 'medicines', 'usePrinter'));
         return view('sales.index');
-
     }
 
     /**
@@ -215,21 +216,23 @@ class SalesController extends BaseController
 
         // item_id represents the stock_id here
 
-        
+
         /* extract the id from "item_id" request data by detecting price digits from right to left of item_id, and then get the remained right digits as id
             if the price is 1500 and item_id is 231000 then the id will be 23 */
-            // $newItemIds = [];
+        // $newItemIds = [];
 
-            // foreach ($request->item_id as $key => $item_id) {
-            //     $price = $request->total_price[$key];
-            //     $priceDigits = strlen((string) $price);
-            //     $id = substr($item_id, 0, -$priceDigits); // Extract from left
-            //     $newItemIds[$key] = $id;
-            // }
-            
-            // $request->merge(['item_id' => $newItemIds]);
-            
-            // dd($request->all());
+        // foreach ($request->item_id as $key => $item_id) {
+        //     $price = $request->total_price[$key];
+        //     $priceDigits = strlen((string) $price);
+        //     $id = substr($item_id, 0, -$priceDigits); // Extract from left
+        //     $newItemIds[$key] = $id;
+        // }
+
+        // $request->merge(['item_id' => $newItemIds]);
+
+        $request->merge(['item_id' => $request->stock_id]);
+
+        // dd($request->all());
 
         // Validate the incoming request data for all rows of sales
         try {
@@ -241,6 +244,10 @@ class SalesController extends BaseController
                 'item_id' => 'required|array',         // Ensure it's an array of item IDs
                 // 'item_id.*' => 'required|exists:stocks,id', // Validate each item ID in the array
                 'item_id.*' => 'required|exists:items,id', // Validate each item ID in the array
+
+                // 'stock_id' => 'required|array',         // Ensure it's an array of item IDs
+                // // 'item_id.*' => 'required|exists:stocks,id', // Validate each item ID in the array
+                // 'stock_id.*' => 'required|exists:items,id', // Validate each item ID in the array
 
                 'quantity' => 'required|array',        // Ensure it's an array of quantities
                 'quantity.*' => 'required|integer|min:1', // Validate each quantity
@@ -258,6 +265,8 @@ class SalesController extends BaseController
             return redirect()->back()->with('error', 'Not added because: ' . $e->getMessage());
         }
 
+        // dd($request->all());
+
         // Retrieve the pharmacy_id and staff_id for the sale record
         $pharmacyId = session('current_pharmacy_id'); // Ensure this is set correctly in your session
         $staffId = Auth::user()->id;
@@ -270,15 +279,15 @@ class SalesController extends BaseController
 
                 // store quantity in a temporary variable
                 $temp_quantity = $request->quantity[$key];
-                
-                while($temp_quantity > 0){
+
+                while ($temp_quantity > 0) {
                     // dd($total_price[$key]);
                     // fetch all unxpired stocks of this item_id where the quantity is greater than 0, order them by the expire date ascendingly
-                    $stocks = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('selling_price',$request->total_price[$key])->where('item_id', $request->item_id[$key])->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->orderBy('expire_date', 'asc')->first();
+                    $stocks = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('selling_price', $request->total_price[$key])->where('item_id', $request->item_id[$key])->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->orderBy('expire_date', 'asc')->first();
                     // dd($stocks);
 
                     // check if temporary quantity is greater than the stock quantity
-                    if($temp_quantity > $stocks->remain_Quantity){
+                    if ($temp_quantity > $stocks->remain_Quantity) {
                         // update the temporary quantity to the remaining quantity
                         $temp_quantity = $temp_quantity - $stocks->remain_Quantity;
 
@@ -289,17 +298,17 @@ class SalesController extends BaseController
                             'item_id' => $item_id,
                             'quantity' => $stocks->remain_Quantity,
                             'total_price' => $request->total_price[$key],
-                            'amount' => $request->total_price[$key]*$stocks->remain_Quantity,
+                            'amount' => $request->total_price[$key] * $stocks->remain_Quantity,
                             'date' => $request->date[$key],
                             'stock_id' => $stocks->id,
                         ]);
 
-                        if($thisSale){
+                        if ($thisSale) {
                             // update the stock quantity to 0
                             $stocks->update(['remain_Quantity' => 0]);
                         }
-                    }else{
-                        
+                    } else {
+
                         // make sales
                         $thisSale =  Sales::create([
                             'pharmacy_id' => $pharmacyId,
@@ -307,12 +316,12 @@ class SalesController extends BaseController
                             'item_id' => $item_id,
                             'quantity' => $temp_quantity,
                             'total_price' => $request->total_price[$key],
-                            'amount' => $request->total_price[$key]*$temp_quantity,
+                            'amount' => $request->total_price[$key] * $temp_quantity,
                             'date' => $request->date[$key],
                             'stock_id' => $stocks->id,
                         ]);
 
-                        if($thisSale){
+                        if ($thisSale) {
                             // update the stock quantity to the remaining quantity
                             $stocks->update(['remain_Quantity' => $stocks->remain_Quantity - $temp_quantity]);
                             // update the temporary quantity to 0
@@ -320,21 +329,21 @@ class SalesController extends BaseController
                         }
                     }
 
-                //update remaning stock
-                // $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $item_id)->first();
-                // $remainQuantity = $stock->remain_Quantity - $request->quantity[$key];
-                // $stock->update(['remain_Quantity' => $remainQuantity]);
+                    //update remaning stock
+                    // $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $item_id)->first();
+                    // $remainQuantity = $stock->remain_Quantity - $request->quantity[$key];
+                    // $stock->update(['remain_Quantity' => $remainQuantity]);
 
-                // Sales::create([
-                //     'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
-                //     'staff_id' => $staffId,                // Use the staff_id from the authenticated user
-                //     'item_id' => $stock->item_id,
-                //     'quantity' => $request->quantity[$key],
-                //     'stock_id' => $request->stock_id[$key],
-                //     'total_price' => $request->amount[$key],
-                //     'date' => $request->date[$key],
-                // ]);
-            }
+                    // Sales::create([
+                    //     'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
+                    //     'staff_id' => $staffId,                // Use the staff_id from the authenticated user
+                    //     'item_id' => $stock->item_id,
+                    //     'quantity' => $request->quantity[$key],
+                    //     'stock_id' => $request->stock_id[$key],
+                    //     'total_price' => $request->amount[$key],
+                    //     'date' => $request->date[$key],
+                    // ]);
+                }
             }
 
             // $printing = $this->printSaleReceipt($saleDate[0]);           

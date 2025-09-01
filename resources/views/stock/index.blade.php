@@ -45,7 +45,7 @@
 
     {{-- <!-- Create Stock Modal --> --}}
     <div class="modal fade" id="createStockModal" tabindex="-1" aria-labelledby="createStockModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header text-center bg-primary text-white">
                     <h5 class="modal-title" id="createStockModalLabel">Add New Stock</h5>
@@ -131,7 +131,7 @@
     <!-- Create Medicine + Stock Modal -->
     <div class="modal fade" id="createMedicineStockModal" tabindex="-1" aria-labelledby="createMedicineStockModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header text-center bg-primary text-white">
                     <h5 class="modal-title" id="createMedicineStockModalLabel">Add New Stock and Medicine</h5>
@@ -209,7 +209,7 @@
     {{-- Create a modal to Import Medicine and Stock from csv file --}}
     <div class="modal fade" id="importMedicineStockModal" tabindex="-1" aria-labelledby="importMedicineStockModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header text-center bg-primary text-white">
                     <h5 class="modal-title" id="importMedicineStockModalLabel">Import Medicines and Stock</h5>

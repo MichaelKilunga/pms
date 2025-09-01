@@ -6,8 +6,9 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                    <a class="flex text-primary items-center gap-2" href="{{ route('dashboard') }}">
                         <x-application-mark class="block h-9 w-auto" />
+                        PILLPOINTONE
                     </a>
                 </div>
             </div>
@@ -124,7 +125,7 @@
         {{-- <span class="flex justify-between h-16"> --}}
 
         <!-- Navigation Links -->
-        <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex overflow-auto">
+        {{-- <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex overflow-auto">
             @if (Auth::user()->role == 'staff')
                 <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                     {{ __('Dashboard') }}
@@ -135,7 +136,6 @@
                 <x-nav-link href="{{ route('salesReturns') }}" :active="request()->routeIs('salesReturns')">
                     {{ __('Sales Returns') }}
                 </x-nav-link>
-                {{-- stock balances --}}
                 <x-nav-link href="{{ route('stocks.balance') }}" :active="request()->routeIs('stocks.balance')">
                     {{ __('Stock Balance') }}
                 </x-nav-link> 
@@ -168,7 +168,6 @@
                 <x-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
                     {{ __('Stock') }}
                 </x-nav-link>
-                {{-- stock balances --}}
                 <x-nav-link href="{{ route('stocks.balance') }}" :active="request()->routeIs('stocks.balance')">
                     {{ __('Stock Balance') }}
                 </x-nav-link> 
@@ -258,11 +257,11 @@
                 <x-nav-link href="{{ route('agent.completeRegistration', ['action' => 'index']) }}" :active="request()->routeIs('agent.completeRegistration')">
                     {{ __('Complete Registration') }}
                 </x-nav-link>
-                {{-- <x-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
+                <x-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
                     {{ __('Contracts') }}
-                </x-nav-link> --}}
+                </x-nav-link>
             @endif
-        </div>
+        </div> --}}
         {{-- </span> --}}
     </div>
 

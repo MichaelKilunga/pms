@@ -30,6 +30,7 @@
             )
             ->where('pharmacy_id', session('current_pharmacy_id'))
             ->where('expire_date', '>', now())
+            ->where('remain_Quantity', '>', 0)
             ->groupBy('item_id', 'selling_price')
             ->with('item')
             ->get();
@@ -87,7 +88,7 @@
 
     <!-- Create Sales Modal -->
     <div class="modal fade" id="createSalesModal" tabindex="-1" aria-labelledby="createSalesModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="createSalesModalLabel">Add New Sale</h5>
@@ -104,7 +105,7 @@
                                     <select name="item_id[]" class="form-select salesChosen" required>
                                         <option selected value="">Select medicine</option>
                                         @foreach ($medicines as $medicine)
-                                            <option value="{{ $medicine->id }}">
+                                            <option value="{{ $medicine->id.'-'.$medicine->selling_price }}">
                                                 {{ $medicine->item->name }} 
                                                 <br><strong
                                                 class="text-danger">({{ number_format($medicine->selling_price) }}Tsh)</strong>
@@ -252,9 +253,13 @@
             function tellPrice(row) {
                 let medicines = @json($medicines); // Convert medicines to a JS array
                 const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
-                
+                //get value of  id attribute in the select with name=item_is[]
+                // const selectedMedicineId = row.querySelector('[name="stock_id[]"]').value;
+                // alert(selectedMedicineId);
+                // const [id, selling_price] = selectedMedicineId.split('-');
+                // alert([id, selling_price]);
                 // Find the selected medicine
-                const selectedMedicine = medicines.find(medicine => medicine.id == selectedMedicineId);
+                const selectedMedicine = medicines.find(medicine => medicine.id + '-' + medicine.selling_price == selectedMedicineId);
                 
                 row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
                 // console.log(selectedMedicine.id);
@@ -308,7 +313,7 @@
                                 <select name="item_id[]" data-row-id="item_id[]" class="form-select salesChosen" required>
                                     <option selected disabled value="">Select medicine</option>
                                     @foreach ($medicines as $medicine)
-                                        <option value="{{ $medicine->id }}">
+                                        <option value="{{ $medicine->id }}-{{ $medicine->selling_price }}">
                                                 {{ $medicine->item->name }} <br><strong
                                                 class="text-danger">({{ number_format($medicine->selling_price) }}Tsh)</strong>
                                             </option>

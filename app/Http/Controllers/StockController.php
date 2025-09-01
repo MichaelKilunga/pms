@@ -27,9 +27,10 @@ class StockController extends Controller
         // $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
         if ($request->ajax()) {
             $stocks = Stock::with('item', 'staff') // Load relationships
-                ->where('pharmacy_id', session('current_pharmacy_id'));
-            // ->orderBy('remain_Quantity', 'desc');
-            // ->where('remain_Quantity','>',0);
+                ->where('pharmacy_id', session('current_pharmacy_id'))
+                // if not remain
+                ->orderBy('created_at', 'desc')
+                ->orderBy('batch_number', 'desc');
 
             return DataTables::of($stocks)
                 ->addIndexColumn() // Adds auto-incrementing column
@@ -341,6 +342,12 @@ class StockController extends Controller
     public function update(Request $request, Stock $stock)
     {
         try {
+            $message = null;
+            $stock = Stock::find($request->id);
+
+            // start transaction
+            DB::beginTransaction();
+
             $request->validate([
                 'id' => 'required|integer|exists:stocks,id',
                 'quantity' => 'required|integer|min:1',
@@ -352,16 +359,108 @@ class StockController extends Controller
                 'in_date' => 'required|date',
                 'expire_date' => 'required|date',
             ]);
+            //if original quantity is greater than remain_Quantity
+
+            if ($stock->quantity > $stock->remain_Quantity) {
+
+                //if here, it means has already started to make sales on this stock, so we can't  modify buying price and selling price
+                //what to do then? modify only the quantity=remain_Quantity and remain_Quantity=0; as a way to close this stock and create a new one
+                // with a new batch number, selling price and buying price;
+
+                //check if he wants to modify prices
+                if ((($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && ($request->quantity != $stock->quantity)) {
+
+                    //check if new stocked quantity is greater than sold quanity
+                    if (!($request->quantity >= ($stock->quantity - $stock->remain_Quantity))) {
+                        throw new Exception('New quantity is less than the sold quantity.');
+                    }
+
+                    //close this stock
+                    $stock->update([
+                        'quantity' => $stock->quantity - $stock->remain_Quantity,
+                        'remain_Quantity' => 0,
+                    ]);
+
+
+                    // create a new similar stock with new prices and quantity
+                    if (($request->quantity - ($stock->quantity - $stock->remain_Quantity)) > 0) {
+                        $newStock = Stock::create([
+                            'pharmacy_id' => session('current_pharmacy_id'),
+                            'quantity' => $request->quantity - ($stock->quantity - $stock->remain_Quantity),
+                            'remain_Quantity' => $request->quantity - ($stock->quantity - $stock->remain_Quantity),
+                            'batch_number' => $stock->batch_number,
+                            'low_stock_percentage' => round(($request->quantity - ($stock->quantity - $stock->remain_Quantity)) * 0.25, 0),
+                            'buying_price' => $request->buying_price,
+                            'selling_price' => $request->selling_price,
+                            'supplier' => $request->supplier,
+                            'in_date' => $request->in_date,
+                            'expire_date' => $request->expire_date,
+                            'staff_id' => Auth::user()->id,
+                            'item_id' => $stock->item_id,
+                        ]);
+                    }
+                    $message = 'Price and quantity updated successfully.';
+
+                } elseif ((($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && !($request->quantity != $stock->quantity)) {
+
+                    $newStock_quantity = $stock->remain_Quantity;
+
+                    //close this stock
+                    $stock->update([
+                        'quantity' => $stock->quantity - $stock->remain_Quantity,
+                        'remain_Quantity' => 0,
+                    ]);
+
+                    // create a new similar stock with new prices and quantity
+                    $newStock = Stock::create([
+                        'pharmacy_id' => session('current_pharmacy_id'),
+                        'quantity' => $newStock_quantity,
+                        'remain_Quantity' => $newStock_quantity,
+                        'batch_number' => $stock->batch_number,
+                        'low_stock_percentage' => round($newStock_quantity * 0.25, 0),
+                        'buying_price' => $request->buying_price,
+                        'selling_price' => $request->selling_price,
+                        'supplier' => $request->supplier,
+                        'in_date' => $request->in_date,
+                        'staff_id' => Auth::user()->id,
+                        'expire_date' => $request->expire_date,
+                        'item_id' => $stock->item_id,
+                    ]);
+                    $message = 'Price updated successfully.';
+
+                } elseif (!(($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && ($request->quantity != $stock->quantity)) {
+                    //check if new stocked quantity is greater than sold quanity
+                    if ($request->quantity >= ($stock->quantity - $stock->remain_Quantity)) {
+                        $stock->update([
+                            'quantity' => $request->quantity,
+                            'remain_Quantity' => $request->quantity - ($stock->quantity - $stock->remain_Quantity),
+                        ]);
+                    } else {
+                        throw new Exception('New quantity is less than the sold quantity.');
+                    }
+                    $message = 'Quantity updated successfully.';
+                }elseif(!(($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && !($request->quantity != $stock->quantity) && ($request->expire_date != $stock->expire_date)){
+                    $stock->update([
+                        'expire_date' => $request->expire_date,
+                    ]);
+                    $message = 'Expire date updated successfully.';
+                }
+
+                DB::commit();
+                return redirect()->route('stock')->with('success', $message);
+            } else {
+                $request['remain_Quantity'] = $request['quantity'];
+
+                $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $request->id)->first();
+                $stock->update($request->only('quantity', 'low_stock_percentage', 'remain_Quantity', 'buying_price', 'selling_price', 'supplier', 'in_date', 'expire_date'));
+
+                DB::commit();
+                return redirect()->route('stock')->with('success', 'Stock updated successfully.');
+            }
         } catch (Exception $e) {
+            DB::rollBack();
             return redirect()->back()->withInput()->with('error', "Data  not added because: " . $e->getMessage());
         }
-
-        $request['remain_Quantity'] = $request['quantity'];
-
-        $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $request->id)->first();
-        $stock->update($request->only('quantity', 'low_stock_percentage', 'remain_Quantity', 'buying_price', 'selling_price', 'supplier', 'in_date', 'expire_date'));
-
-        return redirect()->route('stock')->with('success', 'Stock updated successfully.');
     }
 
     /**
