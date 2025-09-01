@@ -201,10 +201,10 @@
                                 </div>
                             </div>
 
-                            {{-- Inventory --}}
+                            {{-- Stock --}}
                             <div x-data="{ open: @json($invOpen) }" class="space-y-1">
                                 <button @click="open = ! open" class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                    <span class="font-medium">Inventory</span>
+                                    <span class="font-medium">Stock</span>
                                     <svg :class="{ 'rotate-90': open }" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
