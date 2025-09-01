@@ -15,6 +15,12 @@
     <!-- Bootstrap Icons CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
+    {{-- //bootstrap 5 link --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    {{-- jQuery script --}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -133,18 +139,18 @@
     <!--End of Tawk.to Script-->
     {{-- TAWK END --}}
 
-
     <!-- Hero Section -->
     <div class="hero">
         <div class="container">
             <h1 class="display-4 fw-bold">Welcome to Pharmacy Management System (PILLPOINTONE)</h1>
             <p class="lead">A powerful solution for managing your Pharmacies</p>
             @auth
-                <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg me-2">Go to Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg me-2 mt-3">Go to Dashboard</a>
             @else
-                <a onclick="return (confirm('Still under maintanance!') && false)" href="{{ route('register') }}" class="btn btn-primary btn-lg me-2">Become Agent</a>
-                <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg">Login</a>
+                <a onclick="return (confirm('Still under maintanance!') && false)" href="{{ route('register') }}" class="btn btn-primary btn-lg me-2 mt-3"><i class="bi bi-person-plus"></i> Become Agent</a>
+                <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg mt-3"><i class="bi bi-box-arrow-in-right"></i> Login</a>
             @endauth
+            <button type="button" class="btn btn-primary btn-lg mt-3"  data-bs-toggle="modal" data-bs-target="#contactModal"><i class="bi bi-chat"></i> Request Trial</button>
         </div>
         <div class="scroll-indicator" onclick="scrollToContent()">⬇ Scroll to Learn More</div>
     </div>
@@ -246,6 +252,81 @@
         </div>
     </section>
 
+
+    {{-- Quick contact links --}}
+    <div class="mt-2 text-center">
+        <a class="btn btn-success btn-sm" target="_blank" href="https://wa.me/{{ config('support.whatsapp', env('SUPPORT_WHATSAPP')) }}?text={{ urlencode('Hello, I need help with...') }}">WhatsApp</a>
+        <a class="btn btn-outline-secondary btn-sm" href="mailto:{{ config('support.email', env('SUPPORT_EMAIL')) }}">{{ config('support.email', env('SUPPORT_EMAIL')) }}</a>
+        <a class="btn btn-outline-secondary btn-sm" href="{{ config('support.website', env('SUPPORT_WEBSITE')) }}" target="_blank">Website</a>
+        {{-- normal call --}}
+        <a class="btn btn-outline-secondary btn-sm" href="tel:{{ config('support.phone', env('SUPPORT_PHONE')) }}">Call</a>
+    </div>
+
+    <!-- Contact Us Modal -->
+    <div class="modal fade" id="contactModal" tabindex="-1" role="dialog" aria-labelledby="contactModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form id="contactForm">
+                    @csrf
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="contactModalLabel">Contact Us</h5>
+                        <span class="close" onmouseover="this.style.cursor='pointer'" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </span>
+                    </div>
+
+                    <div class="modal-body">
+                        
+                        <div class="form-group" style="display:none !important;">
+                            <input type="text" name="nickname" value="" class="form-control" autocomplete="off" />
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-md-6">
+                                <label>Phone</label>
+                                <input name="phone" required type="text" class="form-control" />
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Location</label>
+                                <input name="location" type="text" required class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <label>Service</label>
+                            <select name="service" class="form-control" required>
+                                <option value="">Select a service</option>
+                                <option value="pharmacy">Pharmacy Management System</option>
+                                <option value="api">API's</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <label>Describe your issue</label>
+                            <textarea name="message" rows="4" class="form-control" required placeholder="I need to upgrade package..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" id="contactSubmitBtn" class="btn btn-primary">Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast (position fixed bottom-right) -->
+    <div aria-live="polite" aria-atomic="true" style="position: fixed; bottom: 1rem; right: 1rem; z-index: 1080;">
+    <div id="contactToast" class="toast" data-delay="6000" style="min-width: 250px;">
+        <div class="toast-header">
+        <strong class="mr-auto">Contact</strong>
+        <small class="text-muted">now</small>
+        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
+        </div>
+        <div class="toast-body"></div>
+    </div>
+    </div>
 
     <!-- Subscription Plans Section -->
     {{-- CHeck if is user logged in and is agent --}}
@@ -407,6 +488,67 @@
         </div>
     </footer>
 
+    <!-- AJAX + JS -->
+    <script>
+        $(document).ready(function () {
+            // Setup CSRF token for all AJAX requests
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $('#contactForm').on('submit', function (e) {
+                e.preventDefault();
+
+                var form = $(this);
+                var btn  = $('#contactSubmitBtn');
+
+                btn.prop('disabled', true);
+                btn.text('Sending...');
+
+                $.ajax({
+                    url: '/contact-us',
+                    method: 'POST',
+                    data: form.serialize(),
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response && response.status === 'success') {
+                            alert(response.message || 'Message sent. We will contact you shortly.');
+
+                            // reset form fields
+                            form[0].reset();
+
+                            // hide modal (Bootstrap)
+                                $('#contactModal').modal('hide');
+                        } else {
+                            // API returned a 200 with a non-success status
+                            alert((response && response.message) ? response.message : 'An error occurred. Please try again.');
+                        }
+                    },
+                    error: function (xhr) {
+                        var msg = 'An error occurred. Please try again.';
+                        if (xhr && xhr.responseJSON) {
+                            if (xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            } else if (xhr.responseJSON.errors) {
+                                var firstKey = Object.keys(xhr.responseJSON.errors)[0];
+                                msg = xhr.responseJSON.errors[firstKey][0];
+                            }
+                        } else if (xhr && xhr.statusText) {
+                            msg = xhr.statusText;
+                        }
+
+                        alert(msg);
+                    },
+                    complete: function () {
+                        btn.prop('disabled', false).text('Send');
+                    }
+                });
+            });
+        });
+    </script>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -417,6 +559,12 @@
             });
         }
     </script>
+
+
+    <!-- Add these CDN links (put in head/footer as needed) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script> --}}
+
 </body>
 
 </html>

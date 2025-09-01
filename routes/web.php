@@ -29,6 +29,7 @@ use App\Http\Controllers\SalesReturnController;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\StockTransferController;
+use App\Http\Controllers\ContactController;
 
 
 Route::get('/', function () {
@@ -265,3 +266,5 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {
     Route::post('pharmacies', [PharmacyController::class, 'store'])->name('pharmacies.store');
 });
+
+Route::post('/contact-us', [ContactController::class, 'send'])->name('contact.send');
