@@ -270,7 +270,8 @@
                                                                                                                                                                                         </tr>
                                                                                                                                                                                     `).join('')}
                                             ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
-                                    </tbody>
+                                             
+                                            </tbody>
                                 </table>
                             `;
 
@@ -316,6 +317,7 @@
                                                                                                                                                                                                 ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
                                                                                                                                                                                             </tr>`).join('')}
                                             ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
+                                         
                                     </tbody>
                                 </table>
                             `;

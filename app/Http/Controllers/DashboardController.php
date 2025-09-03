@@ -130,6 +130,7 @@ class DashboardController extends Controller
         session(['pharmacy_name' => Pharmacy::where('id', session('current_pharmacy_id'))->value('name')]);
         session(['location' => Pharmacy::where('id', session('current_pharmacy_id'))->value('location')]);
 
+
         // $itemsSummary = DB::table('items')
         //     ->leftJoin('sales', function ($join) use ($pharmacyId) {
         //         $join->on('items.id', '=', 'sales.item_id')
