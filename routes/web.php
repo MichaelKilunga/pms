@@ -121,7 +121,10 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     //adde these for viewing stock balance
     Route::get('/stock/balances', [StockController::class, 'viewStockBalances'])->name('stock.balances');
     Route::get('/stock/details/{id}', [StockController::class, 'getStockDetails'])->name('stock.details');
-    
+    // Route::get('/stock/balance', [StockController::class, 'viewStockBalances']);
+    // Route::get('/stock/details/{id}', [StockController::class, 'getStockDetails']);
+
+
     //stock stransfer
     Route::get('stockTransfers', [StockTransferController::class, 'index'])->name('stockTransfers');
     Route::get('/stock-transfers', [StockTransferController::class, 'index'])->name('stockTransfers.index');
@@ -261,7 +264,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/audits', [AuditController::class, 'index'])->name('audits.index');
     // get base64 image
     Route::get('/get_logo', [AuditController::class, 'getImage'])->name('audits.getImage');
-
 });
 
 Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {
@@ -285,8 +287,8 @@ Route::middleware(['auth'])->group(function () {
 
     //categories
     Route::get('expenses/category', [ExpenseController::class, 'category'])->name('expenses.category');
-    Route::post('expenses/category', [ExpenseController::class, 'storeCategory'])->name ('category.store');
-    Route::put('expenses/category/{id}', [ExpenseController::class, 'updateCategory'])->name('category.update');  
+    Route::post('expenses/category', [ExpenseController::class, 'storeCategory'])->name('category.store');
+    Route::put('expenses/category/{id}', [ExpenseController::class, 'updateCategory'])->name('category.update');
     Route::delete('expenses/category/{id}', [ExpenseController::class, 'destroyCategory'])->name('category.destroy');
 
     // Full CRUD routes for expenses

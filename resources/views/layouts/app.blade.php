@@ -26,7 +26,6 @@
     <!-- include summernote css/js -->
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
 
-
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('assets/js/bootstrap.js') }}"></script>
@@ -199,15 +198,15 @@
                                     </a>
                                  
                                     {{-- expenses categories --}}
-                                    <a href="{{ route('expenses.category') }}"
+                                    {{-- <a href="{{ route('expenses.category') }}"
                                         class="block px-3 py-2 rounded no-underline {{ request()->routeIs('expenses.category') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                                         {{ __('Categories') }}
-                                    </a>
+                                    </a> --}}
                                     {{-- add vendor --}}
-                                    <a href="{{ route('expenses.vendors') }}"
+                                    {{-- <a href="{{ route('expenses.vendors') }}"
                                         class="block px-3 py-2 rounded no-underline {{ request()->routeIs('expenses.vendors') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                                         {{ __('Vendors') }}
-                                    </a>
+                                    </a> --}}
 
 
                                 </div>

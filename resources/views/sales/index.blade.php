@@ -1,22 +1,6 @@
 @extends('sales.app')
 
 @section('content')
-    {{-- @php 
-    // $medicines = App\Models\Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->with('item')->get(); 
-    $medicines = App\Models\Stock::select(
-            // generate a new id for each row by concatenating item_id and selling_price
-                            \DB::raw("item_id || selling_price as id"),
-                            'item_id',
-                            \DB::raw("SUM(remain_Quantity) as remain_Quantity"),
-                            'selling_price'
-                        )
-                        ->where('pharmacy_id', session('current_pharmacy_id'))
-                        ->where('expire_date', '>', now())
-                        ->groupBy('item_id', 'selling_price')
-                        ->with('item')
-                        ->get();
-                        // dd($medicines);
-    @endphp --}}
 
     @php
         use App\Models\Stock;
@@ -253,12 +237,7 @@
             function tellPrice(row) {
                 let medicines = @json($medicines); // Convert medicines to a JS array
                 const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
-                //get value of  id attribute in the select with name=item_is[]
-                // const selectedMedicineId = row.querySelector('[name="stock_id[]"]').value;
-                // alert(selectedMedicineId);
-                // const [id, selling_price] = selectedMedicineId.split('-');
-                // alert([id, selling_price]);
-                // Find the selected medicine
+              
                 const selectedMedicine = medicines.find(medicine => medicine.id + '-' + medicine.selling_price == selectedMedicineId);
                 
                 row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;

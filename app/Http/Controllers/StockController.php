@@ -16,6 +16,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\Item;
 
 
 
@@ -558,6 +559,24 @@ class StockController extends Controller
     }
 
     //stock balance 
+    // public function viewStockBalances()
+    // {
+    //     $pharmacyId = session('current_pharmacy_id');
+
+    //     $stockBalances = Stock::select(
+    //         'item_id',
+    //         DB::raw('SUM(quantity) as quantity'),
+    //         DB::raw("SUM(CASE WHEN expire_date > NOW() THEN remain_Quantity ELSE 0 END) as remain_Quantity"),
+    //         DB::raw("SUM(CASE WHEN expire_date <= NOW() THEN remain_Quantity ELSE 0 END) as expired_remain_Quantity")
+    //     )
+    //         ->where('pharmacy_id', $pharmacyId)
+    //         ->groupBy('item_id')
+    //         ->with('item')
+    //         ->paginate(10);
+
+    //     return view('stock.balance', compact('stockBalances'));
+    // }
+      // Show stock balance page
     public function viewStockBalances()
     {
         $pharmacyId = session('current_pharmacy_id');
@@ -565,18 +584,75 @@ class StockController extends Controller
         $stockBalances = Stock::select(
             'item_id',
             DB::raw('SUM(quantity) as quantity'),
-            DB::raw("SUM(CASE WHEN expire_date > NOW() THEN remain_Quantity ELSE 0 END) as remain_Quantity"),
-            DB::raw("SUM(CASE WHEN expire_date <= NOW() THEN remain_Quantity ELSE 0 END) as expired_remain_Quantity")
+            DB::raw("SUM(CASE WHEN expire_date > NOW() THEN remain_quantity ELSE 0 END) as remain_quantity"),
+            DB::raw("SUM(CASE WHEN expire_date <= NOW() THEN remain_quantity ELSE 0 END) as expired_remain_quantity")
         )
-            ->where('pharmacy_id', $pharmacyId)
-            ->groupBy('item_id')
-            ->with('item')
-            ->paginate(10);
+        ->where('pharmacy_id', $pharmacyId)
+        ->groupBy('item_id')
+        ->with('item')  // Make sure Stock model has `item()` relation
+        ->paginate(10);
 
         return view('stock.balance', compact('stockBalances'));
     }
 
-    public function getStockDetails(Request $request)
+    // public function getStockDetails(Request $request)
+    // {
+    //     try {
+    //         $request->validate(['item_id' => 'required|integer']);
+
+    //         $pharmacyId = session('current_pharmacy_id');
+    //         $itemId = $request->query('item_id');
+
+    //         $stocks = Stock::where('item_id', $itemId)
+    //             ->where('pharmacy_id', $pharmacyId)
+    //             ->orderBy('expire_date', 'asc')
+    //             ->get();
+
+    //         $now = Carbon::now();
+
+    //         $fine = $stocks->filter(function ($s) use ($now) {
+    //             return $s->expire_date && Carbon::parse($s->expire_date)->gt($now);
+    //         })->map(function ($s) {
+    //             return [
+    //                 'batch_no' => $s->batch_number,
+    //                 'qty' => (int) $s->remain_Quantity,
+    //                 'supplier' => $s->supplier,
+    //                 'expiry_date' => $s->expire_date ? Carbon::parse($s->expire_date)->format('d-m-Y') : null,
+    //                 'stocked_on' => $s->in_date ? Carbon::parse($s->in_date)->format('d-m-Y') : null,
+    //             ];
+    //         })->values();
+
+    //         $expired = $stocks->filter(function ($s) use ($now) {
+    //             return $s->expire_date && Carbon::parse($s->expire_date)->lte($now);
+    //         })->map(function ($s) {
+    //             return [
+    //                 'batch_no' => $s->batch_number,
+    //                 'qty' => (int) $s->remain_Quantity,
+    //                 'supplier' => $s->supplier,
+    //                 'expiry_date' => $s->expire_date ? Carbon::parse($s->expire_date)->format('d-m-Y') : null,
+    //                 'stocked_on' => $s->in_date ? Carbon::parse($s->in_date)->format('d-m-Y') : null,
+    //             ];
+    //         })->values();
+
+    //         $item = Items::find($itemId);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'item' => [
+    //                 'id' => $itemId,
+    //                 'name' => $item ? $item->name : 'Unknown'
+    //             ],
+    //             'fine' => $fine,
+    //             'expired' => $expired
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $e->getMessage()
+    //         ]);
+    //     }
+    // }
+        public function getStockDetails(Request $request)
     {
         try {
             $request->validate(['item_id' => 'required|integer']);
@@ -591,6 +667,7 @@ class StockController extends Controller
 
             $now = Carbon::now();
 
+            // Fine stocks
             $fine = $stocks->filter(function ($s) use ($now) {
                 return $s->expire_date && Carbon::parse($s->expire_date)->gt($now);
             })->map(function ($s) {
@@ -603,6 +680,7 @@ class StockController extends Controller
                 ];
             })->values();
 
+            // Expired stocks
             $expired = $stocks->filter(function ($s) use ($now) {
                 return $s->expire_date && Carbon::parse($s->expire_date)->lte($now);
             })->map(function ($s) {
@@ -626,6 +704,7 @@ class StockController extends Controller
                 'fine' => $fine,
                 'expired' => $expired
             ]);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

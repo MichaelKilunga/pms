@@ -100,6 +100,7 @@ class DashboardController extends Controller
         )
             ->where('pharmacy_id', session('current_pharmacy_id'))
             ->where('expire_date', '>', now())
+            ->where('remain_Quantity', '>', 0)
             ->groupBy('item_id', 'selling_price')
             ->with('item')
             ->get();
