@@ -12,7 +12,7 @@
                         <th>#</th>
                         <th>Medicine Name</th>
                         <th>Stocked Remaining Quantity</th>
-                        <th class="text-danger">Expired Quantity</th>
+                        <th>Expired Quantity</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
@@ -55,25 +55,46 @@
 
         <!-- Modal -->
         <div class="modal fade" id="stockModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Stock Details for <span id="modalItemName"></span></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title d-flex align-items-center">
+                            <i class="bi bi-box-seam me-2"></i>
+                            Stock Details for <span id="modalItemName" class="ms-1"></span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
+
                     <div class="modal-body">
                         <ul class="nav nav-tabs" id="stockTabs">
                             <li class="nav-item">
-                                <button class="nav-link active" data-bs-toggle="tab"
-                                    data-bs-target="#fineStock">Fine</button>
+                                <button class="nav-link active text-success fw-bold" data-bs-toggle="tab"
+                                    data-bs-target="#fineStock">
+                                    <i class="bi bi-check-circle me-1"></i> Fine
+                                </button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link" data-bs-toggle="tab"
-                                    data-bs-target="#expiredStock">Expired</button>
+                                <button class="nav-link text-danger fw-bold" data-bs-toggle="tab"
+                                    data-bs-target="#expiredStock">
+                                    <i class="bi bi-x-circle me-1"></i> Expired
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link text-warning fw-bold" data-bs-toggle="tab"
+                                    data-bs-target="#lowStock">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> Low Stock
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link text-dark fw-bold" data-bs-toggle="tab"
+                                    data-bs-target="#finishedStock">
+                                    <i class="bi bi-dash-circle me-1"></i> Finished
+                                </button>
                             </li>
                         </ul>
 
                         <div class="tab-content mt-3">
+                            <!-- Fine -->
                             <div class="tab-pane fade show active" id="fineStock">
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped mb-0">
@@ -91,6 +112,7 @@
                                 </div>
                             </div>
 
+                            <!-- Expired -->
                             <div class="tab-pane fade" id="expiredStock">
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped mb-0">
@@ -107,6 +129,42 @@
                                     </table>
                                 </div>
                             </div>
+
+                            <!-- Low Stock -->
+                            <div class="tab-pane fade" id="lowStock">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Batch No</th>
+                                                <th>Remain Quantity</th>
+                                                <th>Supplier</th>
+                                                <th>Stocked On</th>
+                                                <th>Expiry Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lowStockTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Finished -->
+                            <div class="tab-pane fade" id="finishedStock">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Batch No</th>
+                                                <th>Remain Quantity</th>
+                                                <th>Supplier</th>
+                                                <th>Stocked On</th>
+                                                <th>Expiry Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="finishedStockTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -115,7 +173,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -156,6 +213,8 @@
                 $('#modalItemName').text('Loading...');
                 $('#fineStockTableBody').html(spinnerRow);
                 $('#expiredStockTableBody').html(spinnerRow);
+                $('#lowStockTableBody').html(spinnerRow);
+                $('#finishedStockTableBody').html(spinnerRow);
 
                 var start = Date.now();
 
@@ -168,7 +227,6 @@
                     dataType: 'json',
                     cache: false,
                     success: function(response) {
-                        console.log(response);
                         var elapsed = Date.now() - start;
                         var remaining = MIN_LOADING_MS - elapsed;
 
@@ -178,6 +236,10 @@
                                 $('#fineStockTableBody').html(
                                     '<tr><td colspan="5">Could not load data</td></tr>');
                                 $('#expiredStockTableBody').html(
+                                    '<tr><td colspan="5">Could not load data</td></tr>');
+                                $('#lowStockTableBody').html(
+                                    '<tr><td colspan="5">Could not load data</td></tr>');
+                                $('#finishedStockTableBody').html(
                                     '<tr><td colspan="5">Could not load data</td></tr>');
                                 return;
                             }
@@ -203,7 +265,7 @@
                             } else {
                                 fineBody.html(
                                     '<tr><td colspan="5" class="text-center text-muted">No fine stock</td></tr>'
-                                    );
+                                );
                             }
 
                             // Expired
@@ -225,8 +287,54 @@
                             } else {
                                 expiredBody.html(
                                     '<tr><td colspan="5" class="text-center text-muted">No expired stock</td></tr>'
-                                    );
+                                );
                             }
+
+                            // Low Stock
+                            var lowBody = $('#lowStockTableBody').empty();
+                            if (response.lowStock.length) {
+                                $.each(response.lowStock, function(i, row) {
+                                    lowBody.append('<tr>' +
+                                        '<td>' + escapeHtml(row.batch_no) +
+                                        '</td>' +
+                                        '<td>' + (row.qty) + '</td>' +
+                                        '<td>' + escapeHtml(row.supplier) +
+                                        '</td>' +
+                                        '<td>' + escapeHtml(row.stocked_on) +
+                                        '</td>' +
+                                        '<td>' + escapeHtml(row.expiry_date) +
+                                        '</td>' +
+                                        '</tr>');
+                                });
+                            } else {
+                                lowBody.html(
+                                    '<tr><td colspan="5" class="text-center text-muted">No low stock</td></tr>'
+                                );
+                            }
+
+
+                            // Finished
+                            var finishedBody = $('#finishedStockTableBody').empty();
+                            if (response.finished.length) {
+                                $.each(response.finished, function(i, row) {
+                                    finishedBody.append('<tr>' +
+                                        '<td>' + escapeHtml(row.batch_no) +
+                                        '</td>' +
+                                        '<td>' + (row.qty) + '</td>' +
+                                        '<td>' + escapeHtml(row.supplier) +
+                                        '</td>' +
+                                        '<td>' + escapeHtml(row.stocked_on) +
+                                        '</td>' +
+                                        '<td>' + escapeHtml(row.expiry_date) +
+                                        '</td>' +
+                                        '</tr>');
+                                });
+                            } else {
+                                finishedBody.html(
+                                    '<tr><td colspan="5" class="text-center text-muted">No finished stock</td></tr>'
+                                );
+                            }
+
                         }
 
                         if (remaining > 0) {
@@ -241,6 +349,10 @@
                             '<tr><td colspan="5">Error loading data</td></tr>');
                         $('#expiredStockTableBody').html(
                             '<tr><td colspan="5">Error loading data</td></tr>');
+                        $('#lowStockTableBody').html(
+                            '<tr><td colspan="5">Error loading data</td></tr>');
+                        $('#finishedStockTableBody').html(
+                            '<tr><td colspan="5">Error loading data</td></tr>');
                     }
                 });
             });
@@ -249,10 +361,15 @@
                 $('#modalItemName').text('');
                 $('#fineStockTableBody').empty();
                 $('#expiredStockTableBody').empty();
+                $('#lowStockTableBody').empty();
+                $('#finishedStockTableBody').empty();
                 $('#stockModal .nav-link:first').addClass('active');
                 $('#stockModal .nav-link:last').removeClass('active');
                 $('#fineStock').addClass('show active');
                 $('#expiredStock').removeClass('show active');
+                $('#lowStock').removeClass('show active');
+                $('#finishedStock').removeClass('show active');
+
             });
         });
     </script>

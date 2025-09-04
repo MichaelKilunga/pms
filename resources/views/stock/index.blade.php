@@ -8,7 +8,7 @@
             {{$x->id}}
         @endforeach --}}
         <div class="d-flex justify-content-between mb-3">
-            <h2>Stock</h2>
+            <h1 class="text-primary fw-bold fs-3">Stock</h1>
             <div>
                 <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createStockModal">Add New
                     Stock</a>

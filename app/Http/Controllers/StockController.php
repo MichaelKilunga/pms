@@ -61,15 +61,20 @@ class StockController extends Controller
                                 data-bs-target="#editStockModal' . $stock->id . '">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form action="' . route('stock.destroy', $stock->id) . '" method="POST"
-                                style="display:inline;">
-                                ' . csrf_field() . '
-                                ' . method_field('DELETE') . '
-                                <button type="submit" onclick="return confirm(\'Do you want to delete this stock?\')"
-                                    class="btn btn-danger btn-sm ms-1">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                            ' . (
+                        $stock->remain_Quantity != $stock->quantity
+                        ? '<button type="button" class="btn btn-danger btn-sm ms-1" disabled>
+                            <i class="bi bi-trash"></i>
+                        </button>'
+                                        : '<form action="' . route("stock.destroy", $stock->id) . '" method="POST" style="display:inline;">
+                            ' . csrf_field() . '
+                            ' . method_field("DELETE") . '
+                            <button type="submit" onclick="return confirm(\'Do you want to delete this stock?\')" 
+                                class="btn btn-danger btn-sm ms-1">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>'
+                    ) . '
                         </div>
     
                         <!-- View Stock Modal -->
@@ -401,7 +406,6 @@ class StockController extends Controller
                         ]);
                     }
                     $message = 'Price and quantity updated successfully.';
-
                 } elseif ((($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && !($request->quantity != $stock->quantity)) {
 
                     $newStock_quantity = $stock->remain_Quantity;
@@ -428,7 +432,6 @@ class StockController extends Controller
                         'item_id' => $stock->item_id,
                     ]);
                     $message = 'Price updated successfully.';
-
                 } elseif (!(($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && ($request->quantity != $stock->quantity)) {
                     //check if new stocked quantity is greater than sold quanity
                     if ($request->quantity >= ($stock->quantity - $stock->remain_Quantity)) {
@@ -440,7 +443,7 @@ class StockController extends Controller
                         throw new Exception('New quantity is less than the sold quantity.');
                     }
                     $message = 'Quantity updated successfully.';
-                }elseif(!(($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && !($request->quantity != $stock->quantity) && ($request->expire_date != $stock->expire_date)){
+                } elseif (!(($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && !($request->quantity != $stock->quantity) && ($request->expire_date != $stock->expire_date)) {
                     $stock->update([
                         'expire_date' => $request->expire_date,
                     ]);
@@ -576,7 +579,7 @@ class StockController extends Controller
 
     //     return view('stock.balance', compact('stockBalances'));
     // }
-      // Show stock balance page
+    // Show stock balance page
     public function viewStockBalances()
     {
         $pharmacyId = session('current_pharmacy_id');
@@ -587,72 +590,15 @@ class StockController extends Controller
             DB::raw("SUM(CASE WHEN expire_date > NOW() THEN remain_quantity ELSE 0 END) as remain_quantity"),
             DB::raw("SUM(CASE WHEN expire_date <= NOW() THEN remain_quantity ELSE 0 END) as expired_remain_quantity")
         )
-        ->where('pharmacy_id', $pharmacyId)
-        ->groupBy('item_id')
-        ->with('item')  // Make sure Stock model has `item()` relation
-        ->paginate(10);
+            ->where('pharmacy_id', $pharmacyId)
+            ->groupBy('item_id')
+            ->with('item')  // Make sure Stock model has `item()` relation
+            ->paginate(10);
 
         return view('stock.balance', compact('stockBalances'));
     }
 
-    // public function getStockDetails(Request $request)
-    // {
-    //     try {
-    //         $request->validate(['item_id' => 'required|integer']);
-
-    //         $pharmacyId = session('current_pharmacy_id');
-    //         $itemId = $request->query('item_id');
-
-    //         $stocks = Stock::where('item_id', $itemId)
-    //             ->where('pharmacy_id', $pharmacyId)
-    //             ->orderBy('expire_date', 'asc')
-    //             ->get();
-
-    //         $now = Carbon::now();
-
-    //         $fine = $stocks->filter(function ($s) use ($now) {
-    //             return $s->expire_date && Carbon::parse($s->expire_date)->gt($now);
-    //         })->map(function ($s) {
-    //             return [
-    //                 'batch_no' => $s->batch_number,
-    //                 'qty' => (int) $s->remain_Quantity,
-    //                 'supplier' => $s->supplier,
-    //                 'expiry_date' => $s->expire_date ? Carbon::parse($s->expire_date)->format('d-m-Y') : null,
-    //                 'stocked_on' => $s->in_date ? Carbon::parse($s->in_date)->format('d-m-Y') : null,
-    //             ];
-    //         })->values();
-
-    //         $expired = $stocks->filter(function ($s) use ($now) {
-    //             return $s->expire_date && Carbon::parse($s->expire_date)->lte($now);
-    //         })->map(function ($s) {
-    //             return [
-    //                 'batch_no' => $s->batch_number,
-    //                 'qty' => (int) $s->remain_Quantity,
-    //                 'supplier' => $s->supplier,
-    //                 'expiry_date' => $s->expire_date ? Carbon::parse($s->expire_date)->format('d-m-Y') : null,
-    //                 'stocked_on' => $s->in_date ? Carbon::parse($s->in_date)->format('d-m-Y') : null,
-    //             ];
-    //         })->values();
-
-    //         $item = Items::find($itemId);
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'item' => [
-    //                 'id' => $itemId,
-    //                 'name' => $item ? $item->name : 'Unknown'
-    //             ],
-    //             'fine' => $fine,
-    //             'expired' => $expired
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $e->getMessage()
-    //         ]);
-    //     }
-    // }
-        public function getStockDetails(Request $request)
+    public function getStockDetails(Request $request)
     {
         try {
             $request->validate(['item_id' => 'required|integer']);
@@ -669,7 +615,7 @@ class StockController extends Controller
 
             // Fine stocks
             $fine = $stocks->filter(function ($s) use ($now) {
-                return $s->expire_date && Carbon::parse($s->expire_date)->gt($now);
+                return  $s->remain_Quantity > $s->low_stock_percentage && $s->remain_Quantity > 0 && $s->expire_date && Carbon::parse($s->expire_date)->gt($now);
             })->map(function ($s) {
                 return [
                     'batch_no' => $s->batch_number,
@@ -693,6 +639,32 @@ class StockController extends Controller
                 ];
             })->values();
 
+            //low stocks
+            $lowStock = $stocks->filter(function ($s) use ($now) {
+                return $s->remain_Quantity > 0 && $s->remain_Quantity <= $s->low_stock_percentage && $s->expire_date && Carbon::parse($s->expire_date)->gt($now);
+            })->map(function ($s) {
+                return [
+                    'batch_no' => $s->batch_number,
+                    'qty' => (int) $s->remain_Quantity,
+                    'supplier' => $s->supplier,
+                    'expiry_date' => $s->expire_date ? Carbon::parse($s->expire_date)->format('d-m-Y') : null,
+                    'stocked_on' => $s->in_date ? Carbon::parse($s->in_date)->format('d-m-Y') : null,
+                ];
+            })->values();
+
+            //finished stocks
+            $finished = $stocks->filter(function ($s) {
+                return $s->remain_Quantity == 0;
+            })->map(function ($s) {
+                return [
+                    'batch_no' => $s->batch_number,
+                    'qty' => (int) $s->remain_Quantity,
+                    'supplier' => $s->supplier,
+                    'expiry_date' => $s->expire_date ? Carbon::parse($s->expire_date)->format('d-m-Y') : null,
+                    'stocked_on' => $s->in_date ? Carbon::parse($s->in_date)->format('d-m-Y') : null,
+                ];
+            })->values();
+
             $item = Items::find($itemId);
 
             return response()->json([
@@ -702,9 +674,10 @@ class StockController extends Controller
                     'name' => $item ? $item->name : 'Unknown'
                 ],
                 'fine' => $fine,
-                'expired' => $expired
+                'expired' => $expired,
+                'lowStock' => $lowStock,
+                'finished' => $finished
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

@@ -121,8 +121,6 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     //adde these for viewing stock balance
     Route::get('/stock/balances', [StockController::class, 'viewStockBalances'])->name('stock.balances');
     Route::get('/stock/details/{id}', [StockController::class, 'getStockDetails'])->name('stock.details');
-    // Route::get('/stock/balance', [StockController::class, 'viewStockBalances']);
-    // Route::get('/stock/details/{id}', [StockController::class, 'getStockDetails']);
 
 
     //stock stransfer
