@@ -1,26 +1,23 @@
 @extends('sales.app')
 
 @section('content')
-
     @php
         use App\Models\Stock;
         use Illuminate\Support\Facades\DB;
 
         $medicines = Stock::select(
-                DB::raw("CONCAT(item_id, '-', selling_price) as id"), // safe MySQL concat
-                'item_id',
-                DB::raw("SUM(remain_Quantity) as remain_Quantity"),
-                'selling_price'
-            )
+            DB::raw("CONCAT(item_id, '-', selling_price) as id"), // safe MySQL concat
+            'item_id',
+            DB::raw('SUM(remain_Quantity) as remain_Quantity'),
+            'selling_price',
+        )
             ->where('pharmacy_id', session('current_pharmacy_id'))
             ->where('expire_date', '>', now())
             ->where('remain_Quantity', '>', 0)
             ->groupBy('item_id', 'selling_price')
             ->with('item')
             ->get();
-            // dd($medicines->all());
     @endphp
-
 
     <div class="container mt-4">
         <!-- Header -->
@@ -89,10 +86,10 @@
                                     <select name="item_id[]" class="form-select salesChosen" required>
                                         <option selected value="">Select medicine</option>
                                         @foreach ($medicines as $medicine)
-                                            <option value="{{ $medicine->id.'-'.$medicine->selling_price }}">
-                                                {{ $medicine->item->name }} 
+                                            <option value="{{ $medicine->id . '-' . $medicine->selling_price }}">
+                                                {{ $medicine->item->name }}
                                                 <br><strong
-                                                class="text-danger">({{ number_format($medicine->selling_price) }}Tsh)</strong>
+                                                    class="text-danger">({{ number_format($medicine->selling_price) }}Tsh)</strong>
                                             </option>
                                         @endforeach
                                     </select>
@@ -237,12 +234,13 @@
             function tellPrice(row) {
                 let medicines = @json($medicines); // Convert medicines to a JS array
                 const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
-              
-                const selectedMedicine = medicines.find(medicine => medicine.id + '-' + medicine.selling_price == selectedMedicineId);
-                
+
+                const selectedMedicine = medicines.find(medicine => medicine.id + '-' + medicine.selling_price ==
+                    selectedMedicineId);
+
                 row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
                 // console.log(selectedMedicine.id);
-                
+
                 // return;
                 if (selectedMedicine) {
                     // Set the total price to the medicine price (formatted with "TZS")
@@ -278,6 +276,69 @@
                     style: 'currency',
                     currency: 'TZS',
                 }).format(total);
+            }
+
+            // function kuondoa medicines zilizochaguliwa kwenye rows nyingine
+            // function updateMedicineOptions() {
+            //     // pata all selected medicines
+            //     let selectedMedicines = [];
+            //     document.querySelectorAll('[name="item_id[]"]').forEach(select => {
+            //         if (select.value) {
+            //             selectedMedicines.push(select.value);
+            //         }
+            //     });
+
+            //     // loop kupitia select zote na disable option zilizochaguliwa tayari
+            //     document.querySelectorAll('[name="item_id[]"]').forEach(select => {
+            //         let currentValue = select.value;
+            //         select.querySelectorAll('option').forEach(option => {
+            //             if (selectedMedicines.includes(option.value) && option.value !==
+            //                 currentValue) {
+            //                 // option.disabled = true;
+            //                 // option.style.display = "none"; // 👈 ficha kabisa option
+            //                 $(option).hide();   // ficha option kwenye select
+
+            //             } else {
+            //                 // option.disabled = false;
+            //                 // option.style.display = ""; // rudisha ionekane
+            //                 $(option).show();   // rudisha option ikionekane
+
+            //             }
+            //         });
+
+            //         // refresh select2
+            //         $(select).trigger('change.select2');
+            //     });
+            // }
+            function updateMedicineOptions() {
+                // pata all selected medicines
+                let selectedMedicines = [];
+                document.querySelectorAll('[name="item_id[]"]').forEach(select => {
+                    if (select.value) {
+                        selectedMedicines.push(select.value);
+                    }
+                });
+
+                // loop kupitia select zote na ficha/onyesha medicines
+                document.querySelectorAll('[name="item_id[]"]').forEach(select => {
+                    let currentValue = select.value;
+
+                    $(select).find('option').each(function() {
+                        if (selectedMedicines.includes(this.value) && this.value !== currentValue) {
+                            $(this).attr("disabled", true); // disable option
+                        } else {
+                            $(this).attr("disabled", false); // re-enable option
+                        }
+                    });
+
+                    // force Select2 to redraw
+                    // $(select).select2();
+                    $(select).select2({
+                        dropdownParent: $(
+                            '#saleModal') // 👈 hii ndiyo inazuia kuchoropoka nyuma ya modal
+                    });
+
+                });
             }
 
             // Add Row Functionality
@@ -322,18 +383,35 @@
 
                 salesFields.appendChild(newRow);
 
+                // Initialize Select2 kwa row mpya, hii ndiyo inazuia dropdown kuonekana nyuma ya modal
+                $(newRow).find('select[name="item_id[]"]').select2({
+                    dropdownParent: $('#saleModal')
+                });
+
+
                 // Initialize Chosen for the new row
                 initializeChosen();
+                updateMedicineOptions(); // <-- ongeza hii
 
                 // Add Event Listeners for the new row
                 newRow.querySelector('.remove-sale-row').addEventListener('click', function() {
                     newRow.remove();
                     updateTotalAmount();
+                    updateMedicineOptions(); // rudisha options zilizokuwa zimefichwa
                 });
 
                 newRow.querySelector('[name="quantity[]"]').addEventListener('input', function() {
                     calculateAmount(newRow);
                 });
+
+                newRow.querySelector('.remove-sale-row').addEventListener('click', function() {
+                    newRow.remove();
+                    updateTotalAmount();
+                    updateMedicineOptions();
+                });
+
+
+                updateMedicineOptions(); // apply restrictions immediately
             });
 
             // Initial Setup for Existing Rows
@@ -341,6 +419,7 @@
                 row.querySelector('[name="item_id[]"]').addEventListener('change', function() {
                     tellPrice(row);
                     calculateAmount(row);
+                    updateMedicineOptions(); // <-- ongeza hii
                 });
 
                 row.querySelector('[name="quantity[]"]').addEventListener('input', function() {

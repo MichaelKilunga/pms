@@ -217,7 +217,8 @@
                             <form id="search_form" class="row gy-2 gx-3 align-items-center justify-content-center">
                                 <hr>
                                 <div class="col-auto">
-                                    <input id="medicine" type="text" name="searchValue" class="form-control search">
+                                    <input id="medicine" type="text" name="searchValue"
+                                        class="form-control search">
                                 </div>
                                 <div class="col-auto">
                                     <button type="submit" class="btn btn-primary"><i
@@ -255,7 +256,8 @@
                                     </select>
                                 </div>
                                 <div class="col-auto">
-                                    <button id="apply-filter-btn" type="submit" class="btn btn-primary">Apply Filter</button>
+                                    <button id="apply-filter-btn" type="submit" class="btn btn-primary">Apply
+                                        Filter</button>
                                 </div>
                             </form>
 
@@ -263,7 +265,8 @@
                             <div class="mt-3 text-center">
                                 <h5 class="fw-bold">
                                     Total Sales in Selected Range: <span
-                                        class="text-success total-sales">{{ number_format($filteredTotalSales) }} TZS</span>
+                                        class="text-success total-sales">{{ number_format($filteredTotalSales) }}
+                                        TZS</span>
                                 </h5>
                             </div>
                         </div>
@@ -320,7 +323,7 @@
 <!-- Create Sales Modal -->
 <div class="modal fade" id="createSalesModal" tabindex="-1" aria-labelledby="createSalesModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="createSalesModalLabel">Add New Sale</h5>
@@ -340,7 +343,7 @@
                                         {{-- <option value="{{ $sellMedicine->item->id }}">{{ $sellMedicine->item->name }}
                                         </option> --}}
                                         <option value="{{ $sellMedicine->id }}">
-                                            {{ $sellMedicine->item->name }} 
+                                            {{ $sellMedicine->item->name }}
                                             <br><strong
                                                 class="text-danger">({{ number_format($sellMedicine->selling_price) }}Tsh)</strong>
                                         </option>
@@ -530,7 +533,7 @@
                 url: `/sales/filter/${duration}`,
                 method: 'GET',
                 success: function(response) {
-                    if(response.success){
+                    if (response.success) {
                         console.log(response);
                         // alert('Succeeded:  '+response.message);
                         $('.total-sales')
@@ -541,7 +544,8 @@
                                 currency: 'TZS'
                             }).format(response.filteredTotalSales));
 
-                        $('.salesGraph').removeClass('text-muted').removeClass('text-danger')
+                        $('.salesGraph').removeClass('text-muted').removeClass(
+                                'text-danger')
                             .addClass('text-success');
                         $('#salesGraph').removeAttr('hidden');
                         $('.remove-spinner').remove();
@@ -550,7 +554,7 @@
                         salesChart.data.labels = response.medicineNames;
                         salesChart.data.datasets[0].data = response.medicineSales;
                         salesChart.update();
-                    }else{
+                    } else {
                         console.log(response);
                         $('.total-sales')
                             .removeClass('text-muted')
@@ -560,7 +564,8 @@
                                 currency: 'TZS'
                             }).format(0));
 
-                        $('.salesGraph').removeClass('text-muted').removeClass('text-success')
+                        $('.salesGraph').removeClass('text-muted').removeClass(
+                                'text-success')
                             .addClass('text-danger');
                         $('#salesGraph').removeAttr('hidden');
                         $('.remove-spinner').remove();
@@ -581,103 +586,19 @@
                             currency: 'TZS'
                         }).format(0));
 
-                    
+
                     $('.salesGraph').removeClass('text-muted').removeClass('text-danger')
                         .addClass('text-success');
                     $('#salesGraph').removeAttr('hidden');
                     $('.remove-spinner').remove();
 
                     // Update the graph
-                    salesChart.data.labels =[];
+                    salesChart.data.labels = [];
                     salesChart.data.datasets[0].data = [];
                     salesChart.update();
                 }
             });
         });
-
-        // Filter Form Submission
-        // $('#filter-Form').on('submit', function(event) {
-        //     event.preventDefault();
-
-        //     var filterValue = $('select[name="filter"]').val();
-
-        //     // Update loading state
-        //     $('.total-sales')
-        //         .removeClass('text-success')
-        //         .addClass('text-muted')
-        //         .html(
-        //             '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>'
-        //         );
-
-        //     $('#salesGraph').attr('hidden', true);
-        //     $('.salesGraph')
-        //         .addClass('text-muted')
-        //         .append(
-        //             '<div class="spinner-border remove-spinner spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>'
-        //         );
-
-        //     // Perform GET request
-        //     $.get('/sales/filter', { filter: filterValue }, function(response) {
-        //         // alert(response.message);
-
-        //         if (response.success) {
-        //             $('.total-sales')
-        //                 .removeClass('text-muted text-danger')
-        //                 .addClass('text-success')
-        //                 .text(new Intl.NumberFormat('en-TZ', {
-        //                     style: 'currency',
-        //                     currency: 'TZS'
-        //                 }).format(response.filteredTotalSales));
-
-        //             $('.salesGraph').removeClass('text-muted text-danger').addClass('text-success');
-        //             $('#salesGraph').removeAttr('hidden');
-        //             $('.remove-spinner').remove();
-
-        //             // Update the graph
-        //             salesChart.data.labels = response.medicineNames;
-        //             salesChart.data.datasets[0].data = response.medicineSales;
-        //             salesChart.update();
-        //         } else {
-        //             alert('False: ' + response.message);
-                    
-        //             $('.total-sales')
-        //                 .removeClass('text-muted text-success')
-        //                 .addClass('text-danger')
-        //                 .text(new Intl.NumberFormat('en-TZ', {
-        //                     style: 'currency',
-        //                     currency: 'TZS'
-        //                 }).format(0));
-
-        //             $('.salesGraph').removeClass('text-muted text-success').addClass('text-danger');
-        //             $('#salesGraph').removeAttr('hidden');
-        //             $('.remove-spinner').remove();
-
-        //             salesChart.data.labels = [];
-        //             salesChart.data.datasets[0].data = [];
-        //             salesChart.update();
-        //         }
-        //     }, 'json') // <--- explicitly expect JSON
-        //     .fail(function(xhr) {
-        //         console.error("Server error:", xhr.responseText);
-        //         alert('Error fetching sales data: ' + xhr.statusText);
-
-        //         $('.total-sales')
-        //             .removeClass('text-success')
-        //             .addClass('text-danger')
-        //             .text(new Intl.NumberFormat('en-TZ', {
-        //                 style: 'currency',
-        //                 currency: 'TZS'
-        //             }).format(0));
-
-        //         $('.salesGraph').removeClass('text-muted text-success').addClass('text-danger');
-        //         $('#salesGraph').removeAttr('hidden');
-        //         $('.remove-spinner').remove();
-
-        //         salesChart.data.labels = [];
-        //         salesChart.data.datasets[0].data = [];
-        //         salesChart.update();
-        //     });
-        // });
 
 
         // Search Form Submission
@@ -722,159 +643,156 @@
         });
     });
 
+</script>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize Chosen for dynamically added rows
-        function initializeChosen() {
-            $(document).ready(function() {
-                $(".chosen").each(function() {
-                    let $select = $(this);
-                    let $modal = $select.closest(".modal"); // Check if inside a modal
 
-                    $select.select2({
-                        width: "100%",
-                        minimumResultsForSearch: 5,
-                        dropdownParent: $modal.length ? $modal : $(
-                            "body") // Use modal if inside one
-                    }).on("select2:open", function() {
-                        document.querySelector(
-                                ".select2-container--open .select2-search__field")
-                            .focus();
-                    });
-                }).on("select2:select select2:unselect", function() {
-                    const row = $(this).closest(".sale-entry")[0];
-                    tellPrice(row);
-                    calculateAmount(row);
-                });
-            });
-        }
-
+        // -------------------------
         // Reusable Functions
+        // -------------------------
         function calculateAmount(row) {
             const price = parseFloat(row.querySelector('[name="total_price[]"]').value) || 0;
             const quantity = parseFloat(row.querySelector('[name="quantity[]"]').value) || 0;
             const amount = price * quantity;
             row.querySelector('.amount').value = amount;
 
-            // Update total amount
             updateTotalAmount();
         }
 
         function tellPrice(row) {
-            let medicines = @json($sellMedicines); // Convert medicines to a JS array
-            // console.log(@json($sellMedicines));
+            let medicines = @json($sellMedicines); // JS array from PHP
             let selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
 
-            // Find the selected medicine
-            let selectedMedicine = medicines.find(medicine => medicine.id == selectedMedicineId);
+            let selectedMedicine = medicines.find(med => med.id == selectedMedicineId);
+            if (!selectedMedicine) return;
 
-            row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
-            // console.log(selectedMedicine.id);
+            row.querySelector('[name="stock_id[]"]').value = selectedMedicine.id;
+            row.querySelector('[name="total_price[]"]').value = selectedMedicine.selling_price;
+            row.querySelector('[name="quantity[]"]').setAttribute('max', selectedMedicine.remain_Quantity);
 
-            if (selectedMedicine) {
-                // Set the total price to the medicine price (formatted with "TZS")
-                row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price}`;
-                row.querySelector('[name="quantity[]"]').setAttribute('max',
-                    `${selectedMedicine.remain_Quantity}`);
-
-                const labelElement = row.querySelector('[for="label[]"]');
-                // Clear any existing content in the labelElement
-                labelElement.innerHTML = '';
-                // Create a span element to hold the appended text
-                const appendedText = document.createElement('small');
-                // Set the text content and add the class
-                appendedText.innerHTML = 'In stock (&darr;' + selectedMedicine.remain_Quantity + ')';
-                if (selectedMedicine.remain_Quantity < selectedMedicine.low_stock_percentage) {
-                    appendedText.classList.add('text-danger');
-                } else {
-                    appendedText.classList.add('text-success');
-                }
-                // Append the span to the label element
-                labelElement.appendChild(appendedText);
-
-            }
+            const labelElement = row.querySelector('[for="label[]"]');
+            labelElement.innerHTML = '';
+            const appendedText = document.createElement('small');
+            appendedText.innerHTML = 'In stock (&darr;' + selectedMedicine.remain_Quantity + ')';
+            appendedText.classList.add(selectedMedicine.remain_Quantity < selectedMedicine
+                .low_stock_percentage ? 'text-danger' : 'text-success');
+            labelElement.appendChild(appendedText);
         }
 
         function updateTotalAmount() {
             let total = 0;
             document.querySelectorAll('.sale-entry').forEach(row => {
-                const amount = parseFloat(row.querySelector('.amount').value) || 0;
-                total += amount;
+                total += parseFloat(row.querySelector('.amount').value) || 0;
             });
             document.getElementById('totalAmount').value = new Intl.NumberFormat('en-US', {
                 style: 'currency',
-                currency: 'TZS',
+                currency: 'TZS'
             }).format(total);
         }
 
+        // -------------------------
+        // Disable/Enable Selected Options
+        // -------------------------
+        function updateMedicineOptions() {
+            let selectedMedicines = [];
+            document.querySelectorAll('[name="item_id[]"]').forEach(select => {
+                if (select.value) selectedMedicines.push(select.value);
+            });
+
+            document.querySelectorAll('[name="item_id[]"]').forEach(select => {
+                let currentValue = select.value;
+                $(select).find('option').each(function() {
+                    if (selectedMedicines.includes(this.value) && this.value !== currentValue) {
+                        $(this).attr("disabled", true);
+                    } else {
+                        $(this).attr("disabled", false);
+                    }
+                });
+                $(select).trigger('change.select2');
+            });
+        }
+
+        // -------------------------
+        // Initialize Select2 for a row
+        // -------------------------
+        function attachSelect2(row) {
+            $(row).find('select.chosen').select2({
+                width: '100%',
+                minimumResultsForSearch: 5,
+                dropdownParent: $('#createSalesModal')
+            }).on('select2:select select2:unselect', function() {
+                tellPrice(row);
+                calculateAmount(row);
+                updateMedicineOptions();
+            });
+        }
+
+        // -------------------------
         // Add Row Functionality
+        // -------------------------
         document.getElementById('addSaleRow').addEventListener('click', function() {
             const salesFields = document.getElementById('salesFields');
             const newRow = document.createElement('div');
             newRow.classList.add('row', 'mb-3', 'sale-entry', 'align-items-center');
 
             newRow.innerHTML = `
-                            <input type="text" name="stock_id[]" hidden required>
-                            <div class="col-md-4">
-                                <select name="item_id[]" data-row-id="item_id[]" class="form-select chosen" required>
-                                    <option selected disabled value="">Select Item</option>
-                                    @foreach ($sellMedicines as $sellMedicine)
-                                        <option value="{{ $sellMedicine->id }}">
-                                            {{ $sellMedicine->item->name }} <br><strong
-                                                class="text-danger">({{ number_format($sellMedicine->selling_price) }}Tsh)</strong>
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <input type="text" class="form-control" VALUE="0" name="total_price[]" readonly required>
-                            </div>
-                            <div class="col-md-2">
-                                    <label class="form-label" for="label[]"></label>
-                                <input type="number" class="form-control" name="quantity[]" min="1" placeholder="Quantity" required>
-                            </div>
-                            <div class="col-md-3">
-                                <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
-                            </div>
-                            <div class="col-md-0" hidden>
-                            <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
-                            </div>
-                            <div class="col-md-1 d-flex justify-content-center">
-                                <button type="button" class="btn btn-danger btn-sm remove-sale-row">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-            `;
-
+            <input type="text" name="stock_id[]" hidden required>
+            <div class="col-md-4">
+                <select name="item_id[]" class="form-select chosen" required>
+                    <option selected disabled value="">Select Item</option>
+                    @foreach ($sellMedicines as $sellMedicine)
+                        <option value="{{ $sellMedicine->id }}">
+                            {{ $sellMedicine->item->name }} ({{ number_format($sellMedicine->selling_price) }}Tsh)
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" value="0" name="total_price[]" readonly required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="label[]"></label>
+                <input type="number" class="form-control" name="quantity[]" min="1" placeholder="Quantity" required>
+            </div>
+            <div class="col-md-3">
+                <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
+            </div>
+            <div class="col-md-0" hidden>
+                <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
+            </div>
+            <div class="col-md-1 d-flex justify-content-center">
+                <button type="button" class="btn btn-danger btn-sm remove-sale-row">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        `;
 
             salesFields.appendChild(newRow);
 
-            // Initialize Chosen for the new row
-            initializeChosen();
-
-            // Add Event Listeners for the new row
-            newRow.querySelector('.remove-sale-row').addEventListener('click', function() {
-                newRow.remove();
-                updateTotalAmount();
-            });
+            attachSelect2(newRow);
+            updateMedicineOptions();
 
             newRow.querySelector('[name="quantity[]"]').addEventListener('input', function() {
                 calculateAmount(newRow);
             });
+
+            newRow.querySelector('.remove-sale-row').addEventListener('click', function() {
+                newRow.remove();
+                updateTotalAmount();
+                updateMedicineOptions();
+            });
         });
 
-        // Initial Setup for Existing Rows
+        // -------------------------
+        // Initialize Existing Rows
+        // -------------------------
         document.querySelectorAll('.sale-entry').forEach(row => {
-            row.querySelector('[name="item_id[]"]').addEventListener('change', function() {
-                tellPrice(row);
-                calculateAmount(row);
-            });
+            attachSelect2(row);
 
             row.querySelector('[name="quantity[]"]').addEventListener('input', function() {
                 calculateAmount(row);
             });
         });
 
-        // Initialize Chosen on Page Load
-        initializeChosen();
     });
 </script>

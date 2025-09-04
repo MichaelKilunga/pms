@@ -177,17 +177,6 @@ class SalesController extends BaseController
                 ->make(true);
         }
 
-        // dd($sales);
-
-        // $printerEnabled = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
-        // if ($printerEnabled) {
-        //     $usePrinter = $printerEnabled->use_printer;
-        // } else {
-        //     $usePrinter = false;
-        // }
-        // $medicines = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '>', now())->where('remain_Quantity', '>', 0)->with('item')->get();
-        // // dd($medicines);
-
         // return view('sales.index', compact('sales', 'medicines', 'usePrinter'));
         return view('sales.index');
     }
@@ -211,23 +200,6 @@ class SalesController extends BaseController
     {
         $saleDate = $request->input('date');
 
-        // dd($saleDate[0]);
-        // dd($request->all());
-
-        // item_id represents the stock_id here
-
-
-        /* extract the id from "item_id" request data by detecting price digits from right to left of item_id, and then get the remained right digits as id
-            if the price is 1500 and item_id is 231000 then the id will be 23 */
-        // $newItemIds = [];
-
-        // foreach ($request->item_id as $key => $item_id) {
-        //     $price = $request->total_price[$key];
-        //     $priceDigits = strlen((string) $price);
-        //     $id = substr($item_id, 0, -$priceDigits); // Extract from left
-        //     $newItemIds[$key] = $id;
-        // }
-
         // $request->merge(['item_id' => $newItemIds]);
 
         $request->merge(['item_id' => $request->stock_id]);
@@ -237,17 +209,10 @@ class SalesController extends BaseController
         // Validate the incoming request data for all rows of sales
         try {
             $request->validate([
-                //NIMEIGNORE HIVI DATA NDIO IKAFANYA KAZI
-                // 'pharmacy_id' => 'required|exists:pharmacies,id',
-                // 'staff_id' => 'required|exists:users,id',
-
+       
                 'item_id' => 'required|array',         // Ensure it's an array of item IDs
                 // 'item_id.*' => 'required|exists:stocks,id', // Validate each item ID in the array
                 'item_id.*' => 'required|exists:items,id', // Validate each item ID in the array
-
-                // 'stock_id' => 'required|array',         // Ensure it's an array of item IDs
-                // // 'item_id.*' => 'required|exists:stocks,id', // Validate each item ID in the array
-                // 'stock_id.*' => 'required|exists:items,id', // Validate each item ID in the array
 
                 'quantity' => 'required|array',        // Ensure it's an array of quantities
                 'quantity.*' => 'required|integer|min:1', // Validate each quantity
@@ -328,21 +293,6 @@ class SalesController extends BaseController
                             $temp_quantity = 0;
                         }
                     }
-
-                    //update remaning stock
-                    // $stock = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('id', $item_id)->first();
-                    // $remainQuantity = $stock->remain_Quantity - $request->quantity[$key];
-                    // $stock->update(['remain_Quantity' => $remainQuantity]);
-
-                    // Sales::create([
-                    //     'pharmacy_id' => $pharmacyId,         // Use the pharmacy_id from session
-                    //     'staff_id' => $staffId,                // Use the staff_id from the authenticated user
-                    //     'item_id' => $stock->item_id,
-                    //     'quantity' => $request->quantity[$key],
-                    //     'stock_id' => $request->stock_id[$key],
-                    //     'total_price' => $request->amount[$key],
-                    //     'date' => $request->date[$key],
-                    // ]);
                 }
             }
 
@@ -434,7 +384,8 @@ class SalesController extends BaseController
 
         return redirect()->route('sales')->with('success', 'Sale deleted successfully!');
     }
-
+     
+    /****************PRINTER SETING ************/
     /* implement functions for listing all receipts, and printing last receipt */
     public function allReceipts()
     {
