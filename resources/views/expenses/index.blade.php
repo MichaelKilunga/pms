@@ -357,9 +357,7 @@
                                     </div>
                                 </div>
                             @empty
-                                <tr>
-                                    <td colspan="11" class="text-center text-muted">No expenses found.</td>
-                                </tr>
+                           
                             @endforelse
                         </tbody>
                     </table>
