@@ -271,7 +271,7 @@ Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {
 // expenses controller
 Route::middleware(['auth'])->group(function () {
     // Homepage should redirect to expenses index
-    Route::get('/', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
     Route::get('expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
     Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::put('expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
