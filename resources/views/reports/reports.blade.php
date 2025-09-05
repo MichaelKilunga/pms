@@ -333,7 +333,7 @@
                                 tableBody.after(`
                                         <tfoot>
                                             <tr>
-                                                <td colspan="4" class="text-end fw-bolder fs-5">Total Profit</td>
+                                                <td colspan="4" class="text-center fw-bolder fs-5">TOTAL </td>
                                                 <td colspan="1" class="text-center fw-bolder" id="">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(response.totalSales)}</td>
                                                 <td colspan="1" class="text-center fw-bolder" id="">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(response.totalProfit)}</td>
                                             </tr>

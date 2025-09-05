@@ -37,12 +37,6 @@ class ReportPrintController extends Controller
         $value = $request->value;
         $format = $request->format;
 
-        // Filter sales based on the selected type
-        // $sales = Sales::join('stocks', 'sales.stock_id', '=', 'stocks.id')
-        //      ->join('items', 'sales.item_id', '=', 'items.id')
-        //      ->select('sales.*', 'stocks.*', 'items.*')
-        //      ->get();
-
         $sales = match ($type) {
             'day' => Sales::with('item')->whereDate('sales.date', $value)->get(),
             'week' => Sales::with('item')->whereBetween('sales.date', [

@@ -173,6 +173,28 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     //     Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
     //     Route::get('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
     // });
+
+    // expenses controller
+    // Homepage should redirect to expenses index
+    Route::get('/', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::get('expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
+    Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+    Route::put('expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
+    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+
+    //vendors
+    Route::get('expenses/vendors', [ExpenseController::class, 'vendors'])->name('expenses.vendors');
+    Route::post('expenses/vendors', [ExpenseController::class, 'storeVendor'])->name('vendors.store');
+    Route::put('expenses/vendors/{id}', [ExpenseController::class, 'updateVendor'])->name('vendors.update');
+    Route::delete('expenses/vendors/{id}', [ExpenseController::class, 'destroyVendor'])->name('vendors.destroy');
+
+    //categories
+    Route::get('expenses/category', [ExpenseController::class, 'category'])->name('expenses.category');
+    Route::post('expenses/category', [ExpenseController::class, 'storeCategory'])->name('category.store');
+    Route::put('expenses/category/{id}', [ExpenseController::class, 'updateCategory'])->name('category.update');
+    Route::delete('expenses/category/{id}', [ExpenseController::class, 'destroyCategory'])->name('category.destroy');
+    Route::post('expenses/{expense}/approve', [ExpenseController::class, 'approve'])->name('expenses.approve');
+    Route::post('expenses/{expense}/reject', [ExpenseController::class, 'reject'])->name('expenses.reject');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -268,36 +290,5 @@ Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {
     Route::post('pharmacies', [PharmacyController::class, 'store'])->name('pharmacies.store');
 });
 
-// expenses controller
-Route::middleware(['auth'])->group(function () {
-    // Homepage should redirect to expenses index
-    Route::get('/', [ExpenseController::class, 'index'])->name('expenses.index');
-    Route::get('expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
-    Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
-    Route::put('expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
-    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
-
-    //vendors
-    Route::get('expenses/vendors', [ExpenseController::class, 'vendors'])->name('expenses.vendors');
-    Route::post('expenses/vendors', [ExpenseController::class, 'storeVendor'])->name('vendors.store');
-    Route::put('expenses/vendors/{id}', [ExpenseController::class, 'updateVendor'])->name('vendors.update');
-    Route::delete('expenses/vendors/{id}', [ExpenseController::class, 'destroyVendor'])->name('vendors.destroy');
-
-    //categories
-    Route::get('expenses/category', [ExpenseController::class, 'category'])->name('expenses.category');
-    Route::post('expenses/category', [ExpenseController::class, 'storeCategory'])->name('category.store');
-    Route::put('expenses/category/{id}', [ExpenseController::class, 'updateCategory'])->name('category.update');
-    Route::delete('expenses/category/{id}', [ExpenseController::class, 'destroyCategory'])->name('category.destroy');
-
-    // Full CRUD routes for expenses
-    // Route::resource('expenses', ExpenseController::class);
-
-    // Approve & Reject actions
-    Route::post('expenses/{expense}/approve', [ExpenseController::class, 'approve'])
-        ->name('expenses.approve');
-
-    Route::post('expenses/{expense}/reject', [ExpenseController::class, 'reject'])
-        ->name('expenses.reject');
-});
 
 Route::post('/contact-us', [ContactController::class, 'send'])->name('contact.send');
