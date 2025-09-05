@@ -501,5 +501,105 @@
                 ] // Default sorting by Batch Number
             });
         });
+
+        $(document).ready(function() {
+            function attachPriceValidation(modalSelector) {
+                const $modal = $(modalSelector);
+                const $form = $modal.find('form').first();
+                const $saveBtn = $form.find('[type="submit"]').first();
+
+                // Ondoa utendaji wa awali wa 'submit' ili kuzuia kukagua tena
+                $form.off('submit.priceValidation');
+
+                // Tumia 'input change' ili kukagua wakati mtumiaji anapoandika
+                $form.on('input change', '[name="buying_price[]"], [name="selling_price[]"]', function() {
+                    const $row = $(this).closest('.stock-entry');
+                    const $bpInput = $row.find('[name="buying_price[]"]');
+                    const $spInput = $row.find('[name="selling_price[]"]');
+
+                    const bpVal = ($bpInput.val() || '').toString().replace(/,/g, '').trim();
+                    const spVal = ($spInput.val() || '').toString().replace(/,/g, '').trim();
+
+                    const bp = bpVal === '' ? NaN : parseFloat(bpVal);
+                    const sp = spVal === '' ? NaN : parseFloat(spVal);
+
+                    // Ondoa makosa ya awali kabla ya kukagua tena
+                    $row.find('.field-error').remove();
+                    $bpInput.removeClass('is-invalid');
+                    $spInput.removeClass('is-invalid');
+                    $modal.find('.priceValidationError').remove();
+
+                    // Kagua ikiwa selling price ni ndogo kuliko buying price
+                    if (!isNaN(bp) && !isNaN(sp) && sp < bp) {
+                        // Ongeza "is-invalid" class ili kuonyesha kosa
+                        $bpInput.addClass('is-invalid');
+                        $spInput.addClass('is-invalid');
+
+                        // Ongeza ujumbe wa kosa
+                        if ($row.find('.field-error').length === 0) {
+                            $row.append(
+                                '<div class="field-error text-danger fw-bold small mt-1"> The selling price must be greater than or equal to the buying price.</div>'
+                            );
+                        }
+                    }
+
+                    // Kagua fomu nzima ili kuamua hali ya kitufe cha 'submit'
+                    let hasErrors = false;
+                    $form.find('.stock-entry').each(function() {
+                        const rowBpVal = ($(this).find('[name="buying_price[]"]').val() || '')
+                            .toString().replace(/,/g, '').trim();
+                        const rowSpVal = ($(this).find('[name="selling_price[]"]').val() || '')
+                            .toString().replace(/,/g, '').trim();
+                        const rowBp = rowBpVal === '' ? NaN : parseFloat(rowBpVal);
+                        const rowSp = rowSpVal === '' ? NaN : parseFloat(rowSpVal);
+                        if (!isNaN(rowBp) && !isNaN(rowSp) && rowSp < rowBp) {
+                            hasErrors = true;
+                        }
+                    });
+
+                    // Zimisha au washa kitufe cha 'submit' kulingana na matokeo
+                    if ($saveBtn && $saveBtn.length) {
+                        $saveBtn.prop('disabled', hasErrors);
+                    }
+
+                    // Ongeza ujumbe mkuu wa kosa juu ya fomu ikiwa kuna makosa
+                    if (hasErrors) {
+                        const alertHtml =
+                            '<div class="alert alert-danger priceValidationError">Please correct the lines that have been marked with errors. For you to save and continue, <span class ="text-danger fw-bold">the selling price must be greater than or equal to the buying price.</span></div>';
+                        $form.prepend(alertHtml);
+                    }
+                });
+
+                // Hii inaruhusu fomu kuwasilishwa ikiwa hakuna makosa
+                $form.on('submit', function(e) {
+                    let hasErrors = false;
+                    $form.find('.stock-entry').each(function() {
+                        const rowBpVal = ($(this).find('[name="buying_price[]"]').val() || '')
+                            .toString().replace(/,/g, '').trim();
+                        const rowSpVal = ($(this).find('[name="selling_price[]"]').val() || '')
+                            .toString().replace(/,/g, '').trim();
+                        const rowBp = rowBpVal === '' ? NaN : parseFloat(rowBpVal);
+                        const rowSp = rowSpVal === '' ? NaN : parseFloat(rowSpVal);
+                        if (!isNaN(rowBp) && !isNaN(rowSp) && rowSp < rowBp) {
+                            hasErrors = true;
+                        }
+                    });
+
+                    if (hasErrors) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        e.stopPropagation();
+                    } else {
+                        if ($saveBtn && $saveBtn.length) {
+                            $saveBtn.prop('disabled', true);
+                        }
+                    }
+                });
+
+            }
+
+            attachPriceValidation('#createStockModal');
+            attachPriceValidation('#createMedicineStockModal');
+        });
     </script>
 @endsection

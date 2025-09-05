@@ -136,8 +136,8 @@
                                                 class="modal-content">
                                                 @csrf
                                                 @method('PUT')
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Edit Vendor</h5>
+                                                <div class="modal-header bg-primary text-white">
+                                                    <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit Vendor Details</h5>
                                                     <button type="button" class="btn-close"
                                                         data-bs-dismiss="modal"></button>
                                                 </div>
@@ -198,9 +198,7 @@
                                     </div>
                                 </div>
                             @empty
-                                <tr>
-                                    <td colspan="8" class="text-center text-muted">No vendors found.</td>
-                                </tr>
+                               
                             @endforelse
                         </tbody>
                     </table>
@@ -215,8 +213,8 @@
             <div class="modal-content">
                 <form action="{{ route('vendors.store') }}" method="POST">
                     @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title">Add Vendor</h5>
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title"><i class="bi bi-person-badge me-2"></i> Vendor Registration</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body row g-3">

@@ -154,7 +154,9 @@ class ReportPrintController extends Controller
             });
 
             // Calculate totals
-            $totalSales = $sales->sum('total_price');
+            // $totalSales = $sales->sum('total_price');
+            // sum of(quantity*sellingprice) of all sales total
+            $totalSales = $sales->sum(DB::raw('quantity * total_price'));  
             $totalReturns = 0;
             $totalProfit = $profitsRows->sum('amount');
             $totalExpired = $expiredRows->count();

@@ -27,7 +27,7 @@
                             class="smallest">Promote To Existing</small></button>
                 @endif
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSalesNoteModal"><small
-                        class="md-smallest">+ New</small></button>
+                        class="md-smallest"><i class="bi bi-plus-circle"></i> New</small></button>
             </div>
         </div>
 
@@ -47,11 +47,9 @@
                         <th>#</th>
                         <th class="name-column#">Name</th>
                         <th>Quantity</th>
-                        <th>Unit Price</th>
+                        <th>Unit Price (TZS)</th>
+                        <th>Total Price (TZS)</th>
                         <th>Status</th>
-                        {{-- <th>Description</th> --}}
-                        {{-- <th>Pharmacy</th>
-                            <th>Staff</th> --}}
                         <th>Created</th>
                         <th>Actions</th>
                     </tr>
@@ -65,10 +63,8 @@
                             <td class="name-column">{{ $salesNote->name }}</td>
                             <td>{{ $salesNote->quantity }}</td>
                             <td>{{ $salesNote->unit_price }}</td>
+                            <td>{{ number_format($salesNote->unit_price * $salesNote->quantity) }}</td>
                             <td>{{ $salesNote->status }}</td>
-                            {{-- <td>{{ $salesNote->description }}</td> --}}
-                            {{-- <td>{{ $salesNote->pharmacy_id }}</td>
-                                    <td>{{ $salesNote->staff_id }}</td> --}}
                             <td>{{ \Carbon\Carbon::parse($salesNote->created_at)->diffForHumans() }}</td>
                             <td>
                                 <div class="d-flex justify-content-between">
@@ -206,13 +202,13 @@
     </div>
 
     {{-- Create Sales Note Modal --}}
-    <div class="modal fade" id="createSalesNoteModal" role="dialog" aria-labelledby="createSalesNoteModalLabel"
-        aria-hidden="true">
+    <div class="modal fadetext-white modal-lg" id="createSalesNoteModal" role="dialog"
+        aria-labelledby="createSalesNoteModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form action="{{ route('salesNotes.store') }}" method="POST">
                     @csrf
-                    <div class="modal-header">
+                    <div class="modal-header  bg-primary text-white">
                         <h5 class="modal-title" id="createSalesNoteModalLabel">Create Sales Note</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -224,17 +220,25 @@
                                     class="text-danger">*</span></label>
                         </div>
                         <div class="row mb-2">
-                            <div class="col-md-6 form-floating">
+                            <div class="col-md-3 form-floating">
                                 <input type="number" min="1" class="form-control" id="floatingQuantity"
                                     name="quantity" placeholder="50" required>
                                 <label class="form-label" for="floatingQuantity">Quantity<span
                                         class="text-danger">*</span></label>
                             </div>
-                            <div class="col-md-6 form-floating">
+                            <div class="col-md-5 form-floating">
                                 <input type="number" min="1" class="form-control" id="floatingUnitPrice"
                                     name="unit_price" placeholder="200" required>
-                                <label class="form-label" for="floatingUnitPrice">Unit Price<span
+                                <label class="form-label" for="floatingUnitPrice">Unit Selling Price<span
                                         class="text-danger">*</span></label>
+                            </div>
+                            {{-- quantity* unit selling price --}}
+                            <div class="col-md-4 form-floating">
+                                <input type="text" class="form-control fw-bold text-success" id="floatingTotalPrice" name="total_price"
+                                    placeholder="100000" readonly>
+                                <label class="form-label fw-bold text-dark" for="TotalAmount">Total Price
+                                    <span class="text-danger">*</span>
+                                </label>
                             </div>
                         </div>
                         <div class="form-floating mb-2">
@@ -251,7 +255,7 @@
                     </div>
                     <div class="modal-footer justify-content-between">
                         <button type="button" class="btn btn-secondary " data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Create</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
             </div>
@@ -266,14 +270,7 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Promote Selected Sales Notes</h5>
-                        <!-- Button to promote to existing items -->
-                        {{-- <button type="button" class="btn btn-outline-success promoteToExistingItems"
-                            id="promoteMultipleToExistingItems">Promote to Existing
-                            items </button> --}}
-                        <!-- Button to promote to existing stocks -->
-                        {{-- <button type="button" class="btn btn-outline-success promoteToExistingStocks"
-                            id="promoteMultipleToExistingStocks">Promote to
-                            Existing Stocks </button> --}}
+
                         <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                     </div>
                     <div id="promotionPannel" class="modal-body">
@@ -324,27 +321,6 @@
             </div>
         </div>
     </div>
-
-    {{-- Modal for promoting multiple sales notes to existing stock of items as one at once --}}
-    {{-- <div class="modal fade" id="promoteSelectedSaleNoteAsOneToExistingStockModal" role="dialog">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <form action="{{ route('salesNotes.promoteAsOne') }}" id="promoteSaleNoteAsOneToExistingForm" method="POST">
-                    @csrf                    
-                    <div id="asOneToExistingPromotionPannel" class="modal-body">
-
-                        <!-- This will be populated with one row of items -->
-
-                    </div>
-                    <div class="justify-content-between modal-footer">
-                        <button id="closeAsOneToExistingPromotionModal" type="button" class="btn btn-secondary"
-                            data-bs-dismiss="modal">Close</button>
-                        <button type="submit" id="submitPromotion" class="btn btn-success">Promote</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div> --}}
 
     <script>
         $(document).ready(function() {
@@ -429,24 +405,6 @@
 
                     var saleNoteId = $(this).closest('tr').find('td:first')
                         .text(); // Get sale note ID from first column
-                    // var row = $(this).closest('tr'); // Get the row
-
-                    // row.toggleClass('selected_'); // Toggle row selection
-
-                    // // Store or remove sale note ID
-                    // if (row.hasClass('selected_')) {
-                    //     // clear previous selected selectedSalesNotes
-                    // selectedSalesNotes = [];
-                    //     // add the current selected sale note to the selectedSalesNotes array
-                    // selectedSalesNotes.push(saleNoteId);
-                    // } else {
-                    //     selectedSalesNotes = selectedSalesNotes.filter(id => id !== saleNoteId);
-                    // }
-
-                    // if (selectedSalesNotes.length === 0) {
-                    //     alert('Please select at least one sales note to promote.');
-                    //     return;
-                    // }
 
                     // Populate the modal with selected IDs
                     //Edit the body of the modal to include rows of each item
@@ -1012,7 +970,7 @@
                     // listen for changes in the .medicineSelect field to call for a function to set the stock fields data
                     $(document).on('change', '.promote-entry select[name="item_id"]', function() {
                         let row = $(this).closest(
-                        '.promote-entry'); // Get the closest parent row
+                            '.promote-entry'); // Get the closest parent row
                         setStockFieldsData(row[0]); // Pass the DOM element to the function
                     });
 
@@ -1095,6 +1053,42 @@
                 });
             });
 
+        });
+    </script>
+
+    {{-- // Script to auto-calculate total price in the promotion modal --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Function to attach calculation to inputs
+            function attachCalculateTotal(modal) {
+                const quantityInput = modal.querySelector('#floatingQuantity');
+                const unitPriceInput = modal.querySelector('#floatingUnitPrice');
+                const totalPriceInput = modal.querySelector('#floatingTotalPrice');
+
+                function calculateTotal() {
+                    const quantity = parseFloat(quantityInput.value) || 0;
+                    const unitPrice = parseFloat(unitPriceInput.value) || 0;
+                    const total = quantity * unitPrice;
+
+                    totalPriceInput.value = total > 0 ?
+                        new Intl.NumberFormat('en-TZ', {
+                            style: 'currency',
+                            currency: 'TZS',
+                            minimumFractionDigits: 0
+                        }).format(total) :
+                        '';
+                }
+
+                quantityInput.addEventListener('input', calculateTotal);
+                unitPriceInput.addEventListener('input', calculateTotal);
+            }
+
+            // Listen for modal show
+            const salesNoteModal = document.getElementById('createSalesNoteModal');
+            salesNoteModal.addEventListener('shown.bs.modal', function() {
+                attachCalculateTotal(salesNoteModal);
+            });
         });
     </script>
 @endsection

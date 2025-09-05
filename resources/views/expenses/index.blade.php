@@ -65,15 +65,15 @@
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
+                                <th>Created By</th>
                                 <th>Date</th>
                                 <th>Pharmacy</th>
                                 <th>Category</th>
                                 <th>Vendor</th>
                                 <th>Payment</th>
                                 <th>Amount</th>
-                                <th>Status</th>
-                                <th>Created By</th>
                                 <th>Approved By</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -81,6 +81,7 @@
                             @forelse($expenses as $expense)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $expense->creator->name ?? '-' }}</td>
                                     <td>{{ $expense->expense_date->format('d M Y') }}</td>
                                     <td>{{ $expense->pharmacy->name ?? '-' }}</td>
                                     <td>{{ $expense->category->name ?? '-' }}</td>
@@ -90,6 +91,7 @@
                                     </td>
                                     <td><strong>{{ number_format($expense->amount, 2) }}</strong> {{ $expense->currency }}
                                     </td>
+                                    <td>{{ $expense->approver?->name ?? '-' }}</td>
                                     <td>
                                         @if ($expense->status == 'approved')
                                             <span class="badge bg-success">Approved</span>
@@ -99,8 +101,6 @@
                                             <span class="badge bg-warning text-dark">Pending</span>
                                         @endif
                                     </td>
-                                    <td>{{ $expense->creator->name ?? 'N/A' }}</td>
-                                    <td>{{ $expense->approver?->name ?? 'N/A' }}</td>
                                     <td>
                                         <div class="group-item">
                                             @if ($expense->status == 'pending' && ($users->role == 'owner' || $users->role == 'admin'))
@@ -112,7 +112,8 @@
                                                 <button type="button" class="btn btn-sm btn-warning edit-expense"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#editExpenseModal{{ $expense->id }}"
-                                                    data-expense='@json($expense)'><i class="bi bi-pencil"></i>
+                                                    data-expense='@json($expense)'><i
+                                                        class="bi bi-pencil-square"></i>
                                                 </button>
                                                 <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST"
                                                     class="d-inline" onsubmit="return confirm('Are you sure?')">
@@ -151,7 +152,7 @@
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#editExpenseModal{{ $expense->id }}"
                                                     data-expense='@json($expense)'><i
-                                                        class="bi bi-pencil"></i>
+                                                        class="bi bi-pencil-square"></i>
                                                 </button>
                                                 <form action="{{ route('expenses.destroy', $expense->id) }}"
                                                     method="POST" class="d-inline"
@@ -210,7 +211,8 @@
                                                     <li class="list-group-item"><strong>Category:</strong> <span
                                                             id="modal-category"></span>{{ $expense->category->name }}</li>
                                                     <li class="list-group-item"><strong>Vendor:</strong> <span
-                                                            id="modal-vendor"></span>{{ $expense->vendor->name }}</li>
+                                                            id="modal-vendor"></span>{{ $expense->vendor->name ?? '-' }}
+                                                    </li>
                                                     <li class="list-group-item"><strong>Payment Method:</strong> <span
                                                             id="modal-payment"
                                                             class="badge bg-info text-dark"></span>{{ $expense->payment_method }}
@@ -257,8 +259,9 @@
                                                 action="{{ route('expenses.update', $expense->id) }}">
                                                 @csrf
                                                 @method('PUT')
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Edit Expense</h5>
+                                                <div class="modal-header bg-primary text-white">
+                                                    <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit
+                                                        Expense</h5>
                                                     <button type="button" class="btn-close"
                                                         data-bs-dismiss="modal"></button>
                                                 </div>
@@ -304,11 +307,17 @@
                                                             <select name="vendor_id" id="edit-vendor"
                                                                 class="form-select">
                                                                 <option value="">Select Vendor</option>
+                                                                <option value="">No vendor</option>
+
                                                                 @foreach ($vendors as $vendor)
                                                                     <option value="{{ $vendor->id }}"
                                                                         {{ $vendor->id == $expense->vendor_id ? 'selected' : '' }}>
                                                                         {{ $vendor->name }}
                                                                     </option>
+                                                                    {{-- no vendor --}}
+                                                                    @if ($expense->vendor_id == null)
+                                                                        <option value="">No vendor</option>
+                                                                    @endif
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -357,7 +366,6 @@
                                     </div>
                                 </div>
                             @empty
-                           
                             @endforelse
                         </tbody>
                     </table>
@@ -374,8 +382,8 @@
             <div class="modal-content">
                 <form action="{{ route('expenses.store') }}" method="POST">
                     @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="registerExpenseLabel"><i class="fas fa-wallet me-2"></i> New Expense
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="registerExpenseLabel"><i class="bi bi-wallet me-2"></i> New Expense
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
@@ -411,6 +419,7 @@
                                     @foreach ($vendors as $vendor)
                                         <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
                                     @endforeach
+                                    <<option value="">No vendor</option>
                                 </select>
                             </div>
                             <div class="col-md-6">

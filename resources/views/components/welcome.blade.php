@@ -180,22 +180,6 @@
         </div>
     @endif
 
-
-    {{-- Profit Made --}}
-    {{-- <div class="row m-2">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-body">
-                    <h4 class="text-center mb-3">Total Profit Made:
-                        <span id="totalProfitMade" type="text" name="totalProfitMade"
-                            class="badge badge-succee totalProfitMade text-success"></span>
-                    </h4>
-                    <hr>
-                </div>
-            </div>
-        </div>
-    </div> --}}
-
     {{-- Sales Filter Section --}}
     <div class="row mb-4">
         {{-- Sales Vs medicine graph --}}
@@ -342,10 +326,15 @@
                                     @foreach ($sellMedicines as $sellMedicine)
                                         {{-- <option value="{{ $sellMedicine->item->id }}">{{ $sellMedicine->item->name }}
                                         </option> --}}
-                                        <option value="{{ $sellMedicine->id }}">
+                                        {{-- <option value="{{ $sellMedicine->id }}">
                                             {{ $sellMedicine->item->name }}
                                             <br><strong
                                                 class="text-danger">({{ number_format($sellMedicine->selling_price) }}Tsh)</strong>
+                                        </option> --}}
+                                        <option
+                                            value="{{ $sellMedicine->item->id }}_{{ $sellMedicine->selling_price }}">
+                                            {{ $sellMedicine->item->name }}
+                                            ({{ number_format($sellMedicine->selling_price) }}Tsh)
                                         </option>
                                     @endforeach
                                 </select>
@@ -356,7 +345,7 @@
                                     value="0" readonly required>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label" for="label[]">Quantity</label>
+                                <label class="form-label  stock-label" for="label[]">Quantity</label>
                                 <input type="number" class="form-control" min="1"
                                     title="Only 10 has remained in stock!" placeholder="Quantity" name="quantity[]"
                                     required>
@@ -642,10 +631,20 @@
             });
         });
     });
-
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        // raw data from Laravel
+        const rawMedicines = @json($sellMedicines); // ensure this includes item relation
+
+        // normalize and add compositeKey = "<medicine_id>_<selling_price>"
+        const medicines = (rawMedicines || []).map(m => {
+            const itemId = (m.item && m.item.id) ? m.item.id : (m.item_id || '');
+            return Object.assign({}, m, {
+                compositeKey: itemId + '_' + m.selling_price
+            });
+        });
 
         // -------------------------
         // Reusable Functions
@@ -660,23 +659,35 @@
         }
 
         function tellPrice(row) {
-            let medicines = @json($sellMedicines); // JS array from PHP
-            let selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
+            const selectedKey = row.querySelector('[name="item_id[]"]').value;
+            if (!selectedKey) return;
 
-            let selectedMedicine = medicines.find(med => med.id == selectedMedicineId);
+            const selectedMedicine = medicines.find(m => m.compositeKey === selectedKey);
             if (!selectedMedicine) return;
 
-            row.querySelector('[name="stock_id[]"]').value = selectedMedicine.id;
-            row.querySelector('[name="total_price[]"]').value = selectedMedicine.selling_price;
-            row.querySelector('[name="quantity[]"]').setAttribute('max', selectedMedicine.remain_Quantity);
+            // set hidden stock_id[] to actual stock id (so server can use it)
+            const stockInput = row.querySelector('[name="stock_id[]"]');
+            if (stockInput) stockInput.value = selectedMedicine.id;
 
-            const labelElement = row.querySelector('[for="label[]"]');
-            labelElement.innerHTML = '';
-            const appendedText = document.createElement('small');
-            appendedText.innerHTML = 'In stock (&darr;' + selectedMedicine.remain_Quantity + ')';
-            appendedText.classList.add(selectedMedicine.remain_Quantity < selectedMedicine
-                .low_stock_percentage ? 'text-danger' : 'text-success');
-            labelElement.appendChild(appendedText);
+            // set price, set max quantity, update label
+            const priceInput = row.querySelector('[name="total_price[]"]');
+            if (priceInput) priceInput.value = selectedMedicine.selling_price;
+
+            const qtyInput = row.querySelector('[name="quantity[]"]');
+            if (qtyInput) qtyInput.setAttribute('max', selectedMedicine.remain_Quantity || 0);
+
+            const labelElement = row.querySelector('.stock-label');
+            if (labelElement) {
+                labelElement.innerHTML = '';
+                const appendedText = document.createElement('small');
+                appendedText.innerHTML = 'In stock (&darr;' + (selectedMedicine.remain_Quantity || 0) + ')';
+                appendedText.classList.add(
+                    (selectedMedicine.remain_Quantity || 0) < (selectedMedicine.low_stock_percentage || 0) ?
+                    'text-danger' :
+                    'text-success'
+                );
+                labelElement.appendChild(appendedText);
+            }
         }
 
         function updateTotalAmount() {
@@ -684,31 +695,42 @@
             document.querySelectorAll('.sale-entry').forEach(row => {
                 total += parseFloat(row.querySelector('.amount').value) || 0;
             });
-            document.getElementById('totalAmount').value = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'TZS'
-            }).format(total);
+            const totalEl = document.getElementById('totalAmount');
+            if (totalEl) {
+                totalEl.value = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'TZS'
+                }).format(total);
+            }
         }
 
         // -------------------------
-        // Disable/Enable Selected Options
+        // Disable/Enable Selected Options (based on compositeKey)
         // -------------------------
         function updateMedicineOptions() {
-            let selectedMedicines = [];
+            let selectedKeys = [];
             document.querySelectorAll('[name="item_id[]"]').forEach(select => {
-                if (select.value) selectedMedicines.push(select.value);
+                if (select.value) selectedKeys.push(select.value); // these are composite keys now
             });
 
             document.querySelectorAll('[name="item_id[]"]').forEach(select => {
-                let currentValue = select.value;
+                const currentValue = select.value;
                 $(select).find('option').each(function() {
-                    if (selectedMedicines.includes(this.value) && this.value !== currentValue) {
-                        $(this).attr("disabled", true);
+                    // this.value is also a compositeKey
+                    if (this.value && selectedKeys.includes(this.value) && this.value !==
+                        currentValue) {
+                        $(this).prop("disabled", true);
                     } else {
-                        $(this).attr("disabled", false);
+                        $(this).prop("disabled", false);
                     }
                 });
-                $(select).trigger('change.select2');
+
+                // refresh select2 display
+                try {
+                    $(select).trigger('change.select2');
+                } catch (e) {
+                    // ignore if select2 not present
+                }
             });
         }
 
@@ -716,72 +738,94 @@
         // Initialize Select2 for a row
         // -------------------------
         function attachSelect2(row) {
-            $(row).find('select.chosen').select2({
-                width: '100%',
-                minimumResultsForSearch: 5,
-                dropdownParent: $('#createSalesModal')
-            }).on('select2:select select2:unselect', function() {
-                tellPrice(row);
-                calculateAmount(row);
-                updateMedicineOptions();
-            });
+            // init select2 on selects inside this row
+            const $sel = $(row).find('select.chosen');
+            if ($sel.length) {
+                $sel.select2({
+                    width: '100%',
+                    minimumResultsForSearch: 5,
+                    dropdownParent: $('#createSalesModal')
+                }).on('select2:select select2:unselect change', function() {
+                    // when user selects or unselects, update price & options
+                    tellPrice(row);
+                    calculateAmount(row);
+                    updateMedicineOptions();
+                });
+            } else {
+                // fallback: plain select change
+                const sel = row.querySelector('select.chosen');
+                if (sel) {
+                    sel.addEventListener('change', function() {
+                        tellPrice(row);
+                        calculateAmount(row);
+                        updateMedicineOptions();
+                    });
+                }
+            }
         }
 
         // -------------------------
         // Add Row Functionality
         // -------------------------
-        document.getElementById('addSaleRow').addEventListener('click', function() {
-            const salesFields = document.getElementById('salesFields');
-            const newRow = document.createElement('div');
-            newRow.classList.add('row', 'mb-3', 'sale-entry', 'align-items-center');
+        const addSaleBtn = document.getElementById('addSaleRow');
+        if (addSaleBtn) {
+            addSaleBtn.addEventListener('click', function() {
+                const salesFields = document.getElementById('salesFields');
+                const newRow = document.createElement('div');
+                newRow.classList.add('row', 'mb-3', 'sale-entry', 'align-items-center');
 
-            newRow.innerHTML = `
-            <input type="text" name="stock_id[]" hidden required>
-            <div class="col-md-4">
-                <select name="item_id[]" class="form-select chosen" required>
-                    <option selected disabled value="">Select Item</option>
-                    @foreach ($sellMedicines as $sellMedicine)
-                        <option value="{{ $sellMedicine->id }}">
-                            {{ $sellMedicine->item->name }} ({{ number_format($sellMedicine->selling_price) }}Tsh)
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <input type="text" class="form-control" value="0" name="total_price[]" readonly required>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label" for="label[]"></label>
-                <input type="number" class="form-control" name="quantity[]" min="1" placeholder="Quantity" required>
-            </div>
-            <div class="col-md-3">
-                <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
-            </div>
-            <div class="col-md-0" hidden>
-                <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
-            </div>
-            <div class="col-md-1 d-flex justify-content-center">
-                <button type="button" class="btn btn-danger btn-sm remove-sale-row">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-        `;
+                newRow.innerHTML = `
+                <input type="text" name="stock_id[]" hidden required>
+                <div class="col-md-4">
+                    <select name="item_id[]" class="form-select chosen" required>
+                        <option selected disabled value="">Select Item</option>
+                        @foreach ($sellMedicines as $sellMedicine)
+                            <option value="{{ $sellMedicine->item->id }}_{{ $sellMedicine->selling_price }}">
+                                {{ $sellMedicine->item->name }} ({{ number_format($sellMedicine->selling_price) }}Tsh)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" value="0" name="total_price[]" readonly required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label stock-label">Quantity</label>
+                    <input type="number" class="form-control" name="quantity[]" min="1" placeholder="Quantity" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
+                </div>
+                <div class="col-md-0" hidden>
+                    <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
+                </div>
+                <div class="col-md-1 d-flex justify-content-center">
+                    <button type="button" class="btn btn-danger btn-sm remove-sale-row">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
 
-            salesFields.appendChild(newRow);
+                salesFields.appendChild(newRow);
 
-            attachSelect2(newRow);
-            updateMedicineOptions();
-
-            newRow.querySelector('[name="quantity[]"]').addEventListener('input', function() {
-                calculateAmount(newRow);
-            });
-
-            newRow.querySelector('.remove-sale-row').addEventListener('click', function() {
-                newRow.remove();
-                updateTotalAmount();
+                attachSelect2(newRow);
                 updateMedicineOptions();
+
+                const qty = newRow.querySelector('[name="quantity[]"]');
+                if (qty) qty.addEventListener('input', function() {
+                    calculateAmount(newRow);
+                });
+
+                const removeBtn = newRow.querySelector('.remove-sale-row');
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', function() {
+                        newRow.remove();
+                        updateTotalAmount();
+                        updateMedicineOptions();
+                    });
+                }
             });
-        });
+        }
 
         // -------------------------
         // Initialize Existing Rows
@@ -789,7 +833,15 @@
         document.querySelectorAll('.sale-entry').forEach(row => {
             attachSelect2(row);
 
-            row.querySelector('[name="quantity[]"]').addEventListener('input', function() {
+            // if row already has a selected item, populate its price & label
+            const sel = row.querySelector('[name="item_id[]"]');
+            if (sel && sel.value) {
+                tellPrice(row);
+                calculateAmount(row);
+            }
+
+            const qty = row.querySelector('[name="quantity[]"]');
+            if (qty) qty.addEventListener('input', function() {
                 calculateAmount(row);
             });
         });
