@@ -92,7 +92,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>{{ $message === 'daily' ? 'Daily' : 'Custom' }} Pharmacy Report</h1>
+            <h1>{{ $message === 'daily' ? '' : '' }} Pharmacy Report</h1>
             <p>{{ $pharmacy->name }} - {{ $reportDate }}</p>
         </div>
 
