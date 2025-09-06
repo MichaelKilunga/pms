@@ -16,7 +16,7 @@ class SendDailyPharmacyReport extends Command
     /**
      * The name and signature of the console command.
      *
-     * @var string
+     * @var string  
      */
     protected $signature = 'pharmacy:send-daily-report {--pharmacy_id= : Send report for specific pharmacy}';
 
@@ -115,6 +115,8 @@ class SendDailyPharmacyReport extends Command
     private function sendReportForPharmacy(Pharmacy $pharmacy): void
     {
         $today = Carbon::today();
+        $reportDate = $today->format('F j, Y');
+        $message = 'daily';
 
         // ----------------------
         // Sales summary (aggregated in SQL)
@@ -144,14 +146,17 @@ class SendDailyPharmacyReport extends Command
             'total_transactions' => (int)   ($salesData->total_transactions ?? 0),
             'profit_loss'        => (float) (($salesData->total_revenue ?? 0) - ($totalCost ?? 0)),
         ];
+        
 
         // ----------------------
         // Stock status (categorized in PHP but fetched once)
         // ----------------------
         $stocks = Stock::where('pharmacy_id', $pharmacy->id)
-            ->select(['id', 'item_id', 'quantity', 'remain_quantity', 'low_stock_percentage', 'expire_date'])
+            ->select(['id', 'item_id', 'quantity', 'remain_Quantity', 'low_stock_percentage', 'expire_date', 'batch_number', 'supplier'])
             ->with('item:id,name') // load only what’s needed
             ->get();
+
+            // dd($stocks);
 
         /** 
          * @var array<string, \Illuminate\Support\Collection<int, \App\Models\Stock>> $stockStatus 
@@ -177,7 +182,7 @@ class SendDailyPharmacyReport extends Command
         // ----------------------
         if ($pharmacy->owner && $pharmacy->owner->email) {
             Mail::to($pharmacy->owner->email)
-                ->send(new DailyPharmacyReport($pharmacy, $salesSummary, $stockStatus));
+                ->send(new DailyPharmacyReport($pharmacy, $salesSummary, $stockStatus, $reportDate, $message));
 
             $this->info("📧 Queued report for {$pharmacy->name} owner: {$pharmacy->owner->email}");
         } else {

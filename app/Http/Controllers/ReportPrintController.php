@@ -6,12 +6,15 @@ use Illuminate\Http\Request;
 use App\Models\Sales;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SalesReportExport;
+use App\Mail\DailyPharmacyReport;
 use App\Models\Items;
+use App\Models\Pharmacy;
 use App\Models\Stock;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use  Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 // use PDF;
 // use Barryvdh\DomPDF\PDF;
@@ -125,9 +128,9 @@ class ReportPrintController extends Controller
             $stocksRows = $stocks->get();
 
             //create a variable to count number of rows in the profitsRows and in the stocksRows
-            if($category == 'sales'){
+            if ($category == 'sales') {
                 $rows = $sales->count();
-            }else if($category == 'stocks'){
+            } else if ($category == 'stocks') {
                 $rows = $stocks->count();
             }
 
@@ -156,7 +159,7 @@ class ReportPrintController extends Controller
             // Calculate totals
             // $totalSales = $sales->sum('total_price');
             // sum of(quantity*sellingprice) of all sales total
-            $totalSales = $sales->sum(DB::raw('quantity * total_price'));  
+            $totalSales = $sales->sum(DB::raw('quantity * total_price'));
             $totalReturns = 0;
             $totalProfit = $profitsRows->sum('amount');
             $totalExpired = $expiredRows->count();
@@ -202,6 +205,110 @@ class ReportPrintController extends Controller
                 'profits' => $profitsRows,
                 'rows' => $rows
             ]);
+        }
+    }
+
+    public function sendReport(Request $request)
+    {
+        try {
+            $pharmacy_id = session('current_pharmacy_id');
+            $pharmacy = Pharmacy::find($pharmacy_id);
+            // validate start and end date
+            $request->validate([
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date'
+            ]);
+
+            if($request->start_date == $request->end_date) {
+                $reportDate = Carbon::parse($request->start_date)->format('F j, Y');
+                $message = 'daily';
+            } else {
+                $reportDate = Carbon::parse($request->start_date)->format('F j, Y') . ' to ' . Carbon::parse($request->end_date)->format('F j, Y');
+                $message = 'custom';
+            }
+
+            // dd($request->all());    
+
+            // $start_date = Carbon::parse($request->start_date);
+            // $end_date = Carbon::parse($request->end_date);
+
+            // $today = Carbon::today();
+
+            // ----------------------
+            // Sales summary (aggregated in SQL)
+            // ----------------------
+            $salesData = Sales::where('pharmacy_id', $pharmacy_id)
+                ->whereDate('date', '>=', $request->start_date)
+                ->whereDate('date', '<=', $request->end_date)
+                ->selectRaw('
+                                        COALESCE(SUM(total_price * quantity), 0) as total_revenue,
+                                        COALESCE(SUM(quantity), 0) as total_quantity,
+                                        COUNT(*) as total_transactions
+                                    ')->first();
+
+            // Compute total cost directly with a join (avoid per-row loops)
+            $totalCost = Sales::where('sales.pharmacy_id', $pharmacy_id)
+                ->whereDate('sales.date', '>=', $request->start_date)
+                ->whereDate('sales.date', '<=', $request->end_date)
+                ->join('stocks', 'sales.stock_id', '=', 'stocks.id')
+                ->selectRaw('COALESCE(SUM(stocks.buying_price * sales.quantity), 0) as total_cost')
+                ->value('total_cost');
+
+            /** 
+             * @var array<string, int|float> $salesSummary 
+             */
+            $salesSummary = [
+                'total_revenue'      => (float) ($salesData->total_revenue ?? 0),
+                'total_cost'         => (float) ($totalCost ?? 0),
+                'total_transactions' => (int)   ($salesData->total_transactions ?? 0),
+                'profit_loss'        => (float) (($salesData->total_revenue ?? 0) - ($totalCost ?? 0)),
+            ];
+
+            // dd($salesSummary, $salesData, $totalCost);
+
+
+            // ----------------------
+            // Stock status (categorized in PHP but fetched once)
+            // ----------------------
+            $stocks = Stock::where('pharmacy_id', $pharmacy_id)
+                ->select(['id', 'item_id', 'quantity', 'remain_Quantity', 'low_stock_percentage', 'expire_date', 'batch_number', 'supplier'])
+                ->with('item:id,name') // load only what’s needed
+                ->get();
+
+                // dd($stocks);
+
+            /** 
+             * @var array<string, \Illuminate\Support\Collection<int, \App\Models\Stock>> $stockStatus 
+             */
+            $stockStatus = [
+                'out_of_stock' => $stocks->where('remain_quantity', 0)->values(),
+                'low_stock' => $stocks->filter(function ($stock) {
+                    if ($stock->remain_quantity <= 0) return false;
+                    $threshold = ($stock->quantity * $stock->low_stock_percentage) / 100;
+                    return $stock->remain_quantity <= $threshold;
+                })->values(),
+                'expired' => $stocks->filter(fn($stock) => Carbon::parse($stock->expire_date)->isPast())->values(),
+                'good_stock' => $stocks->filter(function ($stock) {
+                    if ($stock->remain_quantity <= 0) return false;
+                    if (Carbon::parse($stock->expire_date)->isPast()) return false;
+                    $threshold = ($stock->quantity * $stock->low_stock_percentage) / 100;
+                    return $stock->remain_quantity > $threshold;
+                })->values(),
+            ];
+
+            // ----------------------
+            // Queue email (non-blocking)
+            // ----------------------
+            if ($pharmacy->owner && $pharmacy->owner->email) {
+                Mail::to($pharmacy->owner->email)
+                    ->send(new DailyPharmacyReport($pharmacy, $salesSummary, $stockStatus, $reportDate, $message));
+                return redirect()->back()->with('success', 'Report sent successfully');
+            } else {
+                return redirect()->back()->with('error', 'No email found for pharmacy');
+            }
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error sending report: ' . $e->getMessage());
         }
     }
 }

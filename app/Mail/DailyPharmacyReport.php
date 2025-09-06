@@ -19,16 +19,18 @@ class DailyPharmacyReport extends Mailable
     public $salesSummary;
     public $stockStatus;
     public $reportDate;
+    public $message;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Pharmacy $pharmacy, array $salesSummary, array $stockStatus)
+    public function __construct(Pharmacy $pharmacy, array $salesSummary, array $stockStatus, $reportDate, $message)
     {
         $this->pharmacy = $pharmacy;
         $this->salesSummary = $salesSummary;
         $this->stockStatus = $stockStatus;
-        $this->reportDate = Carbon::today()->format('F j, Y');
+        $this->reportDate = $reportDate;
+        $this->message = $message;
     }
 
     /**
@@ -36,8 +38,13 @@ class DailyPharmacyReport extends Mailable
      */
     public function envelope(): Envelope
     {
+        if ($this->message === 'daily') {
+            return new Envelope(
+                subject: "Daily Report - {$this->pharmacy->name} ({$this->reportDate})",
+            );
+        }
         return new Envelope(
-            subject: "Daily Report - {$this->pharmacy->name} ({$this->reportDate})",
+            subject: "Custom Report - {$this->pharmacy->name} ({$this->reportDate})",
         );
     }
 

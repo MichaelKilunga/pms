@@ -17,8 +17,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\Item;
-
-
+use App\Models\Sales;
 
 class StockController extends Controller
 {
@@ -61,113 +60,116 @@ class StockController extends Controller
                                 data-bs-target="#editStockModal' . $stock->id . '">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            ' . (
-                        $stock->remain_Quantity != $stock->quantity
-                        ? '<button type="button" class="btn btn-danger btn-sm ms-1" disabled>
-                            <i class="bi bi-trash"></i>
-                        </button>'
-                        : '<form action="' . route("stock.destroy", $stock->id) . '" method="POST" style="display:inline;">
-                            ' . csrf_field() . '
-                            ' . method_field("DELETE") . '
-                            <button type="submit" onclick="return confirm(\'Do you want to delete this stock?\')" 
-                                class="btn btn-danger btn-sm ms-1">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>'
-                    ) . '
+                            '. ($stock->remain_Quantity != $stock->quantity
+                                ? '<button type="button" class="btn btn-danger btn-sm ms-1" disabled>
+                                    <i class="bi bi-trash"></i>
+                                </button>'
+                                : '<form action="' . route("stock.destroy", $stock->id) . '" method="POST" style="display:inline;">
+                                    ' . csrf_field() . '
+                                    ' . method_field("DELETE") . '
+                                    <button type="submit" onclick="return confirm(\'Do you want to delete this stock?\')" 
+                                        class="btn btn-danger btn-sm ms-1">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>'
+                            ) . '
+                            '.($stock->selling_price < $stock->buying_price ?
+                    '<button class="btn btn-warning btn-sm ms-1" data-bs-toggle="modal"
+                                    data-bs-target="#editBuyingSellingPrice' . $stock->id . '">
+                                    <i class="bi bi-recycle"></i>
+                                </button>':'').'
                         </div>
     
                         <!-- View Stock Modal -->
                       <!-- View Stock Modal -->
-<div class="modal fade" id="viewStockModal' . $stock->id . '" tabindex="-1"
-    aria-labelledby="viewStockModalLabel' . $stock->id . '" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content shadow-lg rounded-3">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">
-                    <i class="bi bi-box-seam me-2"></i> Stock Details
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="p-2 border rounded bg-light">
-                                <strong>Stock Name:</strong>
-                                <div>' . ($stock->item->name ?? 'N/A') . '</div>
+                        <div class="modal fade" id="viewStockModal' . $stock->id . '" tabindex="-1"
+                            aria-labelledby="viewStockModalLabel' . $stock->id . '" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content shadow-lg rounded-3">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title">
+                                            <i class="bi bi-box-seam me-2"></i> Stock Details
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container-fluid">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong>Stock Name:</strong>
+                                                        <div>' . ($stock->item->name ?? 'N/A') . '</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong>Batch Number:</strong>
+                                                        <div>' . $stock->batch_number . '</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong>Supplier:</strong>
+                                                        <div>' . $stock->supplier . '</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong>Buying Price:</strong>
+                                                        <div>' . number_format($stock->buying_price, 2) . '</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong>Selling Price:</strong>
+                                                        <div>' . number_format($stock->selling_price, 2) . '</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong>Stocked Quantity:</strong>
+                                                        <div>' . $stock->quantity . '</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong>Remain Quantity:</strong>
+                                                        <div>' . $stock->remain_Quantity . '</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong>Low Stock (%):</strong>
+                                                        <div>' . $stock->low_stock_percentage . '</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong>In Date:</strong>
+                                                        <div>' . $stock->in_date . '</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong>Expire Date:</strong>
+                                                        <div>' . $stock->expire_date . '</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer bg-light">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            <i class="bi bi-x-circle me-1"></i> Close
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="p-2 border rounded bg-light">
-                                <strong>Batch Number:</strong>
-                                <div>' . $stock->batch_number . '</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-2 border rounded bg-light">
-                                <strong>Supplier:</strong>
-                                <div>' . $stock->supplier . '</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-2 border rounded bg-light">
-                                <strong>Buying Price:</strong>
-                                <div>' . number_format($stock->buying_price, 2) . '</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-2 border rounded bg-light">
-                                <strong>Selling Price:</strong>
-                                <div>' . number_format($stock->selling_price, 2) . '</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-2 border rounded bg-light">
-                                <strong>Stocked Quantity:</strong>
-                                <div>' . $stock->quantity . '</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-2 border rounded bg-light">
-                                <strong>Remain Quantity:</strong>
-                                <div>' . $stock->remain_Quantity . '</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-2 border rounded bg-light">
-                                <strong>Low Stock (%):</strong>
-                                <div>' . $stock->low_stock_percentage . '</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-2 border rounded bg-light">
-                                <strong>In Date:</strong>
-                                <div>' . $stock->in_date . '</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-2 border rounded bg-light">
-                                <strong>Expire Date:</strong>
-                                <div>' . $stock->expire_date . '</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i> Close
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
     
-                        <!-- Edit Stock Modal -->
-                        <div class="modal fade modal-lg" id="editStockModal' . $stock->id . '" tabindex="-1"
+                        <!-- Edit full Stock Modal -->
+                        <div class="modal fade modal-lg" id="editStockModal'.$stock->id.'" tabindex="-1"
                             aria-labelledby="editStockModalLabel' . $stock->id . '" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -181,29 +183,110 @@ class StockController extends Controller
                                             ' . csrf_field() . '
                                             ' . method_field('PUT') . '
                                             <input type="hidden" name="id" value="' . $stock->id . '">
-                                        <div class="row">
-                                          <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="item" class="form-label">Stock Name</label>
-                                                <input type="text" class="form-control" name="item_name"
-                                                    value="' . ($stock->item->name ?? '') . '" readonly>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="item" class="form-label">Stock Name</label>
+                                                        <input type="text" class="form-control" name="item_name"
+                                                            value="' . ($stock->item->name ?? '') . '" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="batch_number" class="form-label">Batch Number</label>
+                                                        <input type="text" class="form-control" name="batch_number"
+                                                            value="' . $stock->batch_number . '" readonly>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="mb-3">
+                                                        <label for="supplier" class="form-label">Supplier Name</label>
+                                                        <input type="text" class="form-control" name="supplier"
+                                                            value="' . $stock->supplier . '" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="buying_price" class="form-label">Buying Price</label>
+                                                        <input type="number" class="form-control" name="buying_price"
+                                                            value="' . $stock->buying_price . '" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="selling_price" class="form-label">Selling Price</label>
+                                                        <input type="number" class="form-control" name="selling_price"
+                                                            value="' . $stock->selling_price . '" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="quantity" class="form-label">Stocked Quantity</label>
+                                                        <input type="number" class="form-control" name="quantity"
+                                                            value="' . $stock->quantity . '" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="remain_Quantity" class="form-label">Remain Quantity</label>
+                                                        <input type="number" class="form-control" name="remain_Quantity"
+                                                            value="' . $stock->remain_Quantity . '" readonly required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="low_stock_percentage" class="form-label">Low Stock</label>
+                                                        <input type="number" class="form-control" name="low_stock_percentage"
+                                                            value="' . $stock->low_stock_percentage . '" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="expire_date" class="form-label">Expire Date</label>
+                                                        <input type="text" class="form-control" name="expire_date"
+                                                            value="' . $stock->expire_date . '" required>
+                                                    </div>
+                                                </div>
+
                                             <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="batch_number" class="form-label">Batch Number</label>
-                                                <input type="text" class="form-control" name="batch_number"
-                                                    value="' . $stock->batch_number . '" readonly>
+                                                    <div class="mb-3 hidden">
+                                                        <label for="in_date" class="form-label">In Date</label>
+                                                        <input type="text" class="form-control" name="in_date"
+                                                            value="' . $stock->in_date . '" readonly required>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <button type="submit" class="btn btn-success">Update Stock</button>
+                                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                                                </div>
                                             </div>
-                                        </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Edit Buying/Selling Price Stock Modal -->
+                        <div class="modal fade modal-lg" id="editBuyingSellingPrice' . $stock->id . '" tabindex="-1"
+                            aria-labelledby="editBuyingSellingPriceLabel' . $stock->id . '" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="editBuyingSellingPriceLabel' . $stock->id . '">Edit Seling Vs  Buyinig Price of ' . $stock->item->name . '</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="' . route('stock.updateSBP', $stock->id) . '" method="POST">
+                                            ' . csrf_field() . '
+                                            ' . method_field('PUT') . '
+                                            <input type="hidden" name="id" value="' . $stock->id . '">                                        
                                         <div class="row">
-                                            <div class="col-md-12">
-                                            <div class="mb-3">
-                                                <label for="supplier" class="form-label">Supplier Name</label>
-                                                <input type="text" class="form-control" name="supplier"
-                                                    value="' . $stock->supplier . '" required>
-                                            </div>
-                                            </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="buying_price" class="form-label">Buying Price</label>
@@ -221,41 +304,17 @@ class StockController extends Controller
                                             <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="quantity" class="form-label">Stocked Quantity</label>
-                                                        <input type="number" class="form-control" name="quantity"
+                                                        <input type="number" readonly class="form-control" name="quantity"
                                                             value="' . $stock->quantity . '" required>
                                                     </div>
                                                     </div>
                                                     <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="remain_Quantity" class="form-label">Remain Quantity</label>
-                                                        <input type="number" class="form-control" name="remain_Quantity"
+                                                        <input type="number" readonly class="form-control" name="remain_Quantity"
                                                             value="' . $stock->remain_Quantity . '" readonly required>
                                                     </div>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="low_stock_percentage" class="form-label">Low Stock</label>
-                                                <input type="number" class="form-control" name="low_stock_percentage"
-                                                    value="' . $stock->low_stock_percentage . '" required>
-                                            </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="mb-3">
-                                                    <label for="expire_date" class="form-label">Expire Date</label>
-                                                    <input type="text" class="form-control" name="expire_date"
-                                                        value="' . $stock->expire_date . '" required>
-                                                </div>
-                                            </div>
-
-                                           <div class="col-md-6">
-                                            <div class="mb-3 hidden">
-                                                <label for="in_date" class="form-label">In Date</label>
-                                                <input type="text" class="form-control" name="in_date"
-                                                    value="' . $stock->in_date . '" readonly required>
-                                            </div>
-                                            </div>
-                                            
+                                            </div>                                            
                                             <div class="d-flex align-items-center justify-content-between">
                                             <button type="submit" class="btn btn-success">Update Stock</button>
                                             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
@@ -774,6 +833,38 @@ class StockController extends Controller
                 'success' => false,
                 'message' => $e->getMessage()
             ]);
+        }
+    }
+
+    public function updateSBP(Request $request)
+    {
+        try{
+            DB::beginTransaction();
+        $request->validate([
+            'id' => 'required|exists:stocks,id',
+            'buying_price' => 'required|numeric',
+            'selling_price' => 'required|numeric'
+        ]);
+
+        $stock = Stock::find($request->id);
+
+        $stock->buying_price = $request->buying_price;
+        $stock->selling_price = $request->selling_price;
+        $stock->save();
+
+        // pull all sales under this stock and modify their selling price to the new selling price
+        $sales = Sales::where('stock_id', $stock->id)->get();
+        foreach ($sales as $sale) {
+            // unit price == total_price here
+            $sale->total_price = $request->selling_price;
+            $sale->save();
+        }
+
+        DB::commit();
+        return redirect()->back()->with('success', 'Stock updated successfully');   
+        } catch (\Exception $e) {   
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 }

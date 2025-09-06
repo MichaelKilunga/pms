@@ -90,6 +90,20 @@
                     </div>
                 </div>
             </div>
+            <div id="reportSendDiv" class="hidden col-6 col-md-4 col-lg-2">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Send Report</h6>
+                        {{-- pass start date and end date --}}
+                        <form action="{{ route('reports.send') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="start_date" id="report_start_date">
+                            <input type="hidden" name="end_date" id="report_end_date">
+                            <button type="submit" class="btn btn-primary">Send Report</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- Table Section -->
         <div class="row mb-2 g-4 justify-content-center text-center">
@@ -154,27 +168,45 @@
                 switch (value) {
                     case 'today':
                         console.log('Filtering for Today');
+                        $('#report_start_date').val(formatDate(today));
+                        $('#report_end_date').val(formatDate(today));
+                        $('#reportSendDiv').removeClass('hidden');
                         filterData(formatDate(today), formatDate(today), category, medicine);
                         break;
                     case 'this_week':
                         console.log('Filtering for This Week');
+                        $('#report_start_date').val(formatDate(startOfWeek));
+                        $('#report_end_date').val(formatDate(new Date()));
+                        $('#reportSendDiv').removeClass('hidden');
                         filterData(formatDate(startOfWeek), formatDate(new Date()), category, medicine);
                         break;
                     case 'this_month':
                         console.log('Filtering for This Month');
+                        $('#report_start_date').val(formatDate(startOfMonth));
+                        $('#report_end_date').val(formatDate(new Date()));
+                        $('#reportSendDiv').removeClass('hidden');
                         filterData(formatDate(startOfMonth), formatDate(new Date()), category, medicine);
                         break;
                     case 'last_month':
                         console.log('Filtering for Last Month');
+                        $('#report_start_date').val(formatDate(startOfLastMonth));
+                        $('#report_end_date').val(formatDate(endOfLastMonth));
+                        $('#reportSendDiv').removeClass('hidden');
                         filterData(formatDate(startOfLastMonth), formatDate(endOfLastMonth), category,
                             medicine);
                         break;
                     case 'this_year':
                         console.log('Filtering for This Year');
+                        $('#report_start_date').val(formatDate(startOfYear));
+                        $('#report_end_date').val(formatDate(new Date()));
+                        $('#reportSendDiv').removeClass('hidden');
                         filterData(formatDate(startOfYear), formatDate(new Date()), category, medicine);
                         break;
                     case 'custom_range':
                         console.log('Custom Range Selected');
+                        $('#report_start_date').val('');
+                        $('#report_end_date').val('');
+                        $('#reportSendDiv').addClass('hidden');
                         $('.dateDiv').removeClass('hidden');
                         $('#startDate, #endDate').removeClass('d-none');
                         break;
@@ -185,6 +217,8 @@
                 const startDate = $('#startDate').val();
                 const endDate = $('#endDate').val();
                 if (startDate && endDate) {
+                    $('#report_start_date').val(startDate);
+                    $('#report_end_date').val(endDate);
                     // console.log(`Filtering from ${startDate} to ${endDate}`);
                     filterData(startDate, endDate, category, medicine);
                 }

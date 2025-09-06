@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Pharmacy Report - {{ $pharmacy->name }}</title>
+    <title>{{ $message === 'daily' ? '' : '' }} Pharmacy Report - {{ $pharmacy->name }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -92,7 +92,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Daily Pharmacy Report</h1>
+            <h1>{{ $message === 'daily' ? 'Daily' : 'Custom' }} Pharmacy Report</h1>
             <p>{{ $pharmacy->name }} - {{ $reportDate }}</p>
         </div>
 
@@ -212,7 +212,7 @@
                         <td>{{ $stock->item->name ?? 'N/A' }}</td>
                         <td>{{ $stock->remain_Quantity }}</td>
                         <td>{{ $stock->quantity }}</td>
-                        <td>{{ $stock->low_stock }}</td>
+                        <td>{{ $stock->low_stock_percentage }}</td>
                         <td>{{ $stock->batch_number }}</td>
                     </tr>
                     @endforeach

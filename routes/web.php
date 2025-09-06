@@ -115,6 +115,7 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::post('stock', [StockController::class, 'store'])->name('stock.store');
     Route::get('stock/{id}', [StockController::class, 'show'])->name('stock.show');
     Route::put('stock', [StockController::class, 'update'])->name('stock.update');
+    Route::put('stock/updateSBP', [StockController::class, 'updateSBP'])->name('stock.updateSBP');
     Route::delete('stock/delete/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
     Route::post('/stock/import', [StockController::class, 'import'])->name('importMedicineStock');
     Route::get('/stock-balances', [StockController::class, 'viewStockBalances'])->name('stocks.balance');
@@ -168,6 +169,7 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::get('/reports', [ReportPrintController::class, 'index'])->name('reports.index');
     Route::get('/filterReports', [ReportPrintController::class, 'filterReports'])->name('filterReports');
     Route::post('/reports', [ReportPrintController::class, 'generateReport'])->name('reports.generate');
+    Route::post('/reports/send', [ReportPrintController::class, 'sendReport'])->name('reports.send');
 
     // Route::middleware(['eligible:get sms'])->group(function () {
     //     Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
