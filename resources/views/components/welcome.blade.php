@@ -180,6 +180,8 @@
         </div>
     @endif
 
+
+
     {{-- Sales Filter Section --}}
     <div class="row mb-4">
         {{-- Sales Vs medicine graph --}}
