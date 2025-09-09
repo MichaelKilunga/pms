@@ -118,10 +118,21 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::put('stock/updateSBP', [StockController::class, 'updateSBP'])->name('stock.updateSBP');
     Route::delete('stock/delete/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
     Route::post('/stock/import', [StockController::class, 'import'])->name('importMedicineStock');
-    Route::get('/stock-balances', [StockController::class, 'viewStockBalances'])->name('stocks.balance');
-    //adde these for viewing stock balance
-    Route::get('/stock/balances', [StockController::class, 'viewStockBalances'])->name('stock.balances');
+    // Route::get('/stock-balances', [StockController::class, 'stockBalancesPage'])->name('stocks.balance');
+    // Route::get('/stock-balances/view', [StockController::class, 'viewStockBalances'])->name('stock.balance.page');
+    // //adde these for viewing stock balance
+    // Route::get('/stock/balances', [StockController::class, 'viewStockBalances'])->name('stock.balances');
+    // Route::get('/stock/details/{id}', [StockController::class, 'getStockDetails'])->name('stock.details');
+
+    // Page view
+    Route::get('/stock-balances', [StockController::class, 'stockBalancesPage'])->name('stocks.balance');
+
+    // DataTables JSON endpoint
+    Route::get('/stock-balances/data', [StockController::class, 'viewStockBalances'])->name('stocks.balance.data');
+
+    // Optional: stock details modal
     Route::get('/stock/details/{id}', [StockController::class, 'getStockDetails'])->name('stock.details');
+
 
 
     //stock stransfer

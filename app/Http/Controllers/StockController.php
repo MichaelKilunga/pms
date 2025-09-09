@@ -711,42 +711,50 @@ class StockController extends Controller
         }
     }
 
-    //stock balance 
-    // public function viewStockBalances()
-    // {
-    //     $pharmacyId = session('current_pharmacy_id');
+    
+    public function stockBalancesPage()
+{
+    return view('stock.balance');
+}
 
-    //     $stockBalances = Stock::select(
-    //         'item_id',
-    //         DB::raw('SUM(quantity) as quantity'),
-    //         DB::raw("SUM(CASE WHEN expire_date > NOW() THEN remain_Quantity ELSE 0 END) as remain_Quantity"),
-    //         DB::raw("SUM(CASE WHEN expire_date <= NOW() THEN remain_Quantity ELSE 0 END) as expired_remain_Quantity")
-    //     )
-    //         ->where('pharmacy_id', $pharmacyId)
-    //         ->groupBy('item_id')
-    //         ->with('item')
-    //         ->paginate(10);
+public function viewStockBalances()
+{
+    $pharmacyId = session('current_pharmacy_id');
 
-    //     return view('stock.balance', compact('stockBalances'));
-    // }
-    // Show stock balance page
-    public function viewStockBalances()
-    {
-        $pharmacyId = session('current_pharmacy_id');
+    $stockBalances = Stock::select(
+        'stocks.item_id',
+        DB::raw('SUM(stocks.quantity) as quantity'),
+        DB::raw("SUM(CASE WHEN stocks.expire_date > NOW() THEN stocks.remain_quantity ELSE 0 END) as remain_quantity"),
+        DB::raw("SUM(CASE WHEN stocks.expire_date <= NOW() THEN stocks.remain_quantity ELSE 0 END) as expired_remain_quantity")
+    )
+    ->where('stocks.pharmacy_id', $pharmacyId)  // <-- prefix table
+    ->groupBy('stocks.item_id')
+    ->with('item');
 
-        $stockBalances = Stock::select(
-            'item_id',
-            DB::raw('SUM(quantity) as quantity'),
-            DB::raw("SUM(CASE WHEN expire_date > NOW() THEN remain_quantity ELSE 0 END) as remain_quantity"),
-            DB::raw("SUM(CASE WHEN expire_date <= NOW() THEN remain_quantity ELSE 0 END) as expired_remain_quantity")
-        )
-            ->where('pharmacy_id', $pharmacyId)
-            ->groupBy('item_id')
-            ->with('item')  // Make sure Stock model has `item()` relation
-            ->paginate(10);
+    return DataTables::eloquent($stockBalances)
+        ->addIndexColumn()
+        ->addColumn('medicine_name', fn($row) => $row->item->name ?? 'Unknown')
+        ->addColumn('status', function($row){
+            if ($row->remain_quantity > 0) {
+                return '<span class="text-success fw-bold">Available</span>';
+            } elseif ($row->expired_remain_quantity > 0) {
+                return '<span class="text-danger fw-bold">Expired</span>';
+            } else {
+                return '<span class="text-warning fw-bold">Finished</span>';
+            }
+        })
+        ->addColumn('action', function($row){
+            return '<button type="button" class="btn btn-primary btn-sm view-stock-btn" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#stockModal" 
+                        data-item-id="'.$row->item_id.'">
+                        <i class="bi bi-eye"></i></button>';
+        })
+        ->rawColumns(['status','action'])
+        ->make(true);
+}
 
-        return view('stock.balance', compact('stockBalances'));
-    }
+
 
     public function getStockDetails(Request $request)
     {

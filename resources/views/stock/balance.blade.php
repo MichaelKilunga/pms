@@ -17,40 +17,7 @@
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @forelse($stockBalances as $stock)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $stock->item->name ?? 'Unknown' }}</td>
-                            <td class="text-dark fw-bold">{{ $stock->remain_quantity }}</td>
-                            <td
-                                class="{{ $stock->expired_remain_quantity > 0 ? 'text-danger fw-bold' : 'text-dark fw-bold' }}">
-                                {{ $stock->expired_remain_quantity }}
-                            </td>
-                            <td>
-                                @if ($stock->remain_quantity > 0)
-                                    <span class="text-success fw-bold">Available</span>
-                                @elseif ($stock->expired_remain_quantity > 0)
-                                    <span class="text-danger fw-bold">Expired</span>
-                                @else
-                                    <span class="text-warning fw-bold">Finished</span>
-                                @endif
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-primary btn-sm view-stock-btn" data-bs-toggle="modal"
-                                    data-bs-target="#stockModal" data-item-id="{{ $stock->item_id }}">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="text-center">No stocks available</td>
-                        </tr>
-                    @endforelse
-                </tbody>
             </table>
-            {{ $stockBalances->links() }}
         </div>
 
         <!-- Modal -->
@@ -177,18 +144,6 @@
 
     <script>
         $(document).ready(function() {
-
-            $('#TableOne').DataTable({
-                paging: false, // disable DataTables pagination
-                info: false, // disable "Showing page..." info
-                searching: true, // keep search box
-                ordering: true, // optional: keep column sorting
-                lengthChange: false, // disable "Show _MENU_ entries"
-                language: {
-                    zeroRecords: "No records found",
-                    search: "Search:"
-                }
-            });
 
             function escapeHtml(str) {
                 if (!str) return '';
@@ -371,6 +326,54 @@
                 $('#finishedStock').removeClass('show active');
 
             });
+        });
+
+        $(function() {
+
+            $.fn.dataTable.ext.errMode = 'throw'; // show errors in console
+
+            $('#TableOne').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: "{{ route('stocks.balance.data') }}", // JSON endpoint
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'medicine_name',
+                        name: 'item.name'
+                    },
+                    {
+                        data: 'remain_quantity',
+                        name: 'remain_quantity'
+                    },
+                    {
+                        data: 'expired_remain_quantity',
+                        name: 'expired_remain_quantity',
+                        searchable: false
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    },
+                ],
+                pageLength: 10,
+                order: [
+                    [1, 'asc']
+                ], // default sort by medicine name
+            });
+
         });
     </script>
 @endsection
