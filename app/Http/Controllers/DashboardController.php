@@ -14,6 +14,7 @@ use App\Models\PrinterSetting;
 use App\Models\Sales;
 use App\Models\Stock;
 use App\Models\User;
+use App\Models\Contract;
 use App\Notifications\InAppNotification;
 use App\Notifications\WelcomeNotification;
 use App\Notifications\SmsNotification;
@@ -50,7 +51,38 @@ class DashboardController extends Controller
         // // dd('done');
 
         if (Auth::user()->role == "super") {
-            return view('superAdmin.index');
+
+            $totalPharmacies = Pharmacy::all()->count();
+            // dd($totalPharmacies);
+
+            // count all pharmacies that have salescreated 6 hours ago
+            $countactivepharmacies = Pharmacy::whereHas('sales', function ($query) {
+                $query->where('created_at', '>=', Carbon::now()->subHours(6));
+            })->count();
+            // dd($countactivepharmacies);
+
+            //call all users
+            $users = User::all()->count();
+
+            //call all users with role agent
+            $agents = User::where('role', 'agent')->count();
+
+            //active contracts
+            $activeContracts = Contract::where('is_current_contract', 1)->count();
+            $expiredContracts = Contract::where('is_current_contract', 0)->count();
+
+            //all packages
+            $packages = Package::all()->count();
+            $activePackages = Package::where('status', '1')->count();
+            $inactivePackages = Package::where('status', '0')->count();
+
+            //notifications
+            // $notifications = Notification::where('user_id', Auth::user()->id)->count();
+            // dd($notifications);
+
+            // $notifications = Notification::where('user_id', Auth::user()->id)->count();
+
+            return view('superAdmin.index', compact('totalPharmacies', 'users', 'agents', 'countactivepharmacies', 'activeContracts', 'expiredContracts', 'packages', 'activePackages', 'inactivePackages'));
         }
 
         if (Auth::user()->role == "agent") {
@@ -337,7 +369,6 @@ class DashboardController extends Controller
                 'medicineNames' => $filteredSales->pluck('medicine_name'),
                 'medicineSales' => $filteredSales->pluck('total_sales')
             ]);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

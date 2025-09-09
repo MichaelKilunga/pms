@@ -3,9 +3,53 @@
 @section('content')
     <div class="container mt-4">
         {{-- <p>{{'Unread: '.Auth::user()->unreadNotifications->count() }}</p> --}}
-        @if ( Auth::user()->unreadNotifications->count() == 0)
-            <p class="text-center text-primary italic">no new notification!!</p>
+        @if (Auth::user()->unreadNotifications->count() == 0)
+            <div class="p-5 rounded-4 shadow-lg text-center w-100 bg-light bg-gradient">
+                <div class="mb-3">
+                    <i class="bi bi-bell-slash text-primary display-4 bell-shake"></i>
+                </div>
+
+                <h4 class="fw-bold text-primary mb-2">No New Notifications</h4>
+                <p class="text-muted mb-0">You’re fully up to date — wishing you a smooth and productive day! with pillpointone.</p>
+
+            </div>
         @endif
+
+        <style>
+            @keyframes vibrate {
+
+                0%,
+                100% {
+                    transform: rotate(0deg);
+                }
+
+                20% {
+                    transform: rotate(-10deg);
+                }
+
+                40% {
+                    transform: rotate(10deg);
+                }
+
+                60% {
+                    transform: rotate(-8deg);
+                }
+
+                80% {
+                    transform: rotate(8deg);
+                }
+            }
+
+            .bell-shake {
+                display: inline-block;
+                animation: vibrate 1s infinite;
+                animation-delay: 5s;
+                /* kila sekunde moja inaanza tena */
+            }
+        </style>
+
+
+
         @if (Auth::user()->unreadNotifications->count() > 0)
             <div class="d-flex justify-content-between">
                 <h1>Notifications</h1>

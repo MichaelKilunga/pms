@@ -455,10 +455,10 @@
                                         {{ __('Notifications') }}
                                     </a>
 
-                                    <a href="{{ route('reports.all') }}" :active="request()->routeIs('reports.all')"
+                                    {{-- <a href="{{ route('reports.all') }}" :active="request()->routeIs('reports.all')"
                                         class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('reports.all') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                                         {{ __('Reports') }}
-                                    </a>
+                                    </a> --}}
 
                                     <a href="{{ route('contracts') }}" :active="request()->routeIs('contracts')"
                                         class=" block px-3 py-2 rounded no-underline {{ request()->routeIs('contracts') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
