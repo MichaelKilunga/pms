@@ -294,15 +294,15 @@
                                     </thead>
                                     <tbody>
                                         ${response.sales.map((sale, index) => `
-                                                                                                                                                                                        <tr>
-                                                                                                                                                                                            <td>${index + 1}</td>
-                                                                                                                                                                                            <td>${sale.date}</td>
-                                                                                                                                                                                            <td class="text-left">${sale.item['name']}</td>
-                                                                                                                                                                                            <td>${sale.quantity}</td>
-                                                                                                                                                                                            <td>${sale.quantity*(sale.stock['selling_price'])}</td>
-                                                                                                                                                                                            <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
-                                                                                                                                                                                        </tr>
-                                                                                                                                                                                    `).join('')}
+                                                                                                                                                                                                            <tr>
+                                                                                                                                                                                                                <td>${index + 1}</td>
+                                                                                                                                                                                                                <td>${sale.date}</td>
+                                                                                                                                                                                                                <td class="text-left">${sale.item['name']}</td>
+                                                                                                                                                                                                                <td>${sale.quantity}</td>
+                                                                                                                                                                                                                <td class="text-left">${sale.quantity*(sale.stock['selling_price'])}</td>
+                                                                                                                                                                                                                <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
+                                                                                                                                                                                                            </tr>
+                                                                                                                                                                                                        `).join('')}
                                             ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
                                              
                                             </tbody>
@@ -333,23 +333,23 @@
                                     </thead>
                                     <tbody>
                                         ${response.stocks.map((stock, index) => `
-                                                                                                                                                                                            <tr>
-                                                                                                                                                                                                <td>${index + 1}</td>
-                                                                                                                                                                                                <td>${stock.batch_number}</td>
+                                                                                                                                                                                                                <tr>
+                                                                                                                                                                                                                    <td>${index + 1}</td>
+                                                                                                                                                                                                                    <td>${stock.batch_number}</td>
 
-                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
-                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
-                                                                                                                                                                                                <td>${stock.expire_date}</td>
-                                                                                                                                                                                                <td>${stock.low_stock_percentage}</td>
-                                                                                                                                                                                                <td>${stock.supplier}</td>  
-                                                                                                                                                                                                            
-                                                                                                                                                                                                <td class="text-left">${stock.item['name']}</td>
-                                                                                                                                                                                                <td>${stock.quantity}</td>
-                                                                                                                                                                                                <td>${stock.remain_Quantity}</td>
-                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
-                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
-                                                                                                                                                                                                ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
-                                                                                                                                                                                            </tr>`).join('')}
+                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
+                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
+                                                                                                                                                                                                                    <td>${stock.expire_date}</td>
+                                                                                                                                                                                                                    <td>${stock.low_stock_percentage}</td>
+                                                                                                                                                                                                                    <td>${stock.supplier}</td>  
+                                                                                                                                                                                                                                
+                                                                                                                                                                                                                    <td class="text-left">${stock.item['name']}</td>
+                                                                                                                                                                                                                    <td>${stock.quantity}</td>
+                                                                                                                                                                                                                    <td>${stock.remain_Quantity}</td>
+                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
+                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
+                                                                                                                                                                                                                    ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
+                                                                                                                                                                                                                </tr>`).join('')}
                                             ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
                                          
                                     </tbody>
@@ -506,8 +506,12 @@
                                             title: '',
                                             text: 'Download PDF',
                                             className: 'btn btn-secondary reportsDownloadButton',
-                                            orientation: 'portrait', // Landscape orientation for PDF
+                                            //if category is sales orientation should be Portrait
+                                            orientation: category ===
+                                                "sales" ? "portrait" : "landscape",
+                                            //set page size to A4
                                             pageSize: 'A4', // A4 page size
+                                            footer: false, // hii inasaidia kwenye baadhi ya versions (footer ikiwa true onadisplay)
                                             customize: function(doc) {
                                                 let reportType = category ===
                                                     "sales" ? "Sales Report" :
@@ -657,7 +661,249 @@
                                                             .fill('*');
                                                     }
                                                 });
+
+                                                //PROPER APPEND FOR TOTAL SALES
+
+                                                // ongeza row ya totals mwisho wa jedwali
+
+                                                //if sales display below foorter alse display fr stock
+                                                // doc.content.forEach(function(
+                                                //     content) {
+                                                //     if (content.table) {
+                                                //         content.table
+                                                //             .body.push(
+                                                //             [{
+                                                //                     text: 'TOTAL',
+                                                //                     bold: true,
+                                                //                     alignment: 'center',
+                                                //                     colSpan: 4
+                                                //                 },
+                                                //                 {},
+                                                //                 {},
+                                                //                 {},
+                                                //                 {
+                                                //                     text: $(
+                                                //                             '#totalSales')
+                                                //                         .text(),
+                                                //                     bold: true,
+                                                //                     alignment: 'center'
+                                                //                 },
+                                                //                 {
+                                                //                     text: $(
+                                                //                             '#totalProfit')
+                                                //                         .text(),
+                                                //                     bold: true,
+                                                //                     alignment: 'center'
+                                                //                 }
+                                                //             ]);
+                                                //     }
+                                                // });
+
+                                                doc.content.forEach(function(
+                                                    content) {
+                                                    if (content.table) {
+                                                        if (category ===
+                                                            'sales') {
+                                                            // SALES FOOTER
+                                                            content
+                                                                .table
+                                                                .body
+                                                                .push([{
+                                                                        text: 'TOTAL',
+                                                                        bold: true,
+                                                                        alignment: 'center',
+                                                                        colSpan: 4
+                                                                    },
+                                                                    {},
+                                                                    {},
+                                                                    {},
+                                                                    {
+                                                                        text: $(
+                                                                                '#totalSales'
+                                                                            )
+                                                                            .text(),
+                                                                        bold: true,
+                                                                        alignment: 'center'
+                                                                    },
+                                                                    {
+                                                                        text: $(
+                                                                                '#totalProfit'
+                                                                            )
+                                                                            .text(),
+                                                                        bold: true,
+                                                                        alignment: 'center'
+                                                                    }
+                                                                ]);
+                                                        } else if (
+                                                            category ===
+                                                            'stocks') {
+                                                            // STOCKS FOOTER (13 columns total)
+                                                            content
+                                                                .table
+                                                                .body
+                                                                .push([{
+                                                                        text: 'TOTAL',
+                                                                        bold: true,
+                                                                        alignment: 'center',
+                                                                        colSpan: 8
+                                                                    },
+                                                                    {},
+                                                                    {},
+                                                                    {},
+                                                                    {},
+                                                                    {},
+                                                                    {},
+                                                                    {}, // fillers for colspan=8
+                                                                    '', // Stocked Qty (leave empty)
+                                                                    '', // Remained Qty (leave empty)
+                                                                    {
+                                                                        text: $(
+                                                                                '#totalSales'
+                                                                            )
+                                                                            .text(),
+                                                                        bold: true,
+                                                                        alignment: 'center'
+                                                                    }, // total sales
+                                                                    {
+                                                                        text: $(
+                                                                                '#totalProfit'
+                                                                            )
+                                                                            .text(),
+                                                                        bold: true,
+                                                                        alignment: 'center'
+                                                                    }, // total profit
+                                                                    {
+                                                                        text: $(
+                                                                                '#totalReturns'
+                                                                            )
+                                                                            .text(),
+                                                                        bold: true,
+                                                                        alignment: 'center'
+                                                                    } // expired loss
+                                                                ]);
+                                                        }
+                                                    }
+                                                });
+
+                                                // page margins
+                                                doc.pageMargins = [20, 60, 20,
+                                                    40
+                                                ];
+
+                                                doc.content.forEach(function(
+                                                    content) {
+                                                    if (content.table) {
+                                                        // define adaptive widths for stock table
+                                                        if (category ===
+                                                            'stocks') {
+                                                            content
+                                                                .table
+                                                                .widths = [
+                                                                    'auto', // #
+                                                                    'auto', // Batch Number
+                                                                    'auto', // Buying Price
+                                                                    'auto', // Selling Price
+                                                                    'auto', // Expiry Date
+                                                                    'auto', // Low Stock
+                                                                    'auto', // Supplier
+                                                                    '*', // Medicine (flexible because names are long)
+                                                                    'auto', // Stocked Qty
+                                                                    'auto', // Remained Qty
+                                                                    'auto', // Total Sales
+                                                                    'auto', // Total Profit
+                                                                    'auto' // Expired Loss
+                                                                ];
+                                                        }
+
+                                                        // format alignment
+                                                        content.table
+                                                            .body
+                                                            .forEach(
+                                                                function(
+                                                                    row,
+                                                                    rowIndex
+                                                                ) {
+                                                                    if (rowIndex ===
+                                                                        0
+                                                                    )
+                                                                        return; // skip header
+                                                                    // align money columns to the right
+                                                                    [2, 3,
+                                                                        10,
+                                                                        11,
+                                                                        12
+                                                                    ]
+                                                                    .forEach
+                                                                        (function(
+                                                                            colIndex
+                                                                        ) {
+                                                                            if (row[
+                                                                                    colIndex
+                                                                                ] &&
+                                                                                row[
+                                                                                    colIndex
+                                                                                ]
+                                                                                .text !==
+                                                                                undefined
+                                                                            ) {
+                                                                                row[colIndex]
+                                                                                    .alignment =
+                                                                                    'right';
+                                                                            } else if (
+                                                                                typeof row[
+                                                                                    colIndex
+                                                                                ] ===
+                                                                                'string'
+                                                                            ) {
+                                                                                row[colIndex] = {
+                                                                                    text: row[
+                                                                                        colIndex
+                                                                                    ],
+                                                                                    alignment: 'right'
+                                                                                };
+                                                                            }
+                                                                        });
+                                                                    // center align qty columns
+                                                                    [0, 8,
+                                                                        9
+                                                                    ]
+                                                                    .forEach
+                                                                        (function(
+                                                                            colIndex
+                                                                        ) {
+                                                                            if (row[
+                                                                                    colIndex
+                                                                                ] &&
+                                                                                row[
+                                                                                    colIndex
+                                                                                ]
+                                                                                .text !==
+                                                                                undefined
+                                                                            ) {
+                                                                                row[colIndex]
+                                                                                    .alignment =
+                                                                                    'center';
+                                                                            } else if (
+                                                                                typeof row[
+                                                                                    colIndex
+                                                                                ] ===
+                                                                                'string'
+                                                                            ) {
+                                                                                row[colIndex] = {
+                                                                                    text: row[
+                                                                                        colIndex
+                                                                                    ],
+                                                                                    alignment: 'center'
+                                                                                };
+                                                                            }
+                                                                        });
+                                                                });
+                                                    }
+
+                                                });
+
                                             }
+                                            // hapa################################################
                                         }
                                     ],
                                     columnDefs: columnDefs,
