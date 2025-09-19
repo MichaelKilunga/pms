@@ -297,7 +297,7 @@
                                                                                                                                                                                                                 <tr>
                                                                                                                                                                                                                     <td>${index + 1}</td>
                                                                                                                                                                                                                     <td>${sale.date}</td>
-                                                                                                                                                                                                                    <td class="text-left">${sale.item['name']}</td>
+                                                                                                                                                                                                                    <td class ="text-left">${sale.item['name']}</td>
                                                                                                                                                                                                                     <td>${sale.quantity}</td>
                                                                                                                                                                                                                    <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity * sale.stock['selling_price'])}</td>
                                                                                                                                                                                                                    <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.stock['selling_price'])}</td>
@@ -506,7 +506,8 @@
                                             //if category is sales orientation should be Portrait
                                             orientation: category ===
                                                 "sales" ? "portrait" : "landscape",
-                                            //set page size to A4
+                                            //  orientation: 'landscape',
+                                              //set page size to A4
                                             pageSize: 'A4', // A4 page size
                                             footer: false, // hii inasaidia kwenye baadhi ya versions (footer ikiwa true onadisplay)
                                             customize: function(doc) {
@@ -724,8 +725,7 @@
                                                     content) {
                                                     if (content.table) {
                                                         // define adaptive widths for stock table
-                                                        if (category ===
-                                                            'stocks') {
+                                                        if (category === 'stocks') {
                                                             content
                                                                 .table
                                                                 .widths = [
@@ -744,6 +744,55 @@
                                                                     'auto' // Expired Loss
                                                                 ];
                                                         }
+
+                                                        //define adaptive width with sales
+                                                    //  if (category === 'sales') 
+                                                    //     {
+                                                    //         content
+                                                    //             .table
+                                                    //             .widths = [
+                                                    //                 'auto', // #
+                                                    //                 'auto', // Date
+                                                    //                 '*', // Medicine
+                                                    //                 'auto', // Quantity
+                                                    //                 'auto', // Total Sales
+                                                    //                 'auto' // Total profit
+                                                    //             ];
+                                                    //     }
+
+
+                                                    if (category === 'sales') {
+                                                content.table.widths = [
+                                                    'auto',   // #
+                                                    'auto',   // Date
+                                                    '*',      // Medicine
+                                                    'auto',   // Quantity
+                                                    'auto',   // Total Sales
+                                                    'auto'    // Total profit
+                                                ];
+
+                                                // Force left + top alignment & wrapping for Medicine column
+                                                content.table.body.forEach((row, rowIndex) => {
+                                                    if (rowIndex > 0) { // skip header row
+                                                        row[2] = { 
+                                                            text: row[2], 
+                                                            alignment: 'left', 
+                                                            noWrap: false, 
+                                                            margin: [0, 0, 0, 0],   // optional: remove padding
+                                                            style: 'medicineCell'
+                                                        };
+                                                    }
+                                                });
+
+                                                // Add a style in your pdfmake doc definition
+                                                content.styles = {
+                                                    medicineCell: {
+                                                        alignment: 'left',
+                                                        valign: 'top'   // ensure text starts at top of cell
+                                                    }
+                                                };
+                                            }
+
 
                                                         // format alignment
                                                         content.table
