@@ -706,6 +706,20 @@
                                                     40
                                                 ];
 
+                                                // Add page numbers (footer)
+                                                doc.footer = function(currentPage, pageCount) {
+                                                    return {
+                                                        columns: [
+                                                            {
+                                                                text: 'Page ' + currentPage.toString() + ' of ' + pageCount,
+                                                                alignment: 'right',
+                                                                fontSize: 9,
+                                                                margin: [0, 0, 20, 0]
+                                                            }
+                                                        ]
+                                                    };
+                                                };
+
                                                 doc.content.forEach(function(
                                                     content) {
                                                     if (content.table) {
