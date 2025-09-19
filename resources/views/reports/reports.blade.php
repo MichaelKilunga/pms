@@ -294,15 +294,16 @@
                                     </thead>
                                     <tbody>
                                         ${response.sales.map((sale, index) => `
-                                                                                                                                                                                                            <tr>
-                                                                                                                                                                                                                <td>${index + 1}</td>
-                                                                                                                                                                                                                <td>${sale.date}</td>
-                                                                                                                                                                                                                <td class="text-left">${sale.item['name']}</td>
-                                                                                                                                                                                                                <td>${sale.quantity}</td>
-                                                                                                                                                                                                                <td class="text-left">${sale.quantity*(sale.stock['selling_price'])}</td>
-                                                                                                                                                                                                                <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sale.quantity*(sale.stock['selling_price']-sale.stock['buying_price']))}</td>
-                                                                                                                                                                                                            </tr>
-                                                                                                                                                                                                        `).join('')}
+                                                                                                                                                                                                                <tr>
+                                                                                                                                                                                                                    <td>${index + 1}</td>
+                                                                                                                                                                                                                    <td>${sale.date}</td>
+                                                                                                                                                                                                                    <td class="text-left">${sale.item['name']}</td>
+                                                                                                                                                                                                                    <td>${sale.quantity}</td>
+                                                                                                                                                                                                                   <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity * sale.stock['selling_price'])}</td>
+                                                                                                                                                                                                                   <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.stock['selling_price'])}</td>
+
+                                                                                                                                                                                                                </tr>
+                                                                                                                                                                                                            `).join('')}
                                             ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
                                              
                                             </tbody>
@@ -315,17 +316,15 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Batch Number</th>
-
-                                            <th>Buying Price</th>
-                                            <th>Selling Price</th>
-                                            <th>Expiry Date</th>
-                                            <th>Low Stock When</th>
-                                            <th>Supplier name</th>
-
                                             <th>Medicine</th>
                                             <th>Stocked Quantity</th>
                                             <th>Remained Quantity</th>
+                                            <th>Buying Price</th>
+                                            <th>Selling Price</th>
+                                            <th>Low Stock When</th>
+                                            <th>Expiry Date</th>
+                                            <th>Batch Number</th>
+                                            <th>Supplier name</th>
                                             <th>Total Sales</th>
                                             <th>Total Profit</th>
                                             <th>Expired Loss</th>
@@ -333,23 +332,21 @@
                                     </thead>
                                     <tbody>
                                         ${response.stocks.map((stock, index) => `
-                                                                                                                                                                                                                <tr>
-                                                                                                                                                                                                                    <td>${index + 1}</td>
-                                                                                                                                                                                                                    <td>${stock.batch_number}</td>
-
-                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
-                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
-                                                                                                                                                                                                                    <td>${stock.expire_date}</td>
-                                                                                                                                                                                                                    <td>${stock.low_stock_percentage}</td>
-                                                                                                                                                                                                                    <td>${stock.supplier}</td>  
-                                                                                                                                                                                                                                
-                                                                                                                                                                                                                    <td class="text-left">${stock.item['name']}</td>
-                                                                                                                                                                                                                    <td>${stock.quantity}</td>
-                                                                                                                                                                                                                    <td>${stock.remain_Quantity}</td>
-                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
-                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
-                                                                                                                                                                                                                    ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>0</td>`}
-                                                                                                                                                                                                                </tr>`).join('')}
+                                                                                                                                                                                                                    <tr>
+                                                                                                                                                                                                                        <td>${index + 1}</td>
+                                                                                                                                                                                                                        <td class="text-left">${stock.item['name']}</td>
+                                                                                                                                                                                                                        <td>${stock.quantity}</td>
+                                                                                                                                                                                                                        <td>${stock.remain_Quantity}</td>
+                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
+                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
+                                                                                                                                                                                                                        <td>${stock.low_stock_percentage}</td>
+                                                                                                                                                                                                                        <td>${stock.expire_date}</td>
+                                                                                                                                                                                                                        <td>${stock.batch_number}</td>
+                                                                                                                                                                                                                        <td>${stock.supplier}</td> 
+                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
+                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
+                                                                                                                                                                                                                        ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>Tsh 0</td>`}
+                                                                                                                                                                                                                    </tr>`).join('')}
                                             ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
                                          
                                     </tbody>
@@ -425,12 +422,12 @@
                         if (category == 'stocks') {
                             columnDefs = [{
                                     targets: 2,
-                                    visible: false,
+                                    visible: true,
                                     searchable: false
                                 },
                                 {
                                     targets: 3,
-                                    visible: false
+                                    visible: true
                                 },
                                 {
                                     targets: 4,
@@ -663,41 +660,7 @@
                                                 });
 
                                                 //PROPER APPEND FOR TOTAL SALES
-
-                                                // ongeza row ya totals mwisho wa jedwali
-
-                                                //if sales display below foorter alse display fr stock
-                                                // doc.content.forEach(function(
-                                                //     content) {
-                                                //     if (content.table) {
-                                                //         content.table
-                                                //             .body.push(
-                                                //             [{
-                                                //                     text: 'TOTAL',
-                                                //                     bold: true,
-                                                //                     alignment: 'center',
-                                                //                     colSpan: 4
-                                                //                 },
-                                                //                 {},
-                                                //                 {},
-                                                //                 {},
-                                                //                 {
-                                                //                     text: $(
-                                                //                             '#totalSales')
-                                                //                         .text(),
-                                                //                     bold: true,
-                                                //                     alignment: 'center'
-                                                //                 },
-                                                //                 {
-                                                //                     text: $(
-                                                //                             '#totalProfit')
-                                                //                         .text(),
-                                                //                     bold: true,
-                                                //                     alignment: 'center'
-                                                //                 }
-                                                //             ]);
-                                                //     }
-                                                // });
+                                                // Append TOTAL row for sales report
 
                                                 doc.content.forEach(function(
                                                     content) {
@@ -733,53 +696,6 @@
                                                                         bold: true,
                                                                         alignment: 'center'
                                                                     }
-                                                                ]);
-                                                        } else if (
-                                                            category ===
-                                                            'stocks') {
-                                                            // STOCKS FOOTER (13 columns total)
-                                                            content
-                                                                .table
-                                                                .body
-                                                                .push([{
-                                                                        text: 'TOTAL',
-                                                                        bold: true,
-                                                                        alignment: 'center',
-                                                                        colSpan: 8
-                                                                    },
-                                                                    {},
-                                                                    {},
-                                                                    {},
-                                                                    {},
-                                                                    {},
-                                                                    {},
-                                                                    {}, // fillers for colspan=8
-                                                                    '', // Stocked Qty (leave empty)
-                                                                    '', // Remained Qty (leave empty)
-                                                                    {
-                                                                        text: $(
-                                                                                '#totalSales'
-                                                                            )
-                                                                            .text(),
-                                                                        bold: true,
-                                                                        alignment: 'center'
-                                                                    }, // total sales
-                                                                    {
-                                                                        text: $(
-                                                                                '#totalProfit'
-                                                                            )
-                                                                            .text(),
-                                                                        bold: true,
-                                                                        alignment: 'center'
-                                                                    }, // total profit
-                                                                    {
-                                                                        text: $(
-                                                                                '#totalReturns'
-                                                                            )
-                                                                            .text(),
-                                                                        bold: true,
-                                                                        alignment: 'center'
-                                                                    } // expired loss
                                                                 ]);
                                                         }
                                                     }
