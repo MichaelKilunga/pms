@@ -1,3 +1,7 @@
+@section('title', 'Login')
+@section('meta_description', 'Secure login to your Pharmacy Management System account. Access your pharmacy dashboard, track sales, and manage stock efficiently.')
+@section('meta_keywords', 'Login, Pharmacy Management System, Online Pharmacy, Pharmacy Dashboard, DLDM System, Duka la Dawa Tanzania')
+
 <x-guest-layout>
     <x-authentication-card>
         <x-slot name="logo">

@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ExpenseController;
-
+use Illuminate\Support\Facades\Hash;
 
 Route::get('/', function () {
     //return welcome view with packages
@@ -336,3 +336,23 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::post('/contact-us', [ContactController::class, 'send'])->name('contact.send');
+
+// checkPassword
+Route::post('/checkPassword', function (Request $request) {
+    try {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $inputPassword = $request->input('password');
+        $user = Auth::user();
+
+        if (Hash::check($inputPassword, $user->password)) {
+            return response()->json(['success' => true]);
+        } else {
+            return response()->json(['success' => false,'password'=>$request->input('password')]);
+        }
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage(), 'password'=>$request->input('password')]);
+    }
+})->name('checkPassword');

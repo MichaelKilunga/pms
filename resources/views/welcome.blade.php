@@ -5,7 +5,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ env('APP_NAME') }}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    {{-- META CONFIG --}}
+    <meta name="description" content="Pharmacy Management System (PILLPOINTONE) is a comprehensive solution for managing pharmacies, including inventory, sales, and customer management.">
+    <meta name="keywords" content="Online Pharmacy, Pharmacy Management System, Mfumo wa Pharmacy Tanzania, Mfumo wa Pharmacy Morogoro, DLDM system, Mfumo wa duka la dawa, Hospital Management, Dawa, Mauzo ya Dawa, Pharmacy Software, Pharmacy POS System, Pharmacy Inventory Management, Medicine Sales System, Drug Store Software, Mfumo wa Hospitali, Pharmacy Accounting System, Dawa za Hospitali, Maduka ya Dawa Tanzania, Medical Store Management, Digital Pharmacy System, Pharmaceutical Management System, E-Pharmacy Tanzania, Pharmacy Sales Tracking, Pharmacy Stock Management, Mfumo wa Mauzo ya Dawa, Pharmacy Billing Software, Tanzania Pharmacy Software, Healthcare Management System, Mfumo wa Afya Tanzania, Pharmacy Dar es Salaam, Pharmacy Dodoma, Pharmacy Arusha, Pharmacy Mwanza, Pharmacy Mbeya, Pharmacy Morogoro, Pharmacy Zanzibar, Pharmacy Kilimanjaro, Pharmacy Tanga, Mfumo wa Mauzo ya Madawa, Pharmacy ERP System, Pharmacy Cloud Software, Retail Pharmacy Management, Hospital and Pharmacy System, Medicine Distribution Software, Mfumo wa Usimamizi wa Dawa, Tanzania E-Health System, Health Information System Tanzania, Pharmacy Business Software, Pharmacy Store Tanzania, Medical Shop Software, Maduka ya dawa Morogoro, Mfumo wa duka la dawa Tanzania, Digital Health Tanzania, Pharmacy Management, POS, Inventory, Sales, Customer Management, Multi-Store, Cloud Integration">
+    <meta name="author" content="SKYLINK SOLUTIONS">
+    <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
 
     <!-- Bootstrap CSS -->

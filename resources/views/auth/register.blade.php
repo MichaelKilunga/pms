@@ -1,3 +1,7 @@
+@section('title', 'Become Agent')
+@section('meta_description', 'Apply to become an agent for our Pharmacy Management System. Join our network and manage pharmacies across Tanzania.')
+@section('meta_keywords', 'Become Agent, Pharmacy Agent, Pharmacy Management System, DLDM system, Online Pharmacy Tanzania')
+
 <x-guest-layout>
     <x-authentication-card>
         <x-slot name="logo">
