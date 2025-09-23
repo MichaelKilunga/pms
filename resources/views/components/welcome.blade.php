@@ -10,7 +10,7 @@
                     <button data-bs-toggle="modal" data-bs-target="#createSalesNoteModal"
                         class="card bg-primary text-white shadow text-decoration-none">
                         <div class="card-body">
-                            <h6><i class="bi bi-plus-circle fs-1#"></i> Sales Notebook</h6>
+                            <h6><i class="bi bi-plus-circle fs-1#"></i> Create Sales Notebook</h6>
                         </div>
                     </button>
                 </div>
@@ -136,7 +136,8 @@
                     <button data-bs-toggle="modal" data-bs-target="#createSalesNoteModal"
                         class="card bg-primary text-white shadow text-decoration-none">
                         <div class="card-body">
-                            <h6><i class="bi bi-plus-circle fs-1#"></i> Sales Notebook</h6>
+                            <h6><i class="bi bi-plus-circle fs-1#"></i> Create Sales Notebook</h6>
+                            {{-- <p class="fs-5 fw-bold">{{ $totalMedicines }}</p> --}}
                         </div>
                     </button>
                 </div>
@@ -161,7 +162,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-4 col-lg-2">
+                 <!-- Locked sales card (hidden initially) -->
+                <div class="col-6 col-md-4 col-lg-2" id="totalSalesCard" style="display: none;">
                     <div class="card bg-success text-white shadow">
                         <div class="card-body">
                             <h6>
@@ -1024,8 +1026,10 @@
                         if (response.success) {
                             $("#password-section").hide();
                             $(".myreportcheck").show();
+                            $("#totalSalesCard").show();
                             setTimeout(function() {
                                 $(".myreportcheck").hide();
+                                $("#totalSalesCard").hide()
                                 $("#unlock-section").show();
                                 $("#unlock-password").val('');
                             }, 5000); // hide after 5 seconds
