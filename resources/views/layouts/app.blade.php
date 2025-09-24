@@ -203,7 +203,7 @@
                                         class="block px-3 py-2 rounded no-underline {{ request()->routeIs('expenses.index') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                                         {{ __('All Expenses') }}
                                     </a>
-                                 
+
                                     {{-- expenses categories --}}
                                     {{-- <a href="{{ route('expenses.category') }}"
                                         class="block px-3 py-2 rounded no-underline {{ request()->routeIs('expenses.category') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
@@ -229,7 +229,22 @@
                             $invOpen = request()->routeIs('medicines', 'stock', 'stocks.balance', 'stockTransfers');
                             $manageOpen = request()->routeIs('staff', 'category', 'pharmacies', 'myContracts');
                             $reportsOpen = request()->routeIs('reports.all', 'notifications', 'agent.messages');
-                            $expensesOpen = request()->routeIs('expenses.index', 'expenses.create', 'expenses.edit','expenses.vendors','expenses.category');
+                            $expensesOpen = request()->routeIs(
+                                'expenses.index',
+                                'expenses.create',
+                                'expenses.edit',
+                                'expenses.vendors',
+                                'expenses.category',
+                            );
+                            // Debts menu open state
+                            $debtsOpen = request()->routeIs(
+                                'debts.index',
+                                'debts.create',
+                                'debts.edit',
+                                'installments.installment',
+                                'installments.create',
+                                'installments.edit',
+                            );
                         @endphp
 
                         <nav class="space-y-3">
@@ -361,7 +376,7 @@
                                 </div>
                             </div>
 
-                              {{-- Expenses --}}
+                            {{-- Expenses --}}
                             <div x-data="{ open: @json($expensesOpen) }" class="space-y-1">
                                 <button @click="open = ! open"
                                     class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
@@ -378,7 +393,7 @@
                                         class="block px-3 py-2 rounded no-underline {{ request()->routeIs('expenses.index') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                                         {{ __('All Expenses') }}
                                     </a>
-                                 
+
                                     {{-- expenses categories --}}
                                     <a href="{{ route('expenses.category') }}"
                                         class="block px-3 py-2 rounded no-underline {{ request()->routeIs('expenses.category') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
@@ -394,7 +409,40 @@
                                 </div>
                             </div>
 
+                            {{-- Debts --}}
+                            {{-- Debts --}}
+                            <div x-data="{ open: @json($debtsOpen) }" class="space-y-1">
+                                <button @click="open = ! open"
+                                    class="w-full flex items-center justify-between px-3 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <span class="font-medium">Debts</span>
+                                    <svg :class="{ 'rotate-90': open }" class="w-4 h-4 transform transition-transform"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
 
+                                <div x-show="open" x-cloak x-transition class="pl-4 mt-1 space-y-1">
+                                    {{-- All Debts --}}
+                                    <a href="{{ route('debts.index') }}"
+                                        class="block px-3 py-2 rounded no-underline {{ request()->routeIs('debts.index') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('All Debts') }}
+                                    </a>
+
+                                    {{-- Add Debt (opens modal) --}}
+                                    {{-- <a href="#" @click.prevent="$dispatch('open-modal', 'add-debt-modal')"
+                                        class="block px-3 py-2 rounded no-underline text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        {{ __('Add Debt') }}
+                                    </a> --}}
+
+                                    {{-- Installments --}}
+                                    <a href="{{ route('installments.installment') }}"
+                                        class="block px-3 py-2 rounded no-underline {{ request()->routeIs('installments.installment') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                        {{ __('All Installments') }}
+                                    </a>
+                                </div>
+                            </div>
+                            
                         </nav>
                     @endif
 

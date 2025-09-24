@@ -32,6 +32,8 @@ use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ExpenseController;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\DebtController;
+use App\Http\Controllers\InstallmentController;
 
 Route::get('/', function () {
     //return welcome view with packages
@@ -335,6 +337,19 @@ Route::middleware(['auth'])->group(function () {
         ->name('expenses.reject');
 });
 
+
+//debts controller and installations
+Route::middleware(['auth'])->group(function () {
+    Route::get('/debt', [DebtController::class, 'index'])->name('debts.index');
+    Route::post('debts/storeint', [DebtController::class, 'storeinst'])->name('debts.inststore');
+    Route::post('debts/store', [DebtController::class, 'store'])->name('debts.store');
+    Route::delete('debts/{id}', [DebtController::class, 'destroy'])->name('debts.destroy');
+    Route::get('/installations', [InstallmentController::class, 'index'])->name('installments.installment');
+    Route::get('installments/create/{debt_id}', [InstallmentController::class, 'create'])->name('installments.create');
+    Route::post('installments/store', [InstallmentController::class, 'store'])->name('installments.store');
+    Route::delete('installments/destroy{id}', [InstallmentController::class, 'destroyinst'])->name('installments.destroyinst');
+});
+
 Route::post('/contact-us', [ContactController::class, 'send'])->name('contact.send');
 
 // checkPassword
@@ -350,9 +365,9 @@ Route::post('/checkPassword', function (Request $request) {
         if (Hash::check($inputPassword, $user->password)) {
             return response()->json(['success' => true]);
         } else {
-            return response()->json(['success' => false,'password'=>$request->input('password')]);
+            return response()->json(['success' => false, 'password' => $request->input('password')]);
         }
     } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => $e->getMessage(), 'password'=>$request->input('password')]);
+        return response()->json(['success' => false, 'message' => $e->getMessage(), 'password' => $request->input('password')]);
     }
 })->name('checkPassword');
