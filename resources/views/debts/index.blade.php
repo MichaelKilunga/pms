@@ -49,14 +49,24 @@
                                     <span class="bi bi-cash"></span>
                                 </button>
                             @endif
-
+                            @if($debt->totalPaid() > 0)
                             <form action="{{ route('debts.destroy', $debt->id) }}" method   ="POST" class="d-inline"
+                                onsubmit="return confirm('Are you sure you want to delete this debt?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm" disabled><span
+                                        class="bi bi-trash"></span></button>
+                            </form>
+                            @endif
+                            @if($debt->totalPaid() == 0)
+                                  <form action="{{ route('debts.destroy', $debt->id) }}" method   ="POST" class="d-inline"
                                 onsubmit="return confirm('Are you sure you want to delete this debt?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm"><span
                                         class="bi bi-trash"></span></button>
                             </form>
+                            @endif
                         </div>
 
                         <!-- Add Installment Modal -->
