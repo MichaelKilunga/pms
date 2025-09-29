@@ -10,8 +10,11 @@ return new class extends Migration
     {
         Schema::create('installments', function (Blueprint $table) {
             $table->id();
+             //pharmacy id
+            $table->foreignId('pharmacy_id')->constrained('pharmacies')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('debt_id')->constrained('debts')->onDelete('cascade');
             $table->decimal('amount', 12, 2);
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }

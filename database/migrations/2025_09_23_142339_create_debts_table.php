@@ -10,6 +10,8 @@ return new class extends Migration
     {
         Schema::create('debts', function (Blueprint $table) {
             $table->id();
+             //pharmacy id
+            $table->foreignId('pharmacy_id')->constrained('pharmacies')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('stock_id')->constrained('stocks')->onDelete('cascade');
             $table->integer('debtAmount');
             $table->enum('status', ['Not paid', 'Partial paid', 'Full paid'])->default('Not paid');

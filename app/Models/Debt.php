@@ -9,7 +9,12 @@ class Debt extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['stock_id', 'debtAmount', 'status'];
+    protected $fillable = ['pharmacy_id','stock_id', 'debtAmount', 'status'];
+    
+    public function pharmacy()
+    {
+        return $this->belongsTo(Pharmacy::class, 'pharmacy_id'); // adjust model name if different
+    }
 
     public function stock()
     {

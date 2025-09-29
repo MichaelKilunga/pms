@@ -344,6 +344,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('debts/storeint', [DebtController::class, 'storeinst'])->name('debts.inststore');
     Route::post('debts/store', [DebtController::class, 'store'])->name('debts.store');
     Route::delete('debts/{id}', [DebtController::class, 'destroy'])->name('debts.destroy');
+    //debt update
+    Route::put('debts/{id}', [DebtController::class, 'update'])->name('debts.update');
     Route::get('/installations', [InstallmentController::class, 'index'])->name('installments.installment');
     Route::get('installments/create/{debt_id}', [InstallmentController::class, 'create'])->name('installments.create');
     Route::post('installments/store', [InstallmentController::class, 'store'])->name('installments.store');
