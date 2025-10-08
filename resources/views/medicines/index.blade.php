@@ -109,23 +109,39 @@
                                         </div>
                                     </div>
                                 </div>
+
+
+                                {{-- if medicine having stock, disable delete button --}}
+                                @php
+                                    //select * from stocks where item_id = $medicine->id
+                                    $hasStock = \App\Models\Stock::where('item_id', $medicine->id)->exists();
+                                    // dd($hasStock);
+                                @endphp
+                                @if ($hasStock)
+                                    <button class="btn btn-danger btn-sm" disabled><i class="bi bi-trash"></i></button>
+                                @else
+                                    {{-- enable delete button --}}
+                                    <form action="{{ route('medicines.destroy', $medicine->id) }}" method="POST"
+                                        style="display:inline;">
+                                        {{-- <form action="medicines/destroy" method="DELETE" style="display:inline;"> --}}
+                                        @csrf
+                                        @method('DELETE')
+                                        <input type="number" class="hidden" value="">
+                                        <button type="submit"
+                                            onclick="return confirm('Do you want to delete this medicine?')"
+                                            class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                @endif
+
+
+
+
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
-
-
-        <form action="{{ route('medicines.destroy', $medicine->id) }}" method="POST" style="display:inline;">
-            {{-- <form action="medicines/destroy" method="DELETE" style="display:inline;"> --}}
-            @csrf
-            @method('DELETE')
-            <input type="number" class="hidden" value="">
-            <button type="submit" onclick="return confirm('Do you want to delete this medicine?')"
-                class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
-        </form>
-        </td>
-        </tr>
-        @endforeach
-        </tbody>
-        </table>
-    </div>
     </div>
 
 

@@ -21,9 +21,9 @@ class ItemsController extends Controller
     public function index()
     {
         $medicines = Items::with(['category', 'pharmacy'])->where('pharmacy_id', session('current_pharmacy_id'))->get();
+        //oder by items name ascending
+        $medicines = $medicines->sortBy('name');
         $categories = Category::get();
-        // $pharmacy = Pharmacy::where('pharmacy_id', session('current_pharmacy_id'))->first();
-
         // dd($medicines);
         return view('medicines.index', compact('medicines', 'categories'));
     }
