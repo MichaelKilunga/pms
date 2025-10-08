@@ -503,7 +503,8 @@ class SaleNoteController extends Controller
                 'item_id' => $request->item_id,
                 'quantity' => $request->quantity,
                 'stock_id' => $request->stock_id,
-                'total_price' => $request->total_price,
+                // 'total_price' => $request->total_price,
+                'total_price' => $stock->selling_price,
                 'date' => $request->date,
             ]);
 

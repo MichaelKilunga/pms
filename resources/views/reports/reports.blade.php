@@ -125,6 +125,7 @@
                 </div>
             </div>
         </div>
+        {{-- <div><p>{{$medicine->pharmacies->name}}</p></div> --}}
     </div>
     <script>
         $(document).ready(function() {
@@ -288,8 +289,8 @@
                                             <th>Date</th>
                                             <th>Medicine</th>
                                             <th>Quantity</th>
-                                            <th>Total Sales</th>
-                                            <th>Total profit</th>
+                                            <th>Amount</th>
+                                            <th>Profit</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -300,7 +301,7 @@
                                                                                                                                                                                                                     <td class ="text-left">${sale.item['name']}</td>
                                                                                                                                                                                                                     <td>${sale.quantity}</td>
                                                                                                                                                                                                                    <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity * sale.stock['selling_price'])}</td>
-                                                                                                                                                                                                                   <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.stock['selling_price'])}</td>
+                                                                                                                                                                                                                   <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity *((sale.stock['selling_price'])-(sale.stock['buying_price'])))}</td>
 
                                                                                                                                                                                                                 </tr>
                                                                                                                                                                                                             `).join('')}
@@ -542,11 +543,12 @@
                                                                     bold: true,
                                                                     alignment: 'left'
                                                                 },
-                                                                {
-                                                                    text: "(PILLPOINTONE)",
+                                                                   {
+                                                                    text: "{{ strtoupper($pharmacy->name) }}",
                                                                     fontSize: 17,
                                                                     italics: true,
-                                                                    color: '#FF0000', // Red
+                                                                    color: '#0000FF', // Blue
+                                                                    bold: true,
                                                                     alignment: 'left'
                                                                 },
                                                                 {
@@ -765,6 +767,7 @@
                                                 content.table.widths = [
                                                     'auto',   // #
                                                     'auto',   // Date
+                                                    // 'auto',   // Medicine
                                                     '*',      // Medicine
                                                     'auto',   // Quantity
                                                     'auto',   // Total Sales
@@ -882,7 +885,7 @@
                                                 });
 
                                             }
-                                            // hapa################################################
+                                            // hapa##
                                         }
                                     ],
                                     columnDefs: columnDefs,

@@ -68,7 +68,10 @@ class ReportPrintController extends Controller
     public function all()
     {
         $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
-        return view('reports.reports', compact('medicines'));
+        $pharmacyId = session('current_pharmacy_id');
+        $pharmacy = Pharmacy::find($pharmacyId);
+
+        return view('reports.reports', compact('medicines', 'pharmacy'));
     }
 
     public function filterReports(Request $request)
@@ -219,7 +222,7 @@ class ReportPrintController extends Controller
                 'end_date' => 'required|date|after_or_equal:start_date'
             ]);
 
-            if($request->start_date == $request->end_date) {
+            if ($request->start_date == $request->end_date) {
                 $reportDate = Carbon::parse($request->start_date)->format('F j, Y');
                 $message = 'daily';
             } else {
@@ -275,7 +278,7 @@ class ReportPrintController extends Controller
                 ->with('item:id,name') // load only what’s needed
                 ->get();
 
-                // dd($stocks);
+            // dd($stocks);
 
             /** 
              * @var array<string, \Illuminate\Support\Collection<int, \App\Models\Stock>> $stockStatus 
@@ -306,7 +309,6 @@ class ReportPrintController extends Controller
             } else {
                 return redirect()->back()->with('error', 'No email found for pharmacy');
             }
-
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error sending report: ' . $e->getMessage());
         }

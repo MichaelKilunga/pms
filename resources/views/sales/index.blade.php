@@ -54,7 +54,7 @@
                     <tr>
                         <th>#</th>
                         <th>Sales Name</th>
-                        <th>Price</th>
+                        <th>Unit Price</th>
                         <th>Quantity</th>
                         <th>Total Price</th>
                         <th>Date</th>
