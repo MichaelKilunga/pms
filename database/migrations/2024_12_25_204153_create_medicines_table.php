@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('class')->nullable();
             $table->text('dosage_form')->nullable();
             $table->text('description')->nullable();
-            $table->text('status')->default('approved');
+            $table->string('status')->default('approved');
             $table->text('strength')->nullable();
             $table->text('manufacturer')->nullable();
             $table->text('manufacturing_country')->nullable();
