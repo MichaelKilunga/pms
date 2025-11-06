@@ -46,7 +46,7 @@ class ContactController extends Controller
 
         try {
             // Prefer queue if available; fallback to send
-                Mail::to(env('SUPPORT_EMAIL'))->send(new ContactUsMail($data));
+                Mail::to(env('SUPPORT_EMAIL')?? "micksimon30@gmail.com")->send(new ContactUsMail($data));
 
             return response()->json(['status' => 'success', 'message' => 'Message sent. We will contact you shortly.']);
         } catch (\Throwable $e) {
