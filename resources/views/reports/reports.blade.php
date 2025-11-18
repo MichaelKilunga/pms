@@ -90,7 +90,7 @@
                     </div>
                 </div>
             </div>
-            <div id="reportSendDiv" class="hidden col-6 col-md-4 col-lg-2">
+            <div id="reportSendDiv" class="col-6 col-md-4 col-lg-2">
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Send Report</h6>
@@ -171,28 +171,28 @@
                         console.log('Filtering for Today');
                         $('#report_start_date').val(formatDate(today));
                         $('#report_end_date').val(formatDate(today));
-                        $('#reportSendDiv').removeClass('hidden');
+                        // $('#reportSendDiv').removeClass('hidden');
                         filterData(formatDate(today), formatDate(today), category, medicine);
                         break;
                     case 'this_week':
                         console.log('Filtering for This Week');
                         $('#report_start_date').val(formatDate(startOfWeek));
                         $('#report_end_date').val(formatDate(new Date()));
-                        $('#reportSendDiv').removeClass('hidden');
+                        // $('#reportSendDiv').removeClass('hidden');
                         filterData(formatDate(startOfWeek), formatDate(new Date()), category, medicine);
                         break;
                     case 'this_month':
                         console.log('Filtering for This Month');
                         $('#report_start_date').val(formatDate(startOfMonth));
                         $('#report_end_date').val(formatDate(new Date()));
-                        $('#reportSendDiv').removeClass('hidden');
+                        // $('#reportSendDiv').removeClass('hidden');
                         filterData(formatDate(startOfMonth), formatDate(new Date()), category, medicine);
                         break;
                     case 'last_month':
                         console.log('Filtering for Last Month');
                         $('#report_start_date').val(formatDate(startOfLastMonth));
                         $('#report_end_date').val(formatDate(endOfLastMonth));
-                        $('#reportSendDiv').removeClass('hidden');
+                        // $('#reportSendDiv').removeClass('hidden');
                         filterData(formatDate(startOfLastMonth), formatDate(endOfLastMonth), category,
                             medicine);
                         break;
@@ -200,16 +200,16 @@
                         console.log('Filtering for This Year');
                         $('#report_start_date').val(formatDate(startOfYear));
                         $('#report_end_date').val(formatDate(new Date()));
-                        $('#reportSendDiv').removeClass('hidden');
+                        // $('#reportSendDiv').removeClass('hidden');
                         filterData(formatDate(startOfYear), formatDate(new Date()), category, medicine);
                         break;
                     case 'custom_range':
                         console.log('Custom Range Selected');
                         $('#report_start_date').val('');
                         $('#report_end_date').val('');
-                        $('#reportSendDiv').addClass('hidden');
                         $('.dateDiv').removeClass('hidden');
                         $('#startDate, #endDate').removeClass('d-none');
+                        // $('#reportSendDiv').addClass('hidden');
                         break;
                 }
             });
@@ -218,6 +218,7 @@
                 const startDate = $('#startDate').val();
                 const endDate = $('#endDate').val();
                 if (startDate && endDate) {
+                    // $('#reportSendDiv').removeClass('hidden');
                     $('#report_start_date').val(startDate);
                     $('#report_end_date').val(endDate);
                     // console.log(`Filtering from ${startDate} to ${endDate}`);
@@ -901,6 +902,7 @@
                     },
                     complete: function() {
                         $('#loader-overlay').hide(); // Hide loader
+                        $('#reportSendDiv').removeClass('hidden');
                     },
                     error: function() {
                         $('#loader-overlay').hide(); // Hide loader

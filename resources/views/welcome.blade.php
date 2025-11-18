@@ -153,7 +153,8 @@
             @auth
                 <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg me-2 mt-3">Go to Dashboard</a>
             @else
-                <a onclick="return (confirm('Still under maintanance!') && false)" href="{{ route('register') }}" class="btn btn-primary btn-lg me-2 mt-3"><i class="bi bi-person-plus"></i> Become Agent</a>
+            {{-- onclick="return (confirm('Still under maintanance!') && false)" --}}
+                <a href="{{ route('register') }}" class="btn btn-primary btn-lg me-2 mt-3"><i class="bi bi-person-plus"></i> Become Agent</a>
                 <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg mt-3"><i class="bi bi-box-arrow-in-right"></i> Login</a>
             @endauth
             <button type="button" class="btn btn-primary btn-lg mt-3"  data-bs-toggle="modal" data-bs-target="#contactModal"><i class="bi bi-chat"></i> Request Trial</button>
