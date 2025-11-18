@@ -13,6 +13,8 @@
                     <th>#</th>
                     <th>Owner</th>
                     <th>Package</th>
+                    <th>Package Duration</th>
+                    <th>Package Amount</th>
                     <th>Status</th>
                     <th>Payment Status</th>
                     <th>Time remained</th>
@@ -25,15 +27,34 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $contract->owner->name }}</td>
                         <td>{{ $contract->package->name }}</td>
+                        {{-- different of enddate and startdate in days --}}
+                        <td>{{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) }}
+                            days  ({{((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)))/30)}} Month)</td>
+                        <td>{{ number_format(((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)))/30) * $contract->package->price) }}</td>
                         <td>{{ $contract->status }}</td>
                         <td>{{ $contract->payment_status }}</td>
                         {{-- show time remained in human readable format, use time difference between now and end date, if time has passed show negative passed time --}}
-                        @if (\Carbon\Carbon::parse($contract->end_date) < now())
-                            <td class="text-danger">Expired {{ \Carbon\Carbon::parse($contract->end_date)->diffForHumans() }}
-                            </td>
-                        @else
-                            <td>{{ \Carbon\Carbon::parse($contract->end_date)->diffForHumans() }}</td>
+                        @if ($contract->status == 'active')
+                            @if (\Carbon\Carbon::parse($contract->end_date) < now())
+                                <td class="text-danger">Expired
+                                    {{ \Carbon\Carbon::parse($contract->end_date)->diffForHumans() }}
+                                </td>
+                            @else
+                                <td>{{ \Carbon\Carbon::parse($contract->end_date)->diffForHumans() }}</td>
+                            @endif
+                        @elseif ($contract->status == 'inactive')
+                            <td>Not started</td>
+                        @elseif ($contract->status == 'graced')
+                            @if (\Carbon\Carbon::parse($contract->grace_end_date) < now())
+                                <td class="text-danger">Grace Period Expired
+                                    {{ \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() }}
+                                </td>
+                            @else
+                                <td>In Grace Period
+                                    {{ \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() }}</td>
+                            @endif
                         @endif
+
                         <td>
                             {{-- below create a a view button and a modal to view contract when view action button is clicked --}}
                             <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#viewModal{{ $contract->id }}"
@@ -55,7 +76,8 @@
                                             <p><strong>Payment Status:</strong> {{ $contract->payment_status }}</p>
                                             <p><strong>Start Date:</strong> {{ $contract->start_date }}</p>
                                             <p><strong>End Date:</strong> {{ $contract->end_date }}</p>
-                                            <p><strong>Grace Period:</strong> {{ \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() }}</p>
+                                            <p><strong>Grace Period:</strong>
+                                                {{ \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() }}</p>
                                             <p><strong>Created At:</strong> {{ $contract->created_at }}</p>
                                             <p><strong>Updated At:</strong> {{ $contract->updated_at }}</p>
                                         </div>
@@ -68,11 +90,11 @@
                             </div>
                             {{-- action button to confirm payement --}}
                             <a class="btn btn-success {{ $contract->payment_status == 'payed' ? 'disabled' : '' }} "
-                                onclick="return confirm('Do you want to confirm payement?')"
+                                onclick="return confirm('Do you want to confirm payment?')"
                                 href="{{ route('contracts.admin.confirm', $contract->id) }}"><i
                                     class="bi bi-cash-coin"></i></a>
                             {{-- action button to grace a grace period --}}
-                            <a class="btn btn-warning {{((\Carbon\Carbon::parse($contract->end_date) < now()) && !($contract->grace_end_date)) ? '': 'disabled'}} "
+                            <a class="btn btn-warning {{ \Carbon\Carbon::parse($contract->end_date) < now() && !$contract->grace_end_date ? '' : 'disabled' }} "
                                 href="javascript:void(0);"
                                 onclick="let daysToAdd = prompt('How many days do you want to add?'); 
                                      if (daysToAdd !== null && !isNaN(daysToAdd)) {

@@ -135,7 +135,8 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     // Optional: stock details modal
     Route::get('/stock/details/{id}', [StockController::class, 'getStockDetails'])->name('stock.details');
 
-
+    //stock check routes
+    Route::post('/stocks/check/save', [StockController::class, 'saveStockCheck'])->name('stocks.check.save');
 
     //stock stransfer
     Route::get('stockTransfers', [StockTransferController::class, 'index'])->name('stockTransfers');

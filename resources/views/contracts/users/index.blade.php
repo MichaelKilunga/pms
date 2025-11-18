@@ -1,247 +1,318 @@
 @extends('contracts.app')
 
 @section('content')
-    <div class="container mt-4">
-        {{-- Show owner his current subscription contract plan --}}
-        <div class="row d-flex justify-content-between">
-            <div class="card col-md-4">
-                {{-- Show current contract on the left  --}}
-                <div class="card-body">
-                    <h5 class="card-title  text-center fs-4 text-primary">Current Plan</h5>
-                    @if ($contracts->count() > 0)
-                        @foreach ($contracts as $contract)
-                            @if ($contract->is_current_contract)
-                                <h5 class="card-title" style="color: #007bff;">{{ $contract->package->name }}</h5>
-                                @if (!session('agent'))
-                                    <p class="card-text">Price: TZS {{ number_format($contract->package->price) }}</p>
-                                @endif
-                                <p class="card-text">Duration: {{ $contract->package->duration }} days</p>
-                                <p class="card-text">Start Date: {{ $contract->start_date }}</p>
-                                <p class="card-text">End Date: {{ $contract->end_date }}</p>
-                                {{-- Display animated countdown of remained time before plan expire --}}
-                                <p class="card-text">Time Remaining: <span class="text-danger" id="countdown"></span></p>
-                                <p class="card-text">Status: {{ $contract->status }} <small
-                                        class="text-warning">{{ $contract->status == 'graced' ? \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() : '' }}</small>
-                                </p>
-                                <p class="card-text">Payment: {{ $contract->payment_status }}</p>
-                                {{-- <a href="{{ route('contracts.users.upgrade') }}" class="btn btn-primary">Change Plan</a> --}}
-                            @endif
-                        @endforeach
-                    @else
-                        <p class="card-text">No active plan</p>
-                    @endif
-                    <hr>
-                </div>
-                {{-- implement a simple table(columns: name of package, and action to activate) to show active contracts and payed but are not the current one, an action button should --}}
-                {{-- be available to activate the contract --}}
-                <div class="card-body table-responsive">
-                    <h5 class="card-title text-center fs-4 text-primary">Active Plans</h5>
-                    <table class="table" id="Table#">
-                        <thead>
-                            <tr>
-                                <th scope="col">Plan</th>
-                                {{-- <th scope="col">Price</th>
-                                <th scope="col">Duration</th>
-                                <th scope="col">Start Date</th>
-                                <th scope="col">End Date</th>
-                                <th scope="col">Payment Status</th>
-                                <th scope="col">Status</th> --}}
-                                <th scope="col">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if ($contracts)
-                                @foreach ($contracts as $contract)
-                                    @if ($contract->is_current_contract == 0 && $contract->payment_status == 'payed' && $contract->status != 'inactive')
-                                        <tr>
-                                            <td>{{ $contract->package->name }}</td>
-                                            {{-- <td>TZS {{ number_format($contract->package->price) }}</td>
-                                            <td>{{ $contract->package->duration }} days</td>
-                                            <td>{{ $contract->start_date }}</td>
-                                            <td>{{ $contract->end_date }}</td>
-                                            <td>{{ $contract->payment_status }}</td>
-                                            <td>{{ $contract->status }}</td> --}}
-                                            <td>
-                                                <a href="{{ route('contracts.users.activate', ['contract_id' => $contract->id, 'owner_id' => Auth::user()->id]) }}"
-                                                    class="btn btn-primary">Activate</a>
-                                            </td>
-                                        </tr>
+
+    <div class="container my-4">
+
+        {{-- ========================= CURRENT PLAN ========================= --}}
+        <div class="row g-4">
+
+            {{-- CURRENT PLAN CARD --}}
+            <div class="col-md-4">
+                <div class="card shadow border-0 rounded-3">
+                    <div class="card-body">
+
+                        <h4 class="text-center text-primary mb-4 fw-bold">
+                            <i class="fas fa-bolt"></i> Current Plan
+                        </h4>
+
+                        @if ($contracts->count() > 0)
+                            @foreach ($contracts as $contract)
+                                @if ($contract->is_current_contract)
+                                    <div class="p-3 border rounded bg-light mb-3 shadow-sm">
+                                        <h5 class="fw-bold text-primary">
+                                            <i class="fas fa-layer-group"></i> {{ $contract->package->name }}
+                                        </h5>
+                                    </div>
+
+                                    @if (!session('agent'))
+                                        <p class="mb-1">
+                                            <strong>Amount Paid:</strong>
+                                            <span class="text-success fw-bold">
+                                                TZS
+                                                {{ number_format((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) * $contract->package->price) }}
+                                            </span>
+                                        </p>
                                     @endif
-                                @endforeach
-                            @else
-                                <tr>
-                                    <td colspan="6">No plans</td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            {{-- show previous contracts on the right in a table form --}}
-            <div class="card col-md-8">
-                <div class="card-body table-responsive">
-                    <h5 class="card-title text-center fs-4 text-primary">Previous Plans</h5>
-                    <table class="table" id="Table">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Plan</th>
-                                @if (!session('agent'))
-                                    <th scope="col">Price</th>
+
+                                    <p class="mb-1"><strong>Package Price:</strong> TZS
+                                        {{ number_format($contract->package->price) }} / {{ $contract->package->duration }}
+                                        days</p>
+
+                                    <p class="mb-1">
+                                        <strong>Duration:</strong>
+                                        {{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) }}
+                                        days
+                                        ({{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30 }}
+                                        month)
+                                    </p>
+
+                                    <p class="mb-1"><strong>Start Date:</strong> {{ $contract->start_date }}</p>
+                                    <p class="mb-1"><strong>End Date:</strong> {{ $contract->end_date }}</p>
+
+                                    <p class="mb-1">
+                                        <strong>Time Remaining:</strong>
+                                        <span class="text-danger fw-bold" id="countdown"></span>
+                                    </p>
+
+                                    <p class="mb-1">
+                                        <strong>Status:</strong>
+                                        <span class="badge bg-info">{{ $contract->status }}</span>
+
+                                        @if ($contract->status == 'graced')
+                                            <small class="text-warning">
+                                                ({{ \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() }})
+                                            </small>
+                                        @endif
+                                    </p>
+
+                                    <p>
+                                        <strong>Payment:</strong>
+                                        <span class="badge bg-success">{{ $contract->payment_status }}</span>
+                                    </p>
                                 @endif
-                                <th scope="col">Duration</th>
-                                <th scope="col">Start Date</th>
-                                <th scope="col">End Date</th>
-                                <th scope="col">Payment Status</th>
-                                <th scope="col">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if ($contracts)
-                                @foreach ($contracts as $contract)
-                                    @if (!$contract->is_current_contract && $contract->payment_status != 'pending')
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $contract->package->name }}</td>
-                                            @if (!session('agent'))
-                                                <td>TZS {{ number_format($contract->package->price) }}</td>
-                                            @endif
-                                            <td>{{ $contract->package->duration }} days</td>
-                                            <td>{{ $contract->start_date }}</td>
-                                            <td>{{ $contract->end_date }}</td>
-                                            <td>{{ $contract->payment_status }}</td>
-                                            <td>{{ $contract->status }}</td>
-                                        </tr>
-                                    @endif
-                                @endforeach
-                            @else
-                                <tr>
-                                    <td colspan="6">No plans</td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        {{-- list all packages in a table with an action to upgrade to this package --}}
-
-        @if (!session('agent'))
-            <div class="mt-4">
-                <h1 class="text-center fs-4 text-primary">Available Subscription Plans</h1>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Plan</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Duration</th>
-                            <th scope="col">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if ($packages)
-                            @foreach ($packages as $package)
-                                {{-- @if ($package->id != 1) --}}
-                                {{-- count active contracts, if is less than 1, show subscribe button otherwise upgrade button --}}
-                                @php
-                                    $activeContracts = Auth::user()->contracts->where('is_current_contract', 1);
-                                    $hasAnyContract = Auth::user()->contracts->count();
-                                @endphp
-                                <tr class="{{ $hasAnyContract > 0 && $package->id == 1 ? 'hidden' : '' }}">
-                                    <td>{{ $package->name }}</td>
-                                    <td>TZS {{ number_format($package->price) }}</td>
-                                    <td>{{ $package->duration }} days</td>
-                                    <td>
-                                        @if ($activeContracts->count() < 1)
-                                            <a href="{{ route('contracts.users.subscribe', ['package_id' => $package->id, 'owner_id' => Auth::user()->id]) }}"
-                                                class="btn btn-primary">Subscribe</a>
-                                        @endif
-                                        @if ($activeContracts->count() > 0)
-                                            @if ($activeContracts->first()->package->id == $package->id)
-                                                @if ($activeContracts->first()->end_date < now())
-                                                    <a href="{{ route('contracts.users.renew', ['package_id' => $package->id, 'owner_id' => Auth::user()->id]) }}"
-                                                        class="btn btn-danger">Re-new</a>
-                                                @else
-                                                    <p class="text-success i">current!</p>
-                                                @endif
-                                            @else
-                                                <a href="{{ route('contracts.users.upgrade', ['package_id' => $package->id, 'owner_id' => Auth::user()->id]) }}"
-                                                    class="btn btn-primary">Upgrade</a>
-                                            @endif
-                                        @endif
-
-                                        {{-- @if ($activeContracts->count() > 0 && $activeContracts->first()->package->id != $package->id)
-                                    <a href="{{ route('contracts.users.upgrade', ['package_id'=>$package->id, 'owner_id'=>Auth::user()->id]) }}"
-                                        class="btn btn-success">Renew</a>
-                                    @endif --}}
-                                    </td>
-                                </tr>
-                                {{-- @endif --}}
                             @endforeach
                         @else
-                            <tr>
-                                <td colspan="4">No available subscription plans</td>
-                            </tr>
+                            <p class="text-muted text-center">No Active Plan</p>
                         @endif
-                    </tbody>
-                </table>
+
+                        <hr class="my-4">
+
+                        {{-- ========================= ACTIVE BUT NOT CURRENT ========================= --}}
+                        <h5 class="text-center text-primary fw-bold mb-3">
+                            <i class="fas fa-sync-alt"></i> Active Plans (Not Current)
+                        </h5>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Plan</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($contracts as $contract)
+                                        @if ($contract->is_current_contract == 0 && $contract->payment_status == 'payed' && $contract->status != 'inactive')
+                                            <tr>
+                                                <td>{{ $contract->package->name }}</td>
+                                                <td>
+                                                    <a href="{{ route('contracts.users.activate', ['contract_id' => $contract->id, 'owner_id' => Auth::user()->id]) }}"
+                                                        class="btn btn-primary btn-sm rounded-pill shadow">
+                                                        <i class="fas fa-check-circle"></i> Activate
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            {{-- ========================= PAYMENT HISTORY ========================= --}}
+            <div class="col-md-8">
+                <div class="card shadow border-0 rounded-3">
+                    <div class="card-body">
+
+                        <h4 class="text-center text-primary mb-4 fw-bold">
+                            <i class="fas fa-history"></i> Payment History
+                        </h4>
+
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="Table">
+                                <thead class="table-light fw-bold">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Plan</th>
+                                        <th>Start</th>
+                                        <th>End</th>
+                                        <th>Duration</th>
+                                        <th>Price</th>
+                                        <th>Payment</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach ($contracts as $contract)
+                                        @if ($contract->payment_status != 'pending')
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $contract->package->name }}</td>
+                                                <td>{{ $contract->start_date }}</td>
+                                                <td>{{ $contract->end_date }}</td>
+
+                                                <td>
+                                                    {{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) }}
+                                                    days
+                                                    ({{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30 }}
+                                                    month)
+                                                </td>
+
+                                                <td class="fw-bold text-success">
+                                                    {{ number_format(
+                                                        (\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) *
+                                                            $contract->package->price,
+                                                    ) }}
+                                                </td>
+
+                                                <td>
+                                                    <span>{{ $contract->payment_status }}</span>
+                                                </td>
+
+                                                <td>
+                                                    <span>{{ $contract->status }}</span>
+                                                    @if ($contract->is_current_contract)
+                                                        <span class="badge bg-success">Current</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {{-- ========================= AVAILABLE PLANS ========================= --}}
+        @if (!session('agent'))
+            <div class="mt-5">
+                <h3 class="text-center text-primary fw-bold mb-4">
+                    <i class="fas fa-gift"></i> Available Subscription Plans
+                </h3>
+
+                <div class="card shadow border-0">
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="Table2">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Plan</th>
+                                        <th>Price</th>
+                                        <th>Duration</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach ($packages as $package)
+                                        @php
+                                            $activeContracts = Auth::user()->contracts->where('is_current_contract', 1);
+                                            $hasAnyContract = Auth::user()->contracts->count();
+                                        @endphp
+
+                                        <tr class="{{ $hasAnyContract > 0 && $package->id == 1 ? 'd-none' : '' }}">
+                                            <td class="fw-bold text-primary">{{ $package->name }}</td>
+                                            <td>TZS {{ number_format($package->price) }}</td>
+                                            <td>{{ $package->duration }} days</td>
+                                            <td>
+
+                                                @if ($activeContracts->count() < 1)
+                                                    <a href="{{ route('contracts.users.subscribe', ['package_id' => $package->id, 'owner_id' => Auth::user()->id]) }}"
+                                                        class="btn btn-primary btn-sm rounded-pill shadow">
+                                                        Subscribe
+                                                    </a>
+                                                @endif
+
+                                                @if ($activeContracts->count() > 0)
+                                                    @if ($activeContracts->first()->package->id == $package->id)
+                                                        @if ($activeContracts->first()->end_date < now())
+                                                            <a href="{{ route('contracts.users.renew', ['package_id' => $package->id, 'owner_id' => Auth::user()->id]) }}"
+                                                                class="btn btn-danger btn-sm rounded-pill shadow">
+                                                                Renew
+                                                            </a>
+                                                        @else
+                                                            <span class="badge bg-success">Current</span>
+                                                        @endif
+                                                    @else
+                                                        <a href="{{ route('contracts.users.upgrade', ['package_id' => $package->id, 'owner_id' => Auth::user()->id]) }}"
+                                                            class="btn btn-primary btn-sm rounded-pill shadow">
+                                                            Upgrade
+                                                        </a>
+                                                    @endif
+                                                @endif
+
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
         @endif
+
+        {{-- ========================= AGENT DETAILS ========================= --}}
         @if (session('agent'))
-        @php
-            $agent = session('agentData');
-        @endphp
-            {{-- Display Agent details from variable $agent --}}
-            <div class="mt-4">
-                <h1 class="text-center fs-4 text-primary">Your Agent Details</h1>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Agent Name</th>
-                            <th scope="col">Agent Email</th>
-                            <th scope="col">Agent Phone</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>{{ $agent->name }}</td>
-                            <td>{{ $agent->email }}</td>
-                            <td>{{ $agent->phone }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+            @php $agent = session('agentData'); @endphp
+
+            <div class="mt-5">
+                <h3 class="text-center text-primary fw-bold mb-4">
+                    <i class="fas fa-user-tie"></i> Your Agent Details
+                </h3>
+
+                <div class="card shadow border-0">
+                    <div class="card-body">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ $agent->name }}</td>
+                                    <td>{{ $agent->email }}</td>
+                                    <td>{{ $agent->phone }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         @endif
+
     </div>
+
+    {{-- COUNTDOWN SCRIPT --}}
     <script>
-        // Set the date we're counting down to
         var countDownDate = new Date("{{ $current_contract_end_date }}").getTime();
 
-        // Update the count down every 1 second
         var x = setInterval(function() {
-
-            // Get the current date and time
             var now = new Date().getTime();
-
-            // Find the distance between now and the count down date
             var distance = countDownDate - now;
 
-            // Time calculations for days, hours, minutes and seconds
             var days = Math.floor(distance / (1000 * 60 * 60 * 24));
             var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            // Display the result in the element with id="countdown"
-            document.getElementById("countdown").innerHTML = days + "d " + hours + "h " +
-                minutes + "m " + seconds + "s ";
+            document.getElementById("countdown").innerHTML =
+                days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
 
-            // If the count down is finished, write some text
             if (distance < 0) {
                 clearInterval(x);
                 document.getElementById("countdown").innerHTML = "EXPIRED";
             }
         }, 1000);
     </script>
+
 @endsection

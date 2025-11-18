@@ -14,6 +14,7 @@
                         <th>Stocked Remaining Quantity</th>
                         <th>Expired Quantity</th>
                         <th>Status</th>
+                        <th>Stock Check</th> <!-- ✅ NEW COLUMN -->
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -359,8 +360,46 @@
                         data: 'status',
                         name: 'status',
                         orderable: false,
-                        searchable: false
+                        searchable: true
                     },
+
+                    {
+                        data: null,
+                        name: 'stock_check',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="d-flex">
+                                    <div class="row">
+                                        <div class="col-6 mb-1">
+                                            Status:<strong class="">fine</strong>
+                                        </div>
+                                        <div class="col-6 mb-1">
+                                            Check date:<strong class="text-secondary">05-10-2025</strong>
+                                        </div>
+                                    </div>
+                                    <div  class="row">
+                                        <div  class="col-md-6">
+                                            <input type="number" class="form-control form-control-sm me-2 physical-qty" 
+                                                style="width:100px;" 
+                                                min="0" 
+                                                placeholder="Qty">
+                                        </div>
+                                        <div  class="col-md-6">
+                                            <button class="btn btn-success btn-sm save-stock-check" 
+                                                data-item-id="${row.item.id}" 
+                                                data-stock-id="${row.id}">
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            `;
+                        }
+                    },
+
                     {
                         data: 'action',
                         name: 'action',
@@ -374,6 +413,54 @@
                 ], // default sort by medicine name
             });
 
+        });
+
+        // Handle stock check save
+        $(document).on('click', '.save-stock-check', function() {
+            const button = $(this);
+            const row = button.closest('tr');
+            const itemId = button.data('item-id');
+            const quantity = row.find('.physical-qty').val();
+
+            if (quantity === '' || quantity < 0) {
+                alert('Please enter a valid quantity.');
+                return;
+            }
+
+            button.prop('disabled', true).text('Saving...');
+
+            $.ajax({
+                url: "{{ route('stocks.check.save') }}", // ✅ create this route
+                method: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    item_id: itemId,
+                    physical_quantity: quantity
+                },
+
+                success: function(response) {
+
+
+                    if (response.success) {
+
+                        // alert('Item ID: ' + itemId + ', Quantity: ' + quantity);
+
+                        alert('Stock check saved successfully!');
+                        $('#TableOne').DataTable().ajax.reload(null,
+                            false); // reload without changing page
+                    } else {
+                        alert('Failed to save stock check.');
+                    }
+                },
+                error: function() {
+                    //check if item id and quantity are being sent
+                    alert('Item ID: ' + itemId + ', Quantity: ' + quantity);
+                    alert('Error saving stock check.');
+                },
+                complete: function() {
+                    button.prop('disabled', false).text('Save');
+                }
+            });
         });
     </script>
 @endsection

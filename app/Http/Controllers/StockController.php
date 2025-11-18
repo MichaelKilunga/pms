@@ -60,11 +60,11 @@ class StockController extends Controller
                                 data-bs-target="#editStockModal' . $stock->id . '">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            '. ($stock->remain_Quantity != $stock->quantity
-                                ? '<button type="button" class="btn btn-danger btn-sm ms-1" disabled>
+                            ' . ($stock->remain_Quantity != $stock->quantity
+                        ? '<button type="button" class="btn btn-danger btn-sm ms-1" disabled>
                                     <i class="bi bi-trash"></i>
                                 </button>'
-                                : '<form action="' . route("stock.destroy", $stock->id) . '" method="POST" style="display:inline;">
+                        : '<form action="' . route("stock.destroy", $stock->id) . '" method="POST" style="display:inline;">
                                     ' . csrf_field() . '
                                     ' . method_field("DELETE") . '
                                     <button type="submit" onclick="return confirm(\'Do you want to delete this stock?\')" 
@@ -72,12 +72,12 @@ class StockController extends Controller
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>'
-                            ) . '
-                            '.($stock->selling_price < $stock->buying_price ?
-                    '<button class="btn btn-warning btn-sm ms-1" data-bs-toggle="modal"
+                    ) . '
+                            ' . ($stock->selling_price < $stock->buying_price ?
+                        '<button class="btn btn-warning btn-sm ms-1" data-bs-toggle="modal"
                                     data-bs-target="#editBuyingSellingPrice' . $stock->id . '">
                                     <i class="bi bi-recycle"></i>
-                                </button>':'').'
+                                </button>' : '') . '
                         </div>
     
                         <!-- View Stock Modal -->
@@ -169,7 +169,7 @@ class StockController extends Controller
                         </div>
     
                         <!-- Edit full Stock Modal -->
-                        <div class="modal fade modal-lg" id="editStockModal'.$stock->id.'" tabindex="-1"
+                        <div class="modal fade modal-lg" id="editStockModal' . $stock->id . '" tabindex="-1"
                             aria-labelledby="editStockModalLabel' . $stock->id . '" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -337,6 +337,7 @@ class StockController extends Controller
 
         return view('stock.index');
     }
+
 
     /**
      * Show the form for creating a new stock entry.
@@ -711,49 +712,48 @@ class StockController extends Controller
         }
     }
 
-    
+
     public function stockBalancesPage()
-{
-    return view('stock.balance');
-}
+    {
+        return view('stock.balance');
+    }
 
-public function viewStockBalances()
-{
-    $pharmacyId = session('current_pharmacy_id');
+    public function viewStockBalances()
+    {
+        $pharmacyId = session('current_pharmacy_id');
 
-    $stockBalances = Stock::select(
-        'stocks.item_id',
-        DB::raw('SUM(stocks.quantity) as quantity'),
-        DB::raw("SUM(CASE WHEN stocks.expire_date > NOW() THEN stocks.remain_quantity ELSE 0 END) as remain_quantity"),
-        DB::raw("SUM(CASE WHEN stocks.expire_date <= NOW() THEN stocks.remain_quantity ELSE 0 END) as expired_remain_quantity")
-    )
-    ->where('stocks.pharmacy_id', $pharmacyId)  // <-- prefix table
-    ->groupBy('stocks.item_id')
-    ->with('item');
+        $stockBalances = Stock::select(
+            'stocks.item_id',
+            DB::raw('SUM(stocks.quantity) as quantity'),
+            DB::raw("SUM(CASE WHEN stocks.expire_date > NOW() THEN stocks.remain_quantity ELSE 0 END) as remain_quantity"),
+            DB::raw("SUM(CASE WHEN stocks.expire_date <= NOW() THEN stocks.remain_quantity ELSE 0 END) as expired_remain_quantity")
+        )
+            ->where('stocks.pharmacy_id', $pharmacyId)  // <-- prefix table
+            ->groupBy('stocks.item_id')
+            ->with('item');
 
-    return DataTables::eloquent($stockBalances)
-        ->addIndexColumn()
-        ->addColumn('medicine_name', fn($row) => $row->item->name ?? 'Unknown')
-        ->addColumn('status', function($row){
-            if ($row->remain_quantity > 0) {
-                return '<span class="text-success fw-bold">Available</span>';
-            } elseif ($row->expired_remain_quantity > 0) {
-                return '<span class="text-danger fw-bold">Expired</span>';
-            } else {
-                return '<span class="text-warning fw-bold">Finished</span>';
-            }
-        })
-        ->addColumn('action', function($row){
-            return '<button type="button" class="btn btn-primary btn-sm view-stock-btn" 
+        return DataTables::eloquent($stockBalances)
+            ->addIndexColumn()
+            ->addColumn('medicine_name', fn($row) => $row->item->name ?? 'Unknown')
+            ->addColumn('status', function ($row) {
+                if ($row->remain_quantity > 0) {
+                    return '<span class="text-success fw-bold">Available</span>';
+                } elseif ($row->expired_remain_quantity > 0) {
+                    return '<span class="text-danger fw-bold">Expired</span>';
+                } else {
+                    return '<span class="text-warning fw-bold">Finished</span>';
+                }
+            })
+            ->addColumn('action', function ($row) {
+                return '<button type="button" class="btn btn-primary btn-sm view-stock-btn" 
                         data-bs-toggle="modal" 
                         data-bs-target="#stockModal" 
-                        data-item-id="'.$row->item_id.'">
+                        data-item-id="' . $row->item_id . '">
                         <i class="bi bi-eye"></i></button>';
-        })
-        ->rawColumns(['status','action'])
-        ->make(true);
-}
-
+            })
+            ->rawColumns(['status', 'action'])
+            ->make(true);
+    }
 
 
     public function getStockDetails(Request $request)
@@ -846,33 +846,62 @@ public function viewStockBalances()
 
     public function updateSBP(Request $request)
     {
-        try{
+        try {
             DB::beginTransaction();
-        $request->validate([
-            'id' => 'required|exists:stocks,id',
-            'buying_price' => 'required|numeric',
-            'selling_price' => 'required|numeric'
-        ]);
+            $request->validate([
+                'id' => 'required|exists:stocks,id',
+                'buying_price' => 'required|numeric',
+                'selling_price' => 'required|numeric'
+            ]);
 
-        $stock = Stock::find($request->id);
+            $stock = Stock::find($request->id);
 
-        $stock->buying_price = $request->buying_price;
-        $stock->selling_price = $request->selling_price;
-        $stock->save();
+            $stock->buying_price = $request->buying_price;
+            $stock->selling_price = $request->selling_price;
+            $stock->save();
 
-        // pull all sales under this stock and modify their selling price to the new selling price
-        $sales = Sales::where('stock_id', $stock->id)->get();
-        foreach ($sales as $sale) {
-            // unit price == total_price here
-            $sale->total_price = $request->selling_price;
-            $sale->save();
-        }
+            // pull all sales under this stock and modify their selling price to the new selling price
+            $sales = Sales::where('stock_id', $stock->id)->get();
+            foreach ($sales as $sale) {
+                // unit price == total_price here
+                $sale->total_price = $request->selling_price;
+                $sale->save();
+            }
 
-        DB::commit();
-        return redirect()->back()->with('success', 'Stock updated successfully');   
-        } catch (\Exception $e) {   
+            DB::commit();
+            return redirect()->back()->with('success', 'Stock updated successfully');
+        } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    public function saveStockCheck(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'item_id' => 'required|exists:items,id',
+            'physical_quantity' => 'required|numeric|min:0',
+        ]);
+
+        //    find records with item id if exists delete
+        DB::table('stock_checks')->where('item_id', $request->item_id)->delete();
+
+        // Example: record the check in a stock_checks table or update existing record
+        DB::table('stock_checks')->updateOrInsert(
+            ['item_id' => $request->item_id],
+            [
+                'physical_quantity' => $request->physical_quantity,
+                'checked_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'user_id' => Auth::id(),
+                'pharmacy_id' => session('current_pharmacy_id'),
+            ]
+        );
+
+        return response()->json(['success' => true]);
+        // return redirect()->back()->with('success', 'Stock check saved successfully.');
+
     }
 }

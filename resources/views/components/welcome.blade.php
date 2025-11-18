@@ -521,7 +521,7 @@
                             <div class="col-md-5 form-floating">
                                 <input type="number" min="1" class="form-control" id="floatingUnitPrice"
                                     name="unit_price" placeholder="200" required>
-                                <label class="form-label" for="floatingUnitPrice">Unit Price<span
+                                <label class="form-label" for="floatingUnitPrice">Unit Selling Price<span
                                         class="text-danger">*</span></label>
                             </div>
 

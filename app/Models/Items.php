@@ -49,4 +49,17 @@ class Items extends Model implements Auditable
     {
         return $this->hasOne(Stock::class, 'item_id')->latestOfMany('created_at');
     }
+
+        // 🔹 Stock check relationship (NEW)
+    public function stockChecks()
+    {
+        return $this->hasMany(Stock::class, 'item_id');
+    }
+
+    // 🔹 Latest stock check entry (NEW)
+    public function latestStockCheck()
+    {
+        return $this->hasOne(Stock::class, 'item_id')->latestOfMany('checked_at');
+    }
+
 }

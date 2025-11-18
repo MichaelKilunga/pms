@@ -63,4 +63,10 @@ class Stock extends Model implements Auditable
     {
         return $this->hasManyThrough(Installment::class, Debt::class);
     }
+
+    public function latestStockCheck()
+    {
+        return $this->hasOne(\App\Models\StockCheck::class, 'item_id', 'item_id')
+            ->latest('checked_at');
+    }
 }

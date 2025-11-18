@@ -32,6 +32,7 @@ class ContractController extends Controller
 
     public function storeSuperAdmin(Request $request)
     {
+        // dd($request->all());
         $validated = $request->validate([
             'owner_id' => 'required|exists:users,id',
             'package_id' => 'required|exists:packages,id',
@@ -110,7 +111,14 @@ class ContractController extends Controller
             $current_contract_end_date = null;
         }
 
-        return view('contracts.users.index', compact('contracts', 'packages', 'current_contract_end_date'));
+        // ⭐ ADD THIS — Check for active + paid but NOT current
+        $hasActivePaidNotCurrent = Contract::where('owner_id', Auth::id())
+            ->where('status', 'active')
+            ->where('payment_status', 'payed')
+            ->where('is_current_contract', 0)
+            ->exists();
+
+        return view('contracts.users.index', compact('contracts', 'packages', 'current_contract_end_date', 'hasActivePaidNotCurrent'));
     }
 
     public function showUser($id)
@@ -121,7 +129,10 @@ class ContractController extends Controller
 
     public function upgrade(Request $request)
     {
+
         $current_contract = Contract::where('owner_id', $request['owner_id'])->where('is_current_contract', 1)->get();
+
+
         //change all the current contract to not current
         foreach ($current_contract as $contract) {
             $contract->update(['is_current_contract' => 0]);
@@ -132,11 +143,12 @@ class ContractController extends Controller
         }
 
         // create a new contract
+        $days = $request['months'] * 30;
         $request['status'] = 'inactive';
         $request['payment_status'] = 'pending';
         $request['is_current_contract'] = 1;
         $request['start_date'] = now();
-        $request['end_date'] = now()->addDays(30);
+        $request['end_date'] = now()->addDays($days);
         $request['grace_end_date'] = null;
 
         try {
@@ -168,46 +180,53 @@ class ContractController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
-
-        $current_contract = Contract::where('owner_id', Auth::user()->id)->where('status', 'active')->orWhere('is_current_contract', 1)->first();
-
-        try {
-            if ($current_contract->package_id == $validated['package_id']) {
-                throw new \Exception('You are already subscribed to this package.');
-            }
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        //validated package id
+        if ($validated['package_id'] == 1) {
+            throw new \Exception('This is unauthorized action!');
         }
+        $packageid = $validated['package_id'];
+        $count = Contract::where('owner_id', Auth::user()->id)
+            ->where('status', 'active')
+            ->where('package_id', $packageid)
+            ->count();
+        // dd($count);
 
-        // change the current contract to inactive
-        $current_contract->update(['is_current_contract' => 0]);
+        //check if the user is trying to upgrade to the same package
+        if ($count > 0) {
+            throw new \Exception('You are already subscribed to this package.');
+        } else {
+            // Proceed with upgrade
 
-        try {
-            Contract::create($validated);
+            try {
+                Contract::create($validated);
+                $packages = Package::all();
 
-            $packages = Package::all();
+                $contracts = Contract::where('owner_id', Auth::user()->id)->with('package')->get();
 
-            $contracts = Contract::where('owner_id', Auth::user()->id)->with('package')->get();
+                $current_contract = Contract::where('is_current_contract', 1)->get('end_date')->first();
 
-            $current_contract = Contract::where('is_current_contract', 1)->get('end_date')->first();
+                $current_contract_end_date = date('Y-m-d', strtotime($current_contract->end_date));
 
-            $current_contract_end_date = date('Y-m-d', strtotime($current_contract->end_date));
-
-            //redirect to route 'myContracts" with success message
-            return redirect()->back()->with('success', 'Package upgraded successfully.');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+                //redirect to route 'myContracts" with success message
+                return redirect()->back()->with('success', 'Package upgraded successfully.');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+            }
         }
     }
 
     //function for new subscription
     public function subscribe(Request $request)
     {
+        // dd($request->all());
+        $month = $request['months'];
+        // conert month selected to days
+        $days = $month * 30;
         $request['status'] = 'inactive';
         $request['payment_status'] = 'pending';
         $request['is_current_contract'] = 1;
         $request['start_date'] = now();
-        $request['end_date'] = now()->addDays(30);
+        $request['end_date'] = now()->addDays($days);
         $request['grace_end_date'] = null;
 
 
@@ -248,17 +267,21 @@ class ContractController extends Controller
 
     public function renew(Request $request)
     {
-        // dd($request->all());
         //locate the current contract and change it not current
         $current_contract = Contract::where('owner_id', $request['owner_id'])->where('is_current_contract', 1)->first();
         $current_contract->update(['is_current_contract' => 0]);
 
+        // create a new contract
+        // conert month selected to days
+        $days = $request['months'] * 30;
         $request['status'] = 'inactive';
         $request['payment_status'] = 'pending';
         $request['is_current_contract'] = 1;
         $request['start_date'] = now();
-        $request['end_date'] = now()->addDays(30);
+        $request['end_date'] = now()->addDays($days);
         $request['grace_end_date'] = null;
+
+        // dd($request->all());
 
         try {
             $validated = $request->validate([
@@ -284,6 +307,17 @@ class ContractController extends Controller
     public function confirm($id)
     {
         $contract = Contract::findOrFail($id);
+        //calculate days between start_date and end_date
+        $days = Carbon::parse($contract->start_date)->diffInDays(Carbon::parse($contract->end_date));
+        // calculate new end_date from today plus days
+        $new_end_date = Carbon::now()->addDays($days);
+        //new start date is today
+        $new_start_date = Carbon::now();
+        // dd($new_start_date, $new_end_date,$days);
+
+        // update contract with the new start date and new end date where package start works after activation.
+        $contract->update(['start_date' => $new_start_date]);
+        $contract->update(['end_date' => $new_end_date]);
         $contract->update(['payment_status' => 'payed', 'status' => 'active']);
         return redirect()->back()->with('success', 'Payment confirmed successfully.');
     }
