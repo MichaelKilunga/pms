@@ -379,10 +379,19 @@
                     },
                 ],
                 pageLength: 10,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "All"]
+                ],
                 order: [
                     [1, 'asc']
                 ], // default sort by medicine name
-                dom: 'Bfrtip', //make sure it does not disable dynamic page length set section
+                dom: 'lBftip', //make sure it does not disable dynamic page length set section
+                buttons: [
+                    // 'print',
+                    'pdf',
+                    'excel'
+                ]
             });
         });
 
