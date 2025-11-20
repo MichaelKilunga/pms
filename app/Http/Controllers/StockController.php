@@ -781,26 +781,26 @@ class StockController extends Controller
             */
             ->addColumn('stock_check_status', function ($row) {
                 // if has last stock check and the stock remain quantity is not consistency with the physical quantity, report status here
-                return '<div class="d-flex">
-                                    <div class="row">
-                                        <div class="col-6 mb-1">
-                                            Status:<strong class="">'. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_Quantity ? "fine" : (($row->latestStockCheck->physical_quantity > $row->remain_Quantity) ? ($row->latestStockCheck->physical_quantity . '<br> Over '. $row->remain_Quantity) : ($row->latestStockCheck->physical_quantity . '<br> Under '. $row->remain_Quantity))) : "Not Checked").'</strong>
+                return '<div class="d-flex gap-2 justify-content-between">
+                                    <div class="d-flex justify-content-start">
+                                        <div class="col-4 mb-1 mx-1">
+                                            <small class="badge '. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_quantity ? 'bg-success' : 'bg-danger') : "bg-warning").' text-smaller">'. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_quantity ? 'Fine ' : (($row->latestStockCheck->physical_quantity > $row->remain_quantity) ? ($row->latestStockCheck->physical_quantity . ' Over ') : ($row->latestStockCheck->physical_quantity . ' Under '))) : "Unchecked").'</small>
                                         </div>                                    
-                                        <div class="col-6 mb-1'. ($row->latestStockCheck ? "": "d-none").'">
-                                            Check date:<strong class="text-secondary">'. ($row->latestStockCheck ? $row->latestStockCheck->checked_at->format('d M Y') : '-') .'</strong>
+                                        <div class="col-8 mb-1'. ($row->latestStockCheck ? "": "d-none").'">
+                                            <small class="badge text-secondary text-smallest">'. ($row->latestStockCheck ? Carbon::parse($row->latestStockCheck->checked_at)->format('d M Y H:i') : '') .'</small>
                                         </div>
                                     </div>
-                                    <div  class="row">
+                                    <div  class="d-flex justify-content-end">
                                         <div  class="col-md-6">
                                             <input type="number" class="form-control form-control-sm me-2 physical-qty" 
-                                                style="width:100px;" 
+                                                style="width:90%;" 
                                                 min="0" 
                                                 placeholder="Qty">
                                         </div>
                                         <div  class="col-md-6">
                                             <button class="btn btn-success btn-sm save-stock-check" 
-                                                data-item-id="${row.item.id}" 
-                                                data-stock-id="${row.id}">
+                                                data-item-id="'.$row->item_id.'" 
+                                                data-stock-id="'.$row->id.'">
                                                 Save
                                             </button>
                                         </div>

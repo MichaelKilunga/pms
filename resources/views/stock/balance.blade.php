@@ -333,6 +333,7 @@
 
             $.fn.dataTable.ext.errMode = 'throw'; // show errors in console
 
+            // allow exporting as pdf and excel
             $('#TableOne').DataTable({
                 processing: true,
                 serverSide: true,
@@ -381,8 +382,8 @@
                 order: [
                     [1, 'asc']
                 ], // default sort by medicine name
+                dom: 'Bfrtip', //make sure it does not disable dynamic page length set section
             });
-
         });
 
         // Handle stock check save
