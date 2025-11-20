@@ -784,12 +784,11 @@ class StockController extends Controller
                 return '<div class="d-flex">
                                     <div class="row">
                                         <div class="col-6 mb-1">
-                                            Status:<strong class="">'. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_Quantity ? "fine" : ($row->latestStockCheck->physical_quantity > $row->remain_Quantity ? $row->latestStockCheck->physical_quantity . '<br> Over '. $row->remain_Quantity : $row->latestStockCheck->physical_quantity . '<br> Under '. $row->remain_Quantity)) : "Not Checked").'</strong>
-                                        </div>
-                                    '.($row->latestStockCheck?'
-                                        <div class="col-6 mb-1">
+                                            Status:<strong class="">'. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_Quantity ? "fine" : (($row->latestStockCheck->physical_quantity > $row->remain_Quantity) ? ($row->latestStockCheck->physical_quantity . '<br> Over '. $row->remain_Quantity) : ($row->latestStockCheck->physical_quantity . '<br> Under '. $row->remain_Quantity))) : "Not Checked").'</strong>
+                                        </div>                                    
+                                        <div class="col-6 mb-1'. ($row->latestStockCheck ? "": "d-none").'">
                                             Check date:<strong class="text-secondary">'. ($row->latestStockCheck ? $row->latestStockCheck->checked_at->format('d M Y') : '-') .'</strong>
-                                        </div>':'').'
+                                        </div>
                                     </div>
                                     <div  class="row">
                                         <div  class="col-md-6">
