@@ -784,11 +784,12 @@ class StockController extends Controller
                 return '<div class="d-flex">
                                     <div class="row">
                                         <div class="col-6 mb-1">
-                                            Status:<strong class="">'. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_Quantity ? "fine" : ($row->latestStockCheck->physical_quantity > $row->remain_Quantity ? $row->latestStockCheck->physical_quantity . '<br> Over' : $row->latestStockCheck->physical_quantity . '<br> Under')) : "Not Checked").'</strong>
+                                            Status:<strong class="">'. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_Quantity ? "fine" : ($row->latestStockCheck->physical_quantity > $row->remain_Quantity ? $row->latestStockCheck->physical_quantity . '<br> Over '. $row->remain_Quantity : $row->latestStockCheck->physical_quantity . '<br> Under '. $row->remain_Quantity)) : "Not Checked").'</strong>
                                         </div>
+                                    '.($row->latestStockCheck?'
                                         <div class="col-6 mb-1">
-                                            Check date:<strong class="text-secondary">05-10-2025</strong>
-                                        </div>
+                                            Check date:<strong class="text-secondary">'. ($row->latestStockCheck ? $row->latestStockCheck->checked_at->format('d M Y') : '-') .'</strong>
+                                        </div>':'').'
                                     </div>
                                     <div  class="row">
                                         <div  class="col-md-6">
@@ -805,7 +806,6 @@ class StockController extends Controller
                                             </button>
                                         </div>
                                     </div>
-
                                 </div>';
             })
             ->addColumn('action', function ($row) {
