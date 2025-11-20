@@ -416,7 +416,7 @@
 
                         // alert('Item ID: ' + itemId + ', Quantity: ' + quantity);
 
-                        alert('Stock check saved successfully!');
+                        // alert('Stock check saved successfully!');
                         $('#TableOne').DataTable().ajax.reload(null,
                             false); // reload without changing page
                     } else {
@@ -425,7 +425,7 @@
                 },
                 error: function() {
                     //check if item id and quantity are being sent
-                    alert('Item ID: ' + itemId + ', Quantity: ' + quantity);
+                    // alert('Item ID: ' + itemId + ', Quantity: ' + quantity);
                     alert('Error saving stock check.');
                 },
                 complete: function() {
