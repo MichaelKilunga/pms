@@ -786,11 +786,11 @@ class StockController extends Controller
                                         <div class="col-4 mb-1 mx-1">
                                             <small class="badge '. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_quantity ? 'bg-success' : 'bg-danger') : "bg-warning").' text-smaller">'. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_quantity ? 'Fine ' : (($row->latestStockCheck->physical_quantity > $row->remain_quantity) ? ($row->latestStockCheck->physical_quantity . ' Over ') : ($row->latestStockCheck->physical_quantity . ' Under '))) : "Unchecked").'</small>
                                         </div>                                    
-                                        <div class="col-8 mb-1 mx-1 '. ($row->latestStockCheck ? "": "d-none").'">
-                                            <small class="badge text-secondary text-smallest">'. ($row->latestStockCheck ? Carbon::parse($row->latestStockCheck->checked_at)->format('d M Y H:i') : '') .'</small>
+                                        <div class="col-8 mb-1'. ($row->latestStockCheck ? "": "d-none").'">
+                                            <small class="badge text-secondary text-smallest">'. ($row->latestStockCheck ? Carbon::parse($row->latestStockCheck->checked_at)->format('d M Y H:i') : '') . '</small>
                                         </div>
                                     </div>
-                                    <div  class="d-flex justify-content-end">
+                                    <div  class="d-flex justify-content-end mx-1 ">
                                         <div  class="col-md-6">
                                             <input type="number" class="form-control form-control-sm me-2 physical-qty" 
                                                 style="width:90%;" 
