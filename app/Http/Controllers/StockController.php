@@ -785,7 +785,7 @@ class StockController extends Controller
                         '<div class="d-flex">
                                     <div class="row">
                                         <div class="col-6 mb-1">
-                                            Status:<strong class="">'. $row->latestStockCheck->physical_quantity .'<br>'. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_Quantity ? "fine" : ($row->latestStockCheck->physical_quantity > $row->remain_Quantity ? "Over" : "Under")) : "Not Checked").'</strong>
+                                            Status:<strong class="">'. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_Quantity ? "fine" : ($row->latestStockCheck->physical_quantity > $row->remain_Quantity ? $row->latestStockCheck->physical_quantity . '<br> Over' : $row->latestStockCheck->physical_quantity . '<br> Under')) : "Not Checked").'</strong>
                                         </div>
                                         <div class="col-6 mb-1">
                                             Check date:<strong class="text-secondary">05-10-2025</strong>
