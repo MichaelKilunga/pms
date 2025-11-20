@@ -746,6 +746,43 @@ class StockController extends Controller
                     return '<span class="text-warning fw-bold">Finished</span>';
                 }
             })
+            // customize stock-check status
+            /*
+                render: function(data, type, row) {
+                            return `
+                                <div class="d-flex">
+                                    <div class="row">
+                                        <div class="col-6 mb-1">
+                                            Status:<strong class="">${row.latestStockCheck?.updated_at}</strong>
+                                        </div>
+                                        <div class="col-6 mb-1">
+                                            Check date:<strong class="text-secondary">05-10-2025</strong>
+                                        </div>
+                                    </div>
+                                    <div  class="row">
+                                        <div  class="col-md-6">
+                                            <input type="number" class="form-control form-control-sm me-2 physical-qty" 
+                                                style="width:100px;" 
+                                                min="0" 
+                                                placeholder="Qty">
+                                        </div>
+                                        <div  class="col-md-6">
+                                            <button class="btn btn-success btn-sm save-stock-check" 
+                                                data-item-id="${row.item.id}" 
+                                                data-stock-id="${row.id}">
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            `;
+                        }
+            */
+            ->addColumn('stock_check_status', function ($row) {
+                // if has last stock check and the stock remain quantity is not consistency with the physical quantity, report status here
+                return $row->latestStockCheck ? ($row->latestStockCheck->physical_qty == $row->remain_Quantity ? 'fine' : ($row->latestStockCheck->physical_qty > $row->remain_Quantity ? 'Over' : 'Under')) : 'Not Checked';
+            })
             ->addColumn('action', function ($row) {
                 return '<button type="button" class="btn btn-primary btn-sm view-stock-btn" 
                         data-bs-toggle="modal" 
