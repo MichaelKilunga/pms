@@ -730,7 +730,9 @@ class StockController extends Controller
         )
             ->where('stocks.pharmacy_id', $pharmacyId)  // <-- prefix table
             ->groupBy('stocks.item_id')
-            ->with('item');
+            ->with('item','latestStockCheck');
+        
+            // dd($stockBalances->get());
 
         return DataTables::eloquent($stockBalances)
             ->addIndexColumn()
