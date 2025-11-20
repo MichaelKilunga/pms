@@ -781,8 +781,7 @@ class StockController extends Controller
             */
             ->addColumn('stock_check_status', function ($row) {
                 // if has last stock check and the stock remain quantity is not consistency with the physical quantity, report status here
-                return //$row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_Quantity ? 'fine' : ($row->latestStockCheck->physical_quantity > $row->remain_Quantity ? 'Over' : 'Under')) : 'Not Checked';
-                        '<div class="d-flex">
+                return '<div class="d-flex">
                                     <div class="row">
                                         <div class="col-6 mb-1">
                                             Status:<strong class="">'. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_Quantity ? "fine" : ($row->latestStockCheck->physical_quantity > $row->remain_Quantity ? $row->latestStockCheck->physical_quantity . '<br> Over' : $row->latestStockCheck->physical_quantity . '<br> Under')) : "Not Checked").'</strong>
@@ -816,7 +815,7 @@ class StockController extends Controller
                         data-item-id="' . $row->item_id . '">
                         <i class="bi bi-eye"></i></button>';
             })
-            ->rawColumns(['status', 'action'])
+            ->rawColumns(['status', 'action','stock_check_status']) // Allow HTML rendering
             ->make(true);
     }
 
