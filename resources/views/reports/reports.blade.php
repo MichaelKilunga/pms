@@ -296,16 +296,16 @@
                                     </thead>
                                     <tbody>
                                         ${response.sales.map((sale, index) => `
-                                                                                                                                                                                                                <tr>
-                                                                                                                                                                                                                    <td>${index + 1}</td>
-                                                                                                                                                                                                                    <td>${sale.date}</td>
-                                                                                                                                                                                                                    <td class ="text-left">${sale.item['name']}</td>
-                                                                                                                                                                                                                    <td>${sale.quantity}</td>
-                                                                                                                                                                                                                   <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity * sale.stock['selling_price'])}</td>
-                                                                                                                                                                                                                   <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity *((sale.stock['selling_price'])-(sale.stock['buying_price'])))}</td>
+                                                                                                                                                                                                                    <tr>
+                                                                                                                                                                                                                        <td>${index + 1}</td>
+                                                                                                                                                                                                                        <td>${sale.date}</td>
+                                                                                                                                                                                                                        <td class ="text-left">${sale.item['name']}</td>
+                                                                                                                                                                                                                        <td>${sale.quantity}</td>
+                                                                                                                                                                                                                       <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity * sale.stock['selling_price'])}</td>
+                                                                                                                                                                                                                       <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity *((sale.stock['selling_price'])-(sale.stock['buying_price'])))}</td>
 
-                                                                                                                                                                                                                </tr>
-                                                                                                                                                                                                            `).join('')}
+                                                                                                                                                                                                                    </tr>
+                                                                                                                                                                                                                `).join('')}
                                             ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
                                              
                                             </tbody>
@@ -334,21 +334,21 @@
                                     </thead>
                                     <tbody>
                                         ${response.stocks.map((stock, index) => `
-                                                                                                                                                                                                                    <tr>
-                                                                                                                                                                                                                        <td>${index + 1}</td>
-                                                                                                                                                                                                                        <td class="text-left">${stock.item['name']}</td>
-                                                                                                                                                                                                                        <td>${stock.quantity}</td>
-                                                                                                                                                                                                                        <td>${stock.remain_Quantity}</td>
-                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
-                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
-                                                                                                                                                                                                                        <td>${stock.low_stock_percentage}</td>
-                                                                                                                                                                                                                        <td>${stock.expire_date}</td>
-                                                                                                                                                                                                                        <td>${stock.batch_number}</td>
-                                                                                                                                                                                                                        <td>${stock.supplier}</td> 
-                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
-                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
-                                                                                                                                                                                                                        ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>Tsh 0</td>`}
-                                                                                                                                                                                                                    </tr>`).join('')}
+                                                                                                                                                                                                                        <tr>
+                                                                                                                                                                                                                            <td>${index + 1}</td>
+                                                                                                                                                                                                                            <td class="text-left">${stock.item['name']}</td>
+                                                                                                                                                                                                                            <td>${stock.quantity}</td>
+                                                                                                                                                                                                                            <td>${stock.remain_Quantity}</td>
+                                                                                                                                                                                                                            <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
+                                                                                                                                                                                                                            <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
+                                                                                                                                                                                                                            <td>${stock.low_stock_percentage}</td>
+                                                                                                                                                                                                                            <td>${stock.expire_date}</td>
+                                                                                                                                                                                                                            <td>${stock.batch_number}</td>
+                                                                                                                                                                                                                            <td>${stock.supplier}</td> 
+                                                                                                                                                                                                                            <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
+                                                                                                                                                                                                                            <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
+                                                                                                                                                                                                                            ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>Tsh 0</td>`}
+                                                                                                                                                                                                                        </tr>`).join('')}
                                             ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
                                          
                                     </tbody>
@@ -456,11 +456,15 @@
                                     searching: true, // Enable search bar
                                     ordering: true, // Enable column sorting
                                     info: true, // Enable information display
-                                    lengthMenu: [10, 25, 50,
-                                        100
+                                    // lengthMenu: [10, 25, 50,
+                                    //     100
+                                    // ], // Dropdown for records per page
+                                    lengthMenu: [
+                                        [10, 25, 50, 100, -1],
+                                        [10, 25, 50, 100, "All"]
                                     ], // Dropdown for records per page
                                     pageLength: 10, // Default number of records per page
-                                    dom: 'Bfrtip', // Add Buttons to the table
+                                    dom: 'lBfrtip', // Add Buttons to the table
                                     buttons: [{
                                             extend: 'csvHtml5',
                                             title: '',
@@ -509,7 +513,7 @@
                                             orientation: category ===
                                                 "sales" ? "portrait" : "landscape",
                                             //  orientation: 'landscape',
-                                              //set page size to A4
+                                            //set page size to A4
                                             pageSize: 'A4', // A4 page size
                                             footer: false, // hii inasaidia kwenye baadhi ya versions (footer ikiwa true onadisplay)
                                             customize: function(doc) {
@@ -544,7 +548,7 @@
                                                                     bold: true,
                                                                     alignment: 'left'
                                                                 },
-                                                                   {
+                                                                {
                                                                     text: "{{ strtoupper($pharmacy->name) }}",
                                                                     fontSize: 17,
                                                                     italics: true,
@@ -711,16 +715,25 @@
                                                 ];
 
                                                 // Add page numbers (footer)
-                                                doc.footer = function(currentPage, pageCount) {
+                                                doc.footer = function(
+                                                    currentPage, pageCount
+                                                    ) {
                                                     return {
-                                                        columns: [
-                                                            {
-                                                                text: 'Page ' + currentPage.toString() + ' of ' + pageCount,
-                                                                alignment: 'right',
-                                                                fontSize: 9,
-                                                                margin: [0, 0, 20, 0]
-                                                            }
-                                                        ]
+                                                        columns: [{
+                                                            text: 'Page ' +
+                                                                currentPage
+                                                                .toString() +
+                                                                ' of ' +
+                                                                pageCount,
+                                                            alignment: 'right',
+                                                            fontSize: 9,
+                                                            margin: [
+                                                                0,
+                                                                0,
+                                                                20,
+                                                                0
+                                                            ]
+                                                        }]
                                                     };
                                                 };
 
@@ -728,7 +741,8 @@
                                                     content) {
                                                     if (content.table) {
                                                         // define adaptive widths for stock table
-                                                        if (category === 'stocks') {
+                                                        if (category ===
+                                                            'stocks') {
                                                             content
                                                                 .table
                                                                 .widths = [
@@ -749,53 +763,72 @@
                                                         }
 
                                                         //define adaptive width with sales
-                                                    //  if (category === 'sales') 
-                                                    //     {
-                                                    //         content
-                                                    //             .table
-                                                    //             .widths = [
-                                                    //                 'auto', // #
-                                                    //                 'auto', // Date
-                                                    //                 '*', // Medicine
-                                                    //                 'auto', // Quantity
-                                                    //                 'auto', // Total Sales
-                                                    //                 'auto' // Total profit
-                                                    //             ];
-                                                    //     }
+                                                        //  if (category === 'sales') 
+                                                        //     {
+                                                        //         content
+                                                        //             .table
+                                                        //             .widths = [
+                                                        //                 'auto', // #
+                                                        //                 'auto', // Date
+                                                        //                 '*', // Medicine
+                                                        //                 'auto', // Quantity
+                                                        //                 'auto', // Total Sales
+                                                        //                 'auto' // Total profit
+                                                        //             ];
+                                                        //     }
 
 
-                                                    if (category === 'sales') {
-                                                content.table.widths = [
-                                                    'auto',   // #
-                                                    'auto',   // Date
-                                                    // 'auto',   // Medicine
-                                                    '*',      // Medicine
-                                                    'auto',   // Quantity
-                                                    'auto',   // Total Sales
-                                                    'auto'    // Total profit
-                                                ];
+                                                        if (category ===
+                                                            'sales') {
+                                                            content
+                                                                .table
+                                                                .widths = [
+                                                                    'auto', // #
+                                                                    'auto', // Date
+                                                                    // 'auto',   // Medicine
+                                                                    '*', // Medicine
+                                                                    'auto', // Quantity
+                                                                    'auto', // Total Sales
+                                                                    'auto' // Total profit
+                                                                ];
 
-                                                // Force left + top alignment & wrapping for Medicine column
-                                                content.table.body.forEach((row, rowIndex) => {
-                                                    if (rowIndex > 0) { // skip header row
-                                                        row[2] = { 
-                                                            text: row[2], 
-                                                            alignment: 'left', 
-                                                            noWrap: false, 
-                                                            margin: [0, 0, 0, 0],   // optional: remove padding
-                                                            style: 'medicineCell'
-                                                        };
-                                                    }
-                                                });
+                                                            // Force left + top alignment & wrapping for Medicine column
+                                                            content
+                                                                .table
+                                                                .body
+                                                                .forEach(
+                                                                    (row,
+                                                                        rowIndex
+                                                                        ) => {
+                                                                        if (rowIndex >
+                                                                            0
+                                                                            ) { // skip header row
+                                                                            row[2] = {
+                                                                                text: row[
+                                                                                    2
+                                                                                    ],
+                                                                                alignment: 'left',
+                                                                                noWrap: false,
+                                                                                margin: [
+                                                                                    0,
+                                                                                    0,
+                                                                                    0,
+                                                                                    0
+                                                                                ], // optional: remove padding
+                                                                                style: 'medicineCell'
+                                                                            };
+                                                                        }
+                                                                    });
 
-                                                // Add a style in your pdfmake doc definition
-                                                content.styles = {
-                                                    medicineCell: {
-                                                        alignment: 'left',
-                                                        valign: 'top'   // ensure text starts at top of cell
-                                                    }
-                                                };
-                                            }
+                                                            // Add a style in your pdfmake doc definition
+                                                            content
+                                                                .styles = {
+                                                                    medicineCell: {
+                                                                        alignment: 'left',
+                                                                        valign: 'top' // ensure text starts at top of cell
+                                                                    }
+                                                                };
+                                                        }
 
 
                                                         // format alignment
