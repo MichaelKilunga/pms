@@ -20,6 +20,7 @@
                     <select id="dateFilter" class="form-select" required>
                         <option selected value="">-- Select Duration --</option>
                         <option selected value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
                         <option value="this_week">This Week</option>
                         <option value="this_month">This Month</option>
                         <option value="last_month">Last Month</option>
@@ -135,6 +136,14 @@
             var selectedMedicineName = $('#medicine').find(':selected').text();
             var category = $('#category').val();
             var selectedCategoryName = $('#category').find(':selected').text();
+
+            // yesterday date calculation
+            function getYesterdayDate() { 
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(today.getDate() - 1);
+                return yesterday;
+            }
             const today = new Date();
             const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today
                 .getDay());
@@ -173,6 +182,14 @@
                         $('#report_end_date').val(formatDate(today));
                         // $('#reportSendDiv').removeClass('hidden');
                         filterData(formatDate(today), formatDate(today), category, medicine);
+                        break;
+                    case 'yesterday':
+                        const yesterday = getYesterdayDate();
+                        console.log('Filtering for Yesterday');
+                        $('#report_start_date').val(formatDate(yesterday));
+                        $('#report_end_date').val(formatDate(yesterday));
+                        // $('#reportSendDiv').removeClass('hidden');
+                        filterData(formatDate(yesterday), formatDate(yesterday), category, medicine);
                         break;
                     case 'this_week':
                         console.log('Filtering for This Week');
