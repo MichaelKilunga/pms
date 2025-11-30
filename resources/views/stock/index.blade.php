@@ -689,6 +689,8 @@
                                 $privateData.attr('hidden', true);
                                 $toggleIcon.removeClass('bi-eye-slash text-danger').addClass('bi-eye text-secondary');
                             }, 300000);
+                        }else{
+                            $passwordError.text(response.message || 'Verification failed. Please check your password.');
                         }
                     },
                     error: function(xhr) {
