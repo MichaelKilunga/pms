@@ -24,7 +24,13 @@ class StockController extends Controller
 
     public function index(Request $request)
     {
-        // $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
+        // compute the total value of available stock as sum of (buying_price * remain_Quantity)
+        $availableStock = Stock::where('pharmacy_id', session('current_pharmacy_id'))
+                            ->sum(DB::raw('buying_price * remain_Quantity'));
+        $expectedSales = Stock::where('pharmacy_id', session('current_pharmacy_id'))
+                            ->sum(DB::raw('selling_price * remain_Quantity'));
+        $expectedProfit = $expectedSales - $availableStock;
+
         if ($request->ajax()) {
             $stocks = Stock::with('item', 'staff') // Load relationships
                 ->where('pharmacy_id', session('current_pharmacy_id'))
@@ -335,7 +341,7 @@ class StockController extends Controller
                 ->make(true);
         }
 
-        return view('stock.index');
+        return view('stock.index', compact('availableStock', 'expectedSales', 'expectedProfit'));
     }
 
 

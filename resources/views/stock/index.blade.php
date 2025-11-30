@@ -8,7 +8,7 @@
             {{$x->id}}
         @endforeach --}}
         <div class="d-flex justify-content-between mb-3">
-            <h1 class="text-primary fw-bold fs-3">Stock</h1>
+            <h1 class="text-primary fw-bold fs-3">Stock <i id="togglePrivateData" class="bi {{ Auth::user()->role == 'owner'?'':'hidden' }} text-secondary bi-eye" style="cursor: pointer;"></i></h1>
             <div>
                 <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createStockModal">Add New
                     Stock</a>
@@ -18,7 +18,45 @@
                     data-bs-target="#importMedicineStockModal">Import CSV</a>
             </div>
         </div>
+        
+        {{-- Check if the user is an owner and define the data display container --}}
+        @if(Auth::user()->role == 'owner')
+            <div class="privateData" hidden>
+                {{-- Display available stock's value in currency --}}
+                <div class="d-flex gap-2 justify-content-between">
+                    <p class="text-secondary"><strong class="fw-bold">Total Stock Value: </strong> {{ number_format($availableStock) }} {{ session('currency')??'TZS' }}</p>
+                    <p class="text-secondary"><strong class="fw-bold">Expected Total Sales: </strong> {{ number_format($expectedSales) }} {{ session('currency')??'TZS' }}</p>
+                    <p class="text-secondary"><strong class="fw-bold">Expected Total Profit: </strong> {{ number_format($expectedProfit) }} {{ session('currency')??'TZS' }}</p>
+                </div>
+                <hr><br>
+            </div>
+        @endif
 
+        <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="passwordModalLabel">Confirm Identity</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please enter your password to view sensitive data.</p>
+                        <form id="reAuthForm">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="passwordInput" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="passwordInput" name="password" required>
+                                <div class="text-danger mt-1" id="passwordError"></div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="verifyPasswordBtn">Verify</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         {{-- there are deleted data here --}}
         <div class="table-responsive">
@@ -435,7 +473,6 @@
             });
         });
 
-
         $(document).ready(function() {
             const today = new Date();
             const year = today.getFullYear(); // Get the full year
@@ -600,6 +637,72 @@
 
             attachPriceValidation('#createStockModal');
             attachPriceValidation('#createMedicineStockModal');
+        });
+
+        $(document).ready(function() {
+            const $toggleIcon = $('#togglePrivateData');
+            const $privateData = $('.privateData');
+            const $passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
+            const $verifyBtn = $('#verifyPasswordBtn');
+            const $passwordInput = $('#passwordInput');
+            const $passwordError = $('#passwordError');
+
+            // 1. Initial Click Handler: Show Modal instead of toggling
+            $toggleIcon.on('click', function() {
+                // If data is currently visible, hide it instantly
+                if ($privateData.is(':visible')) {
+                    $privateData.attr('hidden', true);
+                    $toggleIcon.removeClass('bi-eye-slash text-danger').addClass('bi-eye text-secondary');
+                } else {
+                    // If data is hidden, prompt for password
+                    $passwordInput.val(''); // Clear previous input
+                    $passwordError.text(''); // Clear previous error
+                    $passwordModal.show();
+                }
+            });
+
+            // 2. Verification Button Handler
+            $verifyBtn.on('click', function(e) {
+                e.preventDefault();
+
+                // Simple client-side check
+                if ($passwordInput.val().length === 0) {
+                    $passwordError.text('Password is required.');
+                    return;
+                }
+
+                // Disable button during request
+                $verifyBtn.prop('disabled', true).text('Verifying...');
+
+                $.ajax({
+                    url: '{{ route("checkPassword") }}', // Use the Laravel route name
+                    type: 'POST',
+                    data: $('#reAuthForm').serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            // Password correct: Show data, hide modal, change icon
+                            $passwordModal.hide();
+                            $privateData.removeAttr('hidden');
+                            $toggleIcon.removeClass('bi-eye text-secondary').addClass('bi-eye-slash text-danger');
+                            // hide after 5 minutes
+                            setTimeout(function() {
+                                $privateData.attr('hidden', true);
+                                $toggleIcon.removeClass('bi-eye-slash text-danger').addClass('bi-eye text-secondary');
+                            }, 300000);
+                        }
+                    },
+                    error: function(xhr) {
+                        // Password incorrect
+                        const response = xhr.responseJSON;
+                        const message = response.message || 'Verification failed. Please check your password.';
+                        $passwordError.text(message);
+                    },
+                    complete: function() {
+                        // Re-enable button
+                        $verifyBtn.prop('disabled', false).text('Verify');
+                    }
+                });
+            });
         });
     </script>
 @endsection
