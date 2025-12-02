@@ -368,7 +368,7 @@ Route::post('/checkPassword', function (Request $request) {
         if (Hash::check($inputPassword, $user->password)) {
             return response()->json(['success' => true]);
         } else {
-            return response()->json(['success' => false, 'password' => $request->input('password')]);
+            return response()->json(['success' => false, 'password' => $request->input('password'),'message'=>'Password is incorrect']);
         }
     } catch (\Exception $e) {
         return response()->json(['success' => false, 'message' => $e->getMessage(), 'password' => $request->input('password')]);
