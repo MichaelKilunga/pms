@@ -40,12 +40,12 @@
                         {{-- <option value="">-- Select Category --</option> --}}
                         <option selected value="sales">Sales</option>
                         <option value="stocks">Stock</option>
-                        {{-- <option value="returns">Returns</option> --}}
-                        {{-- <option value="expired">Expired</option>
-                        <option value="profit">Profit</option> --}}
+                        <option value="expenses">Expenses</option>
+                        <option value="debts">Debts</option>
+                        <option value="installments">Installments</option>
                     </select>
                 </div>
-                <div class="col-12 col-md-6 col-lg-3">
+                <div class="col-12 col-md-6 col-lg-3" id="medicineDiv">
                     {{-- <input type="text" class="form-control" placeholder="Search by ID or Name"> --}}
                     <label for="medicine">Medicine</label>
                     <select class="form-select onReport" name="medicine" id="medicine" required>
@@ -57,9 +57,10 @@
                 </div>
             </div>
         </div>
+
         <!-- Summary Cards -->
         <div class="row mb-2 g-4 justify-content-center text-center">
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-2" id="totalStocksDiv">
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Stocks</h6>
@@ -67,7 +68,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-2" id="totalSalesDiv">
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Sales</h6>
@@ -75,7 +76,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-2" id="totalReturnsDiv">
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Returns</h6>
@@ -83,7 +84,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-2" id="totalProfitDiv">
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Profit</h6>
@@ -91,6 +92,62 @@
                     </div>
                 </div>
             </div>
+
+            {{-- total expenses and total debt --}}
+            <div class="col-6 col-md-4 col-lg-2 hidden" id="totalExpensesDiv">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Expenses</h6>
+                        <h3 id="totalExpenses" class="fw-bold text-success">fetching...</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 hidden" id="totalDebtDiv">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Debt</h6>
+                        <h3 id="totalDebt" class="fw-bold text-success">fetching...</h3>
+                    </div>
+                </div>
+            </div>
+
+            {{-- totalDeptsPaid, totalDeptsRemaining, totalDebts --}}
+            <div class="col-6 col-md-4 col-lg-2 hidden" id="totalDeptsPaidDiv">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Debt Paid</h6>
+                        <h3 id="totalDeptsPaid" class="fw-bold text-success">fetching...</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 hidden" id="totalDeptsRemainingDiv">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Totat Dept Remain</h6>
+                        <h3 id="totalDeptsRemaining" class="fw-bold text-primary">fetching...</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 hidden" id="totalDebtsDiv">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Debts</h6>
+                        <h3 id="totalDebts" class="fw-bold text-dark">fetching...</h3>
+                    </div>
+                </div>
+            </div>
+
+            {{-- //installments --}}
+            <div class="col-6 col-md-4 col-lg-2 hidden" id="totalInstallmentsDiv">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Installments</h6>
+                        <h3 id="totalInstallments" class="fw-bold text-primary">fetching...</h3>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Send Report Button --}}
             <div id="reportSendDiv" class="col-6 col-md-4 col-lg-2">
                 <div class="card h-100">
                     <div class="card-body">
@@ -116,7 +173,7 @@
         </div>
 
         <!-- Chart Section -->
-        <div class="row mb-4 g-4 justify-content-center text-center">
+        <div class="row mb-4 g-4 justify-content-center text-center" id="DivchartHead">
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
@@ -126,6 +183,7 @@
                 </div>
             </div>
         </div>
+
         {{-- <div><p>{{$medicine->pharmacies->name}}</p></div> --}}
     </div>
     <script>
@@ -138,7 +196,7 @@
             var selectedCategoryName = $('#category').find(':selected').text();
 
             // yesterday date calculation
-            function getYesterdayDate() { 
+            function getYesterdayDate() {
                 const today = new Date();
                 const yesterday = new Date(today);
                 yesterday.setDate(today.getDate() - 1);
@@ -161,7 +219,99 @@
                 category = $(this).val();
                 selectedCategoryName = $(this).find(':selected').text();
                 $('#dateFilter').trigger('change');
+
+                //if category is expenses selected hide the medicine filter
+                if (category === 'expenses' || category === 'debts' || category === 'installments') {
+                    $('#medicineDiv').addClass('hidden');
+                    $('#DivchartHead').addClass('hidden');
+                }
+
+                if (category === 'sales' || category === 'returns' || category === 'stocks') {
+                    $('#medicineDiv').removeClass('hidden');
+                    $('#totalExpensesDiv').addClass('hidden');
+                    $('#totalDebtDiv').addClass('hidden');
+                    //add class hidden for totalDeptsRemainingDiv,totalDeptsPaidDiv,totalDebtsDiv
+                    $('#totalDeptsPaidDiv').addClass('hidden');
+                    $('#totalDeptsRemainingDiv').addClass('hidden');
+                    $('#totalDebtsDiv').addClass('hidden');
+
+                    // remove  hidden to total total, totalSales,totalReturns,totalStocks
+                    $('#totalProfitDiv').removeClass('hidden');
+                    $('#totalSalesDiv').removeClass('hidden');
+                    $('#totalReturnsDiv').removeClass('hidden');
+                    $('#totalStocksDiv').removeClass('hidden');
+
+                    //hide installments
+                    $('#totalInstallmentsDiv').addClass('hidden');
+
+                    //remove hidden class to div graph
+                    // $('#DivchartHead').removeClass('hidden');
+                }
+                if (category === 'sales') {
+                    //remove hidden class to div graph
+                    $('#DivchartHead').removeClass('hidden');
+                }
+                if (category === 'stocks') {
+                    //remove hidden class to div graph
+                    $('#DivchartHead').addClass('hidden');
+                }
+
+                if (category === 'expenses') {
+                    //show totalExpensesDiv
+                    $('#totalExpensesDiv').removeClass('hidden');
+                    //hide totalDebtDiv
+                    $('#totalDebtDiv').addClass('hidden');
+                    //hide totalDeptsRemainingDiv,totalDeptsPaidDiv,totalDebtsDiv
+                    $('#totalDeptsPaidDiv').addClass('hidden');
+                    $('#totalDeptsRemainingDiv').addClass('hidden');
+                    $('#totalDebtsDiv').addClass('hidden');
+                    //hide totalReturn,totalStocks,totalSales,totalProfit
+                    $('#totalProfitDiv').addClass('hidden');
+                    $('#totalSalesDiv').addClass('hidden');
+                    $('#totalReturnsDiv').addClass('hidden');
+                    $('#totalStocksDiv').addClass('hidden');
+
+                    //hide installments
+                    $('#totalInstallmentsDiv').addClass('hidden');
+
+                }
+
+                if (category === 'debts') {
+                    //show totalDebtDiv
+                    $('#totalDebtDiv').removeClass('hidden');
+                    $('#totalDeptsPaidDiv').removeClass('hidden');
+                    $('#totalDeptsRemainingDiv').removeClass('hidden');
+                    //hide totalExpensesDiv
+                    $('#totalExpensesDiv').addClass('hidden');
+                    // hide totalSales,totalReturns,totalStocks,totalProfit
+                    $('#totalSalesDiv').addClass('hidden');
+                    $('#totalReturnsDiv').addClass('hidden');
+                    $('#totalStocksDiv').addClass('hidden');
+                    $('#totalProfitDiv').addClass('hidden');
+
+                    //hide installments
+                    $('#totalInstallmentsDiv').addClass('hidden');
+                }
+
+                if (category === 'installments') {
+                    $('#totalInstallmentsDiv').removeClass('hidden');
+                    // hide totalSales,totalReturns,totalStocks,totalProfit
+                    $('#totalSalesDiv').addClass('hidden');
+                    $('#totalReturnsDiv').addClass('hidden');
+                    $('#totalStocksDiv').addClass('hidden');
+                    $('#totalProfitDiv').addClass('hidden');
+
+                    //hide totalDeptsRemainingDiv,totalDeptsPaidDiv,totalDebtsDiv
+                    $('#totalDebtDiv').addClass('hidden');
+                    $('#totalDeptsPaidDiv').addClass('hidden');
+                    $('#totalDeptsRemainingDiv').addClass('hidden');
+                    $('#totalDebtsDiv').addClass('hidden');
+
+                    //hide totalExpensesDiv
+                    $('#totalExpensesDiv').addClass('hidden');
+                }
             });
+
 
             $('#medicine').on('change', function() {
                 medicine = $(this).val();
@@ -173,7 +323,9 @@
             $('#dateFilter').on('change', function() {
                 const value = $(this).val();
                 console.log(value);
+                // console.log(category);
                 $('#startDate, #endDate').addClass('d-none');
+
 
                 switch (value) {
                     case 'today':
@@ -181,7 +333,13 @@
                         $('#report_start_date').val(formatDate(today));
                         $('#report_end_date').val(formatDate(today));
                         // $('#reportSendDiv').removeClass('hidden');
-                        filterData(formatDate(today), formatDate(today), category, medicine);
+                        if (category === 'expenses' || category === 'debts' || category ===
+                            'installments') {
+                            filterData(formatDate(today), formatDate(today), category);
+                        } else {
+                            filterData(formatDate(today), formatDate(today), category, medicine);
+                        }
+
                         break;
                     case 'yesterday':
                         const yesterday = getYesterdayDate();
@@ -189,36 +347,62 @@
                         $('#report_start_date').val(formatDate(yesterday));
                         $('#report_end_date').val(formatDate(yesterday));
                         // $('#reportSendDiv').removeClass('hidden');
-                        filterData(formatDate(yesterday), formatDate(yesterday), category, medicine);
+                        if (category === 'expenses' || category === 'debts' || category ===
+                            'installments') {
+                            filterData(formatDate(yesterday), formatDate(yesterday), category);
+                        } else {
+                            filterData(formatDate(yesterday), formatDate(yesterday), category, medicine);
+                        }
                         break;
                     case 'this_week':
                         console.log('Filtering for This Week');
                         $('#report_start_date').val(formatDate(startOfWeek));
                         $('#report_end_date').val(formatDate(new Date()));
                         // $('#reportSendDiv').removeClass('hidden');
-                        filterData(formatDate(startOfWeek), formatDate(new Date()), category, medicine);
+                        if (category === 'expenses' || category === 'debts' || category ===
+                            'installments') {
+                            filterData(formatDate(startOfWeek), formatDate(new Date()), category);
+                        } else {
+                            filterData(formatDate(startOfWeek), formatDate(new Date()), category, medicine);
+                        }
                         break;
                     case 'this_month':
                         console.log('Filtering for This Month');
                         $('#report_start_date').val(formatDate(startOfMonth));
                         $('#report_end_date').val(formatDate(new Date()));
                         // $('#reportSendDiv').removeClass('hidden');
-                        filterData(formatDate(startOfMonth), formatDate(new Date()), category, medicine);
+                        if (category === 'expenses' || category === 'debts' || category ===
+                            'installments') {
+                            filterData(formatDate(startOfMonth), formatDate(new Date()), category);
+                        } else {
+                            filterData(formatDate(startOfMonth), formatDate(new Date()), category,
+                                medicine);
+                        }
                         break;
                     case 'last_month':
                         console.log('Filtering for Last Month');
                         $('#report_start_date').val(formatDate(startOfLastMonth));
                         $('#report_end_date').val(formatDate(endOfLastMonth));
                         // $('#reportSendDiv').removeClass('hidden');
-                        filterData(formatDate(startOfLastMonth), formatDate(endOfLastMonth), category,
-                            medicine);
+                        if (category === 'expenses' || category === 'debts' || category ===
+                            'installments') {
+                            filterData(formatDate(startOfLastMonth), formatDate(endOfLastMonth), category);
+                        } else {
+                            filterData(formatDate(startOfLastMonth), formatDate(endOfLastMonth), category,
+                                medicine);
+                        }
                         break;
                     case 'this_year':
                         console.log('Filtering for This Year');
                         $('#report_start_date').val(formatDate(startOfYear));
                         $('#report_end_date').val(formatDate(new Date()));
                         // $('#reportSendDiv').removeClass('hidden');
-                        filterData(formatDate(startOfYear), formatDate(new Date()), category, medicine);
+                        if (category === 'expenses' || category === 'debts' || category ===
+                            'installments') {
+                            filterData(formatDate(startOfYear), formatDate(new Date()), category);
+                        } else {
+                            filterData(formatDate(startOfYear), formatDate(new Date()), category, medicine);
+                        }
                         break;
                     case 'custom_range':
                         console.log('Custom Range Selected');
@@ -230,6 +414,7 @@
                         break;
                 }
             });
+
             // Listen for custom date range inputs
             $('#startDate, #endDate').on('change', function() {
                 const startDate = $('#startDate').val();
@@ -239,7 +424,11 @@
                     $('#report_start_date').val(startDate);
                     $('#report_end_date').val(endDate);
                     // console.log(`Filtering from ${startDate} to ${endDate}`);
-                    filterData(startDate, endDate, category, medicine);
+                    if (category === 'expenses' || category === 'debts' || category === 'installments') {
+                        filterData(startDate, endDate, category);
+                    } else {
+                        filterData(startDate, endDate, category, medicine);
+                    }
                 }
             });
             // Format date to YYYY-MM-DD
@@ -249,8 +438,12 @@
                 const day = String(date.getDate()).padStart(2, '0');
                 return `${year}-${month}-${day}`;
             }
+
+
+
             // Example filterData function
-            function filterData(start, end, category, medicine) {
+            function filterData(start, end, category, medicine = null) {
+                // alert('category: '+category);
                 $('#loader-overlay').show(); // show loader initially
                 var transactionChart = null;
                 // Add your AJAX request or data filtering logic here
@@ -261,10 +454,20 @@
                         start: start,
                         end: end,
                         category: category,
-                        medicine: medicine
+                        medicine: medicine // NULL for expenses/debts
                     },
                     dataType: 'json',
                     success: function(response) {
+
+                        console.log("Response received:", response);
+                        // --- FIX HERE ---
+                        response.sales = response.sales || [];
+                        response.stocks = response.stocks || [];
+                        response.expenses = response.expenses || [];
+                        response.debts = response.debts || [];
+                        response.installments = response.installments || [];
+                        // ----------------
+
                         //capture response type
                         if (response.success) {
                             $('#loader-overlay').hide(); // Hide loader
@@ -297,8 +500,45 @@
                                 maximumFractionDigits: 0
                             }).format(response.totalReturns));
 
+                            // Update total expenses and total debt
+                            $('#totalExpenses').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalExpenses));
+
+                            $('#totalDebt').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalDebts));
+
+                            $('#totalDeptsRemaining').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalDeptsRemaining));
+                            $('#totalDeptsPaid').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalDeptsPaid));
+
+                            //installments
+                            $('#totalInstallments').text(new Intl.NumberFormat('en-TZ', {
+                                style: 'currency',
+                                currency: 'TZS',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(response.totalInstallments));
+
                             //place the table into block with id="reportsTable", use returned data on bases of category filtered
                             //start with table when category if sales
+
                             var salesTable = `
                                 <table class="table table-striped table-bordered table-hover reportsTable">
                                     <thead>
@@ -313,16 +553,16 @@
                                     </thead>
                                     <tbody>
                                         ${response.sales.map((sale, index) => `
-                                                                                                                                                                                                                    <tr>
-                                                                                                                                                                                                                        <td>${index + 1}</td>
-                                                                                                                                                                                                                        <td>${sale.date}</td>
-                                                                                                                                                                                                                        <td class ="text-left">${sale.item['name']}</td>
-                                                                                                                                                                                                                        <td>${sale.quantity}</td>
-                                                                                                                                                                                                                       <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity * sale.stock['selling_price'])}</td>
-                                                                                                                                                                                                                       <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity *((sale.stock['selling_price'])-(sale.stock['buying_price'])))}</td>
+                                                                                                                                                                                                                                                                        <tr>
+                                                                                                                                                                                                                                                                            <td>${index + 1}</td>
+                                                                                                                                                                                                                                                                            <td>${sale.date}</td>
+                                                                                                                                                                                                                                                                            <td class ="text-left">${sale.item['name']}</td>
+                                                                                                                                                                                                                                                                            <td>${sale.quantity}</td>
+                                                                                                                                                                                                                                                                           <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity * sale.stock['selling_price'])}</td>
+                                                                                                                                                                                                                                                                           <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity *((sale.stock['selling_price'])-(sale.stock['buying_price'])))}</td>
 
-                                                                                                                                                                                                                    </tr>
-                                                                                                                                                                                                                `).join('')}
+                                                                                                                                                                                                                                                                        </tr>
+                                                                                                                                                                                                                                                                    `).join('')}
                                             ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
                                              
                                             </tbody>
@@ -351,26 +591,130 @@
                                     </thead>
                                     <tbody>
                                         ${response.stocks.map((stock, index) => `
-                                                                                                                                                                                                                        <tr>
-                                                                                                                                                                                                                            <td>${index + 1}</td>
-                                                                                                                                                                                                                            <td class="text-left">${stock.item['name']}</td>
-                                                                                                                                                                                                                            <td>${stock.quantity}</td>
-                                                                                                                                                                                                                            <td>${stock.remain_Quantity}</td>
-                                                                                                                                                                                                                            <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
-                                                                                                                                                                                                                            <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
-                                                                                                                                                                                                                            <td>${stock.low_stock_percentage}</td>
-                                                                                                                                                                                                                            <td>${stock.expire_date}</td>
-                                                                                                                                                                                                                            <td>${stock.batch_number}</td>
-                                                                                                                                                                                                                            <td>${stock.supplier}</td> 
-                                                                                                                                                                                                                            <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
-                                                                                                                                                                                                                            <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
-                                                                                                                                                                                                                            ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>Tsh 0</td>`}
-                                                                                                                                                                                                                        </tr>`).join('')}
+                                                                                                                                                                                                                                                                            <tr>
+                                                                                                                                                                                                                                                                                <td>${index + 1}</td>
+                                                                                                                                                                                                                                                                                <td class="text-left">${stock.item['name']}</td>
+                                                                                                                                                                                                                                                                                <td>${stock.quantity}</td>
+                                                                                                                                                                                                                                                                                <td>${stock.remain_Quantity}</td>
+                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
+                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
+                                                                                                                                                                                                                                                                                <td>${stock.low_stock_percentage}</td>
+                                                                                                                                                                                                                                                                                <td>${stock.expire_date}</td>
+                                                                                                                                                                                                                                                                                <td>${stock.batch_number}</td>
+                                                                                                                                                                                                                                                                                <td>${stock.supplier}</td> 
+                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
+                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
+                                                                                                                                                                                                                                                                                ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>Tsh 0</td>`}
+                                                                                                                                                                                                                                                                            </tr>`).join('')}
                                             ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
                                          
                                     </tbody>
                                 </table>
-                            `;
+                             `;
+
+                            //implement table when category is expenses
+                            var expensesTable = `
+                              <table class="table table-striped table-bordered table-hover reportsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Date</th>
+                                            <th>Category</th>
+                                            <th>Vendor</th>
+                                            <th>Payment Method</th>
+                                            <th>Status</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                            ${response.expenses.map((expense, index) => `
+                                                                                            <tr>
+                                                                                                <td>${index + 1}</td>
+                                                                                                <td>${formatReadableDate(expense.expense_date)}</td>
+                                                                                                <td class="text-left">${expense.category?.name ?? 'N/A'}</td>
+                                                                                                <td class="text-left">${expense.vendor?.name ?? 'N/A'}</td>
+                                                                                                <td>${expense.payment_method}</td>
+                                                                                                <td class="text-left">${expense.status}</td>
+                                                                                                <td class="text-left">${new Intl.NumberFormat('en-TZ', { 
+                                                                                                    style: 'currency', 
+                                                                                                    currency: 'TZS' 
+                                                                                                }).format(expense.amount)}</td>
+                                                                                            </tr>
+                                                                                        `).join('')}
+
+                                            ${response.expenses.length == 0 ? `<tr><td colspan="7" class="text-center">No data found</td></tr>` : ''}
+                                         
+                                    </tbody>
+                                </table>
+                             `;
+
+                            //implement table when category is debt
+                            var debtTable = `
+                             <table class="table table-striped table-bordered table-hover reportsTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Medicine & Batch</th>
+                                        <th>Created At</th>
+                                        <th>Updated At</th>
+                                                <th>Status</th>
+                                                 <th>Debt Amount</th>
+                                                 <th>Paid Dept</th>
+                                                <th>Remain Dept</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${response.debts.map((debt, index) => `
+                                                                                                                                                                                        <tr>
+                                                                                                                                                                                            <td>${index + 1}</td>
+                                                                                                                                                                                            <td class="text-left">
+                                                                                                                                                                                            <strong>${debt.stock?.item?.name || 'N/A'}</strong> | 
+                                                                                                                                                                                            <small>${debt.stock?.batch_number || 'N/A'} (${debt.stock?.supplier || 'N/A'})</small>
+                                                                                                                                                                                            </td>
+                                                                                                                                                                                            <td>${formatReadableDate(debt.created_at)}</td>
+                                                                                                                                                                                            <td>${formatReadableDate(debt.updated_at)}</td>
+                                                                                                                                                                                            <td>${debt.status}</td>
+                                                                                                                                                                                            <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.debtAmount)}</td>
+                                                                                                                                                                                            <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.totalPaid)}</td>
+                                                                                                                                                                                            <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.debtAmount - debt.totalPaid)}</td>
+                                                                                                                                                                                            </tr>
+                                                                                                                                                                                    `).join('')}
+                                                ${response.debts.length == 0 ? `<tr><td colspan="10" class="text-center">No data found</td></tr>` : ''}
+                                             
+                                        </tbody>
+                            </table>
+                             `;
+
+                            //implement table when category is installment
+                            var installmentTable = `
+                                <table class="table table-striped table-bordered table-hover reportsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Stock</th>
+                                            <th>Description</th>
+                                            <th>Created Date</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${response.installments.map((installment, index) => `
+                                                                                                                    <tr>
+                                                                                                                        <td>${index + 1}</td>
+                                                                                                                        <td class="text-left">
+                                                                                                                            <strong>${installment.debt?.stock?.item?.name || 'N/A'}</strong> | 
+                                                                                                                            <small>${installment.debt?.stock?.batch_number || 'N/A'} (${installment.debt?.stock?.supplier || 'N/A'})</small>
+                                                                                                                        </td>
+                                                                                                                        <td class="text-left">${installment.description}</td>
+                                                                                                                        <td>${formatReadableDate(installment.created_at)}</td>
+                                                                                                                        <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(installment.amount)}</td>
+                                                                                                                    </tr>
+                                                                                                            `).join('')}
+                                            ${response.installments.length == 0 ? `<tr><td colspan="5" class="text-center">No data found</td></tr>` : ''}
+                                         
+                                    </tbody>
+                                </table>
+                                    `;
 
 
                             //place the table into block with id="reportsTable", use returned data on bases of category filtered
@@ -391,9 +735,49 @@
                                     `);
                             } else if (category == 'stocks') {
                                 $('.reportTable').html(stocksTable);
+                            } else if (category == 'expenses') {
+                                $('.reportTable').html(expensesTable);
+                                var tableBody = $('.reportTable').find('tbody');
+                                //append the footer to the table
+                                tableBody.after(`
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="6" class="text-center fw-bolder fs-5">TOTAL </td>
+                                                <td colspan="1" class="text-left fw-bolder" id="">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(response.totalExpenses)}</td>
+                                            </tr>
+                                        </tfoot>
+                                    `);
+                            } else if (category == 'debts') {
+                                $('.reportTable').html(debtTable);
+                                var tableBody = $('.reportTable').find('tbody');
+                                //append the footer to the table
+                                tableBody.after(`
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="5" class="text-center fw-bolder fs-5">TOTAL </td>
+                                                <td colspan="1" class="text-left fw-bolder" id="">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(response.totalDebts)}</td>
+                                                <td colspan="1" class="text-left fw-bolder" id="">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(response.totalDeptsPaid)}</td>
+                                                <td colspan="1" class="text-left fw-bolder" id="">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(response.totalDeptsRemaining)}</td>
+                                            </tr>
+                                        </tfoot>
+                                    `);
+                            } else if (category == 'installments') {
+                                $('.reportTable').html(installmentTable);
+                                var tableBody = $('.reportTable').find('tbody');
+                                //append the footer to the table
+                                tableBody.after(`
+                                        <tfoot>
+                                            <tr>
+                                                <td></td>
+                                                <td colspan="3" class="text-center fw-bolder fs-5">TOTAL </td>
+                                                <td colspan="1" class="text-left fw-bolder" id="">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(response.totalInstallments)}</td>
+                                            </tr>
+                                        </tfoot>
+                                    `);
+                            } else {
+                                $('.reportTable').html(
+                                    '<i>No data available for the selected category.</i>');
                             }
-
-
 
                             // data = [2200, 2900, 4000, 6000, 3000];
                             // labels = ['June', 'July', 'Aug', 'Sept', 'Nov'];
@@ -403,6 +787,8 @@
                             labels = response.labels;
                             data = response.data;
                             drawGraph(labels, data);
+
+
                         } else {
                             $('#loader-overlay').hide(); // Hide loader
                             $('#totalStocks').text(new Intl.NumberFormat('en-TZ', {
@@ -534,9 +920,21 @@
                                             pageSize: 'A4', // A4 page size
                                             footer: false, // hii inasaidia kwenye baadhi ya versions (footer ikiwa true onadisplay)
                                             customize: function(doc) {
-                                                let reportType = category ===
-                                                    "sales" ? "Sales Report" :
-                                                    "Stocks Report";
+                                                // let reportType = category ===
+                                                //     "sales" ? "Sales Report" :
+                                                //     "Stocks Report";
+                                                let reportTitles = {
+                                                    sales: "Sales Report",
+                                                    stocks: "Stocks Report",
+                                                    expenses: "Expenses Report",
+                                                    debts: "Debts Report",
+                                                    installments: "Installments Report"
+                                                };
+
+                                                let reportType = reportTitles[
+                                                        category] ??
+                                                    "Unknown Report";
+
                                                 let printDate =
                                                     "From: pillpointone.com \n Date: " +
                                                     new Date().toLocaleString();
@@ -723,7 +1121,108 @@
                                                                     }
                                                                 ]);
                                                         }
+
+                                                        //expenses total row
+                                                        if (category ===
+                                                            'expenses'
+                                                            ) {
+                                                            // EXPENSES PRINTED FOOTER
+                                                            content
+                                                                .table
+                                                                .body
+                                                                .push([{
+                                                                        text: 'TOTAL',
+                                                                        bold: true,
+                                                                        alignment: 'center',
+                                                                        colSpan: 6
+                                                                    },
+                                                                    {},
+                                                                    {},
+                                                                    {},
+                                                                    {},
+                                                                    {},
+                                                                    {
+                                                                        text: $(
+                                                                                '#totalExpenses'
+                                                                            )
+                                                                            .text(),
+                                                                        bold: true,
+                                                                        alignment: 'left'
+                                                                    }
+                                                                ]);
+                                                        }
+                                                    
+                                                        //debts total row
+                                                        if (category === 'debts') {
+                                                            // DEPTS PRINTED FOOTER
+                                                            content
+                                                                .table
+                                                                .body
+                                                                .push([{
+                                                                        text: 'TOTAL',
+                                                                        bold: true,
+                                                                        alignment: 'center',
+                                                                        colSpan: 5
+                                                                    },
+                                                                    {},
+                                                                    {},
+                                                                    {},
+                                                                    {},
+                                                                    {
+                                                                        text: $(
+                                                                                '#totalDebt'
+                                                                            )
+                                                                            .text(),
+                                                                        bold: true,
+                                                                        alignment: 'left'
+                                                                    },
+                                                                    {
+                                                                        text: $(
+                                                                                '#totalDeptsPaid'
+                                                                            )
+                                                                            .text(),
+                                                                        bold: true,
+                                                                        alignment: 'left'
+                                                                    },
+                                                                    {
+                                                                        text: $(
+                                                                                '#totalDeptsRemaining'
+                                                                            )
+                                                                            .text(),
+                                                                        bold: true,
+                                                                        alignment: 'left'
+                                                                    }
+                                                                ]);
+                                                        }
+
+                                                        //installments total row
+                                                          if (category ===
+                                                            'installments') {
+                                                            // SALES FOOTER
+                                                            content
+                                                                .table
+                                                                .body
+                                                                .push([{
+                                                                        text: 'TOTAL',
+                                                                        bold: true,
+                                                                        alignment: 'center',
+                                                                        colSpan: 4
+                                                                    },
+                                                                    {},
+                                                                    {},
+                                                                    {},
+                                                                    {
+                                                                        text: $(
+                                                                                '#totalInstallments'
+                                                                            )
+                                                                            .text(),
+                                                                        bold: true,
+                                                                        alignment: 'left'
+                                                                    }
+                                                                ]);
+                                                        }
                                                     }
+
                                                 });
 
                                                 // page margins
@@ -734,7 +1233,7 @@
                                                 // Add page numbers (footer)
                                                 doc.footer = function(
                                                     currentPage, pageCount
-                                                    ) {
+                                                ) {
                                                     return {
                                                         columns: [{
                                                             text: 'Page ' +
@@ -779,22 +1278,6 @@
                                                                 ];
                                                         }
 
-                                                        //define adaptive width with sales
-                                                        //  if (category === 'sales') 
-                                                        //     {
-                                                        //         content
-                                                        //             .table
-                                                        //             .widths = [
-                                                        //                 'auto', // #
-                                                        //                 'auto', // Date
-                                                        //                 '*', // Medicine
-                                                        //                 'auto', // Quantity
-                                                        //                 'auto', // Total Sales
-                                                        //                 'auto' // Total profit
-                                                        //             ];
-                                                        //     }
-
-
                                                         if (category ===
                                                             'sales') {
                                                             content
@@ -816,14 +1299,14 @@
                                                                 .forEach(
                                                                     (row,
                                                                         rowIndex
-                                                                        ) => {
+                                                                    ) => {
                                                                         if (rowIndex >
                                                                             0
-                                                                            ) { // skip header row
+                                                                        ) { // skip header row
                                                                             row[2] = {
                                                                                 text: row[
                                                                                     2
-                                                                                    ],
+                                                                                ],
                                                                                 alignment: 'left',
                                                                                 noWrap: false,
                                                                                 margin: [
@@ -1007,6 +1490,16 @@
                     }
                 });
             }
+
+            //format date to dd-mm-yyyy
+            function formatReadableDate(dateString) {
+                const date = new Date(dateString);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0'); // months are 0-indexed
+                const year = date.getFullYear();
+                return `${day}-${month}-${year}`;
+            }
+
 
         });
     </script>

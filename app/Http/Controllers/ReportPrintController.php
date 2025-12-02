@@ -4,6 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Sales;
+use App\Models\Expense;
+use App\Models\Debt;
+use App\Models\Installment;
+use App\Models\ExpenseCategory;
+use App\Models\Vendor;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SalesReportExport;
 use App\Mail\DailyPharmacyReport;
@@ -15,6 +20,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use  Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
+
+use function Laravel\Prompts\alert;
 
 // use PDF;
 // use Barryvdh\DomPDF\PDF;
@@ -70,152 +77,250 @@ class ReportPrintController extends Controller
         $medicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->get();
         $pharmacyId = session('current_pharmacy_id');
         $pharmacy = Pharmacy::find($pharmacyId);
+        // $expenses = Expense::where('pharmacy_id', $pharmacyId)->get();
+        $expenses = Expense::where('pharmacy_id', session('current_pharmacy_id'))
+            ->with(['category', 'vendor', 'creator'])->get();
+        // $debt = Debt::where('pharmacy_id', $pharmacyId)->get();
+        //return stock with medicine that has not listed on stock debts
+        $stocks = Stock::with('item')
+            ->where('pharmacy_id', session('current_pharmacy_id'))
+            ->whereDoesntHave('debts')
+            ->get();
 
-        return view('reports.reports', compact('medicines', 'pharmacy'));
+        $debts = Debt::with('stock', 'installments')
+            ->where('pharmacy_id', session('current_pharmacy_id'))
+            ->get();
+
+             //get all installments with debt and stock
+        $installments = Installment::with('debt.stock')
+         ->where('pharmacy_id', session('current_pharmacy_id'))
+        ->get();
+
+
+        return view('reports.reports', compact('medicines', 'pharmacy', 'expenses', 'debts', 'stocks', 'installments'));
     }
 
     public function filterReports(Request $request)
     {
-        $request->validate([
-            'start' => 'required|date',
-            'end' => 'required|date',
-            'category' => 'required|in:sales,stocks,profits,expired',
-            'medicine' => 'required|integer',
-        ]);
 
-        $totalSales = 0;
-        $totalStocks = 0;
-        $totalReturns = 0;
-        $totalProfit = 0;
-        $totalExpired = 0;
-        $labels = [];
-        $data = [];
-        $salesRows = [];
-        $stocksRows = [];
-        $expiredRows = [];
-        $profitsRows = [];
-        $rows = 0;
+        //if request category is stock or category
+        // if ($request->category == 'stocks' || $request->category == 'sales') {
+        if (in_array($request->category, ['stocks', 'sales', 'profits', 'expired'])) {
+
+            //validate inputs for stock and sales
+            $request->validate([
+                'start' => 'required|date',
+                'end' => 'required|date',
+                'category' => 'required|in:sales,stocks,profits,expired',
+                'medicine' => 'required|integer',
+            ]);
 
 
-        // Validate and parse dates
-        $startDate = Carbon::parse($request->start);
-        $endDate = Carbon::parse($request->end)->endOfDay();
-        $category = $request->category;
-        $medicine = $request->medicine;
-        $pharmacyId = session('current_pharmacy_id');
-
-        try {
-            // Fetch all sales and calculate profits
-            $sales = Sales::with('stock', 'item')
-                ->where('pharmacy_id', $pharmacyId)
-                ->whereBetween('created_at', [$startDate, $endDate]);
-
-            // Fetch all expired stocks and calculate losses
-            $stocks = Stock::with('item')
-                ->where('pharmacy_id', $pharmacyId)
-                ->whereBetween('created_at', [$startDate, $endDate]);
-
-
-            if ($medicine != 0) {
-                $sales->where('item_id', $medicine);
-                $stocks->where('item_id', $medicine);
-            }
-
-
-            //total costs encurred to buy all stocks as the sum of the product of buying price and quantity
-            $totalStocks = $stocks->sum(DB::raw('buying_price * quantity'));
-
-
-            // Fetch all sales and stocks        
-            $salesRows = $sales->get();
-            $stocksRows = $stocks->get();
-
-            //create a variable to count number of rows in the profitsRows and in the stocksRows
-            if ($category == 'sales') {
-                $rows = $sales->count();
-            } else if ($category == 'stocks') {
-                $rows = $stocks->count();
-            }
-
-
-            // Calculate expired stocks
-            $expiredRows = $stocks->where('expire_date', '<', now())->get()->map(function ($stock) {
-                $loss = $stock->buying_price * $stock->remain_Quantity;
-                return [
-                    'item_name' => $stock->item->name,
-                    'batch_number' => $stock->batch_number,
-                    'amount' => $stock->remain_Quantity,
-                    'loss_incurred' => $loss
-                ];
-            });
-
-            // Calculate profits
-            $profitsRows = $sales->get()->map(function ($sale) {
-                $profit = ($sale->stock->selling_price - $sale->stock->buying_price) * $sale->quantity;
-                return [
-                    'item_name' => $sale->item->name,
-                    'batch_number' => $sale->stock->batch_number,
-                    'amount' => $profit
-                ];
-            });
-
-            // Calculate totals
-            // $totalSales = $sales->sum('total_price');
-            // sum of(quantity*sellingprice) of all sales total
-            $totalSales = $sales->sum(DB::raw('quantity * total_price'));
+            $totalSales = 0;
+            $totalStocks = 0;
             $totalReturns = 0;
-            $totalProfit = $profitsRows->sum('amount');
-            $totalExpired = $expiredRows->count();
+            $totalProfit = 0;
+            $totalExpired = 0;
+            $labels = [];
+            $data = [];
+            $salesRows = [];
+            $stocksRows = [];
+            $expiredRows = [];
+            $profitsRows = [];
+            $rows = 0;
 
-            // Generate labels and data for the chart, where the graph should not change, rather let it always draw medicines names  (as labels) Vs percentage profit the medicine contributes to the total profit (as data).
-            $labels = $profitsRows->map(function ($profit) {
-                return $profit['item_name'];
-            });
 
-            $data = $profitsRows->map(function ($profit) use ($totalProfit) {
-                return ($profit['amount'] / $totalProfit) * 100;
-            });
+            // Validate and parse dates
+            $startDate = Carbon::parse($request->start);
+            $endDate = Carbon::parse($request->end)->endOfDay();
+            $category = $request->category;
+            $medicine = $request->medicine;
+            $pharmacyId = session('current_pharmacy_id');
 
-            return response()->json([
-                'success' => true,
-                'totalSales' => $totalSales ?? 0,
-                'totalStocks' => $totalStocks ?? 0,
-                'totalReturns' => $totalReturns ?? 0,
-                'totalProfit' => $totalProfit ?? 0,
-                'totalExpired' => $totalExpired ?? 0,
-                'labels' => $labels,
-                'data' => $data,
-                'sales' => $salesRows,
-                'stocks' => $stocksRows,
-                'expired' => $expiredRows,
-                'profits' => $profitsRows,
-                'rows' => $rows
+            try {
+                // Fetch all sales and calculate profits
+                $sales = Sales::with('stock', 'item')
+                    ->where('pharmacy_id', $pharmacyId)
+                    ->whereBetween('created_at', [$startDate, $endDate]);
+
+                // Fetch all expired stocks and calculate losses
+                $stocks = Stock::with('item')
+                    ->where('pharmacy_id', $pharmacyId)
+                    ->whereBetween('created_at', [$startDate, $endDate]);
+
+
+                if ($medicine != 0) {
+                    $sales->where('item_id', $medicine);
+                    $stocks->where('item_id', $medicine);
+                }
+
+
+                //total costs encurred to buy all stocks as the sum of the product of buying price and quantity
+                $totalStocks = $stocks->sum(DB::raw('buying_price * quantity'));
+
+
+                // Fetch all sales and stocks        
+                $salesRows = $sales->get();
+                $stocksRows = $stocks->get();
+
+                //create a variable to count number of rows in the profitsRows and in the stocksRows
+                if ($category == 'sales') {
+                    $rows = $sales->count();
+                } else if ($category == 'stocks') {
+                    $rows = $stocks->count();
+                }
+
+
+                // Calculate expired stocks
+                $expiredRows = $stocks->where('expire_date', '<', now())->get()->map(function ($stock) {
+                    $loss = $stock->buying_price * $stock->remain_Quantity;
+                    return [
+                        'item_name' => $stock->item->name,
+                        'batch_number' => $stock->batch_number,
+                        'amount' => $stock->remain_Quantity,
+                        'loss_incurred' => $loss
+                    ];
+                });
+
+                // Calculate profits
+                $profitsRows = $sales->get()->map(function ($sale) {
+                    $profit = ($sale->stock->selling_price - $sale->stock->buying_price) * $sale->quantity;
+                    return [
+                        'item_name' => $sale->item->name,
+                        'batch_number' => $sale->stock->batch_number,
+                        'amount' => $profit
+                    ];
+                });
+
+                // Calculate totals
+                // $totalSales = $sales->sum('total_price');
+                // sum of(quantity*sellingprice) of all sales total
+                $totalSales = $sales->sum(DB::raw('quantity * total_price'));
+                $totalReturns = 0;
+                $totalProfit = $profitsRows->sum('amount');
+                $totalExpired = $expiredRows->count();
+
+                // Generate labels and data for the chart, where the graph should not change, rather let it always draw medicines names  (as labels) Vs percentage profit the medicine contributes to the total profit (as data).
+                $labels = $profitsRows->map(function ($profit) {
+                    return $profit['item_name'];
+                });
+
+                $data = $profitsRows->map(function ($profit) use ($totalProfit) {
+                    return ($profit['amount'] / $totalProfit) * 100;
+                });
+
+                return response()->json([
+                    'success' => true,
+                    'totalSales' => $totalSales ?? 0,
+                    'totalStocks' => $totalStocks ?? 0,
+                    'totalReturns' => $totalReturns ?? 0,
+                    'totalProfit' => $totalProfit ?? 0,
+                    'totalExpired' => $totalExpired ?? 0,
+                    'labels' => $labels,
+                    'data' => $data,
+                    'sales' => $salesRows,
+                    'stocks' => $stocksRows,
+                    'expired' => $expiredRows,
+                    'profits' => $profitsRows,
+                    'rows' => $rows
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                    'totalSales' => $totalSales ?? 0,
+                    'totalStocks' => $totalStocks ?? 0,
+                    'totalReturns' => $totalReturns ?? 0,
+                    'totalProfit' => $totalProfit ?? 0,
+                    'totalExpired' => $totalExpired ?? 0,
+                    'labels' => $labels,
+                    'data' => $data,
+                    'sales' => $salesRows,
+                    'stocks' => $stocksRows,
+                    'expired' => $expiredRows,
+                    'profits' => $profitsRows,
+                    'rows' => $rows
+                ]);
+            }
+        } else {
+            // else if ($request->category == 'expenses' || $request->category == 'debts') {
+            //validates inputs for expenses and debt
+            $request->validate([
+                'start' => 'required|date',
+                'end' => 'required|date',
+                'category' => 'required|in:expenses,debts,installments',
             ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'totalSales' => $totalSales ?? 0,
-                'totalStocks' => $totalStocks ?? 0,
-                'totalReturns' => $totalReturns ?? 0,
-                'totalProfit' => $totalProfit ?? 0,
-                'totalExpired' => $totalExpired ?? 0,
-                'labels' => $labels,
-                'data' => $data,
-                'sales' => $salesRows,
-                'stocks' => $stocksRows,
-                'expired' => $expiredRows,
-                'profits' => $profitsRows,
-                'rows' => $rows
-            ]);
+
+            // Validate and parse dates
+            $startDate = Carbon::parse($request->start);
+            $endDate = Carbon::parse($request->end)->endOfDay();
+            $category = $request->category;
+            $pharmacyId = session('current_pharmacy_id');
+
+            if ($category == 'expenses') {
+                $expenses = Expense::with(['category', 'vendor', 'creator'])
+                    ->where('pharmacy_id', $pharmacyId)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->get();
+
+                $totalExpenses = $expenses->sum('amount');
+
+                return response()->json([
+                    'success' => true,
+                    'totalExpenses' => $totalExpenses ?? 0,
+                    'expenses' => $expenses,
+                    'rows' => $expenses->count()
+                ]);
+            } else if ($category == 'debts') {
+
+                $debts = Debt::with(['stock.item', 'installments'])
+                    ->where('pharmacy_id', $pharmacyId)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->get();
+
+                // Map debts to include totalPaid
+                $debts = $debts->map(function ($debt) {
+                    $debt->totalPaid = $debt->installments->sum('amount'); // same as Blade
+                    $debt->remaining = $debt->debtAmount - $debt->totalPaid; // remaining debt
+                    return $debt;
+                });
+
+                // Calculate totals
+                $totalDebts = $debts->sum('debtAmount');
+                $totalPaid = $debts->sum('totalPaid');
+                $totalRemaining = $debts->sum('remaining');
+
+                return response()->json([
+                    'success' => true,
+                    'totalDebts' => $totalDebts ?? 0,
+                    'totalDeptsPaid' => $totalPaid ?? 0,
+                    'totalDeptsRemaining' => $totalRemaining ?? 0,
+                    'debts' => $debts,
+                    'rows' => $debts->count()
+                ]);
+            }else if($category == 'installments'){
+                $installments = Installment::with(['debt.stock.item'])
+                    ->where('pharmacy_id', $pharmacyId)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->get();
+                    // dd($installments);
+
+                $totalInstallments = $installments->sum('amount');
+                return response()->json([
+                    'success' => true,
+                    'totalInstallments' => $totalInstallments,
+                    'installments' => $installments,
+                    'rows' => $installments->count()
+                ]);
+            }
         }
     }
 
     public function sendReport(Request $request)
     {
         try {
-            $pharmacy_id = session('current_pharmacy_id');
-            $pharmacy = Pharmacy::find($pharmacy_id);
+            $pharmacyId = session('current_pharmacy_id');
+            $pharmacy = Pharmacy::find($pharmacyId);
             // validate start and end date
             $request->validate([
                 'start_date' => 'required|date',
@@ -240,6 +345,8 @@ class ReportPrintController extends Controller
             // ----------------------
             // Sales summary (aggregated in SQL)
             // ----------------------
+
+            $pharmacy_id = session('current_pharmacy_id'); //NIMEONGEZA HIKI KWA MUDA PLEASE
             $salesData = Sales::where('pharmacy_id', $pharmacy_id)
                 ->whereDate('date', '>=', $request->start_date)
                 ->whereDate('date', '<=', $request->end_date)
