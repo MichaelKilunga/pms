@@ -272,6 +272,21 @@ class DashboardController extends Controller
             }
         } else {
             $staff = Staff::where('user_id', Auth::user()->id)->first();
+            
+            if (!isset($pharmacy)) {
+                if ($staff) {
+                     $pharmacy = Pharmacy::find($staff->pharmacy_id);
+                     if ($pharmacy) {
+                         session(['current_pharmacy_id' => $pharmacy->id]);
+                     }
+                }
+            }
+
+            if (!isset($pharmacy) || !$pharmacy) {
+                Auth::logout();
+                return redirect()->route('login')->with('error', 'Account configuration error: No associated pharmacy found. Please contact support.');
+            }
+
             $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id',  Auth::user()->id)->whereDate('created_at', Carbon::today())->sum(DB::raw('total_price * quantity'));
             return view('dashboard', compact(
                 'pharmacy',
