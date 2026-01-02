@@ -59,37 +59,60 @@ class RolesAndPermissionsSeeder extends Seeder
         $staffRole = Role::firstOrCreate(['name' => 'Staff']);
         $staffRole->givePermissionTo(['view dashboard', 'manage sales']); 
 
-        // --- MIGRATE EXISTING USERS ---
+        // --- SMART RECOVERY USERS ---
         
         $users = User::all();
         
         foreach ($users as $user) {
-            $currentRole = $user->role; // 'super', 'admin', 'staff', 'owner', 'agent'
-            
-            if ($currentRole === 'super') {
-                if (!$user->hasRole('Superadmin')) {
-                    $user->assignRole($superAdminRole);
-                }
-            } 
-            elseif ($currentRole === 'owner') {
+            $assigned = false;
+
+            // 1. Superadmin (ID 1 is always Superadmin)
+            if ($user->id === 1 || $user->role === 'super') {
+                $user->assignRole($superAdminRole);
+                $this->command->info("Assigned Superadmin to: {$user->email}");
+                $assigned = true;
+            }
+
+            // 2. Owner (Check if they own any pharmacy)
+            if (Pharmacy::where('owner_id', $user->id)->exists() || $user->role === 'owner') {
                 if (!$user->hasRole('Owner')) {
-                    $user->assignRole($ownerRole);
+                     $user->assignRole($ownerRole);
+                     $this->command->info("Assigned Owner to: {$user->email}");
+                     $assigned = true;
                 }
             }
-            elseif ($currentRole === 'agent') {
-                if (!$user->hasRole('Agent')) {
+
+            // 3. Agent (Check if they are listed as an agent for any pharmacy)
+            // Assuming 'agent_id' exists on pharmacies table or if they are marked as agent
+            if (Pharmacy::where('agent_id', $user->id)->exists() || $user->role === 'agent') {
+                 if (!$user->hasRole('Agent')) {
                     $user->assignRole($agentRole);
-                }
+                    $this->command->info("Assigned Agent to: {$user->email}");
+                    $assigned = true;
+                 }
             }
-            elseif ($currentRole === 'admin') {
-                 if (!$user->hasRole('Manager')) {
-                    $user->assignRole($managerRole);
+
+            // 4. Staff / Manager (Check staff table)
+            $staffRecord = Staff::where('user_id', $user->id)->first();
+            if ($staffRecord) {
+                if ($staffRecord->role === 'admin' || $user->role === 'admin') {
+                     if (!$user->hasRole('Manager')) {
+                        $user->assignRole($managerRole);
+                        $this->command->info("Assigned Manager to: {$user->email}");
+                     }
+                } else {
+                     if (!$user->hasRole('Staff')) {
+                        $user->assignRole($staffRole);
+                        $this->command->info("Assigned Staff to: {$user->email}");
+                     }
                 }
+                $assigned = true;
             }
-            elseif ($currentRole === 'staff') {
-                if (!$user->hasRole('Staff')) {
-                    $user->assignRole($staffRole);
-                }
+
+            // 5. Fallback for 'staff' string in role column if no staff record found yet
+            if (!$assigned && $user->role === 'staff') {
+                $user->assignRole($staffRole);
+                $this->command->info("Fallback: Assigned Staff to: {$user->email}");
             }
         }
     }
