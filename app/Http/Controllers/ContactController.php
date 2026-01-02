@@ -14,12 +14,14 @@ class ContactController extends Controller
 {
     public function send(Request $request)
     {
-        // Basic validation (note recaptcha_token used below)
+        // Basic validation
         $data = $request->validate([
-            'phone' => 'nullable|string|max:40',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:40',
             'location' => 'nullable|string|max:255',
             'service' => 'required|string|max:255',
-            'message' => 'nullable|string|max:2000',
+            'message' => 'required|string|max:2000',
             'nickname' => 'nullable|string|max:10',
         ]);
 
@@ -32,26 +34,49 @@ class ContactController extends Controller
         // Rate limit per IP: 5 per hour (adjust as needed)
         $ip = $request->ip();
         $key = "contact_submissions:{$ip}";
-        $max = 5;
-        $ttlSeconds = 10;//3600; // 1 hour
+        $max = 500;
+        $ttlSeconds = 3600; // 1 hour
 
         $count = Cache::get($key, 0);
         if ($count >= $max) {
             return response()->json(['status' => 'error', 'message' => 'Too many submissions. Please try again later.'], 429);
         }
 
-
         // Proceed: increment rate counter
         Cache::put($key, $count + 1, $ttlSeconds);
 
         try {
-            // Prefer queue if available; fallback to send
-                Mail::to(env('SUPPORT_EMAIL')?? "micksimon30@gmail.com")->send(new ContactUsMail($data));
+            // Prepare message with additional details
+            $fullMessage = $data['message'];
+            if (!empty($data['location'])) {
+                $fullMessage .= "\n\nLocation: " . $data['location'];
+            }
+            if (!empty($data['service'])) {
+                $fullMessage .= "\nService: " . $data['service'];
+            }
 
-            return response()->json(['status' => 'success', 'message' => 'Message sent. We will contact you shortly.']);
+            // Send to SkyPush API
+            $response = Http::withHeaders([
+                'X-API-KEY' => env('SKYPUSH_API_KEY'),
+                'Accept' => 'application/json',
+            ])->post('https://skypush.skylinksolutions.co.tz/api/v1/contact/contact', [
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+                'message' => $fullMessage,
+                'source' => 'contact',
+            ]);
+
+            if ($response->successful()) {
+                return response()->json(['status' => 'success', 'message' => 'Message sent. We will contact you shortly.']);
+            } else {
+                Log::error('SkyPush API Error: ' . $response->body());
+                return response()->json(['status' => 'error', 'message' => 'Failed to send message. Please try again later.'], $response->status());
+            }
+
         } catch (\Throwable $e) {
-            Log::error('Contact mail failed: ' . $e->getMessage(), ['data' => $data]);
-            return response()->json(['status' => 'error', 'message' => 'Failed to send message. Try again later.'], 500);
+            Log::error('Contact API failed: ' . $e->getMessage(), ['data' => $data]);
+            return response()->json(['status' => 'error', 'message' => 'An error occurred. Please try again later.'], 500);
         }
     }
 }

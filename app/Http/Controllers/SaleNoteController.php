@@ -55,7 +55,7 @@ class SaleNoteController extends Controller
         }
 
         $saleNotes = null;
-        if (Auth::user()->role == 'staff') {
+        if (Auth::user()->hasRole('Staff')) {
             $saleNotes = $notes->where('staff_id', Auth::user()->id)->where('status', 'Unpromoted')->get();
             $totalSalesMadeToday = $notes->where('staff_id', Auth::user()->id)->where('status', 'Unpromoted')->sum(DB::raw('quantity * unit_price'));
         } else {

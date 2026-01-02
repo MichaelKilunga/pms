@@ -2,48 +2,67 @@
 
 namespace App\Services;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
+use App\Models\SystemSetting;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class SmsService
 {
-    protected $client;
-    protected $apiUrl;
-    protected $headers;
+    protected $baseUrl = 'https://skypush.skylinksolutions.co.tz/api/v1'; 
+    protected $apiKey;
+    protected $senderId;
+    protected $isEnabled;
 
     public function __construct()
     {
-        $this->client = new Client();
-        $this->apiUrl = env('NEXTSMS_API_URL');
-        $this->headers = [
-            'Authorization' => 'Basic ' . env('NEXTSMS_API_KEY'),
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-        ];
+        $this->loadSettings();
     }
 
-    public function sendSms($to, $message, $reference = null)
+    protected function loadSettings()
     {
-        $body = [
-            'from' => env('NEXTSMS_SENDER_ID'),
-            'to' => $to,
-            'text' => $message,
-            'reference' => $reference ?: uniqid(),
-        ];
+        // Load GLOBAL settings (pharmacy_id = null)
+        $settings = SystemSetting::whereNull('pharmacy_id')
+            ->whereIn('key', ['sms_enabled', 'sms_api_key', 'sms_sender_id'])
+            ->pluck('value', 'key');
+
+        $this->isEnabled = filter_var($settings['sms_enabled'] ?? 'false', FILTER_VALIDATE_BOOLEAN);
+        $this->apiKey = $settings['sms_api_key'] ?? null;
+        $this->senderId = $settings['sms_sender_id'] ?? 'PILPOINTONE'; 
+    }
+
+    public function send($to, $message)
+    {
+        if (!$this->isEnabled || !$this->apiKey) {
+            Log::warning("SmsService: SMS disabled or missing API key.");
+            return false;
+        }
 
         try {
-            // Sending the request
-            $response = $this->client->post($this->apiUrl, [
-                'headers' => $this->headers,
-                'json' => $body
+            // Documented endpoint for Skypush
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                // Assuming bearer token usage for the API key if standards follow, 
+                // but if the previous implementation used Basic Auth, I should be careful. 
+                // 'send_sms.md' (from user context) says: curl -X POST ... -H "Authorization: Bearer <token>"
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Accept' => 'application/json',
+            ])->post("{$this->baseUrl}/sms/send", [
+                'to' => $to,
+                'message' => $message,
+                'sender' => $this->senderId,
+                'client_app' => 'PMS_System'
             ]);
 
-            // Return the response body as a string
-            return $response->getBody()->getContents();
-        } catch (RequestException $e) {
-            Log::error("SMS send failed: " . $e->getMessage());
-            return false; // You can return a custom error message here
+            if ($response->successful()) {
+                Log::info("SmsService: Sent to {$to}");
+                return true;
+            } else {
+                Log::error("SmsService: Failed. " . $response->body());
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error("SmsService Exception: " . $e->getMessage());
+            return false;
         }
     }
 }

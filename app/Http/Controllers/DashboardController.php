@@ -50,7 +50,7 @@ class DashboardController extends Controller
         // Notification::send($notifyUser, new WelcomeNotification);
         // // dd('done');
 
-        if (Auth::user()->role == "super") {
+        if (Auth::user()->hasRole('Superadmin')) {
 
             $totalPharmacies = Pharmacy::all()->count();
             // dd($totalPharmacies);
@@ -65,7 +65,7 @@ class DashboardController extends Controller
             $users = User::all()->count();
 
             //call all users with role agent
-            $agents = User::where('role', 'agent')->count();
+            $agents = User::role('Agent')->count();
 
             //active contracts
             $activeContracts = Contract::where('is_current_contract', 1)->count();
@@ -85,7 +85,7 @@ class DashboardController extends Controller
             return view('superAdmin.index', compact('totalPharmacies', 'users', 'agents', 'countactivepharmacies', 'activeContracts', 'expiredContracts', 'packages', 'activePackages', 'inactivePackages'));
         }
 
-        if (Auth::user()->role == "agent") {
+        if (Auth::user()->hasRole('Agent')) {
             // get all pharmacies under this agent
             $totalPharmacies = Pharmacy::where('agent_id', Auth::user()->id)->count();
             $totalPackages = Package::count();
@@ -108,7 +108,7 @@ class DashboardController extends Controller
             return view('agent.index', compact('totalPharmacies', 'totalPackages', 'activePharmacies', 'inactivePharmacies', 'totalMessages', 'totalCases'));
         }
 
-        if (Auth::user()->role == "staff" || Auth::user()->role == "admin") {
+        if (Auth::user()->hasRole('Staff') || Auth::user()->hasRole('Manager')) {
             $staff = Staff::where('user_id', Auth::user()->id)->first();
             $pharmacy = Pharmacy::where('id', $staff->pharmacy_id)->first();
             session(['current_pharmacy_id' => $pharmacy->id]);
@@ -135,7 +135,7 @@ class DashboardController extends Controller
         $totalPharmacies = Pharmacy::where('owner_id', Auth::user()->id)->count();
         $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today())->sum(DB::raw('total_price * quantity'));
 
-        if (Auth::user()->role == "staff") {
+        if (Auth::user()->hasRole('Staff')) {
             $staff = Staff::where('user_id', Auth::user()->id)->first();
             $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id', $staff->id)->sum(DB::raw('total_price * quantity'));
         }
@@ -169,7 +169,7 @@ class DashboardController extends Controller
 
 
 
-        if (Auth::user()->role == "staff") {
+        if (Auth::user()->hasRole('Staff')) {
             $itemsSummary = DB::table('items')
                 ->leftJoin('sales', function ($join) use ($pharmacyId) {
                     $join->on('items.id', '=', 'sales.item_id')
@@ -201,14 +201,14 @@ class DashboardController extends Controller
 
         $filteredTotalSales = $query->sum(DB::raw('total_price * quantity'));
         // dd($filteredTotalSales);
-        if (Auth::user()->role == "staff") {
+        if (Auth::user()->hasRole('Staff')) {
             // $staff = Staff::where('user_id', Auth::user()->id)->first();
             $filteredTotalSales = $query->where('staff_id', Auth::user()->id)->sum(DB::raw('total_price * quantity'));
             // dd($filteredTotalSales);
         }
 
 
-        if (Auth::user()->role == 'owner') {
+        if (Auth::user()->hasRole('Owner')) {
 
             // Get pharmacies that belong to the authenticated owner
             $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
@@ -237,7 +237,15 @@ class DashboardController extends Controller
 
 
             if (Auth::user()->contracts->where('is_current_contract', 1)->count() < 1) {
-                return redirect()->route('myContracts')->with('info', 'Welcome on board! Subscribe first to continue using our products!');
+                // Check if user is on dynamic pricing
+                $pricingMode = Auth::user()->pricing_mode ?? \App\Models\SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard';
+                
+                // If standard/profit share, enforce subscription. 
+                // If dynamic, we allow them to pass (Middleware will handle specific route blocking)
+                if ($pricingMode != 'dynamic') {
+                     return redirect()->route('myContracts')->with('info', 'Welcome on board! Subscribe first to continue using our products!');
+                }
+                // If dynamic, we let them proceed to dashboard so they can add items.
             }
 
             // dd($pharmacies->count());
@@ -291,7 +299,7 @@ class DashboardController extends Controller
 
             $query = Sales::where('pharmacy_id', $pharmacyId);
 
-            if (Auth::user()->role == "staff") {
+            if (Auth::user()->hasRole('Staff')) {
                 $query->where('staff_id', Auth::user()->id);
             }
 

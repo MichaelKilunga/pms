@@ -1,80 +1,248 @@
-@extends('packages.app')
+@extends("packages.app")
 
-@section('content')
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between">
-            <h1>Subscription Plans</h1>
-            <a href="{{ route('packages.create') }}" class="btn btn-primary mb-3">Add New Package</a>
+@section("content")
+    <div class="container-fluid px-4 py-4">
+
+        <div class="row align-items-center mb-4">
+            <div class="col">
+                <h1 class="h3 text-primary fw-bold mb-0">Subscription & Pricing Management</h1>
+                <p class="text-muted small">Manage global pricing strategies and subscription packages.</p>
+            </div>
+            <div class="col-auto">
+                <a class="btn btn-primary rounded-pill shadow-sm" href="{{ route("packages.create") }}">
+                    <i class="bi bi-plus-lg me-1"></i> New Package
+                </a>
+            </div>
         </div>
-        {{-- Use div classess for responsiveness of our table --}}
-        
-        <div class="table-responsive">
-            {{-- Use table classess for styling our table --}}
-            <table class="table table-bordered" id="Table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Duration</th>
-                        <th>Status</th>
-                        {{-- <th>Number of Pharmacies</th>
-                        <th>Number of Pharmacists</th>
-                        <th>Number of Medicines</th>
-                        <th>In App Notification</th>
-                        <th>Email Notification</th>
-                        <th>SMS Notifications</th>
-                        <th>Online Support</th>
-                        <th>Number of Owner Accounts</th>
-                        <th>Number of Admin Accounts</th>
-                        <th>Reports</th>
-                        <th>Stock Transfer</th>
-                        <th>Stock Management</th>
-                        <th>Staff Management</th>
-                        <th>Receipts</th>
-                        <th>Analytics</th>
-                        <th>Whatsapp Chats</th> --}}
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($packages as $package)
-                        <tr>
-                            <td>{{$loop->iteration}}</td>
-                            <td>{{ $package->name }}</td>
-                            <td>{{ $package->price }}</td>
-                            <td>{{ $package->duration }}</td>
-                            <td>{{ $package->status }}</td>
-                            {{-- <td>{{ $package->number_of_pharmacies }}</td>
-                            <td>{{ $package->number_of_pharmacists }}</td>
-                            <td>{{ $package->number_of_medicines }}</td>
-                            <td>{{ $package->in_app_notification }}</td>
-                            <td>{{ $package->email_notification }}</td>
-                            <td>{{ $package->sms_notifications }}</td>
-                            <td>{{ $package->online_support }}</td>
-                            <td>{{ $package->number_of_owner_accounts }}</td>
-                            <td>{{ $package->number_of_admin_accounts }}</td>
-                            <td>{{ $package->reports }}</td>
-                            <td>{{ $package->stock_transfer }}</td>
-                            <td>{{ $package->stock_management }}</td>
-                            <td>{{ $package->staff_management }}</td>
-                            <td>{{ $package->receipts }}</td>
-                            <td>{{ $package->analytics }}</td>
-                            <td>{{ $package->whatsapp_chats }}</td> --}}
-                            <td>
-                                <a href="{{ route('packages.edit', $package->id) }}" class="btn btn-primary"><i class="bi bi-pencil" ></i></a>
-                                <a href="{{ route('packages.show', $package->id) }}" class="btn btn-info"><i class="bi bi-eye" ></i></a>
-                                <form action="{{ route('packages.destroy', $package->id) }}" method="POST"
-                                    class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash" ></i></button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs nav-fill border-bottom-0 mb-4" id="pricingTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button aria-controls="settings" aria-selected="true" class="nav-link active fw-bold rounded-top-3"
+                    data-bs-target="#settings" data-bs-toggle="tab" id="settings-tab" role="tab" type="button">
+                    <i class="bi bi-sliders me-2"></i> Global Configuration
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button aria-controls="packages" aria-selected="false" class="nav-link fw-bold rounded-top-3"
+                    data-bs-target="#packages" data-bs-toggle="tab" id="packages-tab" role="tab" type="button">
+                    <i class="bi bi-box-seam me-2"></i> Package Definitions
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="pricingTabsContent">
+
+            <!-- Tab 1: Global Settings -->
+            <div aria-labelledby="settings-tab" class="tab-pane fade show active" id="settings" role="tabpanel">
+                <div class="card rounded-4 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <form action="{{ route("packages.settings.update") }}" method="POST">
+                            @csrf
+
+                            <div class="row g-4">
+                                <!-- Pricing Mode Selection -->
+                                <div class="col-md-12">
+                                    <h5 class="fw-bold text-dark mb-3">Default Pricing Strategy</h5>
+                                    <div class="row">
+                                        @php $currentMode = $settings['pricing_mode']->value ?? 'standard'; @endphp
+
+                                        <div class="col-md-4">
+                                            <div class="form-check custom-card-radio">
+                                                <input {{ $currentMode == "standard" ? "checked" : "" }}
+                                                    class="form-check-input" id="modeStandard" name="pricing_mode"
+                                                    type="radio" value="standard">
+                                                <label
+                                                    class="form-check-label card h-100 {{ $currentMode == "standard" ? "border-primary bg-light" : "" }} border-2 p-3"
+                                                    for="modeStandard">
+                                                    <div class="fw-bold"><i class="bi bi-distribute-vertical me-2"></i>
+                                                        Standard Packages</div>
+                                                    <small class="text-muted mt-2">Fixed price packages (e.g., Bronze,
+                                                        Silver, Gold). Best for simple, tiered offerings.</small>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-check custom-card-radio">
+                                                <input {{ $currentMode == "dynamic" ? "checked" : "" }}
+                                                    class="form-check-input" id="modeDynamic" name="pricing_mode"
+                                                    type="radio" value="dynamic">
+                                                <label
+                                                    class="form-check-label card h-100 {{ $currentMode == "dynamic" ? "border-primary bg-light" : "" }} border-2 p-3"
+                                                    for="modeDynamic">
+                                                    <div class="fw-bold"><i class="bi bi-calculator me-2"></i> Dynamic
+                                                        (Item-Based)</div>
+                                                    <small class="text-muted mt-2">Price scales with inventory size (e.g.,
+                                                        items / 500 * Rate).</small>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-check custom-card-radio">
+                                                <input {{ $currentMode == "profit_share" ? "checked" : "" }}
+                                                    class="form-check-input" id="modeProfit" name="pricing_mode"
+                                                    type="radio" value="profit_share">
+                                                <label
+                                                    class="form-check-label card h-100 {{ $currentMode == "profit_share" ? "border-primary bg-light" : "" }} border-2 p-3"
+                                                    for="modeProfit">
+                                                    <div class="fw-bold"><i class="bi bi-graph-up-arrow me-2"></i> Profit
+                                                        Share</div>
+                                                    <small class="text-muted mt-2">Charge a percentage of monthly realized
+                                                        profit.</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <!-- Configuration Inputs -->
+                                <div class="col-md-6">
+                                    <h5 class="fw-bold text-dark mb-3">Dynamic Pricing Parameters</h5>
+                                    <div class="card bg-light border-0 p-3">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold small text-uppercase text-muted">Rate per
+                                                Tier</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text border-end-0 bg-white">TZS</span>
+                                                <input class="form-control border-start-0" name="system_use_rate"
+                                                    type="number" value="{{ $settings["system_use_rate"]->value ?? 100 }}">
+                                            </div>
+                                        </div>
+                                        <div class="mb-0">
+                                            <label class="form-label fw-bold small text-uppercase text-muted">Items per Tier
+                                                (Divisor)</label>
+                                            <input class="form-control" name="item_tier_divisor" type="number"
+                                                value="{{ $settings["item_tier_divisor"]->value ?? 500 }}">
+                                            <div class="form-text">e.g., Every 500 items counts as 1 unit.</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h5 class="fw-bold text-dark mb-3">Profit Share Parameters</h5>
+                                    <div class="card bg-light border-0 p-3">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold small text-uppercase text-muted">Profit Share
+                                                Percentage</label>
+                                            <div class="input-group">
+                                                <input class="form-control border-end-0" name="profit_share_percentage"
+                                                    step="0.01" type="number"
+                                                    value="{{ $settings["profit_share_percentage"]->value ?? 25 }}">
+                                                <span class="input-group-text border-start-0 bg-white">%</span>
+                                            </div>
+                                            <div class="form-text">Percentage of profit to charge (e.g., 25%).</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 text-end">
+                                    <button class="btn btn-success rounded-pill fw-bold px-5 shadow" type="submit">
+                                        <i class="bi bi-check-circle me-2"></i> Save Configuration
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Packages List -->
+            <div aria-labelledby="packages-tab" class="tab-pane fade" id="packages" role="tabpanel">
+                <div class="card rounded-4 border-0 shadow-sm">
+                    <div class="card-body overflow-hidden p-0">
+                        <div class="table-responsive">
+                            <table class="table-hover small mb-0 table align-middle" id="Table">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="text-uppercase small fw-bold text-muted py-3 ps-4">Name</th>
+                                        <th class="text-uppercase small fw-bold text-muted py-3">Details</th>
+                                        <th class="text-uppercase small fw-bold text-muted py-3">Duration</th>
+                                        <th class="text-uppercase small fw-bold text-muted py-3">Status</th>
+                                        <th class="text-uppercase small fw-bold text-muted py-3 pe-4 text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($packages as $package)
+                                        <tr>
+                                            <td class="ps-4">
+                                                <span class="fw-bold text-dark">{{ $package->name }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <span class="fw-bold text-primary">TZS
+                                                        {{ number_format($package->price) }}</span>
+                                                    <small class="text-muted">Standard Price</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="badge bg-info text-dark rounded-pill px-3">{{ $package->duration }}
+                                                    Days</span>
+                                            </td>
+                                            <td>
+                                                @if ($package->status)
+                                                    <span
+                                                        class="badge bg-success-subtle text-success border-success-subtle rounded-pill border">Active</span>
+                                                @else
+                                                    <span
+                                                        class="badge bg-danger-subtle text-danger border-danger-subtle rounded-pill border">Inactive</span>
+                                                @endif
+                                            </td>
+                                            <td class="pe-4 text-end">
+                                                <div class="btn-group">
+                                                    <a class="btn btn-sm btn-outline-secondary rounded-start-pill"
+                                                        href="{{ route("packages.edit", $package->id) }}" title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a class="btn btn-sm btn-outline-secondary"
+                                                        href="{{ route("packages.show", $package->id) }}" title="View">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <form action="{{ route("packages.destroy", $package->id) }}"
+                                                        class="d-inline" method="POST"
+                                                        onsubmit="return confirm('Are you sure?');">
+                                                        @csrf
+                                                        @method("DELETE")
+                                                        <button class="btn btn-sm btn-outline-danger rounded-end-pill"
+                                                            title="Delete" type="submit">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <style>
+        .custom-card-radio input:checked+label {
+            border-color: var(--bs-primary) !important;
+            background-color: var(--bs-primary-bg-subtle) !important;
+        }
+
+        .custom-card-radio input {
+            display: none;
+        }
+
+        .custom-card-radio label {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .custom-card-radio label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+        }
+    </style>
 @endsection

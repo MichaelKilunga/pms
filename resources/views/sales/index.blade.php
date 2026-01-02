@@ -1,29 +1,29 @@
-@extends('sales.app')
+@extends("sales.app")
 
-@section('content')
+@section("content")
     @php
         use App\Models\Stock;
         use Illuminate\Support\Facades\DB;
 
         $medicines = Stock::select(
             DB::raw("CONCAT(item_id, '-', selling_price) as id"), // safe MySQL concat
-            'item_id',
-            DB::raw('SUM(remain_Quantity) as remain_Quantity'),
-            'selling_price',
+            "item_id",
+            DB::raw("SUM(remain_Quantity) as remain_Quantity"),
+            "selling_price",
         )
-            ->where('pharmacy_id', session('current_pharmacy_id'))
-            ->where('expire_date', '>', now())
-            ->where('remain_Quantity', '>', 0)
-            ->groupBy('item_id', 'selling_price')
-            ->with('item')
+            ->where("pharmacy_id", session("current_pharmacy_id"))
+            ->where("expire_date", ">", now())
+            ->where("remain_Quantity", ">", 0)
+            ->groupBy("item_id", "selling_price")
+            ->with("item")
             ->get();
     @endphp
 
-    <div class="container mt-4">
+    <div class="mt-4# container">
         <!-- Header -->
         <div class="d-flex justify-content-between mb-3">
             <h2 class="text-primary fs-2 fw-bold">Sales Management</h2>
-            <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createSalesModal">
+            <a class="btn btn-success" data-bs-target="#createSalesModal" data-bs-toggle="modal" href="#">
                 <i class="bi bi-plus-lg"></i> New Sales
             </a>
         </div>
@@ -32,24 +32,24 @@
             {{-- checkbox to enable use of printer --}}
             <div>
                 <div class="form-control form-check form-switch mt-2">
-                    <input class="form-check-input" type="checkbox" {{ session('use_printer') ? 'checked' : '' }}
-                        id="printerCheckbox">
+                    <input {{ session("use_printer") ? "checked" : "" }} class="form-check-input" id="printerCheckbox"
+                        type="checkbox">
                     <label class="form-check-label" for="printerCheckbox">Printer Enabled</label>
                 </div>
             </div>
             <div>
-                <a href="print/lastReceipt" class="btn btn-success m-2">
+                <a class="btn btn-success m-2" href="print/lastReceipt">
                     <i class="bi bi-printer"></i> Last
                 </a>
-                <a href="allReceipts" class="btn btn-success m-2">
+                <a class="btn btn-success m-2" href="allReceipts">
                     <i class="bi bi-receipt"></i> Receipts
                 </a>
             </div>
         </div>
         <hr class="mb-2">
         <!-- Sales Table -->
-        <div class="table-responsive shadow-sm rounded-3">
-            <table class="table table-striped table-hover table-bordered align-middle" id="salesTable">
+        <div class="table-responsive rounded-3 shadow-sm">
+            <table class="table-striped small table-hover table-bordered table align-middle" id="salesTable">
                 <thead class="table-primary">
                     <tr>
                         <th>#</th>
@@ -64,29 +64,28 @@
             </table>
         </div>
 
-
     </div>
 
     <!-- Create Sales Modal -->
-    <div class="modal fade" id="createSalesModal" tabindex="-1" aria-labelledby="createSalesModalLabel" aria-hidden="true">
+    <div aria-hidden="true" aria-labelledby="createSalesModalLabel" class="modal fade" id="createSalesModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="createSalesModalLabel">Add New Sale</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('sales.store') }}" method="POST" id="salesForm">
+                    <form action="{{ route("sales.store") }}" id="salesForm" method="POST">
                         @csrf
                         <div id="salesFields">
-                            <div class="row mb-3 sale-entry align-items-center">
-                                <input type="text" name="stock_id[]" hidden required>
-                                <div class="col-md-4">
-                                    <label for="medicines" class="form-label">Medicine</label>
-                                    <select name="item_id[]" class="form-select salesChosen" required>
+                            <div class="row sale-entry align-items-center mb-3">
+                                <input hidden name="stock_id[]" required type="text">
+                                <div class="col-md-3">
+                                    <label class="form-label" for="medicines">Medicine</label>
+                                    <select class="salesChosen form-select" name="item_id[]" required>
                                         <option selected value="">Select medicine</option>
                                         @foreach ($medicines as $medicine)
-                                            <option value="{{ $medicine->id . '-' . $medicine->selling_price }}">
+                                            <option value="{{ $medicine->id . "-" . $medicine->selling_price }}">
                                                 {{ $medicine->item->name }}
                                                 <br><strong
                                                     class="text-danger">({{ number_format($medicine->selling_price) }}Tsh)</strong>
@@ -96,24 +95,23 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Price(TZS)</label>
-                                    <input type="text" class="form-control" placeholder="Price" name="total_price[]"
-                                        value="0" readonly required>
+                                    <input class="form-control" name="total_price[]" placeholder="Price" readonly required
+                                        type="text" value="0">
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label" for="label[]">Quantity</label>
-                                    <input type="number" class="form-control" min="1"
-                                        title="Only 10 has remained in stock!" placeholder="Quantity" name="quantity[]"
-                                        required>
+                                    <input class="form-control" min="1" name="quantity[]" placeholder="Quantity"
+                                        required title="Only 10 has remained in stock!" type="number">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <label class="form-label">Amount</label>
-                                    <input type="number" class="form-control amount" name="amount[]" placeholder="Amount"
-                                        readonly>
+                                    <input class="form-control amount" name="amount[]" placeholder="Amount" readonly
+                                        type="number">
                                 </div>
-                                <div class="col-md-0" hidden>
+                                <div {{ Auth::user()->hasRole("Staff") ? "hidden" : "" }} class="col-md-2">
                                     <label class="form-label">Date</label>
-                                    <input type="text" class="form-control date" name="date[]"
-                                        value="{{ now() }}" required>
+                                    <input class="form-control date" name="date[]" required type="text"
+                                        value="{{ now() }}">
                                 </div>
                             </div>
                         </div>
@@ -122,19 +120,19 @@
                                 <strong>Total Amount:</strong>
                             </div>
                             <div class="col-md-3 text-end">
-                                <input type="text" class="form-control text-danger" id="totalAmount" value="0"
-                                    readonly>
+                                <input class="form-control text-danger" id="totalAmount" readonly type="text"
+                                    value="0">
                             </div>
                             <div class="col-md-1 text-end">
-                                <!-- <input class="btn btn-outline-danger" id="totalAmount" value="0" disabled> -->
+                                <!-- <input class="btn btn-outline-danger" disabled id="totalAmount" value="0"> -->
                             </div>
                         </div>
                         <div class="mt-3">
-                            <div class="col-md-11 d-flex justify-content-between ">
-                                <button type="button" id="addSaleRow" class="btn btn-outline-primary">
+                            <div class="col-md-11 d-flex justify-content-between">
+                                <button class="btn btn-outline-primary" id="addSaleRow" type="button">
                                     <i class="bi bi-plus-lg"></i> Add Row
                                 </button>
-                                <button type="submit" class="btn btn-success">
+                                <button class="btn btn-success" type="submit">
                                     <i class="bi bi-save"></i> Save Sales
                                 </button>
                             </div>
@@ -148,39 +146,38 @@
         </div>
     </div>
 
-
     {{-- A MODAL FOR SELECTING PRINTERS FROM THE LIST OF ACTIVE PRINTERS, MODAL SHOULD DETECT ACTIVE PRINTERS
          USING JS AND RETURN THEM AS A DROP-DOWN LIST, USER WILL SELECT THE PRINTER HE/SHE WANTS AND SUBMIT,
          USER SHOULD ONLY SELECT WHILE THE FORM SHOULD CATCH IP address and Printe's path using JS --}}
     {{-- Modal for Selecting Printers --}}
     @if (false)
-        <div class="modal fade" id="printerModal" tabindex="-1" aria-labelledby="printerModalLabel"
-            aria-hidden="true">
+        <div aria-hidden="true" aria-labelledby="printerModalLabel" class="modal fade" id="printerModal"
+            tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="printerModalLabel">Select Printer</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <form action="{{ route('printer.store') }}" method="POST">
+                        <form action="{{ route("printer.store") }}" method="POST">
                             @csrf
                             <div class="mb-3">
-                                <label for="printer" class="form-label">Printer's Name</label>
-                                <input type="text" class="form-control" id="printer" name="printer"
-                                    placeholder="TM-20ll Receipt" required>
+                                <label class="form-label" for="printer">Printer's Name</label>
+                                <input class="form-control" id="printer" name="printer" placeholder="TM-20ll Receipt"
+                                    required type="text">
                             </div>
                             <div class="mb-3">
-                                <label for="ip_address" class="form-label">IP Address</label>
-                                <input type="text" class="form-control" id="ip_address" name="ip_address"
-                                    placeholder="192.168.0.123" required>
+                                <label class="form-label" for="ip_address">IP Address</label>
+                                <input class="form-control" id="ip_address" name="ip_address"
+                                    placeholder="192.168.0.123" required type="text">
                             </div>
                             <div class="mb-3">
-                                <label for="computer_name" class="form-label">Computer's Name</label>
-                                <input type="text" class="form-control" id="computer_name" name="computer_name"
-                                    placeholder="DESKTOP-32" required>
+                                <label class="form-label" for="computer_name">Computer's Name</label>
+                                <input class="form-control" id="computer_name" name="computer_name"
+                                    placeholder="DESKTOP-32" required type="text">
                             </div>
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button class="btn btn-primary" type="submit">Submit</button>
                         </form>
                     </div>
                 </div>
@@ -349,7 +346,7 @@
 
                 newRow.innerHTML = `
                             <input type="text" name="stock_id[]" hidden required>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <select name="item_id[]" data-row-id="item_id[]" class="form-select salesChosen" required>
                                     <option selected disabled value="">Select medicine</option>
                                     @foreach ($medicines as $medicine)
@@ -367,10 +364,10 @@
                                     <label class="form-label" for="label[]"></label>
                                 <input type="number" class="form-control" name="quantity[]" min="1" placeholder="Quantity" required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
                             </div>
-                            <div class="col-md-0" hidden>
+                            <div class="col-md-2" {{ Auth::user()->hasRole("Staff") ? "hidden" : "" }}>
                             <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
                             </div>
                             <div class="col-md-1 d-flex justify-content-center">
@@ -444,7 +441,7 @@
                 // Update printer enable status in the db using jquery ajax
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('printer.updateStatus') }}",
+                    url: "{{ route("printer.updateStatus") }}",
                     data: {
                         _token: "{{ csrf_token() }}",
                         current_status: current_status,
@@ -475,7 +472,7 @@
             $('#salesTable').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('sales') }}",
+                ajax: "{{ route("sales") }}",
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',

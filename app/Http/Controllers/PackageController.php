@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Package;
 use App\Models\Pharmacy;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 
 class PackageController extends Controller
@@ -11,7 +12,19 @@ class PackageController extends Controller
     public function index()
     {
         $packages = Package::all();
-        return view('packages.index', compact('packages'));
+        $settings = SystemSetting::all()->keyBy('key');
+        return view('packages.index', compact('packages', 'settings'));
+    }
+
+    public function updateSettings(Request $request) {
+        $data = $request->except(['_token']);
+        foreach ($data as $key => $value) {
+            SystemSetting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $value]
+            );
+        }
+        return redirect()->back()->with('success', 'Pricing Settings updated successfully.');
     }
 
     public function show($id)

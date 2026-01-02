@@ -15,6 +15,7 @@ use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\MedicineImportController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SystemSettingController;
 use Illuminate\Http\Request;
 use App\Models\Pharmacy;
 use Illuminate\Support\Facades\Auth;
@@ -34,11 +35,16 @@ use App\Http\Controllers\ExpenseController;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\InstallmentController;
+use App\Http\Controllers\WhatsAppController;
+use App\Http\Controllers\SuperAdminNotificationController;
 
 Route::get('/', function () {
     //return welcome view with packages
     return view('welcome', ['packages' => Package::where('id', '!=', 1)->get(), 'agents' => User::where('role', 'agent')->get()]);
 });
+
+Route::view('/privacy_policy', 'legal.privacy_policy')->name('privacy_policy');
+Route::view('/terms_of_use', 'legal.terms_of_use')->name('terms_of_use');
 
 Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::get('schedule', function () {
@@ -48,12 +54,24 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
         return 'Scheduler task triggered and executed!';
     })->name('schedule');
 
+    // System Settings
+    Route::get('admin/system-settings', [SystemSettingController::class, 'index'])->name('admin.settings.system');
+    Route::post('admin/system-settings', [SystemSettingController::class, 'update'])->name('admin.settings.system.update');
+
     //USERS
     Route::get('/superadmin/users', [SuperAdminController::class, 'manageUsers'])->name('superadmin.users');
     Route::get('/superadmin/users/{id}/edit', [SuperAdminController::class, 'editUser'])->name('superadmin.users.edit');
     Route::put('/superadmin/users/{id}', [SuperAdminController::class, 'updateUser'])->name('superadmin.users.update');
     Route::get('/superadmin/users/{id}', [SuperAdminController::class, 'showUser'])->name('superadmin.users.show');
     Route::delete('/superadmin/users/{id}', [SuperAdminController::class, 'deleteUser'])->name('superadmin.users.delete');
+
+    // Super Admin Notification Settings
+    Route::get('/superadmin/settings/notifications', [SuperAdminNotificationController::class, 'index'])->name('superAdmin.notifications.index');
+    Route::post('/superadmin/settings/notifications', [SuperAdminNotificationController::class, 'update'])->name('superAdmin.notifications.update');
+    
+    // Per-User Notification Settings
+    Route::get('/superadmin/users/{id}/notifications', [SuperAdminNotificationController::class, 'manageUser'])->name('superAdmin.users.notifications');
+    Route::post('/superadmin/users/{id}/notifications', [SuperAdminNotificationController::class, 'updateUser'])->name('superAdmin.users.notifications.update');
 
     //PHARMACIES
     Route::get('/superadmin/pharmacies', [SuperAdminController::class, 'managePharmacies'])->name('superadmin.pharmacies');
@@ -64,6 +82,7 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
 
     //PACKAGES
     Route::get('packages', [PackageController::class, 'index'])->name('packages');
+    Route::post('packages/settings', [PackageController::class, 'updateSettings'])->name('packages.settings.update');
     Route::get('packages/create', [PackageController::class, 'create'])->name('packages.create');
     Route::post('packages', [PackageController::class, 'store'])->name('packages.store');
     Route::get('packages/edit/{id}', [PackageController::class, 'edit'])->name('packages.edit');
@@ -184,6 +203,11 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::get('/filterReports', [ReportPrintController::class, 'filterReports'])->name('filterReports');
     Route::post('/reports', [ReportPrintController::class, 'generateReport'])->name('reports.generate');
     Route::post('/reports/send', [ReportPrintController::class, 'sendReport'])->name('reports.send');
+    
+    // Suggested Stock
+    Route::get('/reports/suggested-stock/download', [ReportPrintController::class, 'downloadSuggestedStock'])->name('reports.suggested_stock.download');
+    Route::get('/reports/suggested-stock/json', [ReportPrintController::class, 'getSuggestedStockJson'])->name('reports.suggested_stock.json');
+    Route::post('/reports/suggested-stock/whatsapp', [WhatsAppController::class, 'sendSuggestedStock'])->name('reports.suggested_stock.whatsapp');
 
     // Route::middleware(['eligible:get sms'])->group(function () {
     //     Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
@@ -278,8 +302,18 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['eligible:registered'])->group(function () {
 
-        Route::get('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
-        Route::post('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
+        // Route::get('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
+        // Route::post('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
+        
+        // New Message Module Routes
+        Route::get('agent/messages', [\App\Http\Controllers\MessageController::class, 'index'])->name('agent.messages');
+        Route::prefix('agent/messages/api')->group(function () {
+            Route::get('conversations', [\App\Http\Controllers\MessageController::class, 'fetchConversations'])->name('messages.conversations');
+            Route::post('create-conversation', [\App\Http\Controllers\MessageController::class, 'createConversation'])->name('messages.create');
+            Route::get('conversation/{id}', [\App\Http\Controllers\MessageController::class, 'fetchMessages'])->name('messages.fetch');
+            Route::post('send', [\App\Http\Controllers\MessageController::class, 'store'])->name('messages.send');
+            Route::delete('delete/{id}', [\App\Http\Controllers\MessageController::class, 'destroy'])->name('messages.delete');
+        });
 
         Route::get('agent/cases', [AgentController::class, 'cases'])->name('agent.cases');
         Route::post('agent/cases', [AgentController::class, 'cases'])->name('agent.cases');

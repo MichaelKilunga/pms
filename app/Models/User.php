@@ -11,12 +11,14 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditingTrait;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements Auditable
 {
     use HasApiTokens;
     use  AuditingTrait;
 
+    use HasRoles;
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
     use HasProfilePhoto;
@@ -34,6 +36,8 @@ class User extends Authenticatable implements Auditable
         'role',
         'phone',
         'password',
+        'pricing_mode',
+        'notification_preferences',
     ];
 
     protected $auditEvents = [
@@ -75,6 +79,7 @@ class User extends Authenticatable implements Auditable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notification_preferences' => 'array',
         ];
     }
 
@@ -133,5 +138,20 @@ class User extends Authenticatable implements Auditable
     public function isAgent()
     {
         return $this->hasOne(Agent::class, 'user_id');
+    }
+
+    /**
+     * Check if user wants notification for specific channel
+     */
+    public function wantsNotificationChannel($channel)
+    {
+        $prefs = $this->notification_preferences;
+        
+        // Default to true if not set
+        if (!is_array($prefs) || !array_key_exists($channel, $prefs)) {
+            return true; 
+        }
+
+        return filter_var($prefs[$channel], FILTER_VALIDATE_BOOLEAN);
     }
 }

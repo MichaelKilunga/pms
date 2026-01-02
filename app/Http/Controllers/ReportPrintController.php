@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Services\InventoryService;
 use App\Models\Sales;
 use App\Models\Expense;
 use App\Models\Debt;
@@ -141,7 +142,7 @@ class ReportPrintController extends Controller
                 // Fetch all sales and calculate profits
                 $sales = Sales::with('stock', 'item')
                     ->where('pharmacy_id', $pharmacyId)
-                    ->whereBetween('created_at', [$startDate, $endDate]);
+                    ->whereBetween('date', [$startDate, $endDate]);
 
                 // Fetch all expired stocks and calculate losses
                 $stocks = Stock::with('item')
@@ -420,4 +421,29 @@ class ReportPrintController extends Controller
             return redirect()->back()->with('error', 'Error sending report: ' . $e->getMessage());
         }
     }
+
+    public function getSuggestedStockJson(Request $request, InventoryService $inventoryService)
+    {
+        $pharmacyId = session('current_pharmacy_id');
+        $stocks = $inventoryService->getSuggestedStock($pharmacyId);
+        
+        return response()->json([
+            'success' => true,
+            'stocks' => $stocks
+        ]);
+    }
+
+    public function downloadSuggestedStock(Request $request, InventoryService $inventoryService)
+    {
+        $pharmacyId = session('current_pharmacy_id');
+        
+        $stocks = $inventoryService->getSuggestedStock($pharmacyId);
+        $date = now()->format('Y-m-d H:i');
+
+        $pdf = Pdf::loadView('reports.suggested_stock_pdf', compact('stocks', 'date'));
+
+        return $pdf->download("suggested_stock_{$date}.pdf");
+    }
 }
+
+

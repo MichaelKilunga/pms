@@ -1,6 +1,6 @@
-@extends('sales_notes.app')
+@extends("sales_notes.app")
 
-@section('content')
+@section("content")
     @php $medicines = App\Models\Items::where('pharmacy_id', session('current_pharmacy_id'))->with('lastStock')->get(); @endphp
 
     <div class="container mt-4">
@@ -12,21 +12,21 @@
 
         <div class="row">
             <div class="col-md-6 gap-2">
-                <a href="{{ route('salesNotes', ['filter' => false]) }}" class="btn btn-outline-secondary">All</a>
-                <a href="{{ route('salesNotes', ['filter' => true]) }}" class="btn btn-outline-secondary">Today Notes</a>
+                <a class="btn btn-outline-secondary" href="{{ route("salesNotes", ["filter" => false]) }}">All</a>
+                <a class="btn btn-outline-secondary" href="{{ route("salesNotes", ["filter" => true]) }}">Today Notes</a>
             </div>
             <div class="col-md-6 d-flex mt-2 gap-2">
-                @if (Auth::user()->role != 'staff')
-                    <button id="buttonToPromoteAll" class=" btn btn-warning text-dark"><small class="smallest">Promote
+                @unlessrole("Staff")
+                    <button class="btn btn-warning text-dark" id="buttonToPromoteAll"><small class="smallest">Promote
                             All</small></button>
-                    <button id="buttonToPromoteSelected" class=" btn btn-warning text-dark"><small class="smallest">Promote
+                    <button class="btn btn-warning text-dark" id="buttonToPromoteSelected"><small class="smallest">Promote
                             Separate</small></button>
-                    <button id="buttonToPromoteSelectedAsOne" class=" btn btn-warning text-dark"><small
-                            class="smallest">Promote as One</small></button>
-                    <button id="buttonToPromoteToExistingStock" class=" btn btn-warning text-dark"><small
+                    <button class="btn btn-warning text-dark" id="buttonToPromoteSelectedAsOne"><small class="smallest">Promote
+                            as One</small></button>
+                    <button class="btn btn-warning text-dark" id="buttonToPromoteToExistingStock"><small
                             class="smallest">Promote To Existing</small></button>
-                @endif
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSalesNoteModal"><small
+                @endunlessrole
+                <button class="btn btn-primary" data-bs-target="#createSalesNoteModal" data-bs-toggle="modal"><small
                         class="md-smallest"><i class="bi bi-plus-circle"></i> New</small></button>
             </div>
         </div>
@@ -34,16 +34,16 @@
         <div class="table-responsive mt-3">
             {{-- a row to display total sales note count and total sales amount --}}
             <div class="d-flex justify-content-end align-items-center mb-3">
-                <div class="text-end mx-2"><span class="text-primary"> Total Sales Note: </span> <span
+                <div class="mx-2 text-end"><span class="text-primary"> Total Sales Note: </span> <span
                         class="text-danger">{{ $salesNotes->count() }}</span>, </div>
-                <div class="text-end mx-2"> <span class="text-primary">Total Amount:</span>
+                <div class="mx-2 text-end"> <span class="text-primary">Total Amount:</span>
                     <span class="text-danger">{{ number_format($totalSalesMadeToday) }}/=</span> TZS
                 </div>
             </div>
-            <table class="table table-bordered table-striped" id="SaleNoteTable">
+            <table class="table-bordered table-striped small table" id="SaleNoteTable">
                 <thead class="table-light">
                     <tr>
-                        <th hidden class="hidden"></th>
+                        <th class="hidden" hidden></th>
                         <th>#</th>
                         <th class="name-column#">Name</th>
                         <th>Quantity</th>
@@ -56,9 +56,9 @@
                 </thead>
                 <tbody>
                     @foreach ($salesNotes as $salesNote)
-                        {{-- @if ($salesNote->status != 'promoted') --}}
+                        {{-- @if ($salesNote->status != "promoted") --}}
                         <tr>
-                            <td hidden class="hidden"> {{ $salesNote->id }} </td>
+                            <td class="hidden" hidden> {{ $salesNote->id }} </td>
                             <td>{{ $loop->iteration }}</td>
                             <td class="name-column">{{ $salesNote->name }}</td>
                             <td>{{ $salesNote->quantity }}</td>
@@ -68,30 +68,30 @@
                             <td>{{ \Carbon\Carbon::parse($salesNote->created_at)->diffForHumans() }}</td>
                             <td>
                                 <div class="d-flex justify-content-between">
-                                    @if (Auth::user()->role != 'staff')
+                                    @unlessrole("Staff")
                                         <div>
                                             <button class="btn btn-success promoteButton"><i class="bi bi-upload">
                                                     Promote</i>
                                             </button>
                                         </div>
-                                    @endif
+                                    @endunlessrole
                                     <div>
-                                        <button class="btn btn-primary" data-bs-toggle="modal"
-                                            data-bs-target="#showSalesNoteModal{{ $salesNote->id }}"><i
-                                                class="bi bi-eye"></i></button>
+                                        <button class="btn btn-primary"
+                                            data-bs-target="#showSalesNoteModal{{ $salesNote->id }}"
+                                            data-bs-toggle="modal"><i class="bi bi-eye"></i></button>
                                     </div>
                                     <div>
-                                        <button class="btn btn-warning" data-bs-toggle="modal"
-                                            data-bs-target="#editSalesNoteModal{{ $salesNote->id }}"><i
-                                                class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-warning"
+                                            data-bs-target="#editSalesNoteModal{{ $salesNote->id }}"
+                                            data-bs-toggle="modal"><i class="bi bi-pencil"></i></button>
                                     </div>
                                     {{-- a form for deleting sales note --}}
-                                    <form class="" action="{{ route('salesNotes.destroy', $salesNote->id) }}"
+                                    <form action="{{ route("salesNotes.destroy", $salesNote->id) }}" class=""
                                         method="POST">
                                         @csrf
-                                        @method('DELETE')
-                                        <button type="submit" onclick="return confirm('Do you want to delete?')"
-                                            class="btn btn-danger"><i class="bi bi-trash"></i></button>
+                                        @method("DELETE")
+                                        <button class="btn btn-danger" onclick="return confirm('Do you want to delete?')"
+                                            type="submit"><i class="bi bi-trash"></i></button>
                                     </form>
                                 </div>
                             </td>
@@ -99,59 +99,60 @@
                         {{-- @endif --}}
 
                         {{-- Edit Sales Note Modal --}}
-                        <div class="modal fade" id="editSalesNoteModal{{ $salesNote->id }}" role="dialog"
-                            aria-labelledby="editSalesNoteModalLabel{{ $salesNote->id }}" aria-hidden="true">
+                        <div aria-hidden="true" aria-labelledby="editSalesNoteModalLabel{{ $salesNote->id }}"
+                            class="modal fade" id="editSalesNoteModal{{ $salesNote->id }}" role="dialog">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
-                                    <form action="{{ route('salesNotes.update') }}" method="POST">
+                                    <form action="{{ route("salesNotes.update") }}" method="POST">
                                         @csrf
-                                        @method('PUT')
+                                        @method("PUT")
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="editSalesNoteModalLabel{{ $salesNote->id }}">
                                                 Edit Sales Note</h5>
-                                            <button type="button" class="close" data-bs-dismiss="modal"
-                                                aria-label="Close">
+                                            <button aria-label="Close" class="close" data-bs-dismiss="modal"
+                                                type="button">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
                                         <div class="modal-body d-flex flex-column">
                                             <div class="form-floating mb-2">
-                                                <input type="text" class="form-control" id="floatingName" name="name"
-                                                    placeholder="Amoxicillin" required value="{{ $salesNote->name }}">
+                                                <input class="form-control" id="floatingName" name="name"
+                                                    placeholder="Amoxicillin" required type="text"
+                                                    value="{{ $salesNote->name }}">
                                                 <label class="form-label" for="floatingName">Medicine Name</label>
                                             </div>
                                             <div class="row mb-2">
                                                 <div class="col-md-6 form-floating">
-                                                    <input type="number" min="1" class="form-control"
-                                                        value="{{ $salesNote->quantity }}" id="floatingQuantity"
-                                                        name="quantity" placeholder="50" required>
+                                                    <input class="form-control" id="floatingQuantity" min="1"
+                                                        name="quantity" placeholder="50" required type="number"
+                                                        value="{{ $salesNote->quantity }}">
                                                     <label class="form-label" for="floatingQuantity">Quantity</label>
                                                 </div>
                                                 <div class="col-md-6 form-floating">
-                                                    <input type="number" min="1" class="form-control"
-                                                        value="{{ $salesNote->unit_price }}" id="floatingUnitPrice"
-                                                        name="unit_price" placeholder="200" required>
+                                                    <input class="form-control" id="floatingUnitPrice" min="1"
+                                                        name="unit_price" placeholder="200" required type="number"
+                                                        value="{{ $salesNote->unit_price }}">
                                                     <label class="form-label" for="floatingUnitPrice">Unit Price</label>
                                                 </div>
                                             </div>
                                             <div class="form-floating mb-2">
-                                                <input type="text" class="form-control"
-                                                    value="{{ $salesNote->description }}" id="floatingDescription"
-                                                    name="description" placeholder="Sold for headache">
+                                                <input class="form-control" id="floatingDescription" name="description"
+                                                    placeholder="Sold for headache" type="text"
+                                                    value="{{ $salesNote->description }}">
                                                 <label class="form-label" for="floatingDescription">Description</label>
                                             </div>
 
-                                            <input readonly hidden type="text" name="pharmacy_id"
-                                                placeholder="Pharmacy ID" value="{{ $salesNote->pharmacy_id }}" required>
-                                            <input readonly hidden type="text" name="staff_id" placeholder="Staff ID"
-                                                value="{{ $salesNote->staff_id }}" required>
-                                            <input readonly hidden type="number" name="id" placeholder="Note ID"
-                                                value="{{ $salesNote->id }}" required>
+                                            <input hidden name="pharmacy_id" placeholder="Pharmacy ID" readonly required
+                                                type="text" value="{{ $salesNote->pharmacy_id }}">
+                                            <input hidden name="staff_id" placeholder="Staff ID" readonly required
+                                                type="text" value="{{ $salesNote->staff_id }}">
+                                            <input hidden name="id" placeholder="Note ID" readonly required
+                                                type="number" value="{{ $salesNote->id }}">
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-primary">Update</button>
+                                            <button class="btn btn-secondary" data-bs-dismiss="modal"
+                                                type="button">Close</button>
+                                            <button class="btn btn-primary" type="submit">Update</button>
                                         </div>
                                     </form>
                                 </div>
@@ -159,16 +160,16 @@
                         </div>
 
                         {{-- Show sales note --}}
-                        <div class="modal fade bd-example-modal-lg" id="showSalesNoteModal{{ $salesNote->id }}"
-                            role="dialog" aria-labelledby="showSalesNoteModalLabel{{ $salesNote->id }}"
-                            aria-hidden="true">
+                        <div aria-hidden="true" aria-labelledby="showSalesNoteModalLabel{{ $salesNote->id }}"
+                            class="modal fade bd-example-modal-lg" id="showSalesNoteModal{{ $salesNote->id }}"
+                            role="dialog">
                             <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="showSalesNoteModalLabel{{ $salesNote->id }}">Show
                                             Sales Note</h5>
-                                        <button type="button" class="close" data-bs-dismiss="modal"
-                                            aria-label="Close">
+                                        <button aria-label="Close" class="close" data-bs-dismiss="modal"
+                                            type="button">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
@@ -183,14 +184,14 @@
                                                 <p><strong>Created at:</strong> {{ $salesNote->created_at }}</p>
                                                 {{-- <p><strong>Pharmacy:</strong> {{ $salesNote->pharmacy_id }}</p> --}}
                                                 <p><strong>Added by:</strong>
-                                                    {{ $salesNote->staff_id == Auth::user()->id ? 'You!' : $salesNote->staff->name }}
+                                                    {{ $salesNote->staff_id == Auth::user()->id ? "You!" : $salesNote->staff->name }}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-bs-dismiss="modal">Close</button>
+                                        <button class="btn btn-secondary" data-bs-dismiss="modal"
+                                            type="button">Close</button>
                                     </div>
                                 </div>
                             </div>
@@ -202,60 +203,60 @@
     </div>
 
     {{-- Create Sales Note Modal --}}
-    <div class="modal fadetext-white modal-lg" id="createSalesNoteModal" role="dialog"
-        aria-labelledby="createSalesNoteModalLabel" aria-hidden="true">
+    <div aria-hidden="true" aria-labelledby="createSalesNoteModalLabel" class="modal fadetext-white modal-lg"
+        id="createSalesNoteModal" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form action="{{ route('salesNotes.store') }}" method="POST">
+                <form action="{{ route("salesNotes.store") }}" method="POST">
                     @csrf
-                    <div class="modal-header  bg-primary text-white">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="createSalesNoteModalLabel">Create Sales Note</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                     </div>
                     <div class="modal-body d-flex flex-column">
                         <div class="form-floating mb-2">
-                            <input type="text" class="form-control" id="floatingName" name="name"
-                                placeholder="Amoxicillin" required>
+                            <input class="form-control" id="floatingName" name="name" placeholder="Amoxicillin"
+                                required type="text">
                             <label class="form-label" for="floatingName">Medicine Name<span
                                     class="text-danger">*</span></label>
                         </div>
                         <div class="row mb-2">
                             <div class="col-md-3 form-floating">
-                                <input type="number" min="1" class="form-control" id="floatingQuantity"
-                                    name="quantity" placeholder="50" required>
+                                <input class="form-control" id="floatingQuantity" min="1" name="quantity"
+                                    placeholder="50" required type="number">
                                 <label class="form-label" for="floatingQuantity">Quantity<span
                                         class="text-danger">*</span></label>
                             </div>
                             <div class="col-md-5 form-floating">
-                                <input type="number" min="1" class="form-control" id="floatingUnitPrice"
-                                    name="unit_price" placeholder="200" required>
+                                <input class="form-control" id="floatingUnitPrice" min="1" name="unit_price"
+                                    placeholder="200" required type="number">
                                 <label class="form-label" for="floatingUnitPrice">Unit Selling Price<span
                                         class="text-danger">*</span></label>
                             </div>
                             {{-- quantity* unit selling price --}}
                             <div class="col-md-4 form-floating">
-                                <input type="text" class="form-control fw-bold text-success" id="floatingTotalPrice" name="total_price"
-                                    placeholder="100000" readonly>
+                                <input class="form-control fw-bold text-success" id="floatingTotalPrice"
+                                    name="total_price" placeholder="100000" readonly type="text">
                                 <label class="form-label fw-bold text-dark" for="TotalAmount">Total Price
                                     <span class="text-danger">*</span>
                                 </label>
                             </div>
                         </div>
                         <div class="form-floating mb-2">
-                            <input type="text" class="form-control" id="floatingDescription" name="description"
-                                placeholder="Sold for headache">
+                            <input class="form-control" id="floatingDescription" name="description"
+                                placeholder="Sold for headache" type="text">
                             <label class="form-label" for="floatingDescription">Description <span
                                     class="text-success">(optional)</span></label>
                         </div>
 
-                        <input readonly hidden type="text" name="pharmacy_id" placeholder="Pharmacy ID"
-                            value="{{ session('current_pharmacy_id') }}" required>
-                        <input readonly hidden type="text" name="staff_id" placeholder="Staff ID"
-                            value="{{ auth()->id() }}" required>
+                        <input hidden name="pharmacy_id" placeholder="Pharmacy ID" readonly required type="text"
+                            value="{{ session("current_pharmacy_id") }}">
+                        <input hidden name="staff_id" placeholder="Staff ID" readonly required type="text"
+                            value="{{ auth()->id() }}">
                     </div>
                     <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-secondary " data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                        <button class="btn btn-primary" type="submit">Save</button>
                     </div>
                 </form>
             </div>
@@ -266,56 +267,55 @@
     <div class="modal fade" id="promoteSelectedSaleNoteModal" role="dialog">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
-                <form action="{{ route('salesNotes.promote') }}" id="promoteSaleNoteForm" method="POST">
+                <form action="{{ route("salesNotes.promote") }}" id="promoteSaleNoteForm" method="POST">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Promote Selected Sales Notes</h5>
 
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button class="close" data-bs-dismiss="modal" type="button">&times;</button>
                     </div>
-                    <div id="promotionPannel" class="modal-body">
+                    <div class="modal-body" id="promotionPannel">
 
                         {{-- This will be populated with rows of each item to be promoted --}}
 
                     </div>
                     <div class="justify-content-between modal-footer">
-                        <button id="closePromotionModal" type="button" class="btn btn-secondary"
-                            data-bs-dismiss="modal">Close</button>
-                        <button type="submit" id="submitPromotion" class="btn btn-success">Promote</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" id="closePromotionModal"
+                            type="button">Close</button>
+                        <button class="btn btn-success" id="submitPromotion" type="submit">Promote</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-
     {{-- Modal for promoting multiple sales notes as one item at once --}}
     <div class="modal fade" id="promoteSelectedSaleNoteAsOneModal" role="dialog">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
-                <form action="{{ route('salesNotes.promoteAsOne') }}" id="promoteSaleNoteAsOneForm" method="POST">
+                <form action="{{ route("salesNotes.promoteAsOne") }}" id="promoteSaleNoteAsOneForm" method="POST">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Promote Selected Sales Notes as One Item</h5>
                         {{-- Button to promote to existing items --}}
-                        <button type="button" class="btn btn-outline-success promoteToExistingItems"
-                            id="promoteAsOneToExistingItems">Promote to Existing
+                        <button class="btn btn-outline-success promoteToExistingItems" id="promoteAsOneToExistingItems"
+                            type="button">Promote to Existing
                             items </button>
                         {{-- Button to promote to existing stocks --}}
-                        <button type="button" class="btn btn-outline-success promoteToExistingStocks"
-                            id="promoteAsOneToExistingStocks">Promote to
+                        <button class="btn btn-outline-success promoteToExistingStocks" id="promoteAsOneToExistingStocks"
+                            type="button">Promote to
                             Existing Stocks </button>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button class="close" data-bs-dismiss="modal" type="button">&times;</button>
                     </div>
-                    <div id="asOnePromotionPannel" class="modal-body">
+                    <div class="modal-body" id="asOnePromotionPannel">
 
                         {{-- This will be populated with one row of item  --}}
 
                     </div>
                     <div class="justify-content-between modal-footer">
-                        <button id="closeAsOnePromotionModal" type="button" class="btn btn-secondary"
-                            data-bs-dismiss="modal">Close</button>
-                        <button type="submit" id="submitPromotion" class="btn btn-success">Promote</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" id="closeAsOnePromotionModal"
+                            type="button">Close</button>
+                        <button class="btn btn-success" id="submitPromotion" type="submit">Promote</button>
                     </div>
                 </form>
             </div>
@@ -423,7 +423,7 @@
                                 <label class="form-label" for="supplier_name">Supplier Name</label>
                             </div>
                             <div class="col-md-4 form-floating">
-                                <input class="form-control" type="date" value="{{ date('Y-m-d') }}"
+                                <input class="form-control" type="date" value="{{ date("Y-m-d") }}"
                                     name="date" placeholder="Entry Date" required>
                                 <label class="form-label" for="date">Entry Date</label>
                             </div>
@@ -520,7 +520,7 @@
                                 <label class="form-label" for="supplier_name">Supplier Name</label>
                             </div>
                             <div class="col-md-4 form-floating">
-                                <input class="form-control" type="date" value="{{ date('Y-m-d') }}"
+                                <input class="form-control" type="date" value="{{ date("Y-m-d") }}"
                                     name="date" required placeholder="Entry Date">
                                 <label class="form-label" for="date">Entry Date</label>
                             </div>
@@ -623,7 +623,7 @@
                                 <label class="form-label" for="supplier_name">Supplier Name</label>
                             </div>
                             <div class="col-md-4 form-floating">
-                                <input class="form-control" type="date" value="{{ date('Y-m-d') }}"
+                                <input class="form-control" type="date" value="{{ date("Y-m-d") }}"
                                     name="date" placeholder="Entry Date" required>
                                 <label class="form-label" for="date">Entry Date</label>
                             </div>
@@ -730,7 +730,7 @@
                                 <label class="form-label" for="supplier_name">Supplier Name</label>
                             </div>
                             <div class="col-md-4 form-floating">
-                                <input class="form-control" type="date" value="{{ date('Y-m-d') }}"
+                                <input class="form-control" type="date" value="{{ date("Y-m-d") }}"
                                     name="date" placeholder="Entry Date" required>
                                 <label class="form-label" for="date">Entry Date</label>
                             </div>
@@ -871,7 +871,7 @@
                                 <label class="form-label" for="supplier_name">Supplier Name</label>
                             </div>
                             <div class="col-md-4 form-floating">
-                                <input class="form-control" type="date" value="{{ date('Y-m-d') }}"
+                                <input class="form-control" type="date" value="{{ date("Y-m-d") }}"
                                     name="date" placeholder="Entry Date" required>
                                 <label class="form-label" for="date">Entry Date</label>
                             </div>

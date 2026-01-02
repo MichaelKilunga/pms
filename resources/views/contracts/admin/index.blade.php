@@ -1,13 +1,13 @@
-@extends('contracts.app')
+@extends("contracts.app")
 
-@section('content')
+@section("content")
     <div class="container mt-4">
         <div class="d-flex justify-content-between mb-2">
             <h1>All Contracts</h1>
-            <a href="{{ route('contracts.admin.create') }}" class="btn btn-primary">Create Contract</a>
+            <a class="btn btn-primary" href="{{ route("contracts.admin.create") }}">Create Contract</a>
         </div>
 
-        <table class="table mt-4 table-striped" id="Table">
+        <table class="table-striped small mt-4 table" id="Table">
             <thead>
                 <tr>
                     <th>#</th>
@@ -29,12 +29,15 @@
                         <td>{{ $contract->package->name }}</td>
                         {{-- different of enddate and startdate in days --}}
                         <td>{{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) }}
-                            days  ({{((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)))/30)}} Month)</td>
-                        <td>{{ number_format(((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)))/30) * $contract->package->price) }}</td>
+                            days
+                            ({{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30 }}
+                            Month)</td>
+                        <td>{{ number_format((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) * $contract->package->price) }}
+                        </td>
                         <td>{{ $contract->status }}</td>
                         <td>{{ $contract->payment_status }}</td>
                         {{-- show time remained in human readable format, use time difference between now and end date, if time has passed show negative passed time --}}
-                        @if ($contract->status == 'active')
+                        @if ($contract->status == "active")
                             @if (\Carbon\Carbon::parse($contract->end_date) < now())
                                 <td class="text-danger">Expired
                                     {{ \Carbon\Carbon::parse($contract->end_date)->diffForHumans() }}
@@ -42,9 +45,9 @@
                             @else
                                 <td>{{ \Carbon\Carbon::parse($contract->end_date)->diffForHumans() }}</td>
                             @endif
-                        @elseif ($contract->status == 'inactive')
+                        @elseif ($contract->status == "inactive")
                             <td>Not started</td>
-                        @elseif ($contract->status == 'graced')
+                        @elseif ($contract->status == "graced")
                             @if (\Carbon\Carbon::parse($contract->grace_end_date) < now())
                                 <td class="text-danger">Grace Period Expired
                                     {{ \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() }}
@@ -57,17 +60,17 @@
 
                         <td>
                             {{-- below create a a view button and a modal to view contract when view action button is clicked --}}
-                            <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#viewModal{{ $contract->id }}"
+                            <a class="btn btn-primary" data-bs-target="#viewModal{{ $contract->id }}" data-bs-toggle="modal"
                                 href="#"><i class="bi bi-eye"></i></a>
                             {{-- modal --}}
-                            <div class="modal fade " id="viewModal{{ $contract->id }}" tabindex="-1"
-                                aria-labelledby="viewModalLabel" aria-hidden="true">
+                            <div aria-hidden="true" aria-labelledby="viewModalLabel" class="modal fade"
+                                id="viewModal{{ $contract->id }}" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="viewModalLabel">View Contract</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
+                                            <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
+                                                type="button"></button>
                                         </div>
                                         <div class="modal-body text-left">
                                             <p><strong>Owner:</strong> {{ $contract->owner->name }}</p>
@@ -82,23 +85,23 @@
                                             <p><strong>Updated At:</strong> {{ $contract->updated_at }}</p>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
+                                            <button class="btn btn-secondary" data-bs-dismiss="modal"
+                                                type="button">Close</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             {{-- action button to confirm payement --}}
-                            <a class="btn btn-success {{ $contract->payment_status == 'payed' ? 'disabled' : '' }} "
-                                onclick="return confirm('Do you want to confirm payment?')"
-                                href="{{ route('contracts.admin.confirm', $contract->id) }}"><i
+                            <a class="btn btn-success {{ $contract->payment_status == "payed" ? "disabled" : "" }}"
+                                href="{{ route("contracts.admin.confirm", $contract->id) }}"
+                                onclick="return confirm('Do you want to confirm payment?')"><i
                                     class="bi bi-cash-coin"></i></a>
                             {{-- action button to grace a grace period --}}
-                            <a class="btn btn-warning {{ \Carbon\Carbon::parse($contract->end_date) < now() && !$contract->grace_end_date ? '' : 'disabled' }} "
+                            <a class="btn btn-warning {{ \Carbon\Carbon::parse($contract->end_date) < now() && !$contract->grace_end_date ? "" : "disabled" }}"
                                 href="javascript:void(0);"
                                 onclick="let daysToAdd = prompt('How many days do you want to add?'); 
                                      if (daysToAdd !== null && !isNaN(daysToAdd)) {
-                                         window.location.href = '{{ route('contracts.admin.grace', $contract->id) }}' + '?days=' + daysToAdd;
+                                         window.location.href = '{{ route("contracts.admin.grace", $contract->id) }}' + '?days=' + daysToAdd;
                                      } else {
                                          alert('Please enter a valid number of days.');
                                      }">

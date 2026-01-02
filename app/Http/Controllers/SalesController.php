@@ -9,6 +9,7 @@ use App\Models\PrinterSetting;
 use App\Models\Staff;
 use App\Models\Stock;
 use App\Models\User;
+use App\Notifications\StockLowNotification;
 use Dompdf\Dompdf;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
@@ -271,6 +272,15 @@ class SalesController extends BaseController
                         if ($thisSale) {
                             // update the stock quantity to 0
                             $stocks->update(['remain_Quantity' => 0]);
+                            
+                            // Check Low Stock
+                            if ($stocks->remain_Quantity <= $stocks->low_stock_percentage) {
+                                try {
+                                    $stocks->pharmacy->owner->notify(new StockLowNotification($stocks));
+                                } catch (\Exception $e) {
+                                    Log::error("Failed to send low stock notification: " . $e->getMessage());
+                                }
+                            }
                         }
                     } else {
 
@@ -289,6 +299,16 @@ class SalesController extends BaseController
                         if ($thisSale) {
                             // update the stock quantity to the remaining quantity
                             $stocks->update(['remain_Quantity' => $stocks->remain_Quantity - $temp_quantity]);
+                            
+                            // Check Low Stock
+                            if ($stocks->remain_Quantity <= $stocks->low_stock_percentage) {
+                                try {
+                                    $stocks->pharmacy->owner->notify(new StockLowNotification($stocks));
+                                } catch (\Exception $e) {
+                                    Log::error("Failed to send low stock notification: " . $e->getMessage());
+                                }
+                            }
+
                             // update the temporary quantity to 0
                             $temp_quantity = 0;
                         }

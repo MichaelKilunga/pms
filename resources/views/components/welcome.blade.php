@@ -1,21 +1,21 @@
-    @section('title', 'Dashboard')
-    @section('meta_description', 'Pharmacy Management System Dashboard')
-    @section('meta_keywords', 'Pharmacy Management System Dashborad')
+    @section("title", "Dashboard")
+    @section("meta_description", "Pharmacy Management System Dashboard")
+    @section("meta_keywords", "Pharmacy Management System Dashborad")
 
     <div class="container mt-2">
-        @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
+        @hasanyrole("Owner|Manager")
             {{-- Quick Actions Section --}}
-            <div class="row mb-4 g-4 justify-content-center text-center">
+            <div class="row g-4 justify-content-center mb-4 text-center">
                 <div class="col-6 col-md-4 col-lg-2">
-                    <button data-bs-toggle="modal" data-bs-target="#createSalesNoteModal"
-                        class="card bg-primary text-white shadow text-decoration-none">
+                    <button class="card bg-primary text-decoration-none text-white shadow"
+                        data-bs-target="#createSalesNoteModal" data-bs-toggle="modal">
                         <div class="card-body">
                             <h6><i class="bi bi-plus-circle fs-1#"></i> Create Sales Notebook</h6>
                         </div>
                     </button>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="{{ route('staff') }}" class="card bg-success text-white shadow text-decoration-none">
+                    <a class="card bg-success text-decoration-none text-white shadow" href="{{ route("staff") }}">
                         <div class="card-body">
                             <h6><i class="bi bi-people-fill fs-1#"></i>Manage Pharmacist</h6>
 
@@ -23,7 +23,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="{{ route('pharmacies') }}" class="card bg-warning text-dark shadow text-decoration-none">
+                    <a class="card bg-warning text-dark text-decoration-none shadow" href="{{ route("pharmacies") }}">
                         <div class="card-body">
                             <h6><i class="bi bi-hospital fs-1#"></i> View Pharmacies</h6>
 
@@ -31,15 +31,15 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="" data-bs-toggle="modal" data-bs-target="#createSalesModal"
-                        class="card bg-danger text-white shadow text-decoration-none">
+                    <a class="card bg-danger text-decoration-none text-white shadow" data-bs-target="#createSalesModal"
+                        data-bs-toggle="modal" href="">
                         <div class="card-body">
                             <h6><i class="bi bi-cart-plus fs-1#"></i> Create new Sales</h6>
                         </div>
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="{{ route('reports.all') }}" class="card bg-info text-white shadow text-decoration-none">
+                    <a class="card bg-info text-decoration-none text-white shadow" href="{{ route("reports.all") }}">
                         <div class="card-body">
                             <h6><i class="bi bi-file-earmark-bar-graph fs-1#"></i> Generate Report</h6>
 
@@ -47,7 +47,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="{{ route('stock') }}" class="card bg-secondary text-white shadow text-decoration-none">
+                    <a class="card bg-secondary text-decoration-none text-white shadow" href="{{ route("stock") }}">
                         <div class="card-body">
                             <h6><i class="bi bi-box-seam fs-1#"></i> Check Stocks</h6>
 
@@ -57,7 +57,7 @@
             </div>
 
             {{-- Summary Section --}}
-            <div class="row mb-4 g-4 justify-content-center text-center">
+            <div class="row g-4 justify-content-center mb-4 text-center">
                 <div class="col-6 col-md-4 col-lg-2">
                     <div class="card bg-primary text-white shadow">
                         <div class="card-body">
@@ -119,13 +119,13 @@
                     </div>
                 </div>
             </div>
-        @endif
-        @if (Auth::user()->role == 'staff')
+        @endhasanyrole
+        @hasrole("Staff")
             {{-- Quick Actions Section --}}
-            <div class="row mb-4 g-4 justify-content-center text-center">
+            <div class="row g-4 justify-content-center mb-4 text-center">
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a href="" data-bs-toggle="modal" data-bs-target="#createSalesModal"
-                        class="card bg-danger text-white shadow text-decoration-none">
+                    <a class="card bg-danger text-decoration-none text-white shadow" data-bs-target="#createSalesModal"
+                        data-bs-toggle="modal" href="">
                         <div class="card-body">
                             <h6><i class="bi bi-cart-plus fs-1#"></i> Create new Sales</h6>
 
@@ -133,8 +133,8 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <button data-bs-toggle="modal" data-bs-target="#createSalesNoteModal"
-                        class="card bg-primary text-white shadow text-decoration-none">
+                    <button class="card bg-primary text-decoration-none text-white shadow"
+                        data-bs-target="#createSalesNoteModal" data-bs-toggle="modal">
                         <div class="card-body">
                             <h6><i class="bi bi-plus-circle fs-1#"></i> Create Sales Notebook</h6>
                             {{-- <p class="fs-5 fw-bold">{{ $totalMedicines }}</p> --}}
@@ -162,7 +162,7 @@
                         </div>
                     </div>
                 </div>
-                 <!-- Locked sales card (hidden initially) -->
+                <!-- Locked sales card (hidden initially) -->
                 <div class="col-6 col-md-4 col-lg-2" id="totalSalesCard" style="display: none;">
                     <div class="card bg-success text-white shadow">
                         <div class="card-body">
@@ -184,15 +184,13 @@
                     </div>
                 </div>
             </div>
-        @endif
-
-
+        @endhasrole
 
         {{-- Sales Filter Section --}}
         <div class="row mb-4">
             {{-- Sales Vs medicine graph --}}
             <div class="col-md-6 mb-4">
-                <div class="card shadow h-100">
+                <div class="card h-100 shadow">
                     <div class="card-body salesGraph">
                         <h4 class="text-center">Sales vs Medicines Graph</h4>
                         <canvas id="salesGraph"></canvas>
@@ -205,24 +203,24 @@
                     <div class="col-12">
                         <div class="card shadow">
                             <div class="card-body">
-                                <h4 class="text-center mb-3">Search Medicine</h4>
-                                <form id="search_form"
-                                    class="row gy-2 gx-3 align-items-center justify-content-center">
+                                <h4 class="mb-3 text-center">Search Medicine</h4>
+                                <form class="row gy-2 gx-3 align-items-center justify-content-center"
+                                    id="search_form">
                                     <hr>
                                     <div class="col-auto">
-                                        <input id="medicine" type="text" name="searchValue"
-                                            class="form-control search">
+                                        <input class="form-control search" id="medicine" name="searchValue"
+                                            type="text">
                                     </div>
                                     <div class="col-auto">
-                                        <button type="submit" class="btn btn-primary"><i
+                                        <button class="btn btn-primary" type="submit"><i
                                                 class="bi bi-search"></i></button>
                                     </div>
                                 </form>
-                                <div class="mt-3 ml-5   ">
+                                <div class="ml-5 mt-3">
                                     <h5 class="fw-bold ml-7">
-                                        Status: <span id="avaiable_medicine" class="text-success"></span>
-                                        <br>Similar Medicines Available: <span id="similar_medicine"
-                                            class="text-warning "></span>
+                                        Status: <span class="text-success" id="avaiable_medicine"></span>
+                                        <br>Similar Medicines Available: <span class="text-warning"
+                                            id="similar_medicine"></span>
                                     </h5>
                                 </div>
                             </div>
@@ -231,33 +229,32 @@
                 </div>
 
                 {{-- Sales filter --}}
-                @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
-                    <div class="row  mt-2">
+                @hasanyrole("Owner|Manager")
+                    <div class="row mt-2">
                         <div class="col-12">
                             <div class="card shadow">
                                 <div class="card-body">
-                                    <h4 class="text-center mb-3">Total Sales</h4>
-                                    <form id="filter-Form"
-                                        class="row gy-2 gx-3 align-items-center justify-content-center">
+                                    <h4 class="mb-3 text-center">Total Sales</h4>
+                                    <form class="row gy-2 gx-3 align-items-center justify-content-center"
+                                        id="filter-Form">
                                         <hr>
                                         <div class="col-auto">
-                                            <select name="filter" class="form-select" required>
-                                                <option value="day" {{ $filter == 'day' ? 'selected' : '' }}>Today
+                                            <select class="form-select" name="filter" required>
+                                                <option {{ $filter == "day" ? "selected" : "" }} value="day">Today
                                                 </option>
-                                                <option value="week" {{ $filter == 'week' ? 'selected' : '' }}>This
+                                                <option {{ $filter == "week" ? "selected" : "" }} value="week">This
                                                     Week
                                                 </option>
-                                                <option value="month" {{ $filter == 'month' ? 'selected' : '' }}>This
+                                                <option {{ $filter == "month" ? "selected" : "" }} value="month">This
                                                     Month
                                                 </option>
-                                                <option value="year" {{ $filter == 'year' ? 'selected' : '' }}>This
+                                                <option {{ $filter == "year" ? "selected" : "" }} value="year">This
                                                     Year
                                                 </option>
                                             </select>
                                         </div>
                                         <div class="col-auto">
-                                            <button id="apply-filter-btn" type="submit"
-                                                class="btn btn-primary">Apply
+                                            <button class="btn btn-primary" id="apply-filter-btn" type="submit">Apply
                                                 Filter</button>
                                         </div>
                                     </form>
@@ -273,19 +270,18 @@
                             </div>
                         </div>
                     </div>
-                @endif
+                @endhasanyrole
 
-
-                @if (Auth::user()->role == 'staff')
+                @hasrole("Staff")
                     <!-- Eye icon (initial display) -->
-                    <div id="unlock-section" class="text-center mt-3">
+                    <div class="mt-3 text-center" id="unlock-section">
                         <div class="col-12">
                             <div class="card shadow">
                                 <div class="card-body">
-                                    <h4 class="text-center mb-3">Total Sales</h4>
+                                    <h4 class="mb-3 text-center">Total Sales</h4>
                                     <hr>
-                                    <button id="eye-icon" class="btn btn-md btn-info text-white mt-2">
-                                        <i class="fas fa-eye-slash  fa-1x" style="cursor: pointer;"></i>
+                                    <button class="btn btn-md btn-info mt-2 text-white" id="eye-icon">
+                                        <i class="fas fa-eye-slash fa-1x" style="cursor: pointer;"></i>
                                     </button>
                                     <p>Click the eye icon to unlock the sales report.</p>
                                 </div>
@@ -295,16 +291,15 @@
                     </div>
 
                     <!-- Password prompt (hidden initially) -->
-                    <div id="password-section" class="text-center mt-3" style="display: none;">
+                    <div class="mt-3 text-center" id="password-section" style="display: none;">
                         <div class="col-12">
                             <div class="card shadow">
                                 <div class="card-body">
-                                    <h4 class="text-center mb-3">Total Sales</h4>
+                                    <h4 class="mb-3 text-center">Total Sales</h4>
                                     <hr class="mb-2">
-                                    <input type="password" id="unlock-password"
-                                        class="form-control d-inline-block w-auto" placeholder="Enter Password"
-                                        required>
-                                    <button id="check-password-btn" class="btn btn-primary">Unlock</button> <br>
+                                    <input class="form-control d-inline-block w-auto" id="unlock-password"
+                                        placeholder="Enter Password" required type="password">
+                                    <button class="btn btn-primary" id="check-password-btn">Unlock</button> <br>
                                     <span class="text-danger text-small" id="passwordCHechError"></span>
                                 </div>
                             </div>
@@ -312,17 +307,17 @@
                     </div>
 
                     <!-- Locked report (hidden initially) -->
-                    <div class="row mt-2 myreportcheck" style="display: none;">
+                    <div class="row myreportcheck mt-2" style="display: none;">
                         <div class="col-12">
                             <div class="card shadow">
                                 <div class="card-body">
-                                    <h4 class="text-center mb-3">Total Sales</h4>
-                                    <form id="filter-Form"
-                                        class="row gy-2 gx-3 align-items-center justify-content-center">
+                                    <h4 class="mb-3 text-center">Total Sales</h4>
+                                    <form class="row gy-2 gx-3 align-items-center justify-content-center"
+                                        id="filter-Form">
                                         <hr>
                                         <div class="col-auto">
-                                            <select name="filter" class="form-select" required>
-                                                <option value="day" {{ $filter == 'day' ? 'selected' : '' }}>Today
+                                            <select class="form-select" name="filter" required>
+                                                <option {{ $filter == "day" ? "selected" : "" }} value="day">Today
                                                 </option>
                                                 {{-- <option value="week" {{ $filter == 'week' ? 'selected' : '' }}>This Week
                                         </option>
@@ -334,8 +329,7 @@
                                             </select>
                                         </div>
                                         <div class="col-auto">
-                                            <button id="apply-filter-btn" type="submit"
-                                                class="btn btn-primary">Apply
+                                            <button class="btn btn-primary" id="apply-filter-btn" type="submit">Apply
                                                 Filter</button>
                                         </div>
                                     </form>
@@ -352,9 +346,7 @@
                             </div>
                         </div>
                     </div>
-                @endif
-
-
+                @endhasrole
 
             </div>
         </div>
@@ -368,7 +360,7 @@
                         <div class="card-body">
                             <h4 class="text-center">Stock Summary</h4>
                             <div class="table-responsive mt-2">
-                                <table id="Table" class="table table-striped table-hover">
+                                <table class="table-striped table-hover table" id="Table">
                                     <thead>
                                         <tr>
                                             <th>Medicine</th>
@@ -391,7 +383,7 @@
             </div>
             {{-- Stock Vs medicine graph --}}
             <div class="col-md-6 mb-4">
-                <div class="card shadow h-100">
+                <div class="card h-100 shadow">
                     <div class="card-body">
                         <h4 class="text-center">Stock vs Medicines Graph</h4>
                         <canvas id="stockGraph"></canvas>
@@ -400,28 +392,27 @@
             </div>
         </div>
 
-
     </div>
 
     <!-- Create Sales Modal -->
-    <div class="modal fade" id="createSalesModal" tabindex="-1" aria-labelledby="createSalesModalLabel"
-        aria-hidden="true">
+    <div aria-hidden="true" aria-labelledby="createSalesModalLabel" class="modal fade" id="createSalesModal"
+        tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="createSalesModalLabel">Add New Sale</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('sales.store') }}" method="POST" id="salesForm">
+                    <form action="{{ route("sales.store") }}" id="salesForm" method="POST">
                         @csrf
                         <div id="salesFields">
-                            <div class="row mb-3 sale-entry align-items-center">
-                                <input type="text" name="stock_id[]" hidden required>
+                            <div class="row sale-entry align-items-center mb-3">
+                                <input hidden name="stock_id[]" required type="text">
                                 <div class="col-md-4">
                                     <label class="form-label">Medicine</label>
-                                    <select name="item_id[]" class="form-select chosen" required>
-                                        <option selected disabled value="">Select Item</option>
+                                    <select class="chosen form-select" name="item_id[]" required>
+                                        <option disabled selected value="">Select Item</option>
                                         @foreach ($sellMedicines as $sellMedicine)
                                             {{-- <option value="{{ $sellMedicine->item->id }}">{{ $sellMedicine->item->name }}
                                         </option> --}}
@@ -440,24 +431,24 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Price(TZS)</label>
-                                    <input type="text" class="form-control" placeholder="Price"
-                                        name="total_price[]" value="0" readonly required>
+                                    <input class="form-control" name="total_price[]" placeholder="Price" readonly
+                                        required type="text" value="0">
                                 </div>
                                 <div class="col-md-2">
-                                    <label class="form-label  stock-label" for="label[]">Quantity</label>
-                                    <input type="number" class="form-control" min="1"
-                                        title="Only 10 has remained in stock!" placeholder="Quantity"
-                                        name="quantity[]" required>
+                                    <label class="form-label stock-label" for="label[]">Quantity</label>
+                                    <input class="form-control" min="1" name="quantity[]"
+                                        placeholder="Quantity" required title="Only 10 has remained in stock!"
+                                        type="number">
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Amount</label>
-                                    <input type="number" class="form-control amount" name="amount[]"
-                                        placeholder="Amount" readonly>
+                                    <input class="form-control amount" name="amount[]" placeholder="Amount" readonly
+                                        type="number">
                                 </div>
                                 <div class="col-md-0" hidden>
                                     <label class="form-label">Date</label>
-                                    <input type="text" class="form-control date" name="date[]"
-                                        value="{{ now() }}" required>
+                                    <input class="form-control date" name="date[]" required type="text"
+                                        value="{{ now() }}">
                                 </div>
                             </div>
                         </div>
@@ -466,19 +457,19 @@
                                 <strong>Total Amount:</strong>
                             </div>
                             <div class="col-md-3 text-end">
-                                <input type="text" class="form-control text-danger" id="totalAmount"
-                                    value="0" readonly>
+                                <input class="form-control text-danger" id="totalAmount" readonly type="text"
+                                    value="0">
                             </div>
                             <div class="col-md-1 text-end">
-                                <!-- <input class="btn btn-outline-danger" id="totalAmount" value="0" disabled> -->
+                                <!-- <input class="btn btn-outline-danger" disabled id="totalAmount" value="0"> -->
                             </div>
                         </div>
                         <div class="mt-3">
-                            <div class="col-md-11 d-flex justify-content-between ">
-                                <button type="button" id="addSaleRow" class="btn btn-outline-primary">
+                            <div class="col-md-11 d-flex justify-content-between">
+                                <button class="btn btn-outline-primary" id="addSaleRow" type="button">
                                     <i class="bi bi-plus-lg"></i> Add Row
                                 </button>
-                                <button type="submit" class="btn btn-success">
+                                <button class="btn btn-success" type="submit">
                                     <i class="bi bi-save"></i> Save Sales
                                 </button>
                             </div>
@@ -493,62 +484,62 @@
     </div>
 
     {{-- Create Sales Note Modal --}}
-    <div class="modal fade modal-lg" id="createSalesNoteModal" role="dialog"
-        aria-labelledby="createSalesNoteModalLabel" aria-hidden="true">
+    <div aria-hidden="true" aria-labelledby="createSalesNoteModalLabel" class="modal fade modal-lg"
+        id="createSalesNoteModal" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form action="{{ route('salesNotes.store') }}" method="POST">
+                <form action="{{ route("salesNotes.store") }}" method="POST">
                     @csrf
-                    <div class="modal-header text-white bg-primary">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="createSalesNoteModalLabel">Create Sales Note</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+                        <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
+                            type="button"></button>
                     </div>
                     <div class="modal-body d-flex flex-column">
                         <div class="form-floating mb-2">
-                            <input type="text" class="form-control" id="floatingName" name="name"
-                                placeholder="Amoxicillin" required>
+                            <input class="form-control" id="floatingName" name="name" placeholder="Amoxicillin"
+                                required type="text">
                             <label class="form-label" for="floatingName">Medicine Name<span
                                     class="text-danger">*</span></label>
                         </div>
                         <div class="row mb-2">
                             <div class="col-md-3 form-floating">
-                                <input type="number" min="1" class="form-control" id="floatingQuantity"
-                                    name="quantity" placeholder="50" required>
+                                <input class="form-control" id="floatingQuantity" min="1" name="quantity"
+                                    placeholder="50" required type="number">
                                 <label class="form-label" for="floatingQuantity">Quantity<span
                                         class="text-danger">*</span></label>
                             </div>
                             <div class="col-md-5 form-floating">
-                                <input type="number" min="1" class="form-control" id="floatingUnitPrice"
-                                    name="unit_price" placeholder="200" required>
+                                <input class="form-control" id="floatingUnitPrice" min="1" name="unit_price"
+                                    placeholder="200" required type="number">
                                 <label class="form-label" for="floatingUnitPrice">Unit Selling Price<span
                                         class="text-danger">*</span></label>
                             </div>
 
                             {{-- quantity* unit selling price --}}
                             <div class="col-md-4 form-floating">
-                                <input type="text" class="form-control fw-bold text-success"
-                                    id="floatingTotalPrice" name="total_price" placeholder="100000" readonly>
+                                <input class="form-control fw-bold text-success" id="floatingTotalPrice"
+                                    name="total_price" placeholder="100000" readonly type="text">
                                 <label class="form-label fw-bold text-dark" for="TotalAmount">Total Price
                                     <span class="text-danger">*</span>
                                 </label>
                             </div>
                         </div>
                         <div class="form-floating mb-2">
-                            <input type="text" class="form-control" id="floatingDescription" name="description"
-                                placeholder="Sold for headache">
+                            <input class="form-control" id="floatingDescription" name="description"
+                                placeholder="Sold for headache" type="text">
                             <label class="form-label" for="floatingDescription">Description <span
                                     class="text-success">(optional)</span></label>
                         </div>
 
-                        <input readonly hidden type="text" name="pharmacy_id" placeholder="Pharmacy ID"
-                            value="{{ session('current_pharmacy_id') }}" required>
-                        <input readonly hidden type="text" name="staff_id" placeholder="Staff ID"
-                            value="{{ auth()->id() }}" required>
+                        <input hidden name="pharmacy_id" placeholder="Pharmacy ID" readonly required type="text"
+                            value="{{ session("current_pharmacy_id") }}">
+                        <input hidden name="staff_id" placeholder="Staff ID" readonly required type="text"
+                            value="{{ auth()->id() }}">
                     </div>
                     <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-secondary " data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                        <button class="btn btn-primary" type="submit">Save</button>
                     </div>
                 </form>
             </div>
@@ -716,7 +707,7 @@
 
                 // Perform AJAX request
                 $.ajax({
-                    url: '{{ route('medicines.search') }}',
+                    url: '{{ route("medicines.search") }}',
                     method: 'GET',
                     data: {
                         search: searchValue
@@ -1016,7 +1007,7 @@
 
                 // send backend check request
                 $.ajax({
-                    url: '{{ route('checkPassword') }}',
+                    url: '{{ route("checkPassword") }}',
                     method: 'POST',
                     data: {
                         password: enteredPassword,

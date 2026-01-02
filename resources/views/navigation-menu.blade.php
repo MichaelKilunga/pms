@@ -1,507 +1,107 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav
+    class="fixed left-0 top-0 z-40 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md dark:border-gray-700 dark:bg-gray-800/90">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {{-- FIRST ROW --}}
-        <div class="flex justify-between h-16">
-            <div class="flex">
+    <div class="px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 justify-between">
+            <div class="flex items-center">
+                <!-- Mobile Hamburger -->
+                <div class="-ml-2 mr-2 flex items-center lg:hidden">
+                    <button @click="sidebarOpen = ! sidebarOpen"
+                        class="inline-flex items-center justify-center rounded-md p-2 text-gray-500 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path :class="{ 'hidden': sidebarOpen, 'inline-flex': !sidebarOpen }" class="inline-flex"
+                                d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2" />
+                            <path :class="{ 'hidden': !sidebarOpen, 'inline-flex': sidebarOpen }" class="hidden"
+                                d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2" />
+                        </svg>
+                    </button>
+                </div>
+
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a class="flex text-primary items-center gap-2" href="{{ route('dashboard') }}">
+                <div class="flex shrink-0 items-center">
+                    <a class="flex items-center gap-2 text-xl font-bold tracking-tight text-primary-600 dark:text-primary-400"
+                        href="{{ route("dashboard") }}">
                         <x-application-mark class="block h-9 w-auto" />
-                        PILLPOINTONE
+                        <span class="hidden md:block">PILLPOINTONE</span>
                     </a>
                 </div>
             </div>
 
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <!-- Settings Dropdown -->
-                <div class="ms-3 relative inline-flex rounded-md">
-                    <span class="inline-flex rounded-md">
-                        <p id="clock"
-                            class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
-                        </p>
-                        <a href="{{ route('notifications') }}"
-                            class="inline-flex items-center text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 position-relative">
-                            <i class="bi bi-bell fs-4"></i>
-                            {{-- @if (Auth::user()->unreadNotifications->count() > 0) --}}
-                            <sup id="notifyBell"
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-light">
-                                {{ Auth::user()->unreadNotifications->count() }}
-                            </sup>
-                            {{-- @endif --}}
-                        </a>
-                        <h4
-                            class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
-                            {{ session('pharmacy_name') }}
-                            @if (Auth::user()->role == 'super')
-                                SUPER ADMIN
-                            @endif
-                        </h4>
-                    </span>
-                    <x-dropdown align="right" width="48">
-                        {{-- @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-                            <button
-                                class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
-                                <img class="size-8 rounded-full object-cover"
-                                    src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
-                            </button>
-                        @else --}}
-                        <x-slot name="trigger">
-                            <button type="button"
-                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
-                                {{ Auth::user()->name }}
+            <div class="flex items-center gap-4">
+                {{-- Clock & Notifications (Simplified) --}}
+                <div class="hidden items-center gap-3 md:flex">
+                    <p class="font-mono text-sm font-medium text-gray-500 dark:text-gray-400" id="clock"></p>
+                </div>
 
-                                <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                </svg>
+                <!-- Notification Bell -->
+                <a class="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+                    href="{{ route("notifications") }}">
+                    <i class="bi bi-bell text-xl"></i>
+                    @if (Auth::user()->unreadNotifications->count() > 0)
+                        <div
+                            class="absolute -right-1 -top-1 inline-flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 text-xs font-bold text-white dark:border-gray-900">
+                            {{ Auth::user()->unreadNotifications->count() }}
+                        </div>
+                    @endif
+                </a>
+
+                <!-- Settings Dropdown -->
+                <div class="relative ml-3">
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button
+                                class="flex items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-700 focus:outline-none dark:text-gray-400 dark:hover:text-gray-300"
+                                type="button">
+                                <div class="hidden text-right md:block">
+                                    <div class="text-xs text-gray-400">Welcome back</div>
+                                    <div class="font-bold text-gray-800 dark:text-white">{{ Auth::user()->name }}</div>
+                                </div>
+                                <img alt="{{ Auth::user()->name }}"
+                                    class="h-8 w-8 rounded-full border border-gray-200 object-cover"
+                                    src="{{ Auth::user()->profile_photo_url }}" />
                             </button>
                         </x-slot>
-                        {{-- @endif --}}
 
                         <x-slot name="content">
                             <!-- Account Management -->
                             <div class="block px-4 py-2 text-xs text-gray-400">
-                                {{ __('Manage Account') }}
+                                {{ __("Manage Account") }}
                             </div>
 
-                            <x-dropdown-link href="{{ route('profile.show') }}">
-                                {{ __('Profile') }}
-                            </x-dropdown-link>
+                            <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
+                                href="{{ route("profile.show") }}">
+                                {{ __("Profile") }}
+                            </a>
 
-                            {{-- Choose pharmacy --}}
-                            @if (Auth::user()->role == 'owner')
-                                <x-dropdown-link href="{{ route('pharmacies.switch') }}">
-                                    <p class="btn# btn-light text-danger">{{ __('Switch Pharmacy') }} </p>
-                                </x-dropdown-link>
+                            @if (Auth::user()->hasRole("Owner"))
+                                <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
+                                    href="{{ route("admin.settings.system") }}">
+                                    {{ __("System Configuration") }}
+                                </a>
+                                <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
+                                    href="{{ route("pharmacies.switch") }}">
+                                    <span class="text-red-500">{{ __("Switch Pharmacy") }}</span>
+                                </a>
                             @endif
 
                             <div class="border-t border-gray-200 dark:border-gray-600"></div>
 
                             <!-- Authentication -->
-                            <form method="POST" action="{{ route('logout') }}" x-data>
+                            <form action="{{ route("logout") }}" method="POST" x-data>
                                 @csrf
-
-                                <x-dropdown-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
-                                    {{ __('Log Out') }}
-                                </x-dropdown-link>
+                                <a @click.prevent="$root.submit();"
+                                    class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
+                                    href="{{ route("logout") }}">
+                                    {{ __("Log Out") }}
+                                </a>
                             </form>
                         </x-slot>
                     </x-dropdown>
                 </div>
             </div>
-
-            {{-- NOTIFY BELL --}}
-            <div class="-me-2 flex items-center sm:hidden">
-                <a href="{{ route('notifications') }}"
-                    class="inline-flex items-center mx-2 px-2# mx-2# py-2# text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150 position-relative">
-                    <i class="bi bi-bell fs-4"></i>
-                    {{-- @if (Auth::user()->unreadNotifications->count() > 0) --}}
-                    <sup id="notifyBellPhone"
-                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-light">
-                        {{ Auth::user()->unreadNotifications->count() }}
-                    </sup>
-                    {{-- @endif --}}
-                </a>
-            </div>
-
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" id="hamburger"
-                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
-                    <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
-                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
-                            stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-        <hr>
-        {{-- SECOND ROW --}}
-        {{-- <span class="flex justify-between h-16"> --}}
-
-        <!-- Navigation Links -->
-        {{-- <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex overflow-auto">
-            @if (Auth::user()->role == 'staff')
-                <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
-                    {{ __('Sell medicine') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('salesReturns') }}" :active="request()->routeIs('salesReturns')">
-                    {{ __('Sales Returns') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('stocks.balance') }}" :active="request()->routeIs('stocks.balance')">
-                    {{ __('Stock Balance') }}
-                </x-nav-link> 
-                <x-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
-                    {{ __('Document Sales') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                    {{ __('Notifications') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
-                    {{ __('Messages') }}
-                </x-nav-link>
-            @endif
-            @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
-                <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
-                    {{ __('Sell medicine') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('salesReturns') }}" :active="request()->routeIs('salesReturns')">
-                    {{ __('Sales Returns') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
-                    {{ __('Documented Sales') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
-                    {{ __('All medicine') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
-                    {{ __('Stock') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('stocks.balance') }}" :active="request()->routeIs('stocks.balance')">
-                    {{ __('Stock Balance') }}
-                </x-nav-link> 
-                <x-nav-link href="{{ route('stockTransfers') }}" :active="request()->routeIs('stockTransfers')">
-                    {{ __('Stock Transfers') }}
-                </x-nav-link>
-
-                <x-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
-                    {{ __('Pharmacist') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
-                    {{ __('Category') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
-                    {{ __('Pharmacies') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                    {{ __('Notifications') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('reports.all') }}" :active="request()->routeIs('reports.all')">
-                    {{ __('Reports') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('myContracts') }}" :active="request()->routeIs('myContracts')">
-                    {{ __('Contracts') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
-                    {{ __('Messages') }}
-                </x-nav-link>
-            @endif
-            @if (Auth::user()->role == 'super')
-                <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('superadmin.users') }}" :active="request()->routeIs('superadmin.users')">
-                    {{ __('System Users') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('superadmin.pharmacies') }}" :active="request()->routeIs('superadmin.pharmacies')">
-                    {{ __('Pharmacies') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('packages') }}" :active="request()->routeIs('packages')">
-                    {{ __('Packages') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('allMedicines.all') }}" :active="request()->routeIs('allMedicines.all')">
-                    {{ __('All medicines') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                    {{ __('Notifications') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('reports.all') }}" :active="request()->routeIs('reports.all')">
-                    {{ __('Reports') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('contracts') }}" :active="request()->routeIs('contracts')">
-                    {{ __('Contracts') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('agent.packages', ['action' => 'index']) }}" :active="request()->routeIs('agent.packages')">
-                    {{ __('Agent\'s Contracts') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('update.contracts') }}" :active="request()->routeIs('update.contracts')">
-                    {{ __('Schedules') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('agent.pharmacies', ['action' => 'index']) }}" :active="request()->routeIs('agent.pharmacies')">
-                    {{ __('Pharmacies') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
-                    {{ __('Messages') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('agent.completeRegistration', ['action' => 'index']) }}" :active="request()->routeIs('agent.completeRegistration')">
-                    {{ __('Agents Registration') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('audits.index') }}" :active="request()->routeIs('audits.index')">
-                    {{ __('Activities') }}
-                </x-nav-link>
-            @endif
-            @if (Auth::user()->role == 'agent')
-                <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('agent.pharmacies', ['action' => 'index']) }}" :active="request()->routeIs('agent.pharmacies')">
-                    {{ __('Pharmacies') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('agent.packages', ['action' => 'index']) }}" :active="request()->routeIs('agent.packages')">
-                    {{ __('Packages') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
-                    {{ __('Messages') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('agent.completeRegistration', ['action' => 'index']) }}" :active="request()->routeIs('agent.completeRegistration')">
-                    {{ __('Complete Registration') }}
-                </x-nav-link>
-                <x-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
-                    {{ __('Contracts') }}
-                </x-nav-link>
-            @endif
-        </div> --}}
-        {{-- </span> --}}
-    </div>
-
-    <!-- Responsive Navigation Menu -->
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-
-            @if (Auth::user()->role == 'owner' || Auth::user()->role == 'admin')
-                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
-                    {{ __('Sell medicine') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('salesReturns') }}" :active="request()->routeIs('salesReturns')">
-                    {{ __('Sales Returns') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
-                    {{ __('Document Sales') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                    {{ __('Notifications') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('medicines') }}" :active="request()->routeIs('medicines')">
-                    {{ __('All medicine') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('stock') }}" :active="request()->routeIs('stock')">
-                    {{ __('Stock') }}
-                </x-responsive-nav-link>
-                {{-- stock balances --}}
-                <x-responsive-nav-link href="{{ route('stocks.balance') }}" :active="request()->routeIs('stocks.balance')">
-                    {{ __('Stock Balance') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('stockTransfers') }}" :active="request()->routeIs('stockTransfers')">
-                    {{ __('Stock Transfers') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('staff') }}" :active="request()->routeIs('staff')">
-                    {{ __('Pharmacist') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('category') }}" :active="request()->routeIs('category')">
-                    {{ __('Category') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('pharmacies') }}" :active="request()->routeIs('pharmacies')">
-                    {{ __('Pharmacies') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('reports.all') }}" :active="request()->routeIs('reports.all')">
-                    {{ __('Reports') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('myContracts') }}" :active="request()->routeIs('myContracts')">
-                    {{ __('Contracts') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
-                    {{ __('Messages') }}
-                </x-responsive-nav-link>
-            @endif
-            @if (Auth::user()->role == 'super')
-                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('superadmin.users') }}" :active="request()->routeIs('superadmin.users')">
-                    {{ __('System Users') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('superadmin.pharmacies') }}" :active="request()->routeIs('superadmin.pharmacies')">
-                    {{ __('Pharmacies') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('packages') }}" :active="request()->routeIs('packages')">
-                    {{ __('Packages') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('allMedicines.all') }}" :active="request()->routeIs('allMedicines.all')">
-                    {{ __('All medicines') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                    {{ __('Notifications') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('reports.all') }}" :active="request()->routeIs('reports.all')">
-                    {{ __('Reports') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('contracts') }}" :active="request()->routeIs('contracts')">
-                    {{ __('Contracts') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('agent.packages', ['action' => 'index']) }}" :active="request()->routeIs('agent.packages')">
-                    {{ __('Agent\'s Contracts') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('update.contracts') }}" :active="request()->routeIs('update.contracts')">
-                    {{ __('Schedules') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('agent.pharmacies', ['action' => 'index']) }}" :active="request()->routeIs('agent.pharmacies')">
-                    {{ __('Pharmacies') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
-                    {{ __('Messages') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('agent.completeRegistration', ['action' => 'index']) }}" :active="request()->routeIs('agent.completeRegistration')">
-                    {{ __('Agents Registration') }}
-                </x-responsive-nav-link>
-            @endif
-            @if (Auth::user()->role == 'agent')
-                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('agent.pharmacies', ['action' => 'index']) }}" :active="request()->routeIs('agent.pharmacies')">
-                    {{ __('Pharmacies') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('agent.packages', ['action' => 'index']) }}" :active="request()->routeIs('agent.packages')">
-                    {{ __('Packages') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
-                    {{ __('Messages') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('agent.completeRegistration', ['action' => 'index']) }}" :active="request()->routeIs('agent.completeRegistration')">
-                    {{ __('Complete Registration') }}
-                </x-responsive-nav-link>
-                {{-- <x-responsive-nav-link href="{{ route('agent.cases', ['action' => 'index']) }}" :active="request()->routeIs('agent.cases')">
-                    {{ __('Cases') }}
-                </x-responsive-nav-link> --}}
-                {{-- <x-responsive-nav-link href="{{ route('agent.contracts', ['action' => 'index']) }}" :active="request()->routeIs('agent.contracts')">
-                    {{ __('Contracts') }}
-                </x-responsive-nav-link> --}}
-            @endif
-            @if (Auth::user()->role == 'staff')
-                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('sales') }}" :active="request()->routeIs('sales')">
-                    {{ __('Sell medicine') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('salesNotes') }}" :active="request()->routeIs('salesNotes')">
-                    {{ __('Document Sales') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('salesReturns') }}" :active="request()->routeIs('salesReturns')">
-                    {{ __('Sales Returns') }}
-                </x-responsive-nav-link>
-                {{-- stock balances --}}
-                <x-responsive-nav-link href="{{ route('stocks.balance') }}" :active="request()->routeIs('stocks.balance')">
-                    {{ __('Stock Balance') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('notifications') }}" :active="request()->routeIs('notifications')">
-                    {{ __('Notifications') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('agent.messages', ['action' => 'index']) }}" :active="request()->routeIs('agent.messages')">
-                    {{ __('Messages') }}
-                </x-responsive-nav-link>
-            @endif
-
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
-            <div class="flex items-center px-4">
-                @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-                    <div class="shrink-0 me-3">
-                        <img class="size-10 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url }}"
-                            alt="{{ Auth::user()->name }}" />
-                    </div>
-                @endif
-
-                <div>
-                    <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}
-                    </div>
-                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-                </div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <!-- Account Management -->
-                <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                {{-- @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
-                    <x-responsive-nav-link href="{{ route('api-tokens.index') }}" :active="request()->routeIs('api-tokens.index')">
-                {{ __('API Tokens') }}
-                </x-responsive-nav-link>
-                @endif --}}
-
-
-                {{-- Choose pharmacy --}}
-                @if (Auth::user()->role == 'owner')
-                    <x-dropdown-link href="{{ route('pharmacies.switch') }}">
-                        <p class="btn btn-light text-danger">{{ __('Switch Pharmacy') }} </p>
-                    </x-dropdown-link>
-                @endif
-
-                @if (Auth::user()->role != 'owner')
-                    <x-dropdown-link href="#">
-                        {{-- <h4
-                            class="inline-flex items-center px-3 mx-2# py-2  text-sm leading-4 font-medium rounded-md text-gray-500 text-primary dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
-                            {{ session('pharmacy_name') }}</h4>
-                    <button type="button" --}}
-                        {{-- @foreach ($pharmacy as $pharmacy)
-                                        {{$pharmacy->name}}
-                        @endforeach --}}
-
-                        <p class=" btn-light text-danger disabled">{{ session('pharmacy_name') }}</p>
-                    </x-dropdown-link>
-                @endif
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}" x-data>
-                    @csrf
-
-                    <x-responsive-nav-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
-
-                <!-- Team Management -->
-                @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
-                    <div class="border-t border-gray-200 dark:border-gray-600"></div>
-
-                    <div class="block px-4 py-2 text-xs text-gray-400">
-                        {{ __('Manage Team') }}
-                    </div>
-
-                    <!-- Team Settings -->
-                    <x-responsive-nav-link href="{{ route('teams.show', Auth::user()->currentTeam->id) }}"
-                        :active="request()->routeIs('teams.show')">
-                        {{ __('Team Settings') }}
-                    </x-responsive-nav-link>
-
-                    @can('create', Laravel\Jetstream\Jetstream::newTeamModel())
-                        <x-responsive-nav-link href="{{ route('teams.create') }}" :active="request()->routeIs('teams.create')">
-                            {{ __('Create New Team') }}
-                        </x-responsive-nav-link>
-                    @endcan
-
-                    <!-- Team Switcher -->
-                    @if (Auth::user()->allTeams()->count() > 1)
-                        <div class="border-t border-gray-200 dark:border-gray-600"></div>
-
-                        <div class="block px-4 py-2 text-xs text-gray-400">
-                            {{ __('Switch Teams') }}
-                        </div>
-
-                        @foreach (Auth::user()->allTeams() as $team)
-                            <x-switchable-team :team="$team" component="responsive-nav-link" />
-                        @endforeach
-                    @endif
-                @endif
-            </div>
         </div>
     </div>
+
 </nav>

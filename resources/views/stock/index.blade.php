@@ -1,6 +1,6 @@
-@extends('stock.app')
+@extends("stock.app")
 
-@section('content')
+@section("content")
     @php $medicines = App\Models\Items::where('pharmacy_id', session('current_pharmacy_id'))->with('lastStock')->get(); @endphp
 
     <div class="container mt-4">
@@ -8,51 +8,56 @@
             {{$x->id}}
         @endforeach --}}
         <div class="d-flex justify-content-between mb-3">
-            <h1 class="text-primary fw-bold fs-3">Stock <i id="togglePrivateData" class="bi {{ Auth::user()->role == 'owner'?'':'hidden' }} text-secondary bi-eye" style="cursor: pointer;"></i></h1>
+            <h1 class="text-primary fw-bold fs-3">Stock <i
+                    class="bi {{ Auth::user()->hasRole("Owner") ? "" : "hidden" }} text-secondary bi-eye"
+                    id="togglePrivateData" style="cursor: pointer;"></i></h1>
             <div>
-                <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createStockModal">Add New
+                <a class="btn btn-success" data-bs-target="#createStockModal" data-bs-toggle="modal" href="#">Add New
                     Stock</a>
-                <a href="#" class="btn btn-success" data-bs-toggle="modal"
-                    data-bs-target="#createMedicineStockModal">Medicine + Stock</a>
-                <a href="#" class="btn btn-danger" data-bs-toggle="modal"
-                    data-bs-target="#importMedicineStockModal">Import CSV</a>
+                <a class="btn btn-success" data-bs-target="#createMedicineStockModal" data-bs-toggle="modal"
+                    href="#">Medicine + Stock</a>
+                <a class="btn btn-danger" data-bs-target="#importMedicineStockModal" data-bs-toggle="modal"
+                    href="#">Import CSV</a>
             </div>
         </div>
-        
+
         {{-- Check if the user is an owner and define the data display container --}}
-        @if(Auth::user()->role == 'owner')
+        @hasrole("Owner")
             <div class="privateData" hidden>
                 {{-- Display available stock's value in currency --}}
-                <div class="d-flex gap-2 justify-content-between">
-                    <p class="text-secondary"><strong class="fw-bold">Total Stock Value: </strong> {{ number_format($availableStock) }} {{ session('currency')??'TZS' }}</p>
-                    <p class="text-secondary"><strong class="fw-bold">Expected Total Sales: </strong> {{ number_format($expectedSales) }} {{ session('currency')??'TZS' }}</p>
-                    <p class="text-secondary"><strong class="fw-bold">Expected Total Profit: </strong> {{ number_format($expectedProfit) }} {{ session('currency')??'TZS' }}</p>
+                <div class="d-flex justify-content-between gap-2">
+                    <p class="text-secondary"><strong class="fw-bold">Total Stock Value: </strong>
+                        {{ number_format($availableStock) }} {{ session("currency") ?? "TZS" }}</p>
+                    <p class="text-secondary"><strong class="fw-bold">Expected Total Sales: </strong>
+                        {{ number_format($expectedSales) }} {{ session("currency") ?? "TZS" }}</p>
+                    <p class="text-secondary"><strong class="fw-bold">Expected Total Profit: </strong>
+                        {{ number_format($expectedProfit) }} {{ session("currency") ?? "TZS" }}</p>
                 </div>
                 <hr><br>
             </div>
-        @endif
+        @endhasrole
 
-        <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+        <div aria-hidden="true" aria-labelledby="passwordModalLabel" class="modal fade" id="passwordModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="passwordModalLabel">Confirm Identity</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                     </div>
                     <div class="modal-body">
                         <p>Please enter your password to view sensitive data.</p>
                         <form id="reAuthForm">
                             @csrf
                             <div class="mb-3">
-                                <label for="passwordInput" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="passwordInput" name="password" required>
+                                <label class="form-label" for="passwordInput">Password</label>
+                                <input class="form-control" id="passwordInput" name="password" required type="password">
                                 <div class="text-danger mt-1" id="passwordError"></div>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" id="verifyPasswordBtn">Verify</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                        <button class="btn btn-primary" id="verifyPasswordBtn" type="submit">Verify</button>
                     </div>
                 </div>
             </div>
@@ -60,7 +65,7 @@
 
         {{-- there are deleted data here --}}
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover" id="tableOfStocks">
+            <table class="table-striped table-bordered table-hover small table" id="tableOfStocks">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -77,40 +82,38 @@
             </table>
         </div>
 
-
     </div>
 
-
     {{-- <!-- Create Stock Modal --> --}}
-    <div class="modal fade" id="createStockModal" tabindex="-1" aria-labelledby="createStockModalLabel" aria-hidden="true">
+    <div aria-hidden="true" aria-labelledby="createStockModalLabel" class="modal fade" id="createStockModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header text-center bg-primary text-white">
+                <div class="modal-header bg-primary text-center text-white">
                     <h5 class="modal-title" id="createStockModalLabel">Add New Stock</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <button aria-label="Close" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('stock.store') }}" method="POST" id="stockForm">
+                    <form action="{{ route("stock.store") }}" id="stockForm" method="POST">
                         @csrf
                         <div class="row mb-2">
                             <div class="col-12# col-sm-6# col-md-6 col-lg-2#">
                                 <label class="form-label fw-bold">Stock batch Number</label>
-                                <input placeholder="1234" id="batch_number" type="text"
-                                    class="rounded form-control shadow-sm" name="batch_number" readonly>
+                                <input class="form-control rounded shadow-sm" id="batch_number" name="batch_number"
+                                    placeholder="1234" readonly type="text">
                             </div>
                             <div class="col-12# col-sm-6# col-md-6 col-lg-2#">
                                 <label class="form-label fw-bold">Supplier Name</label>
-                                <input type="text" placeholder="ABC Supplier" class="rounded form-control shadow-sm"
-                                    name="supplier" required>
+                                <input class="form-control rounded shadow-sm" name="supplier" placeholder="ABC Supplier"
+                                    required type="text">
                             </div>
                         </div>
                         <hr class="m-2">
                         <div id="stockFields">
-                            <div class="row mb-3 stock-entry align-items-end gx-2 gy-2">
+                            <div class="row stock-entry align-items-end gx-2 gy-2 mb-3">
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                                    <label for="item_id" class="form-label fw-bold">Medicine Name</label>
-                                    <select name="item_id[]" class="form-select medicineSelect chosen shadow-sm" required>
+                                    <label class="form-label fw-bold" for="item_id">Medicine Name</label>
+                                    <select class="medicineSelect chosen form-select shadow-sm" name="item_id[]" required>
                                         <option selected value="">Select medicine...</option>
                                         @foreach ($medicines as $medicine)
                                             <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
@@ -119,47 +122,46 @@
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Buying Price</label>
-                                    <input type="number" min="1" class="form-control shadow-sm"
-                                        name="buying_price[]" required>
+                                    <input class="form-control shadow-sm" min="1" name="buying_price[]" required
+                                        type="number">
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Selling Price</label>
-                                    <input type="number" min="1" class="form-control shadow-sm"
-                                        name="selling_price[]" required>
+                                    <input class="form-control shadow-sm" min="1" name="selling_price[]" required
+                                        type="number">
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Quantity</label>
-                                    <input type="number" min="1" class="form-control shadow-sm" name="quantity[]"
-                                        required>
+                                    <input class="form-control shadow-sm" min="1" name="quantity[]" required
+                                        type="number">
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Low stock</label>
-                                    <input type="number" class="form-control shadow-sm" name="low_stock_percentage[]"
-                                        min="1" required>
+                                    <input class="form-control shadow-sm" min="1" name="low_stock_percentage[]"
+                                        required type="number">
                                 </div>
                                 <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
                                     <label class="form-label fw-bold">In Date</label>
-                                    <input type="text" class="form-control shadow-sm" name="in_date[]"
-                                        value="{{ now() }}" required>
+                                    <input class="form-control shadow-sm" name="in_date[]" required type="text"
+                                        value="{{ now() }}">
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Expire Date</label>
-                                    <input type="date" class="form-control shadow-sm" name="expire_date[]" required>
+                                    <input class="form-control shadow-sm" name="expire_date[]" required type="date">
                                 </div>
                             </div>
                         </div>
                         <div class="mt-3">
                             <div class="col-md-10 d-flex justify-content-between">
-                                <button type="button" id="addStockBtn" class="btn btn-outline-primary">
+                                <button class="btn btn-outline-primary" id="addStockBtn" type="button">
                                     <i class="bi bi-plus-lg"></i> Add Row
                                 </button>
-                                <button type="submit" class="btn btn-success">
+                                <button class="btn btn-success" type="submit">
                                     <i class="bi bi-save"></i> Save
                                 </button>
                             </div>
                         </div>
                     </form>
-
 
                 </div>
             </div>
@@ -167,77 +169,76 @@
     </div>
 
     <!-- Create Medicine + Stock Modal -->
-    <div class="modal fade" id="createMedicineStockModal" tabindex="-1" aria-labelledby="createMedicineStockModalLabel"
-        aria-hidden="true">
+    <div aria-hidden="true" aria-labelledby="createMedicineStockModalLabel" class="modal fade"
+        id="createMedicineStockModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header text-center bg-primary text-white">
+                <div class="modal-header bg-primary text-center text-white">
                     <h5 class="modal-title" id="createMedicineStockModalLabel">Add New Stock and Medicine</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <button aria-label="Close" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('medicineStock.store') }}" method="POST" id="stockForm">
+                    <form action="{{ route("medicineStock.store") }}" id="stockForm" method="POST">
                         @csrf
                         <div class="row mb-2">
                             <div class="col-12# col-sm-6# col-md-6 col-lg-2#">
                                 <label class="form-label fw-bold">Stock batch Number</label>
-                                <input placeholder="1234" id="batch_number_" type="text"
-                                    class="rounded form-control shadow-sm" name="batch_number" readonly>
+                                <input class="form-control rounded shadow-sm" id="batch_number_" name="batch_number"
+                                    placeholder="1234" readonly type="text">
                             </div>
                             <div class="col-12# col-sm-6# col-md-6 col-lg-2#">
                                 <label class="form-label fw-bold">Supplier Name</label>
-                                <input type="text" placeholder="ABC Supplier" class="rounded form-control shadow-sm"
-                                    name="supplier" required>
+                                <input class="form-control rounded shadow-sm" name="supplier" placeholder="ABC Supplier"
+                                    required type="text">
                             </div>
                         </div>
                         <hr class="m-2">
                         <div id="medicineStockFields">
-                            <div class="row mb-3 stock-entry align-items-end gx-2 gy-2">
+                            <div class="row stock-entry align-items-end gx-2 gy-2 mb-3">
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                                    <label for="item_id" class="form-label fw-bold">New Medicine Name</label>
-                                    <input type="text" class="form-control shadow-sm" name="item_name[]" required>
+                                    <label class="form-label fw-bold" for="item_id">New Medicine Name</label>
+                                    <input class="form-control shadow-sm" name="item_name[]" required type="text">
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Buying Price</label>
-                                    <input type="number" class="form-control shadow-sm" name="buying_price[]" required>
+                                    <input class="form-control shadow-sm" name="buying_price[]" required type="number">
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Selling Price</label>
-                                    <input type="number" class="form-control shadow-sm" name="selling_price[]" required>
+                                    <input class="form-control shadow-sm" name="selling_price[]" required type="number">
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Quantity</label>
-                                    <input type="number" class="form-control shadow-sm" name="quantity[]" required>
+                                    <input class="form-control shadow-sm" name="quantity[]" required type="number">
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Low stock</label>
-                                    <input type="number" class="form-control shadow-sm" name="low_stock_percentage[]"
-                                        min="1" required>
+                                    <input class="form-control shadow-sm" min="1" name="low_stock_percentage[]"
+                                        required type="number">
                                 </div>
                                 <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
                                     <label class="form-label fw-bold">In Date</label>
-                                    <input type="text" class="form-control shadow-sm" name="in_date[]"
-                                        value="{{ now() }}" required>
+                                    <input class="form-control shadow-sm" name="in_date[]" required type="text"
+                                        value="{{ now() }}">
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                                     <label class="form-label fw-bold">Expire Date</label>
-                                    <input type="date" class="form-control shadow-sm" name="expire_date[]" required>
+                                    <input class="form-control shadow-sm" name="expire_date[]" required type="date">
                                 </div>
                             </div>
                         </div>
                         <div class="mt-3">
                             <div class="col-md-10 d-flex justify-content-between">
-                                <button type="button" id="addMedicineStockBtn" class="btn btn-outline-primary">
+                                <button class="btn btn-outline-primary" id="addMedicineStockBtn" type="button">
                                     <i class="bi bi-plus-lg"></i> Add Row
                                 </button>
-                                <button type="submit" class="btn btn-success">
+                                <button class="btn btn-success" type="submit">
                                     <i class="bi bi-save"></i> Save
                                 </button>
                             </div>
                         </div>
                     </form>
-
 
                 </div>
             </div>
@@ -245,36 +246,36 @@
     </div>
 
     {{-- Create a modal to Import Medicine and Stock from csv file --}}
-    <div class="modal fade" id="importMedicineStockModal" tabindex="-1" aria-labelledby="importMedicineStockModalLabel"
-        aria-hidden="true">
+    <div aria-hidden="true" aria-labelledby="importMedicineStockModalLabel" class="modal fade"
+        id="importMedicineStockModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header text-center bg-primary text-white">
+                <div class="modal-header bg-primary text-center text-white">
                     <h5 class="modal-title" id="importMedicineStockModalLabel">Import Medicines and Stock</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <button aria-label="Close" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        type="button"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form action="{{ route('importMedicineStock') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route("importMedicineStock") }}" enctype="multipart/form-data" method="POST">
                         @csrf
                         <div class="mb-3">
                             {{-- Indicate fields required in the label --}}
-                            <label for="file" class="form-label fw-bold">Select CSV File, (Colums:<small
+                            <label class="form-label fw-bold" for="file">Select CSV File, (Colums:<small
                                     class="smallest text-danger"> item_name, buying_price, selling_price, quantity,
                                     low_stock_percentage, expire_date, supplier</small>) </label>
-                            <input type="file" class="form-control" name="file" accept=".csv" required>
+                            <input accept=".csv" class="form-control" name="file" required type="file">
                         </div>
                         <div class="col-12# col-sm-6# col-md-6 col-lg-2#" hidden>
                             <label class="form-label fw-bold">Stock batch Number</label>
-                            <input placeholder="1234" id="batch_number__" type="text"
-                                class="rounded form-control shadow-sm" name="batch_number__" readonly required>
+                            <input class="form-control rounded shadow-sm" id="batch_number__" name="batch_number__"
+                                placeholder="1234" readonly required type="text">
                         </div>
                         <div class="col-0 col-sm-0 col-md-0 col-lg-0" hidden>
                             <label class="form-label fw-bold">In Date</label>
-                            <input type="text" class="form-control shadow-sm" name="in_date"
-                                value="{{ now() }}" required readonly>
+                            <input class="form-control shadow-sm" name="in_date" readonly required type="text"
+                                value="{{ now() }}">
                         </div>
-                        <button type="submit" class="btn btn-success">
+                        <button class="btn btn-success" type="submit">
                             <i class="bi bi-upload"></i> Import
                         </button>
                     </form>
@@ -489,7 +490,7 @@
             $('#tableOfStocks').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('stock') }}", // Laravel route
+                ajax: "{{ route("stock") }}", // Laravel route
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -683,20 +684,24 @@
                             // Password correct: Show data, hide modal, change icon
                             $passwordModal.hide();
                             $privateData.removeAttr('hidden');
-                            $toggleIcon.removeClass('bi-eye text-secondary').addClass('bi-eye-slash text-danger');
+                            $toggleIcon.removeClass('bi-eye text-secondary').addClass(
+                                'bi-eye-slash text-danger');
                             // hide after 5 minutes
                             setTimeout(function() {
                                 $privateData.attr('hidden', true);
-                                $toggleIcon.removeClass('bi-eye-slash text-danger').addClass('bi-eye text-secondary');
+                                $toggleIcon.removeClass('bi-eye-slash text-danger')
+                                    .addClass('bi-eye text-secondary');
                             }, 300000);
-                        }else{
-                            $passwordError.text(response.message || 'Verification failed. Please check your password.');
+                        } else {
+                            $passwordError.text(response.message ||
+                                'Verification failed. Please check your password.');
                         }
                     },
                     error: function(xhr) {
                         // Password incorrect
                         const response = xhr.responseJSON;
-                        const message = response.message || 'Verification failed. Please check your password.';
+                        const message = response.message ||
+                            'Verification failed. Please check your password.';
                         $passwordError.text(message);
                     },
                     complete: function() {

@@ -1,32 +1,32 @@
-@extends('agent.app')
+@extends("agent.app")
 
-@section('content')
+@section("content")
     <div class="container mt-4">
 
         {{-- ========================= SELECT OWNER ========================= --}}
         <div class="mb-4">
             <div class="d-flex justify-content-between align-items-center">
                 <h2 class="h3 text-primary">Select Owner to Manage</h2>
-                <span class="{{ session('owner') ? 'text-success' : 'text-danger' }}">
-                    {{ session('owner') ? session('owner') : 'Select Owner' }}
+                <span class="{{ session("owner") ? "text-success" : "text-danger" }}">
+                    {{ session("owner") ? session("owner") : "Select Owner" }}
                 </span>
             </div>
-            <form action="{{ route('agent.packages.manage', ['action' => 'index']) }}" method="post">
+            <form action="{{ route("agent.packages.manage", ["action" => "index"]) }}" method="post">
                 @csrf
-                <div class="row mt-2 g-2">
+                <div class="row g-2 mt-2">
                     <div class="col-md-8">
                         <select class="form-select rounded" id="owner_id" name="owner_id" required>
                             <option value="">--Select Owner--</option>
                             @foreach ($owners as $owner)
-                                <option value="{{ $owner->id }}"
-                                    {{ session('owner_id') == $owner->id ? 'selected' : '' }}>
+                                <option {{ session("owner_id") == $owner->id ? "selected" : "" }}
+                                    value="{{ $owner->id }}">
                                     {{ $owner->name }} ({{ $owner->phone }})
                                 </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-4 d-flex align-items-start">
-                        <button type="submit" class="btn btn-primary"> <i class="fas fa-gear me-1"></i> Manage
+                        <button class="btn btn-primary" type="submit"> <i class="fas fa-gear me-1"></i> Manage
                     </div>
                 </div>
             </form>
@@ -35,23 +35,24 @@
         <hr>
 
         {{-- ========================= CURRENT & ACTIVE PLANS ========================= --}}
-        <div class="row mt-4 g-4">
+        <div class="row g-4 mt-4">
 
             {{-- Current & Active Plans --}}
             <div class="col-md-4">
-                <div class="card shadow-sm border-0">
+                <div class="card border-0 shadow-sm">
 
                     {{-- Current Plan --}}
                     <div class="card-body">
                         {{-- <div class="p-3 border rounded bg-light mb-3 shadow-sm"> --}}
-                        <h5 class="card-title text-center fs-4 text-primary"><i class="fas fa-bolt"></i> Current Plan
+                        <h5 class="card-title fs-4 text-primary text-center"><i class="fas fa-bolt"></i> Current Plan
                         </h5>
                         {{-- </div> --}}
                         @if ($contracts->count() > 0)
                             @foreach ($contracts as $contract)
                                 @if ($contract->is_current_contract)
-                                    <div class="p-3 border rounded bg-light mb-3 shadow-sm">
-                                        <h5 class="card-title text-primary fw-bold"><i class="fas fa-layer-group"></i> {{ $contract->package->name }}</h5>
+                                    <div class="bg-light mb-3 rounded border p-3 shadow-sm">
+                                        <h5 class="card-title text-primary fw-bold"><i class="fas fa-layer-group"></i>
+                                            {{ $contract->package->name }}</h5>
                                     </div>
                                     <p class="card-text mb-1">Package Price: TZS
                                         {{ number_format($contract->package->price) }} / {{ $contract->package->duration }}
@@ -70,7 +71,7 @@
                                     <p class="card-text mb-1">Time Remaining: <span class="text-danger"
                                             id="countdown"></span></p>
                                     <p class="card-text mb-1">Status: {{ $contract->status }} <small
-                                            class="text-warning">{{ $contract->status == 'graced' ? \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() : '' }}</small>
+                                            class="text-warning">{{ $contract->status == "graced" ? \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() : "" }}</small>
                                     </p>
                                     <p class="card-text mb-0">Payment: {{ $contract->payment_status }}</p>
                                 @endif
@@ -83,9 +84,9 @@
 
                     {{-- Active but not current plans --}}
                     <div class="card-body table-responsive">
-                        <h5 class="card-title text-center fs-4 text-primary"><i class="fas fa-sync-alt"></i>
+                        <h5 class="card-title fs-4 text-primary text-center"><i class="fas fa-sync-alt"></i>
                             Activate Plans (Not Current)</h5>
-                        <table class="table table-hover">
+                        <table class="table-hover table">
                             <thead>
                                 <tr>
                                     <th scope="col">Plan</th>
@@ -95,12 +96,13 @@
                             <tbody>
                                 @php $activePlans = 0; @endphp
                                 @foreach ($contracts as $contract)
-                                    @if (!$contract->is_current_contract && $contract->payment_status == 'payed' && $contract->status != 'inactive')
+                                    @if (!$contract->is_current_contract && $contract->payment_status == "payed" && $contract->status != "inactive")
                                         <tr>
                                             <td>{{ $contract->package->name }}</td>
                                             <td>
-                                                <a href="{{ route('contracts.users.activate', ['contract_id' => $contract->id, 'owner_id' => session('owner_id')]) }}"
-                                                    class="btn btn-primary btn-sm"><i class="fas fa-check-circle"></i>
+                                                <a class="btn btn-primary btn-sm"
+                                                    href="{{ route("contracts.users.activate", ["contract_id" => $contract->id, "owner_id" => session("owner_id")]) }}"><i
+                                                        class="fas fa-check-circle"></i>
                                                     Activate</a>
                                             </td>
                                         </tr>
@@ -109,7 +111,7 @@
                                 @endforeach
                                 @if ($activePlans == 0)
                                     <tr>
-                                        <td colspan="2" class="text-center text-muted">No Active Plans</td>
+                                        <td class="text-muted text-center" colspan="2">No Active Plans</td>
                                     </tr>
                                 @endif
                             </tbody>
@@ -121,11 +123,11 @@
 
             {{-- Previous Plans --}}
             <div class="col-md-8">
-                <div class="card shadow-sm border-0">
+                <div class="card border-0 shadow-sm">
                     <div class="card-body table-responsive">
-                        <h5 class="card-title text-center fs-4 text-primary"><i class="fas fa-history"></i> Previous Plans
+                        <h5 class="card-title fs-4 text-primary text-center"><i class="fas fa-history"></i> Previous Plans
                         </h5>
-                        <table class="table table-striped" id="Table">
+                        <table class="table-striped table" id="Table">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -140,7 +142,7 @@
                             </thead>
                             <tbody>
                                 @foreach ($contracts as $contract)
-                                    @if ($contract->payment_status != 'pending')
+                                    @if ($contract->payment_status != "pending")
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $contract->package->name }}</td>
@@ -177,67 +179,130 @@
 
         {{-- ========================= AVAILABLE SUBSCRIPTION PLANS ========================= --}}
         <div class="mt-5">
-            <h3 class="text-center text-primary fw-bold mb-4"><i class="fas fa-layer-group"></i> Available Subscription Plans</h3>
+            <h3 class="text-primary fw-bold mb-4 text-center"><i class="fas fa-layer-group"></i> Available Subscription
+                Plans</h3>
+
+            @if (isset($pricingData) && $pricingData["mode"] != "standard")
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-8">
+                        @if ($pricingData["mode"] == "dynamic")
+                            <div class="alert alert-info border-info text-center shadow-sm">
+                                <h5 class="fw-bold"><i class="fas fa-calculator me-2"></i> Item-Based Pricing Active</h5>
+                                <p class="mb-1">Based on inventory size:
+                                    <strong>{{ number_format($pricingData["details"]["total_items"]) }} items</strong>.</p>
+                                <hr class="my-2">
+                                <p class="mb-0">
+                                    Base Rate: {{ number_format($pricingData["details"]["rate"]) }} x
+                                    {{ $pricingData["details"]["multiplier"] }} (Tier) =
+                                    <strong class="fs-5">TZS {{ number_format($pricingData["amount"]) }} / month</strong>
+                                </p>
+                            </div>
+                        @elseif($pricingData["mode"] == "profit_share")
+                            <div class="alert alert-success border-success text-center shadow-sm">
+                                <h5 class="fw-bold"><i class="fas fa-chart-line me-2"></i> Profit Share Pricing Active</h5>
+                                <p class="mb-1">Based on <strong>{{ $pricingData["details"]["percentage"] }}%</strong> of
+                                    last 30 days profit.</p>
+                                <hr class="my-2">
+                                <p class="mb-0">
+                                    Est. Monthly Profit: {{ number_format($pricingData["details"]["monthly_profit"]) }} =
+                                    <strong class="fs-5">TZS {{ number_format($pricingData["amount"]) }} / month</strong>
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
+                <table class="table-hover rounded-3 table overflow-hidden align-middle shadow-sm">
+                    <thead class="bg-primary text-white">
                         <tr>
-                            <th>Plan</th>
-                            <th>Price</th>
-                            <th>Duration</th>
-                            <th>Action</th>
+                            <th class="py-3 ps-4">Plan</th>
+                            <th class="py-3">Price</th>
+                            <th class="py-3">Duration</th>
+                            <th class="py-3">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($packages as $package)
                             @php
-                                $activeContracts = \App\Models\Contract::where('owner_id', session('owner_id'))
-                                    ->where('is_current_contract', 1)
+                                $activeContracts = \App\Models\Contract::where("owner_id", session("owner_id"))
+                                    ->where("is_current_contract", 1)
                                     ->get();
-                                $hasAnyContract = \App\Models\Contract::where('owner_id', session('owner_id'))->count();
-                                $activatableContract = \App\Models\Contract::where('owner_id', session('owner_id'))
-                                    ->where('package_id', $package->id)
-                                    ->where('status', 'active')
-                                    ->where('payment_status', 'payed')
-                                    ->where('is_current_contract', 0)
+                                $hasAnyContract = \App\Models\Contract::where("owner_id", session("owner_id"))->count();
+                                $activatableContract = \App\Models\Contract::where("owner_id", session("owner_id"))
+                                    ->where("package_id", $package->id)
+                                    ->where("status", "active")
+                                    ->where("payment_status", "payed")
+                                    ->where("is_current_contract", 0)
                                     ->first();
 
                                 $blockUpgrade = !is_null($activatableContract);
-                                // last contract that is status = inactive, payment_status = payed and is_current_contract = 0
-                                $lastExpiredContract = \App\Models\Contract::where('owner_id', session('owner_id'))
-                                    ->where('package_id', $package->id)
-                                    ->where('status', 'inactive')
-                                    ->where('payment_status', 'payed')
-                                    ->where('end_date', '<', now()) // ensure truly expired
-                                    ->where('is_current_contract', 0)
-                                    ->orderBy('end_date', 'desc')
+                                $lastExpiredContract = \App\Models\Contract::where("owner_id", session("owner_id"))
+                                    ->where("package_id", $package->id)
+                                    ->where("status", "inactive")
+                                    ->where("payment_status", "payed")
+                                    ->where("end_date", "<", now())
+                                    ->where("is_current_contract", 0)
+                                    ->orderBy("end_date", "desc")
                                     ->first();
 
+                                // --- PRICE CALCULATION LOGIC ---
+                                $finalPrice = $package->price; // Default Standard
+                                if (isset($pricingData) && $pricingData["mode"] != "standard") {
+                                    $finalPrice = $pricingData["amount"];
+                                }
+                                // Add Agent Markup per month if applicable (assuming markup is per month? previous logic implied it)
+                                // Actually, ContractController logic showed Markup * Duration in the total.
+                                // Here we show Monthly Price.
+                                // Let's show Base + Markup if applicable.
+                                $agentMarkup = isset($pricingData) ? $pricingData["agent_markup"] : 0;
+                                $displayPrice = $finalPrice + $agentMarkup;
+
                             @endphp
-                            <tr class="{{ $hasAnyContract > 0 && $package->id == 1 ? 'd-none' : '' }}">
-                                <td>{{ $package->name }}</td>
-                                <td>TZS {{ number_format($package->price) }}</td>
-                                <td>{{ $package->duration }} days</td>
-                                <td class="d-flex flex-wrap align-items-center gap-2">
+                            <tr class="{{ $hasAnyContract > 0 && $package->id == 1 ? "d-none" : "" }}">
+                                <td class="fw-bold text-dark ps-4">{{ $package->name }}</td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-primary fs-5">TZS {{ number_format($displayPrice) }}
+                                            <small class="text-muted fs-6">/ mo</small></span>
+                                        @if ($agentMarkup > 0)
+                                            <small class="text-muted" style="font-size: 0.8em;">(Base:
+                                                {{ number_format($finalPrice) }} + Agent Fee:
+                                                {{ number_format($agentMarkup) }})</small>
+                                        @endif
+                                        @if (isset($pricingData) && $pricingData["mode"] != "standard")
+                                            <span
+                                                class="badge bg-secondary-subtle text-dark border-secondary start-100 translate-middle-y top-0 mt-1 border"
+                                                style="width: fit-content;">
+                                                {{ ucfirst($pricingData["mode"]) }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td><span
+                                        class="badge bg-light text-dark rounded-pill border px-3">{{ $package->duration }}
+                                        days</span></td>
+                                <td class="d-flex align-items-center flex-wrap gap-2">
 
                                     {{-- ========================= CHECK: NO ACTIVE CONTRACTS? (Subscribe State) ========================= --}}
                                     @if ($activeContracts->count() < 1)
                                         {{-- Month selection for new subscription --}}
-                                        <select class="form-select form-select-sm me-2 w-auto"
+                                        <select class="form-select-sm form-select me-2 w-auto"
                                             id="months_{{ $package->id }}" required>
                                             <option value="">Select months</option>
 
                                             {{-- Loop months 1–12 --}}
                                             @for ($i = 1; $i <= 12; $i++)
                                                 <option value="{{ $i }}">{{ $i }}
-                                                    month{{ $i > 1 ? 's' : '' }}</option>
+                                                    month{{ $i > 1 ? "s" : "" }}</option>
                                             @endfor
                                         </select>
 
                                         {{-- Subscribe button --}}
-                                        <button type="button"
-                                            class="btn btn-primary btn-sm rounded-pill shadow subscribe-btn"
-                                            data-url="{{ route('contracts.users.subscribe', ['package_id' => $package->id, 'owner_id' => session('owner_id')]) }}">
+                                        <button class="btn btn-primary btn-sm rounded-pill subscribe-btn shadow"
+                                            data-url="{{ route("contracts.users.subscribe", ["package_id" => $package->id, "owner_id" => session("owner_id")]) }}"
+                                            type="button">
                                             <i class="fa-solid fa-badge-check"></i> Subscribe
                                         </button>
                                     @else
@@ -260,25 +325,26 @@
                                             @endphp
 
                                             {{-- ========================= CONTRACT END DATE CHECK (Renew or Current Plan) ========================= --}}
-                                            @if ($endDate->isPast() && $currentContract->status == 'inactive')
+                                            @if ($endDate->isPast() && $currentContract->status == "inactive")
                                                 {{-- Contract expired → Show Renew --}}
-                                                <select class="form-select form-select-sm me-2 w-auto"
+                                                <select class="form-select-sm form-select me-2 w-auto"
                                                     id="months_{{ $package->id }}" required>
                                                     <option value="">Select months</option>
                                                     @for ($i = 1; $i <= 12; $i++)
                                                         <option value="{{ $i }}">{{ $i }}
-                                                            month{{ $i > 1 ? 's' : '' }}</option>
+                                                            month{{ $i > 1 ? "s" : "" }}</option>
                                                     @endfor
                                                 </select>
 
-                                                <button type="button"
-                                                    class="btn btn-warning btn-sm rounded-pill shadow subscribe-btn"
-                                                    data-url="{{ route('contracts.users.renew', ['package_id' => $package->id, 'owner_id' => session('owner_id')]) }}">
+                                                <button class="btn btn-warning btn-sm rounded-pill subscribe-btn shadow"
+                                                    data-url="{{ route("contracts.users.renew", ["package_id" => $package->id, "owner_id" => session("owner_id")]) }}"
+                                                    type="button">
                                                     <i class="fa-solid fa-clock-rotate-left"></i> Renew
                                                 </button>
                                             @else
                                                 {{-- Contract still active → user cannot renew --}}
-                                                <button type="button" class="btn btn-success btn-sm rounded-pill" disabled>
+                                                <button class="btn btn-success btn-sm rounded-pill" disabled
+                                                    type="button">
                                                     Current Plan
                                                 </button>
                                             @endif
@@ -287,25 +353,25 @@
 
                                             {{-- If upgrade is blocked, allow "Activate" previous contract --}}
                                             @if ($blockUpgrade)
-                                                <a href="{{ route('contracts.users.activate', ['contract_id' => $activatableContract->id, 'owner_id' => session('owner_id')]) }}"
-                                                    class="btn btn-primary btn-sm rounded-pill shadow">
+                                                <a class="btn btn-primary btn-sm rounded-pill shadow"
+                                                    href="{{ route("contracts.users.activate", ["contract_id" => $activatableContract->id, "owner_id" => session("owner_id")]) }}">
                                                     <i class="fas fa-check-circle"></i> Activate
                                                 </a>
                                             @else
                                                 {{-- Show Upgrade option --}}
-                                                <select class="form-select form-select-sm me-2 w-auto"
+                                                <select class="form-select-sm form-select me-2 w-auto"
                                                     id="months_{{ $package->id }}" required>
                                                     <option value="">Select months</option>
 
                                                     @for ($i = 1; $i <= 12; $i++)
                                                         <option value="{{ $i }}">{{ $i }}
-                                                            month{{ $i > 1 ? 's' : '' }}</option>
+                                                            month{{ $i > 1 ? "s" : "" }}</option>
                                                     @endfor
                                                 </select>
 
-                                                <button type="button"
-                                                    class="btn btn-primary btn-sm rounded-pill shadow subscribe-btn"
-                                                    data-url="{{ route('contracts.users.upgrade', ['package_id' => $package->id, 'owner_id' => session('owner_id')]) }}">
+                                                <button class="btn btn-primary btn-sm rounded-pill subscribe-btn shadow"
+                                                    data-url="{{ route("contracts.users.upgrade", ["package_id" => $package->id, "owner_id" => session("owner_id")]) }}"
+                                                    type="button">
                                                     <i class="fa-solid fa-arrow-trend-up"></i> Upgrade
                                                 </button>
                                             @endif
@@ -313,8 +379,9 @@
                                     @endif
 
                                     {{-- ========================= PACKAGE DETAILS MODAL BUTTON ========================= --}}
-                                    <a href="#" class="btn btn-danger btn-sm text-white rounded-pill"
-                                        data-bs-toggle="modal" data-bs-target="#packageModal{{ $package->id }}">
+                                    <a class="btn btn-danger btn-sm rounded-pill text-white"
+                                        data-bs-target="#packageModal{{ $package->id }}" data-bs-toggle="modal"
+                                        href="#">
                                         <i class="bi bi-eye"></i> More
                                     </a>
 
@@ -323,14 +390,14 @@
                             </tr>
 
                             {{-- Modal --}}
-                            <div class="modal fade" id="packageModal{{ $package->id }}" tabindex="-1"
-                                aria-labelledby="packageModalLabel{{ $package->id }}" aria-hidden="true">
+                            <div aria-hidden="true" aria-labelledby="packageModalLabel{{ $package->id }}"
+                                class="modal fade" id="packageModal{{ $package->id }}" tabindex="-1">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title">{{ $package->name }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
+                                            <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
+                                                type="button"></button>
                                         </div>
                                         <div class="modal-body">
                                             <div class="card">
@@ -383,8 +450,8 @@
                                                     </ul>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Close</button>
+                                                    <button class="btn btn-secondary" data-bs-dismiss="modal"
+                                                        type="button">Close</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -394,7 +461,7 @@
                         @endforeach
                         @if ($packages->count() == 0)
                             <tr>
-                                <td colspan="4" class="text-center text-muted">No Packages</td>
+                                <td class="text-muted text-center" colspan="4">No Packages</td>
                             </tr>
                         @endif
                     </tbody>
@@ -403,7 +470,6 @@
         </div>
 
     </div>
-
 
     <script>
         // Set the date we're counting down to

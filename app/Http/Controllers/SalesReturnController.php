@@ -21,7 +21,7 @@ class SalesReturnController extends Controller
     public function salesReturns()
     {
 
-        if (Auth::user()->role == 'owner') {
+        if (Auth::user()->hasRole('Owner')) {
             $returns = SalesReturn::with(['sale', 'staff', 'approvedBy'])
                 ->where('pharmacy_id', session('current_pharmacy_id'))
                 ->orderBy('date', 'desc')->orderBy('date', 'desc')

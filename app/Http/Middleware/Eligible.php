@@ -28,13 +28,13 @@ class Eligible
     public function handle(Request $request, Closure $next, $action): Response
     {
         // Super Admin bypass
-        if (Auth::user()->role === 'super') {
+        if (Auth::user()->hasRole('Superadmin')) {
             return $next($request);
         }
 
         // check if agent has completed registration
         if ($action === 'registered') {
-            if (Auth::user()->role === 'agent') {
+            if (Auth::user()->hasRole('Agent')) {
                 $agent = Auth::user()->isAgent;
                 if ($agent != null) {
                     if ($agent->registration_status != 'complete') {
@@ -56,13 +56,17 @@ class Eligible
                     return $next($request);
                 }
             }
+            // if is owner
+            if (Auth::user()->hasRole('Owner')) {
+                return $next($request);
+            }
         }
 
         // Current user
         $user = Auth::user();
         $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
 
-        if (!$pharmacy && Auth::user()->role == 'owner') {
+        if (!$pharmacy && Auth::user()->hasRole('Owner')) {
             // return redirect()->route('dashboard')->with('error', 'No pharmacy found in the session.');
             // $owner = Auth::user();
             if (Auth::user()->pharmacies->count() < 1) {
@@ -79,11 +83,12 @@ class Eligible
         }
 
         // Determine the owner
-        $owner = match ($user->role) {
-            'staff' => User::find($pharmacy->owner_id),
-            'owner' => $user,
-            default => null,
-        };
+        $owner = null;
+        if ($user->hasRole('Staff')) {
+            $owner = User::find($pharmacy->owner_id);
+        } elseif ($user->hasRole('Owner')) {
+            $owner = $user;
+        }
 
 
         if (!$owner) {
@@ -100,13 +105,41 @@ class Eligible
         switch ($action) {
             case 'hasContract':
                 if (!$contract) {
+                    $pricingMode = $owner->pricing_mode ?? \App\Models\SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard';
+
+                    // Allow setup routes for Dynamic Pricing users so they can populate items
+                    if ($pricingMode === 'dynamic') {
+                        $allowedRoutes = [
+                            'dashboard',
+                            'pharmacies', 'pharmacies.create', 'pharmacies.store', 'pharmacies.show', 'pharmacies.update',
+                            'medicines', 'medicines.create', 'medicines.store', 'medicines.show', 'medicines.update', 'medicines.search',
+                            'stock', 'stock.create', 'stock.store', 'stock.show', 'stock.update',
+                            'import', 'importStore', 'medicines.import-form', 'medicines.import'
+                        ];
+                        
+                        // Check if current route name matches allowed list or patterns
+                        $currentRoute = $request->route()->getName();
+                        
+                        // Simple check if route is in allowed list
+                        if (in_array($currentRoute, $allowedRoutes) || 
+                            str_starts_with($currentRoute, 'medicines.') || 
+                            str_starts_with($currentRoute, 'stock.') ||
+                            str_starts_with($currentRoute, 'pharmacies.')) {
+                            return $next($request);
+                        }
+                    }
+
+                    if ($request->ajax() || $request->wantsJson()) {
+                        return response()->json(['success' => false, 'message' => 'Subscription required for this action.'], 403);
+                    }
+
                     $this->notify(
                         $owner,
                         'You do not have an active subscription plan. Please subscribe to access this resource!',
                         'warning'
                     );
 
-                    $redirectRoute = $user->role == 'staff' ? 'dashboard' : 'myContracts';
+                    $redirectRoute = $user->hasRole('Staff') ? 'dashboard' : 'myContracts';
                     return redirect()->route($redirectRoute)->with('error', 'You do not have an active subscription plan.');
                 }
                 break;
@@ -130,16 +163,23 @@ class Eligible
 
             case 'add staff':
                 $package = Package::find($contract->package_id);
-                $staffCount = Staff::where('pharmacy_id', $pharmacy->id)->count();
-
+                
                 if (!$package) {
                     return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
                 }
+
+                // Check strict feature flag first
+                if (!$package->staff_management) {
+                     return redirect()->route('staff')->with('error', 'Your subscription plan does not support Staff Management.');
+                }
+
+                $staffCount = Staff::where('pharmacy_id', $pharmacy->id)->count();
 
                 if ($staffCount >= $package->number_of_pharmacists) {
                     return redirect()->route('staff')->with('error', 'You have reached the maximum number of pharmacists allowed by your subscription.');
                 }
                 break;
+
             case 'add medicine':
                 $package = Package::find($contract->package_id);
                 $medicineCount = Items::where('pharmacy_id', $pharmacy->id)->count();
@@ -149,7 +189,6 @@ class Eligible
                 }
 
                 if ($medicineCount >= $package->number_of_medicines) {
-
                     //check if request is ajax
                     if ($request->ajax())
                         return response()->json(['message' => 'maximum'], 200);
@@ -158,6 +197,7 @@ class Eligible
                     return redirect()->route('medicines')->with('error', 'You have reached the maximum number of medicines allowed by your subscription.');
                 }
                 break;
+
             case 'view reports':
                 $package = Package::find($contract->package_id);
 
@@ -167,6 +207,20 @@ class Eligible
 
                 if ($package->reports != 1) {
                     return redirect()->back()->with('error', 'You\'re not allowed to see reports with your subscription plan, please upgrade!');
+                }
+                break;
+            
+            case 'stock':
+                $package = Package::find($contract->package_id);
+                if (!$package || !$package->stock_management) {
+                     return redirect()->route('dashboard')->with('error', 'Stock Management is not available in your current plan.');
+                }
+                break;
+                
+            case 'transfers':
+                $package = Package::find($contract->package_id);
+                if (!$package || !$package->stock_transfer) {
+                     return redirect()->route('dashboard')->with('error', 'Stock Transfers are not available in your current plan.');
                 }
                 break;
 

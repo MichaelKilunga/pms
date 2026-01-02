@@ -87,10 +87,13 @@ class StaffController extends Controller
             // Create the user
             $user = User::create($validatedData);
 
-
-            // if ($request->role == 'admin') {
-            //     Pharmacy::where('pharmacy_id',$request->pharmacy_id)->update(['admin_id' => $user->id]);
-            // }
+            // Assign Spatie role
+            if ($request->role == 'admin') {
+                $user->assignRole('Manager');
+                 // Pharmacy::where('pharmacy_id',$request->pharmacy_id)->update(['admin_id' => $user->id]);
+            } else {
+                $user->assignRole('Staff');
+            }
 
             // Create the staff record
             $staff = Staff::create([

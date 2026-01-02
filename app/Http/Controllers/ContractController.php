@@ -6,6 +6,8 @@ use App\Models\Contract;
 use App\Models\Package;
 use App\Models\Pharmacy;
 use App\Models\User;
+use App\Models\Sales;
+use App\Models\SystemSetting;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -111,14 +113,73 @@ class ContractController extends Controller
             $current_contract_end_date = null;
         }
 
-        // ⭐ ADD THIS — Check for active + paid but NOT current
+        // Check for active + paid but NOT current
         $hasActivePaidNotCurrent = Contract::where('owner_id', Auth::id())
             ->where('status', 'active')
             ->where('payment_status', 'payed')
             ->where('is_current_contract', 0)
             ->exists();
 
-        return view('contracts.users.index', compact('contracts', 'packages', 'current_contract_end_date', 'hasActivePaidNotCurrent'));
+        // --- PRICING DATA CALCULATION ---
+        $user = Auth::user();
+        $pricingMode = $user->pricing_mode ?? (SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard');
+        
+        $pricingData = [
+            'mode' => $pricingMode,
+            'amount' => 0,
+            'details' => [],
+            'agent_markup' => Pharmacy::where('owner_id', $user->id)->sum('agent_extra_charge')
+        ];
+
+        if ($pricingMode === 'dynamic') {
+            $totalItems = Pharmacy::where('owner_id', $user->id)->withCount('item')->get()->sum('item_count');
+            $rate = (float) (SystemSetting::where('key', 'system_use_rate')->value('value') ?? 100);
+            $divisor = (int) (SystemSetting::where('key', 'item_tier_divisor')->value('value') ?? 500);
+            $divisor = $divisor > 0 ? $divisor : 500;
+            $multiplier = max(1, floor($totalItems / $divisor));
+            $monthlyPrice = $multiplier * $rate * $totalItems;
+            
+            $pricingData['amount'] = $monthlyPrice;
+            $pricingData['details'] = [
+                'total_items' => $totalItems,
+                'rate' => $rate,
+                'multiplier' => $multiplier
+            ];
+        } elseif ($pricingMode === 'profit_share') {
+            $percentage = (float) (SystemSetting::where('key', 'profit_share_percentage')->value('value') ?? 25);
+            $pharmacyIds = Pharmacy::where('owner_id', $user->id)->pluck('id');
+            $startDate = now()->subDays(30);
+            
+            $sales = Sales::whereIn('pharmacy_id', $pharmacyIds)
+                ->where('created_at', '>=', $startDate)
+                ->with('stock')
+                ->get();
+                
+            $monthlyProfit = 0;
+            foreach ($sales as $sale) {
+                if ($sale->stock) {
+                    $cost = $sale->stock->buying_price * $sale->quantity;
+                    $profit = $sale->total_price - $cost;
+                    $monthlyProfit += $profit;
+                }
+            }
+            $monthlyProfit = max(0, $monthlyProfit);
+            $monthlyPrice = $monthlyProfit * ($percentage / 100);
+            
+            $pricingData['amount'] = $monthlyPrice;
+            $pricingData['details'] = [
+                'monthly_profit' => $monthlyProfit,
+                'percentage' => $percentage
+            ];
+        }
+
+        return view('contracts.users.index', compact(
+            'contracts', 
+            'packages', 
+            'current_contract_end_date', 
+            'hasActivePaidNotCurrent',
+            'pricingData'
+        ));
     }
 
     public function showUser($id)
@@ -150,6 +211,79 @@ class ContractController extends Controller
         $request['start_date'] = now();
         $request['end_date'] = now()->addDays($days);
         $request['grace_end_date'] = null;
+
+        // Pricing Logic
+        $owner = User::find($request['owner_id']);
+        // Determine pricing mode: User override > Global setting
+        $pricingMode = $owner->pricing_mode ?? (SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard');
+        
+        $amount = 0;
+        $agentMarkup = 0;
+        $months = $request['months'];
+
+        if ($pricingMode === 'dynamic') {
+             // Calculate total items for the owner
+            $totalItems = Pharmacy::where('owner_id', $owner->id)
+                ->withCount('item')
+                ->get()
+                ->sum('item_count');
+
+            // Logic: Price = max(1, floor(n/500)) * 100 * n
+            $rate = (float) (SystemSetting::where('key', 'system_use_rate')->value('value') ?? 100);
+            $divisor = (int) (SystemSetting::where('key', 'item_tier_divisor')->value('value') ?? 500);
+            $divisor = $divisor > 0 ? $divisor : 500;
+            
+            $multiplier = max(1, floor($totalItems / $divisor));
+            $monthlyPrice = $multiplier * $rate * $totalItems;
+            
+            $amount = $monthlyPrice * $months;
+
+            $agentMarkup = Pharmacy::where('owner_id', $owner->id)->sum('agent_extra_charge') * $months;
+            $amount += $agentMarkup;
+
+        } elseif ($pricingMode === 'profit_share') {
+            // Profit Share Logic
+            $percentage = (float) (SystemSetting::where('key', 'profit_share_percentage')->value('value') ?? 25);
+            
+            // Get last 30 days of sales for this owner's pharmacies to estimate monthly profit
+            $pharmacyIds = Pharmacy::where('owner_id', $owner->id)->pluck('id');
+            $startDate = now()->subDays(30);
+            
+            // Fetch sales with stock to calculate profit
+            // Profit = Sale Total Price - (Sale Quantity * Buying Price)
+            // Note: This assumes 100% collection. If partial payment, logic might differ but simplified here.
+            $sales = Sales::whereIn('pharmacy_id', $pharmacyIds)
+                ->where('created_at', '>=', $startDate)
+                ->with('stock')
+                ->get();
+                
+            $monthlyProfit = 0;
+            foreach ($sales as $sale) {
+                if ($sale->stock) {
+                    $cost = $sale->stock->buying_price * $sale->quantity;
+                    $profit = $sale->total_price - $cost;
+                    $monthlyProfit += $profit;
+                }
+            }
+            // Ensure profit is not negative for billing purposes?
+            $monthlyProfit = max(0, $monthlyProfit);
+            
+            $monthlyPrice = $monthlyProfit * ($percentage / 100);
+            $amount = $monthlyPrice * $months;
+            
+            $agentMarkup = Pharmacy::where('owner_id', $owner->id)->sum('agent_extra_charge') * $months;
+            $amount += $agentMarkup;
+
+        } else {
+             // Standard Pricing
+             $package = Package::find($request['package_id']);
+             $amount = $package ? $package->price * $months : 0;
+        }
+
+        $request->merge([
+            'amount' => $amount,
+            'agent_markup' => $agentMarkup
+        ]);
 
         try {
 
@@ -198,7 +332,13 @@ class ContractController extends Controller
             // Proceed with upgrade
 
             try {
-                Contract::create($validated);
+                // Ensure amount and agent_markup are in validated data if not already (they might not be if validation rules don't include them)
+                // We should add them to the create call
+                $contractData = $validated;
+                $contractData['amount'] = $request->amount;
+                $contractData['agent_markup'] = $request->agent_markup;
+
+                Contract::create($contractData);
                 $packages = Package::all();
 
                 $contracts = Contract::where('owner_id', Auth::user()->id)->with('package')->get();
@@ -228,6 +368,73 @@ class ContractController extends Controller
         $request['start_date'] = now();
         $request['end_date'] = now()->addDays($days);
         $request['grace_end_date'] = null;
+
+        // Pricing Logic
+        $ownerId = $request['owner_id'] ?? Auth::id();
+        $owner = User::find($ownerId);
+        $pricingMode = $owner->pricing_mode ?? (SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard');
+        
+        $amount = 0;
+        $agentMarkup = 0;
+        $months = $request['months'];
+
+        if ($pricingMode === 'dynamic') {
+             // Calculate total items for the owner
+            $totalItems = Pharmacy::where('owner_id', $ownerId)
+                ->withCount('item')
+                ->get()
+                ->sum('item_count');
+
+            // Logic: Price = max(1, floor(n/500)) * 100 * n
+            $rate = (float) (SystemSetting::where('key', 'system_use_rate')->value('value') ?? 100);
+            $divisor = (int) (SystemSetting::where('key', 'item_tier_divisor')->value('value') ?? 500);
+            $divisor = $divisor > 0 ? $divisor : 500;
+            
+            $multiplier = max(1, floor($totalItems / $divisor));
+            $monthlyPrice = $multiplier * $rate * $totalItems;
+            
+            $amount = $monthlyPrice * $months;
+
+            $agentMarkup = Pharmacy::where('owner_id', $ownerId)->sum('agent_extra_charge') * $months;
+            $amount += $agentMarkup;
+
+        } elseif ($pricingMode === 'profit_share') {
+             // Profit Share Logic
+            $percentage = (float) (SystemSetting::where('key', 'profit_share_percentage')->value('value') ?? 25);
+            
+            $pharmacyIds = Pharmacy::where('owner_id', $ownerId)->pluck('id');
+            $startDate = now()->subDays(30);
+            
+            $sales = Sales::whereIn('pharmacy_id', $pharmacyIds)
+                ->where('created_at', '>=', $startDate)
+                ->with('stock')
+                ->get();
+                
+            $monthlyProfit = 0;
+            foreach ($sales as $sale) {
+                if ($sale->stock) {
+                    $cost = $sale->stock->buying_price * $sale->quantity;
+                    $profit = $sale->total_price - $cost;
+                    $monthlyProfit += $profit;
+                }
+            }
+            $monthlyProfit = max(0, $monthlyProfit);
+            
+            $monthlyPrice = $monthlyProfit * ($percentage / 100);
+            $amount = $monthlyPrice * $months;
+            
+            $agentMarkup = Pharmacy::where('owner_id', $ownerId)->sum('agent_extra_charge') * $months;
+            $amount += $agentMarkup;
+
+        } else {
+             $package = Package::find($request['package_id']);
+             $amount = $package ? $package->price * $months : 0;
+        }
+        
+         $request->merge([
+            'amount' => $amount,
+            'agent_markup' => $agentMarkup
+        ]);
 
 
         try {
@@ -260,7 +467,13 @@ class ContractController extends Controller
             return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
 
-        Contract::create($validated);
+
+        
+        $contractData = $validated;
+        $contractData['amount'] = $request->amount;
+        $contractData['agent_markup'] = $request->agent_markup;
+
+        Contract::create($contractData);
 
         return redirect()->back()->with('success', 'Package subscribed successfully.');
     }
@@ -281,6 +494,73 @@ class ContractController extends Controller
         $request['end_date'] = now()->addDays($days);
         $request['grace_end_date'] = null;
 
+        // Pricing Logic
+        $ownerId = $request['owner_id'];
+        $owner = User::find($ownerId);
+        $pricingMode = $owner->pricing_mode ?? (SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard');
+
+        $amount = 0;
+        $agentMarkup = 0;
+        $months = $request['months'];
+
+        if ($pricingMode === 'dynamic') {
+             // Calculate total items for the owner
+            $totalItems = Pharmacy::where('owner_id', $ownerId)
+                ->withCount('item')
+                ->get()
+                ->sum('item_count');
+
+            // Logic: Price = max(1, floor(n/500)) * 100 * n
+            $rate = (float) (SystemSetting::where('key', 'system_use_rate')->value('value') ?? 100);
+            $divisor = (int) (SystemSetting::where('key', 'item_tier_divisor')->value('value') ?? 500);
+            $divisor = $divisor > 0 ? $divisor : 500;
+            
+            $multiplier = max(1, floor($totalItems / $divisor));
+            $monthlyPrice = $multiplier * $rate * $totalItems;
+            
+            $amount = $monthlyPrice * $months;
+
+            $agentMarkup = Pharmacy::where('owner_id', $ownerId)->sum('agent_extra_charge') * $months;
+            $amount += $agentMarkup;
+
+        } elseif ($pricingMode === 'profit_share') {
+             // Profit Share Logic
+            $percentage = (float) (SystemSetting::where('key', 'profit_share_percentage')->value('value') ?? 25);
+            
+            $pharmacyIds = Pharmacy::where('owner_id', $ownerId)->pluck('id');
+            $startDate = now()->subDays(30);
+            
+            $sales = Sales::whereIn('pharmacy_id', $pharmacyIds)
+                ->where('created_at', '>=', $startDate)
+                ->with('stock')
+                ->get();
+                
+            $monthlyProfit = 0;
+            foreach ($sales as $sale) {
+                if ($sale->stock) {
+                    $cost = $sale->stock->buying_price * $sale->quantity;
+                    $profit = $sale->total_price - $cost;
+                    $monthlyProfit += $profit;
+                }
+            }
+            $monthlyProfit = max(0, $monthlyProfit);
+            
+            $monthlyPrice = $monthlyProfit * ($percentage / 100);
+            $amount = $monthlyPrice * $months;
+            
+            $agentMarkup = Pharmacy::where('owner_id', $ownerId)->sum('agent_extra_charge') * $months;
+            $amount += $agentMarkup;
+
+        } else {
+             $package = Package::find($request['package_id']);
+             $amount = $package ? $package->price * $months : 0;
+        }
+
+         $request->merge([
+            'amount' => $amount,
+            'agent_markup' => $agentMarkup
+        ]);
+
         // dd($request->all());
 
         try {
@@ -298,7 +578,13 @@ class ContractController extends Controller
             return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
 
-        Contract::create($validated);
+
+
+        $contractData = $validated;
+        $contractData['amount'] = $request->amount;
+        $contractData['agent_markup'] = $request->agent_markup;
+
+        Contract::create($contractData);
 
         return redirect()->back()->with('success', 'Package renewed successfully.');
     }

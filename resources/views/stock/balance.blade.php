@@ -1,12 +1,12 @@
-@extends('stock.app')
+@extends("stock.app")
 
-@section('content')
+@section("content")
     <div class="container">
-        <h4 class="text-primary fs-2 fw-bold mt-2 mb-1">Stock Balance Summary</h4>
+        <h4 class="text-primary fs-2 fw-bold mb-1 mt-2">Stock Balance Summary</h4>
         <hr>
 
         <div class="table-responsive">
-            <table class="table table-bordered table-striped table-hover" id="TableOne">
+            <table class="table-bordered table-striped table-hover small table" id="TableOne">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -22,40 +22,40 @@
         </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="stockModal" tabindex="-1" aria-hidden="true">
+        <div aria-hidden="true" class="modal fade" id="stockModal" tabindex="-1">
             <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title d-flex align-items-center">
                             <i class="bi bi-box-seam me-2"></i>
-                            Stock Details for <span id="modalItemName" class="ms-1"></span>
+                            Stock Details for <span class="ms-1" id="modalItemName"></span>
                         </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        <button class="btn-close btn-close-white" data-bs-dismiss="modal" type="button"></button>
                     </div>
 
                     <div class="modal-body">
                         <ul class="nav nav-tabs" id="stockTabs">
                             <li class="nav-item">
-                                <button class="nav-link active text-success fw-bold" data-bs-toggle="tab"
-                                    data-bs-target="#fineStock">
+                                <button class="nav-link active text-success fw-bold" data-bs-target="#fineStock"
+                                    data-bs-toggle="tab">
                                     <i class="bi bi-check-circle me-1"></i> Fine
                                 </button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link text-danger fw-bold" data-bs-toggle="tab"
-                                    data-bs-target="#expiredStock">
+                                <button class="nav-link text-danger fw-bold" data-bs-target="#expiredStock"
+                                    data-bs-toggle="tab">
                                     <i class="bi bi-x-circle me-1"></i> Expired
                                 </button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link text-warning fw-bold" data-bs-toggle="tab"
-                                    data-bs-target="#lowStock">
+                                <button class="nav-link text-warning fw-bold" data-bs-target="#lowStock"
+                                    data-bs-toggle="tab">
                                     <i class="bi bi-exclamation-triangle me-1"></i> Low Stock
                                 </button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link text-dark fw-bold" data-bs-toggle="tab"
-                                    data-bs-target="#finishedStock">
+                                <button class="nav-link text-dark fw-bold" data-bs-target="#finishedStock"
+                                    data-bs-toggle="tab">
                                     <i class="bi bi-dash-circle me-1"></i> Finished
                                 </button>
                             </li>
@@ -65,7 +65,7 @@
                             <!-- Fine -->
                             <div class="tab-pane fade show active" id="fineStock">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped mb-0">
+                                    <table class="table-bordered table-striped mb-0 table">
                                         <thead>
                                             <tr>
                                                 <th>Batch No</th>
@@ -83,7 +83,7 @@
                             <!-- Expired -->
                             <div class="tab-pane fade" id="expiredStock">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped mb-0">
+                                    <table class="table-bordered table-striped mb-0 table">
                                         <thead>
                                             <tr>
                                                 <th>Batch No</th>
@@ -101,7 +101,7 @@
                             <!-- Low Stock -->
                             <div class="tab-pane fade" id="lowStock">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped mb-0">
+                                    <table class="table-bordered table-striped mb-0 table">
                                         <thead>
                                             <tr>
                                                 <th>Batch No</th>
@@ -119,7 +119,7 @@
                             <!-- Finished -->
                             <div class="tab-pane fade" id="finishedStock">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped mb-0">
+                                    <table class="table-bordered table-striped mb-0 table">
                                         <thead>
                                             <tr>
                                                 <th>Batch No</th>
@@ -136,7 +136,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
                     </div>
                 </div>
             </div>
@@ -337,7 +337,7 @@
             $('#TableOne').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('stocks.balance.data') }}", // JSON endpoint
+                ajax: "{{ route("stocks.balance.data") }}", // JSON endpoint
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -410,7 +410,7 @@
             button.prop('disabled', true).text('Saving...');
 
             $.ajax({
-                url: "{{ route('stocks.check.save') }}", // ✅ create this route
+                url: "{{ route("stocks.check.save") }}", // ✅ create this route
                 method: 'POST',
                 data: {
                     _token: "{{ csrf_token() }}",

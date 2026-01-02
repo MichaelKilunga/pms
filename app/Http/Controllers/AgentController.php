@@ -9,6 +9,9 @@ use App\Models\Message;
 use App\Models\Package;
 use App\Models\Pharmacy;
 use App\Models\User;
+use App\Models\Sales;
+use App\Models\Stock;
+use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -48,6 +51,7 @@ class AgentController extends Controller
                         'password' => Hash::make("password"),
                         'role' => 'owner',
                     ]);
+                    $owner->assignRole('Owner');
                 } catch (\Exception $e) {
                     throw new \Exception("There is an error creating the owner!");
                 }
@@ -82,6 +86,7 @@ class AgentController extends Controller
                 'pharmacy_name' => 'required|string|unique:pharmacies,name,' . $request->id,
                 'location' => 'nullable',
                 'status' => 'required',
+                'agent_extra_charge' => 'nullable|numeric|min:0',
             ]);
 
             // dd($request->all());
@@ -91,6 +96,7 @@ class AgentController extends Controller
                 $pharmacy->name = $request->pharmacy_name;
                 $pharmacy->location = $request->location;
                 $pharmacy->status = $request->status;
+                $pharmacy->agent_extra_charge = $request->agent_extra_charge ?? 0;
                 $pharmacy->save();
                 return redirect()->back()->with('success', 'Pharmacy updated successfully');
             } catch (\Exception $e) {
@@ -154,7 +160,61 @@ class AgentController extends Controller
                     $current_contract_end_date = null;
                 }
 
-                return view('agent.packages', compact('contracts', 'packages', 'current_contract_end_date', 'owners'));
+                $user = User::find(session('owner_id'));
+                
+                // --- PRICING DATA CALCULATION (Copied from ContractController for consistency) ---
+                $pricingMode = $user->pricing_mode ?? (SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard');
+                
+                $pricingData = [
+                    'mode' => $pricingMode,
+                    'amount' => 0,
+                    'details' => [],
+                    'agent_markup' => Pharmacy::where('owner_id', $user->id)->sum('agent_extra_charge')
+                ];
+
+                if ($pricingMode === 'dynamic') {
+                    $totalItems = Pharmacy::where('owner_id', $user->id)->withCount('item')->get()->sum('item_count');
+                    $rate = (float) (SystemSetting::where('key', 'system_use_rate')->value('value') ?? 100);
+                    $divisor = (int) (SystemSetting::where('key', 'item_tier_divisor')->value('value') ?? 500);
+                    $divisor = $divisor > 0 ? $divisor : 500;
+                    $multiplier = max(1, floor($totalItems / $divisor));
+                    $monthlyPrice = $multiplier * $rate * $totalItems;
+                    
+                    $pricingData['amount'] = $monthlyPrice;
+                    $pricingData['details'] = [
+                        'total_items' => $totalItems,
+                        'rate' => $rate,
+                        'multiplier' => $multiplier
+                    ];
+                } elseif ($pricingMode === 'profit_share') {
+                    $percentage = (float) (SystemSetting::where('key', 'profit_share_percentage')->value('value') ?? 25);
+                    $pharmacyIds = Pharmacy::where('owner_id', $user->id)->pluck('id');
+                    $startDate = now()->subDays(30);
+                    
+                    $sales = Sales::whereIn('pharmacy_id', $pharmacyIds)
+                        ->where('created_at', '>=', $startDate)
+                        ->with('stock')
+                        ->get();
+                        
+                    $monthlyProfit = 0;
+                    foreach ($sales as $sale) {
+                        if ($sale->stock) {
+                            $cost = $sale->stock->buying_price * $sale->quantity;
+                            $profit = $sale->total_price - $cost;
+                            $monthlyProfit += $profit;
+                        }
+                    }
+                    $monthlyProfit = max(0, $monthlyProfit);
+                    $monthlyPrice = $monthlyProfit * ($percentage / 100);
+                    
+                    $pricingData['amount'] = $monthlyPrice;
+                    $pricingData['details'] = [
+                        'monthly_profit' => $monthlyProfit,
+                        'percentage' => $percentage
+                    ];
+                }
+
+                return view('agent.packages', compact('contracts', 'packages', 'current_contract_end_date', 'owners', 'pricingData'));
             } else {
                 $packages = Package::all();
                 // $owners = User::all();
@@ -175,227 +235,8 @@ class AgentController extends Controller
 
     public function messages(Request $request)
     {
-        if ($request->action == 'index' || !$request->action) {
-            // return  all conversations, their messages, and their users
-            try {
-                // Fetch all conversations for the authenticated user
-                $conversations = Conversation::whereHas('creator', function ($query) {
-                    $query->where('role', Auth::user()->role);
-                })->with(['messages' => function ($query) {
-                    $query->with(['sender', 'usersWhoRead']); // Only fetch unread messages
-                }, 'participants'])
-                    ->get()
-                    // Add all other conversations he is a participant in
-                    ->merge(Conversation::whereHas('participants', function ($query) {
-                        $query->where('user_id', Auth::user()->id);
-                    })->with(['messages' => function ($query) {
-                        $query->with(['sender', 'usersWhoRead']); // Only fetch unread messages
-                    }, 'participants'])
-                        ->get());
-
-                $users = User::where('role', Auth::user()->role)->get();
-                // add the super admin, id = 1
-                $users->push(User::find(1));
-
-                return view('agent.messages', compact('conversations', 'users'));
-            } catch (\Exception $e) {
-                // Return the conversations with their unread messages in a json response
-                return response()->json(['error' => $e->getMessage()]);
-            }
-        }
-        if ($request->action == 'delete') {
-
-            try {
-                $message = Message::find($request->id);
-
-                if (!$message) {
-                    return response()->json(['success' => false, 'message' => 'Message not found']);
-                }
-
-                Message::destroy($message->id);
-
-                return response()->json([
-                    'success' => 'true',
-                    'message' => 'Message deleted successfully'
-                ]);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage()
-                ]);
-            }
-        }
-
-        if ($request->action == 'read') {
-            try {
-                $message = Message::find($request->id);
-                // dd($message);
-                $message->is_read = 1;
-                $message->save();
-                return redirect()->back()->with('success', 'Message marked as read successfully');
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', $e->getMessage());
-            }
-        }
-
-        if ($request->action == 'unread') {
-            try {
-                // Fetch all conversations for the authenticated user
-                $conversations = Auth::user()->conversations()
-                    ->with(['messages' => function ($query) {
-                        $query->where('status', 'unread')->with('sender'); // Only fetch unread messages
-                    }])
-                    ->get();
-
-                // Return the conversations with their unread messages in a json response
-                return response()->json($conversations);
-            } catch (\Exception $e) {
-                // Return the conversations with their unread messages in a json response
-                return response()->json(['error' => $e->getMessage()]);
-            }
-        }
-
-        if ($request->action == 'createConversation') {
-            try {
-                // validate
-                $request->validate([
-                    'recipients' => 'required|array',
-                    'recipients.*' => 'required|integer',
-
-                    'title' => 'required|string',
-                    'description' => 'required|string',
-                ]);
-                // create conversation
-                $conversation = Conversation::create([
-                    'title' => $request->title,
-                    'description' => $request->description,
-                    'status' => 'open',
-                    'creator_id' => Auth::user()->id,
-                ]);
-
-                // add each participants to the conversation
-                foreach ($request->recipients as $user_id) {
-                    $conversation->participants()->attach($user_id);
-                    // attach the authenticated user to the conversation
-                    $conversation->participants()->attach(Auth::user()->id);
-                }
-
-                return response()->json(['success' => 'Conversation created successfully']);
-            } catch (\Exception $e) {
-                // Return the conversations with their unread messages in a json response
-                return response()->json(['error' => $e->getMessage()]);
-            }
-        }
-
-        // get conversation messages
-        if ($request->action == 'getMessages') {
-            try {
-                // Fetch conversation messages with sender and users who read
-                $messages = Message::with(['sender', 'usersWhoRead', 'parentMessage' => function ($query) {
-                    $query->with('sender');
-                }])
-                    ->where('conversation_id', $request->conversation_id)
-                    ->get();
-
-                // Return the messages in JSON format
-                return response()->json([
-                    'success' => true,
-                    'messages' => $messages
-                ]);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'success' => false,
-                    'error' => $e->getMessage()
-                ]);
-            }
-        }
-
-        // send message
-        if ($request->action == 'sendMessage') {
-            try {
-                // validate
-                $request->validate([
-                    'conversation_id' => 'required|integer',
-                    'content' => 'required|string',
-                ]);
-
-                // create message
-                $message = Message::create([
-                    'conversation_id' => $request->conversation_id,
-                    'sender_id' => Auth::user()->id,
-                    'content' => $request->content,
-                    'status' => 'unread',
-                ]);
-
-                // return response
-                return response()->json([
-                    'success' => true,
-                    'message' => $message ? 'Message sent successfully' : 'Message not sent'
-                ]);
-            } catch (\Exception $e) {
-                // Return the conversations with their unread messages in a json response
-                return response()->json(['success' => false, 'error' => $e->getMessage()]);
-            }
-        }
-
-        // send reply
-        if ($request->action == 'sendReply') {
-            try {
-                // validate
-                $request->validate([
-                    'conversationId' => 'required|integer',
-                    'parentMessageId' => 'required|integer',
-                    'message' => 'required|string',
-                ]);
-
-                // return response()->json([
-                //     'success' => true,
-                //     'message' => $request->all()
-                // ]);
-
-                // create message
-                $message = Message::create([
-                    'conversation_id' => $request->conversationId,
-                    'sender_id' => Auth::user()->id,
-                    'content' => $request->message,
-                    'status' => 'unread',
-                    'parent_message_id' => $request->parentMessageId,
-                ]);
-
-                // return response
-                return response()->json([
-                    'success' => true,
-                    'message' => $message ? 'Message replied successfully' : 'Message not replied'
-                ]);
-            } catch (\Exception $e) {
-                // Return the conversations with their unread messages in a json response
-                return response()->json(['success' => false, 'error' => $e->getMessage()]);
-            }
-        }
-
-        // return recepients for a conversations
-        if ($request->action == 'getRecipients') {
-            try {
-                // fetch users with same role as the authenticated user, and  super admin
-                $users = User::where('role', Auth::user()->role)->get();
-                // add the super admin, id = 1
-                $users->push(User::find(1));
-
-                return response()->json($users);
-            } catch (\Exception $e) {
-                // Return the conversations with their unread messages in a json response
-                return response()->json(['error' => $e->getMessage()]);
-            }
-        }
-
-        if ($request->action == 'delete_all') {
-            try {
-                Message::where('agent_id', Auth::user()->id)->delete();
-                return redirect()->back()->with('success', 'All messages deleted successfully');
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', $e->getMessage());
-            }
-        }
+        // DEPRECATED: Use MessageController instead.
+        return redirect()->route('agent.messages');
     }
 
     public function cases(Request $request)
@@ -413,10 +254,10 @@ class AgentController extends Controller
     {
         if ($request->action == 'index') {
             $me = Auth::user()->isAgent;
-            if (Auth::user()->role == 'super') {
+            if (Auth::user()->hasRole('Superadmin')) {
                 // $agents = Agent::with('user')->get();
                 // fetch all user with role agents and their data from table agents
-                $agents = User::with('isAgent')->where('role', 'agent')->get();
+                $agents = User::role('Agent')->with('isAgent')->get();
                 // dd($agents[4]->isAgent);
                 return view('agent.complete', compact('me', 'agents'));
             }

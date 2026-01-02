@@ -26,7 +26,7 @@ class Show
     public function handle(Request $request, Closure $next, $action): bool
     {
         // Example condition: Allow super admins to see all content
-        if (Auth::user() && Auth::user()->role === 'super') {
+        if (Auth::user() && Auth::user()->hasRole('Superadmin')) {
             return true;
         }
 
@@ -39,11 +39,12 @@ class Show
         }
 
         // Determine the owner
-        $owner = match ($user->role) {
-            'staff' => User::find($pharmacy->owner_id),
-            'owner' => $user,
-            default => null,
-        };
+        $owner = null;
+        if ($user->hasRole('Staff')) {
+            $owner = User::find($pharmacy->owner_id);
+        } elseif ($user->hasRole('Owner')) {
+            $owner = $user;
+        }
 
         if (!$owner) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized access.');

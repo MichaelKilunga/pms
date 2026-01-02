@@ -1,6 +1,6 @@
-@extends('sales.app')
+@extends("sales.app")
 
-@section('content')
+@section("content")
     <div class="container mt-4">
         <!-- Header -->
         <div class="d-flex justify-content-between mb-3">
@@ -11,8 +11,8 @@
         <hr class="mb-2">
 
         <!-- Sales Table -->
-        <div class="table-responsive shadow-sm rounded-3">
-            <table class="table table-striped table-hover table-bordered align-middle" id="Table">
+        <div class="table-responsive rounded-3 shadow-sm">
+            <table class="table-striped table-hover table-bordered small table align-middle" id="Table">
                 <thead class="table-primary">
                     <tr>
                         <th>#</th>
@@ -25,9 +25,9 @@
                         <th>Approved By</th>
                         <th>Date</th>
                         <th>Status</th>
-                        @if (Auth::user()->role == 'owner')
+                        @hasrole("Owner")
                             <th>Actions</th>
-                        @endif
+                        @endhasrole
                     </tr>
                 </thead>
                 <tbody>
@@ -38,45 +38,46 @@
                             <td>{{ $returns->quantity }}</td>
                             <td>{{ $returns->refund_amount }}</td>
                             <td>{{ $returns->date }}</td>
-                            <td>{{ $returns->reason ?? 'NILL' }}</td>
+                            <td>{{ $returns->reason ?? "NILL" }}</td>
                             <td>{{ $returns->staff->name }}</td>
-                            <td>{{ $returns->approvedBy ? $returns->approvedBy->name : 'Not approved' }}</td>
+                            <td>{{ $returns->approvedBy ? $returns->approvedBy->name : "Not approved" }}</td>
                             <td>{{ $returns->created_at }}</td>
                             <td>
-                                @if ($returns->return_status == 'pending')
-                                    <span class=" text-dark fw-bold">{{ $returns->return_status }}</span>
-                                @elseif ($returns->return_status == 'approved')
+                                @if ($returns->return_status == "pending")
+                                    <span class="text-dark fw-bold">{{ $returns->return_status }}</span>
+                                @elseif ($returns->return_status == "approved")
                                     <span class="text-success fw-bold">{{ $returns->return_status }}</span>
                                 @else
                                     <span class="text-danger fw-bold">{{ $returns->return_status }}</span>
                                 @endif
                             </td>
-                            @if (Auth::user()->role == 'owner')
+                            @hasrole("Owner")
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <form action="{{ route('salesReturns.update') }}" method="POST" class="d-inline">
+                                        <form action="{{ route("salesReturns.update") }}" class="d-inline" method="POST">
                                             @csrf
-                                            <input type="hidden" name="return_id" value="{{ $returns->id }}">
-                                            <input type="hidden" name="return_status" value="approved">
-                                            <button type="submit" class="btn btn-success btn-sm me-2 d-flex"
-                                                onclick="return confirm('Are you sure to approve?')">
+                                            <input name="return_id" type="hidden" value="{{ $returns->id }}">
+                                            <input name="return_status" type="hidden" value="approved">
+                                            <button class="btn btn-success btn-sm d-flex me-2"
+                                                onclick="return confirm('Are you sure to approve?')" type="submit">
                                                 <i class="bi bi-check"></i> Approve
                                             </button>
                                         </form>
 
-                                        <form action="{{ route('salesReturns.update') }}" method="POST"
+                                        <form action="{{ route("salesReturns.update") }}" method="POST"
                                             style="margin-left: 5px;">
                                             @csrf
-                                            <input type="hidden" name="return_id" value="{{ $returns->id }}">
-                                            <input type="hidden" name="return_status" value="rejected">
-                                            <button type="submit" class="btn btn-danger btn-sm d-flex" {{$returns->return_status == 'rejected' ? 'disabled' : ''}}
-                                                onclick="return confirm('Are you sure to reject?')">
+                                            <input name="return_id" type="hidden" value="{{ $returns->id }}">
+                                            <input name="return_status" type="hidden" value="rejected">
+                                            <button {{ $returns->return_status == "rejected" ? "disabled" : "" }}
+                                                class="btn btn-danger btn-sm d-flex"
+                                                onclick="return confirm('Are you sure to reject?')" type="submit">
                                                 <i class="bi bi-x"></i> Reject
                                             </button>
                                         </form>
                                     </div>
                                 </td>
-                            @endif
+                            @endhasrole
 
                         </tr>
                     @endforeach

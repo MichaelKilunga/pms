@@ -1,138 +1,132 @@
-@extends('packages.app')
+@extends("packages.app")
 
-@section('content')
-    <div class="container">
-        <h1>Edit Package</h1>
-        <form action="{{ route('packages.update', $package->id) }}" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" name="name" id="name" class="form-control" value="{{ $package->name }}" required>
+@section("content")
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3 text-primary fw-bold mb-0">Edit Package: {{ $package->name }}</h1>
+                    <a class="btn btn-outline-secondary rounded-pill" href="{{ route("packages") }}">
+                        <i class="bi bi-arrow-left me-1"></i> Back to List
+                    </a>
+                </div>
+
+                <div class="card rounded-4 overflow-hidden border-0 shadow-sm">
+                    <div class="card-header border-bottom bg-white p-4">
+                        <h5 class="fw-bold text-dark mb-0">Package Configuration</h5>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <form action="{{ route("packages.update", $package->id) }}" method="POST">
+                            @csrf
+                            @method("PUT")
+
+                            <!-- Section 1: Basic Information -->
+                            <h6 class="text-uppercase text-muted fw-bold small mb-3">Basic Information</h6>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold" for="name">Package Name</label>
+                                    <input class="form-control" id="name" name="name" required type="text"
+                                        value="{{ $package->name }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold" for="price">Price (TZS)</label>
+                                    <input class="form-control" id="price" name="price" required type="number"
+                                        value="{{ $package->price }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold" for="duration">Duration (Days)</label>
+                                    <input class="form-control" id="duration" name="duration" required type="number"
+                                        value="{{ $package->duration }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold" for="status">Status</label>
+                                    <select class="form-select" id="status" name="status">
+                                        <option {{ $package->status ? "selected" : "" }} value="1">Active</option>
+                                        <option {{ !$package->status ? "selected" : "" }} value="0">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <hr class="text-muted my-4">
+
+                            <!-- Section 2: Account Limits -->
+                            <h6 class="text-uppercase text-muted fw-bold small mb-3">Resource Limits</h6>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small">No. of Pharmacies</label>
+                                    <input class="form-control" name="number_of_pharmacies" required type="number"
+                                        value="{{ $package->number_of_pharmacies }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small">No. of Pharmacists</label>
+                                    <input class="form-control" name="number_of_pharmacists" required type="number"
+                                        value="{{ $package->number_of_pharmacists }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small">No. of Owner Accounts</label>
+                                    <input class="form-control" name="number_of_owner_accounts" required type="number"
+                                        value="{{ $package->number_of_owner_accounts }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small">No. of Admin Accounts</label>
+                                    <input class="form-control" name="number_of_admin_accounts" required type="number"
+                                        value="{{ $package->number_of_admin_accounts }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small">No. of Medicines</label>
+                                    <input class="form-control" name="number_of_medicines" required type="number"
+                                        value="{{ $package->number_of_medicines }}">
+                                </div>
+                            </div>
+
+                            <hr class="text-muted my-4">
+
+                            <!-- Section 3: Module Access (Switches) -->
+                            <h6 class="text-uppercase text-muted fw-bold small mb-3">Module Access & Features</h6>
+                            <div class="row g-4">
+                                @php
+                                    $modules = [
+                                        "reports" => "Reports Module",
+                                        "stock_transfer" => "Stock Transfer",
+                                        "stock_management" => "Stock Management",
+                                        "staff_management" => "Staff Management",
+                                        "receipts" => "Receipt Printing",
+                                        "analytics" => "Analytics Dashboard",
+                                        "whatsapp_chats" => "WhatsApp Integration",
+                                        "online_support" => "Online Support",
+                                        "in_app_notification" => "In-App Notifications",
+                                        "email_notification" => "Email Notifications",
+                                        "sms_notifications" => "SMS Notifications",
+                                    ];
+                                @endphp
+
+                                @foreach ($modules as $field => $label)
+                                    <div class="col-md-4">
+                                        <div
+                                            class="form-check form-switch d-flex align-items-center justify-content-between bg-light m-0 rounded border p-0 p-3">
+                                            <label class="form-check-label fw-bold mb-0"
+                                                for="{{ $field }}">{{ $label }}</label>
+                                            <input name="{{ $field }}" type="hidden" value="0">
+                                            <input {{ $package->$field ? "checked" : "" }}
+                                                class="form-check-input ms-2 mt-0" id="{{ $field }}"
+                                                name="{{ $field }}" role="switch" style="transform: scale(1.2);"
+                                                type="checkbox" value="1">
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-5">
+                                <a class="btn btn-secondary rounded-pill me-2 px-4"
+                                    href="{{ route("packages") }}">Cancel</a>
+                                <button class="btn btn-primary rounded-pill fw-bold px-5 shadow" type="submit">Save
+                                    Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="price">Price:</label>
-                <input type="number" name="price" id="price" class="form-control" value="{{ $package->price }}"
-                    required>
-            </div>
-            <div class="form-group">
-                <label for="duration">Duration (days):</label>
-                <input type="text" name="duration" id="duration" class="form-control" value="{{ $package->duration }}"
-                    required>
-            </div>
-            <div class="form-group">
-                <label for="status">Status:</label>
-                <select name="status" id="status" class="form-control">
-                    <option value="1" {{ $package->status ? 'selected' : '' }}>Active</option>
-                    <option value="0" {{ !$package->status ? 'selected' : '' }}>Inactive</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="number_of_pharmacies">Number of Pharmacies:</label>
-                <input type="number" name="number_of_pharmacies" id="number_of_pharmacies" class="form-control"
-                    value="{{ $package->number_of_pharmacies }}" required>
-            </div>
-            <div class="form-group">
-                <label for="number_of_pharmacists">Number of Pharmacists:</label>
-                <input type="number" name="number_of_pharmacists" id="number_of_pharmacists" class="form-control"
-                    value="{{ $package->number_of_pharmacists }}" required>
-            </div>
-            <div class="form-group">
-                <label for="number_of_medicines">Number of Medicines:</label>
-                <input type="number" name="number_of_medicines" id="number_of_medicines" class="form-control"
-                    value="{{ $package->number_of_medicines }}" required>
-            </div>
-            <div class="form-group">
-                <label for="in_app_notification">In App Notification:</label>
-                <select name="in_app_notification" id="in_app_notification" class="form-control">
-                    <option value="1" {{ $package->in_app_notification ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->in_app_notification ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="email_notification">Email Notification:</label>
-                <select name="email_notification" id="email_notification" class="form-control">
-                    <option value="1" {{ $package->email_notification ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->email_notification ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="sms_notifications">SMS Notifications:</label>
-                <select name="sms_notifications" id="sms_notifications" class="form-control">
-                    <option value="1" {{ $package->sms_notifications ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->sms_notifications ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="online_support">Online Support:</label>
-                <select name="online_support" id="online_support" class="form-control">
-                    <option value="1" {{ $package->online_support ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->online_support ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="number_of_owner_accounts">Number of Owner Accounts:</label>
-                <input type="number" name="number_of_owner_accounts" id="number_of_owner_accounts" class="form-control"
-                    value="{{ $package->number_of_owner_accounts }}" required>
-            </div>
-            <div class="form-group">
-                <label for="number_of_admin_accounts">Number of Admin Accounts:</label>
-                <input type="number" name="number_of_admin_accounts" id="number_of_admin_accounts" class="form-control"
-                    value="{{ $package->number_of_admin_accounts }}" required>
-            </div>
-            <div class="form-group">
-                <label for="reports">Reports:</label>
-                <select name="reports" id="reports" class="form-control">
-                    <option value="1" {{ $package->reports ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->reports ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="stock_transfer">Stock Transfer:</label>
-                <select name="stock_transfer" id="stock_transfer" class="form-control">
-                    <option value="1" {{ $package->stock_transfer ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->stock_transfer ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="stock_management">Stock Management:</label>
-                <select name="stock_management" id="stock_management" class="form-control">
-                    <option value="1" {{ $package->stock_management ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->stock_management ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="staff_management">Staff Management:</label>
-                <select name="staff_management" id="staff_management" class="form-control">
-                    <option value="1" {{ $package->staff_management ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->staff_management ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="receipts">Receipts:</label>
-                <select name="receipts" id="receipts" class="form-control">
-                    <option value="1" {{ $package->receipts ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->receipts ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="analytics">Analytics:</label>
-                <select name="analytics" id="analytics" class="form-control">
-                    <option value="1" {{ $package->analytics ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->analytics ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="whatsapp_chats">Whatsapp Chats:</label>
-                <select name="whatsapp_chats" id="whatsapp_chats" class="form-control">
-                    <option value="1" {{ $package->whatsapp_chats ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->whatsapp_chats ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="d-flex justify-content-between m-2">
-                <a href="{{ route('packages') }}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary">Save</button>
-            </div>
-        </form>
+        </div>
     </div>
 @endsection

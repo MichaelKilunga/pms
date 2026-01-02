@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class GeneralNotification extends Notification
+class GeneralNotification extends BaseNotification
 {
     use Queueable;
     public $notification;
@@ -20,37 +20,46 @@ class GeneralNotification extends Notification
         $this->notification = $notification;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail'];
-    }
+    // BaseNotification handles via()
 
     /**
      * Get the mail representation of the notification.
      */
     public function toMail(object $notifiable): MailMessage
     {
-        // dd($this->notification);
         return (new MailMessage)
-                    ->line($this->notification['subject'].', \n'.$this->notification['body'])
+                    ->subject($this->notification['subject'])
+                    ->line($this->notification['body'])
                     ->action($this->notification['action'], url('/'.$this->notification['path']))
-                    ->line('Thank you for trusting  PILLPOINT!');
+                    ->line('Thank you for trusting PILLPOINT!');
     }
 
     /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
+     * Get the array representation of the notification (Database/In-App).
      */
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title' => $this->notification['subject'],
+            'body' => $this->notification['body'],
+            'action_url' => url('/'.$this->notification['path']),
+            'created_at' => now(),
         ];
+    }
+    
+    /**
+     * SMS Channel
+     */
+    public function toSms($notifiable)
+    {
+        return strip_tags($this->notification['subject'] . ": " . $this->notification['body']);
+    }
+
+    /**
+     * WhatsApp Channel
+     */
+    public function toWhatsapp($notifiable)
+    {
+        return strip_tags("*" . $this->notification['subject'] . "*\n\n" . $this->notification['body'] . "\n\nLink: " . url('/'.$this->notification['path']));
     }
 }

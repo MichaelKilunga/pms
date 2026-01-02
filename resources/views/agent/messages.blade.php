@@ -1,385 +1,545 @@
-@extends('agent.app')
+@extends("agent.app")
 
-@section('content')
-    <div class="container">
-        <div class="row">
-            <!-- Sidebar: Conversations List -->
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between">
-                        <h5 class="mb-0"><i class="bi bi-chat-dots"></i> Conversations</h5>
-                        <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#createConversationModal">
-                            <i class="bi bi-plus-circle"></i> New
-                        </button>
+@section("content")
+    <style>
+        /* Custom Scrollbar */
+        .chat-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-scroll::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 4px;
+        }
+
+        .chat-scroll::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+        }
+
+        /* Conversation Items */
+        .conversation-item {
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .conversation-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .conversation-item.active {
+            background-color: #e9ecef;
+            border-left-color: #0d6efd;
+        }
+
+        /* Message Bubbles */
+        .message-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        .message-sent {
+            background-color: #0d6efd;
+            /* Primary Blue */
+            color: white;
+            border-bottom-right-radius: 2px;
+            float: right;
+        }
+
+        .message-received {
+            background-color: #f1f0f0;
+            /* Light Gray */
+            color: #333;
+            border-bottom-left-radius: 2px;
+            float: left;
+        }
+
+        .message-meta {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* Attachment Preview */
+        .attachment-preview img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+    </style>
+
+    <div class="container-fluid py-3">
+        <div class="row g-3" style="height: 85vh;">
+
+            <!-- Sidebar: Conversations -->
+            <div class="col-md-4 col-lg-3 d-flex flex-column h-100">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header border-bottom bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-primary mb-0">Messages</h5>
+                            <button class="btn btn-sm btn-primary rounded-pill shadow-sm"
+                                data-bs-target="#createConversationModal" data-bs-toggle="modal">
+                                <i class="bi bi-pencil-square"></i> New
+                            </button>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light border-end-0"><i
+                                    class="bi bi-search text-muted"></i></span>
+                            <input class="form-control bg-light border-start-0" id="searchConversations"
+                                placeholder="Search chats..." type="text">
+                        </div>
                     </div>
-                    <div class="card-body p-2">
-                        <input type="text" id="searchConversations" class="form-control mb-2" placeholder="Search...">
 
-                        <ul class="list-group" id="conversationsList">
-                            @foreach ($conversations as $conversation)
-                                <li class="list-group-item d-flex justify-content-between align-items-center conversation-item"
-                                    data-id="{{ $conversation->id }}" data-auth-user-id="{{ Auth::user()->id }}">
-                                    <span><i class="bi bi-chat-left-text"></i> {{ $conversation->title }}</span>
-                                    <span
-                                        class="badge bg-danger">{{ count($conversation->messages->whereNull('read_at')) }}</span>
-                                </li>
-                            @endforeach
+                    <div class="card-body chat-scroll overflow-auto p-0" id="conversationsListContainer">
+                        <div class="text-muted py-5 text-center" id="loadingConversations">
+                            <div class="spinner-border text-primary spinner-border-sm" role="status"></div> Loading...
+                        </div>
+                        <ul class="list-group list-group-flush" id="conversationsList">
+                            <!-- Conversations will be loaded here -->
                         </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- Chat Panel -->
-            <div class="col-md-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-secondary text-white d-flex justify-content-between">
-                        <h5 class="mb-0"><i class="bi bi-envelope"></i> Messages</h5>
-                        <button id="leaveConversation" class="btn btn-sm btn-danger d-none">
-                            <i class="bi bi-x-circle"></i> Leave
-                        </button>
-                    </div>
-                    <div class="card-body chat-container">
-                        <div id="messagesPanel" class="chat-box">
-                            <div class="alert alert-info text-center scroll-to-bottom">
-                                Select a conversation to view messages
+            <!-- Main Chat Area -->
+            <div class="col-md-8 col-lg-9 d-flex flex-column h-100">
+                <div class="card h-100 border-0 shadow-sm">
+
+                    <!-- Chat Header -->
+                    <div class="card-header border-bottom d-flex justify-content-between align-items-center bg-white py-3"
+                        id="chatHeader" style="display: none !important;">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                                style="width: 45px; height: 45px; font-size: 1.2rem;">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0" id="activeConversationTitle">Select a conversation</h6>
+                                <small class="text-muted" id="activeConversationParticipants"></small>
                             </div>
                         </div>
+                        <button class="btn btn-sm btn-outline-danger border-0" id="closeChatBtn" title="Close Chat">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
                     </div>
-                    <div class="card-footer d-none" id="messageInputArea">
-                        <div class="input-group flex justify-content-end">
-                            <input type="text" id="messageInput" class="form-control summernote">
-                            <button class="btn btn-primary" id="sendMessage">
-                                <i class="bi bi-send"> Send</i>
-                            </button>
+
+                    <!-- Chat Messages -->
+                    <div class="card-body bg-light chat-scroll d-flex flex-column overflow-auto" id="messagesPanel">
+                        <div class="align-self-center text-muted my-auto p-5 text-center" id="emptyState">
+                            <i class="bi bi-chat-square-text display-1 text-secondary opacity-25"></i>
+                            <p class="lead mt-3">Select a conversation to start chatting</p>
                         </div>
+                    </div>
+
+                    <!-- Reply / Parent Message Preview -->
+                    <div class="bg-secondary-subtle border-top d-none px-3 py-2" id="replyPreview">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-dark">Replying to <b id="replyToUser">User</b>: <span
+                                    class="text-muted text-truncate d-inline-block" id="replyToPreview"
+                                    style="max-width: 300px;"></span></small>
+                            <button class="btn-close btn-sm" id="cancelReply" type="button"></button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="card-footer border-top bg-white py-3" id="inputArea" style="display: none !important;">
+                        <form id="sendMessageForm">
+                            <div class="input-group">
+                                <button class="btn btn-light text-secondary border" id="attachFileBtn" title="Attach File"
+                                    type="button">
+                                    <i class="bi bi-paperclip"></i>
+                                </button>
+                                <input class="d-none" id="attachmentInput" name="attachment" type="file">
+                                <input autocomplete="off" class="form-control border-start-0 border-end-0" id="messageInput"
+                                    placeholder="Type a message..." type="text">
+                                <button class="btn btn-primary px-4" id="sendBtn" type="submit">
+                                    <i class="bi bi-send-fill"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted d-none ms-2 mt-1" id="filePreviewName"><i
+                                    class="bi bi-file-earmark-check"></i> <span></span> <i
+                                    class="bi bi-x text-danger cursor-pointer" id="removeFile"></i></small>
+                        </form>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
     <!-- Create Conversation Modal -->
     <div class="modal fade" id="createConversationModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="bi bi-chat-square-dots"></i> Create Conversation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title fw-bold"><i class="bi bi-chat-plus"></i> New Conversation</h5>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal" type="button"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <form id="createConversationForm">
                         <div class="mb-3">
-                            <label class="form-label">Title</label>
-                            <input type="text" class="form-control" name="title" required>
-                        </div>
-                        <!-- Description -->
-                        <div class="mb-3">
-                            <label for="conversationDescription" class="form-label">Description</label>
-                            <textarea class="form-control summernote" id="conversationDescription" name="description" rows="3"></textarea>
+                            <label class="form-label fw-bold small text-uppercase">Title / Topic</label>
+                            <input class="form-control" name="title" placeholder="e.g., Project Update" required
+                                type="text">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Participants</label>
-                            <select class="form-select" id="conversationParticipants" name="recipients[]" multiple
-                                live-search="true" data-live-search-style="contains"
-                                data-live-search-placeholder="Search...">
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            <label class="form-label fw-bold small text-uppercase">Description</label>
+                            <textarea class="form-control" name="description" placeholder="Brief description..." required rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-uppercase">Participants</label>
+                            <select class="form-select" id="conversationParticipants" multiple name="recipients[]"
+                                required size="5">
+                                @foreach ($potentialRecipients as $u)
+                                    @if ($u->id !== Auth::id())
+                                        <option value="{{ $u->id }}">{{ $u->name }}</option>
+                                    @endif
                                 @endforeach
                             </select>
+                            <div class="form-text">Hold Ctrl/Cmd to select multiple users.</div>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-save"></i> Create</button>
+                        <div class="d-grid">
+                            <button class="btn btn-primary btn-lg" type="submit">Create Chat</button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            // State
             let currentConversationId = null;
+            let pollingInterval = null;
             let replyToMessageId = null;
-            // capture login user id
-            // let AuthUserId = "{{ Auth::user()->id }}";
+            const currentUserId = {{ Auth::id() }};
 
-            // ✅ 1. Fix Search Function
-            $("#searchConversations").on("keyup", function() {
-                const query = $(this).val().toLowerCase();
-
-                $(".conversation-item").each(function() {
-                    const label = $(this).find(".conversation-title").text().toLowerCase();
-                    $(this).toggle(label.includes(query));
-                });
-            });
-
-            // Load Messages when clicking a conversation
-            $(document).on("click", ".conversation-item", function() {
-                // add active class to the clicked conversation
-                $(".conversation-item").removeClass("active");
-                $(this).addClass("active");
-
-                currentConversationId = $(this).data("id");
-                AuthUserId = $(this).data("auth-user-id");
-                replyToMessageId = null; // Reset reply state
-                $("#messagesPanel").html(
-                    '<div class="text-center my-3"><div class="spinner-border"></div></div>');
-                $("#messageInputArea, #leaveConversation").removeClass("d-none");
-
-                $("#messagesPanel")
-                    .css({
-                        "overflowY": "auto",
-                        "maxHeight": "50vh",
-                    });
-
-                $.ajax({
-                    url: `/agent/messages`,
-                    type: "GET",
-                    data: {
-                        action: "getMessages",
-                        conversation_id: currentConversationId
-                    },
-                    success: function(response) {
-                        if (response.success && response.messages.length > 0) {
-                            console.log(response.messages);
-                            let messagesHtml = response.messages
-                                .map(msg => {
-                                    let parentMessageHtml = "";
-
-                                    // Check if the message has a parent
-                                    if (msg.parent_message) {
-                                        parentMessageHtml = `
-                                            <div class="p-1 rounded bg-secondary text-light small overflow-hidden" style="max-width: 100%; max-height: 50%; overflow-y: hidden; cursor: pointer;">
-                                                <small class="smallest"><strong class="smallest">${msg.parent_message.sender.name}</strong></small>: ${msg.parent_message.content}
-                                            </div>
-                                        `;
-                                    }
-
-                                    return `
-                                        <div class="d-flex ${msg.sender_id == AuthUserId ? 'justify-content-end' : 'justify-content-start'} mb-2 message-item">
-                                            <div class="p-2 rounded ${msg.sender_id == AuthUserId ? 'bg-light text-dark' : 'bg-info'}" style="max-width: 90%;">
-                                                ${parentMessageHtml}
-                                                <small class="smallest"><strong>${msg.sender.name}</strong></small><br>
-                                                ${msg.content}
-                                                <div class="d-flex justify-content-end">
-                                                    <button ${msg.sender_id == AuthUserId ? '' : 'hidden'} class="btn mt-1 btn-sm text-danger delete-btn" data-id="${msg.id}">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                    &nbsp;
-                                                    <div class="text-muted mt-2 small text-end">${new Date(msg.created_at).toLocaleTimeString()}</div>
-                                                    &nbsp;
-                                                    <button class="btn btn-sm text-primary reply-btn" data-sender_id="${msg.sender.id}" data-sender_name="${msg.sender.name}" data-id="${msg.id}" data-content="${msg.content}">
-                                                        <i class="bi bi-reply"></i> Reply
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
-                                })
-                                .join("");
-
-                            $("#messagesPanel").html(messagesHtml);
-
-                            // Scroll by animation to the bottom of the messages panel
-                            $("#messagesPanel").animate({
-                                scrollTop: $("#messagesPanel")[0].scrollHeight
-                            }, 1000);
-
-                            markMessagesAsRead(currentConversationId);
-                        } else {
-                            $("#messagesPanel").html(
-                                '<div class="alert alert-warning">No messages found.</div>');
-                        }
-
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Error fetching messages:", error);
-                        alert("Failed to load messages. Please try again.");
-                    }
-                });
-            });
-
-            // Mark Messages as Read
-            function markMessagesAsRead(conversationId) {
-                $.ajax({
-                    url: `/agent/messages`,
-                    type: "POST",
-                    data: {
-                        conversation_id: conversationId,
-                        _token: "{{ csrf_token() }}",
-                        action: "mark-read"
-                    },
-                    success: function(response) {
-                        console.log("Messages marked as read.");
-                    },
-                    error: function() {
-                        console.log("Failed to mark messages as read.");
+            // --- 1. Load Conversations ---
+            function loadConversations() {
+                $.get("{{ route("messages.conversations") }}", function(data) {
+                    if (data.success) {
+                        renderConversations(data.conversations);
+                        $("#loadingConversations").remove();
                     }
                 });
             }
 
-            // Reply to a Message
-            $(document).on("click", ".reply-btn", function() {
-                replyToMessageId = $(this).data("id");
-                let messageContent = 'Replying to ' + $(this).data("sender_name") + ": " + $(this).data(
-                    "content");
+            loadConversations();
+            // Poll for list updates occassionally (every 30s)
+            setInterval(loadConversations, 30000);
 
-                // remove summernote class from the textarea
-                $('#messageInput').removeClass('summernote');
-                $('#messageInput').summernote('destroy');
-                // clear the textarea  
-                $('#messageInput').val('');
+            function renderConversations(conversations) {
+                const list = $("#conversationsList");
+                const currentCount = list.children().length;
 
-                //Initialize summernot and set the value of the textarea at the same time
-                $('#messageInput').summernote({
-                    // initialize textarea with the message content
-                    placeholder: messageContent,
-                    tabsize: 2,
-                    height: 100,
-                    toolbar: [
-                        // Add the "reply" button to the toolbar
-                        ['reply', ['reply']],
-                        ['style', ['bold', 'italic', 'underline', 'clear']],
-                        ['font', ['strikethrough', 'superscript', 'subscript']],
-                        ['fontsize', ['fontsize']],
-                        ['color', ['color']],
-                        ['para', ['ul', 'ol', 'paragraph']],
-                        ['height', ['height']],
-                        ['insert', ['link', 'picture', 'video']],
-                        ['view', ['fullscreen', 'codeview', 'help']]
-                        // Add more buttons as needed
-                    ],
-                    // set focus on the textarea
-                    focus: true,
+                // Only re-render if count changed or to update unread status
+                // For simplicity in this v1, we re-render but try to keep active state
+                list.empty();
+
+                if (conversations.length === 0) {
+                    list.html('<div class="text-center p-4 text-muted small">No conversations yet.</div>');
+                    return;
+                }
+
+                conversations.forEach(c => {
+                    const isActive = c.id === currentConversationId ? 'active' : '';
+                    const unreadBadge = c.unread_count > 0 ?
+                        `<span class="badge bg-danger rounded-pill ms-2">${c.unread_count}</span>` : '';
+                    const lastMsg = c.messages.length > 0 ? c.messages[0].content || 'Attachment' :
+                        'No messages yet';
+                    const date = new Date(c.updated_at).toLocaleDateString([], {
+                        month: 'short',
+                        day: 'numeric'
+                    });
+
+                    const item = `
+                    <li class="list-group-item conversation-item ${isActive} p-3 border-0 border-bottom" data-id="${c.id}" data-title="${c.title}">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <h6 class="mb-0 text-truncate" style="max-width: 70%;">${c.title}</h6>
+                            <small class="text-muted" style="font-size: 0.75rem;">${date}</small>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted text-truncate d-block" style="max-width: 80%;">${lastMsg}</small>
+                            ${unreadBadge}
+                        </div>
+                    </li>
+                `;
+                    list.append(item);
                 });
+            }
+
+            // --- 2. Switch Conversation / Close Chat ---
+            $("#closeChatBtn").click(function() {
+                $("#chatHeader, #inputArea").attr("style", "display: none !important");
+                $("#messagesPanel").html(`
+                    <div class="align-self-center text-muted my-auto p-5 text-center" id="emptyState">
+                        <i class="bi bi-chat-square-text display-1 text-secondary opacity-25"></i>
+                        <p class="lead mt-3">Select a conversation to start chatting</p>
+                    </div>
+                `);
+
+                $(".conversation-item").removeClass("active");
+                currentConversationId = null;
+                if (pollingInterval) clearInterval(pollingInterval);
             });
 
-            // Send Message
-            $("#sendMessage").on("click", function() {
-                let content = $("#messageInput").summernote("code");
-                // alert(content);
-                if (!content || !currentConversationId) return;
+            $(document).on('click', '.conversation-item', function() {
+                const id = $(this).data('id');
+                const title = $(this).data('title');
 
-                $.ajax({
-                    url: "/agent/messages",
-                    type: "POST",
-                    data: {
-                        content: content,
-                        action: replyToMessageId ? "sendReply" : "sendMessage",
-                        conversation_id: currentConversationId,
-                        reply_to: replyToMessageId, // Send reply-to message ID
-                        _token: $('meta[name="csrf-token"]').attr(
-                            "content"), // Ensure CSRF token is included
-                        conversationId: currentConversationId,
-                        parentMessageId: replyToMessageId ? replyToMessageId : null,
-                        message: content
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            // alert(response.message);
+                if (currentConversationId === id) return;
 
-                            // Auto-click the conversation to reload messages
-                            $(".conversation-item[data-id='" + currentConversationId + "']")
-                                .click();
+                currentConversationId = id;
+                $(".conversation-item").removeClass("active");
+                $(this).addClass("active");
 
-                            // Mark as active
-                            $(".conversation-item[data-id='" + currentConversationId + "']")
-                                .addClass("active");
+                // UI Updates
+                $("#emptyState").hide();
+                $("#chatHeader").attr("style", "display: flex !important"); // Force flex
+                $("#inputArea").attr("style", "display: block !important");
+                $("#activeConversationTitle").text(title);
+                $("#messagesPanel").html(
+                    '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>'
+                );
 
-                            // Clear the input field
-                            $("#messageInput").summernote('destroy');
-                            $("#messageInput").val('');
-                            $("#messageInput").summernote();
+                // Find participants from pre-loaded data or just generic text for now
+                // Adding a small delay to simulate loading for UX smoothness if needed
+                fetchMessages();
 
-                            replyToMessageId = null; // Reset reply state
-                        } else {
-                            alert("Message failed: " + response.message);
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error("Error sending message:", xhr.responseText);
-                        alert("An error occurred. Check the console for details.");
+                // Start polling for this chat
+                if (pollingInterval) clearInterval(pollingInterval);
+                pollingInterval = setInterval(fetchMessages, 5000);
+            });
+
+            function fetchMessages() {
+                if (!currentConversationId) return;
+
+                $.get(`/agent/messages/api/conversation/${currentConversationId}`, function(data) {
+                    if (data.success) {
+                        renderMessages(data.messages);
                     }
                 });
+            }
 
-            });
+            function renderMessages(messages) {
+                const panel = $("#messagesPanel");
+                panel.empty(); // Simple clear & redraw (Optimization: Append only new in v2)
 
-            // ✅ Fix Create Conversation
-            $("#createConversationForm").on("submit", function(event) {
-                event.preventDefault();
+                if (messages.length === 0) {
+                    panel.html('<div class="text-center text-muted mt-5">No messages yet. Say hello! 👋</div>');
+                    return;
+                }
 
-                const formData = new FormData(this);
+                let lastDate = null;
+
+                messages.forEach(msg => {
+                    const isMe = msg.sender_id === currentUserId;
+                    const alignClass = isMe ? 'message-sent' : 'message-received';
+                    const alignFlex = isMe ? 'justify-content-end' : 'justify-content-start';
+                    const prettyTime = new Date(msg.created_at).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    // Date Divider
+                    const msgDate = new Date(msg.created_at).toDateString();
+                    if (msgDate !== lastDate) {
+                        panel.append(
+                            `<div class="text-center small text-muted my-3"><span class="bg-white px-2 rounded-pill border">${msgDate}</span></div>`
+                        );
+                        lastDate = msgDate;
+                    }
+
+                    // Attachments
+                    let attachmentHtml = '';
+                    if (msg.attachment) {
+                        if (msg.message_type === 'image') {
+                            attachmentHtml =
+                                `<div class="attachment-preview"><a href="/storage/${msg.attachment}" target="_blank"><img src="/storage/${msg.attachment}" alt="Image"></a></div>`;
+                        } else {
+                            attachmentHtml =
+                                `<div class="mt-2"><a href="/storage/${msg.attachment}" target="_blank" class="btn btn-sm btn-light border"><i class="bi bi-file-earmark-arrow-down"></i> Download File</a></div>`;
+                        }
+                    }
+
+                    // Reply Reference
+                    let replyHtml = '';
+                    if (msg.parent_message) {
+                        replyHtml = `
+                        <div class="small bg-white bg-opacity-25 p-1 rounded mb-1 border-start border-4 border-warning">
+                             <b>${msg.parent_message.sender.name}:</b> ${msg.parent_message.content || 'Attachment'}
+                        </div>
+                    `;
+                    }
+
+                    // Delete Button (Only for me)
+                    const deleteBtn = isMe ?
+                        `<span class="ms-2 text-danger cursor-pointer delete-msg-btn" data-id="${msg.id}" title="Delete" style="cursor:pointer;">&times;</span>` :
+                        '';
+
+                    // Reply Button
+                    const replyAction =
+                        `<i class="bi bi-reply-fill ms-2 cursor-pointer reply-msg-btn text-muted" data-id="${msg.id}" data-user="${msg.sender.name}" data-content="${msg.content || 'Attachment'}" title="Reply" style="cursor:pointer; font-size: 0.9rem;"></i>`;
+
+                    const html = `
+                    <div class="d-flex w-100 ${alignFlex} mb-3">
+                        <div class="message-bubble ${alignClass} shadow-sm" style="min-width: 150px;">
+                            ${replyHtml}
+                            <div class="fw-bold mb-1 small">${isMe ? 'You' : msg.sender.name}</div>
+                            <div class="message-content" style="white-space: pre-wrap;">${msg.content || ''}</div>
+                            ${attachmentHtml}
+                            <div class="message-meta d-flex justify-content-end align-items-center">
+                                ${prettyTime}
+                                ${replyAction}
+                                ${deleteBtn}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                    panel.append(html);
+                });
+
+                // Scroll to bottom (only if wasn't scrolled up - enhancement for later, for now auto-scroll)
+                // panel.scrollTop(panel[0].scrollHeight);
+            }
+
+            // --- 3. Send Message ---
+            $("#sendMessageForm").on("submit", function(e) {
+                e.preventDefault();
+                const content = $("#messageInput").val().trim();
+                const file = $("#attachmentInput")[0].files[0];
+
+                if (!content && !file) return;
+
+                const formData = new FormData();
+                formData.append('conversation_id', currentConversationId);
+                formData.append('content', content);
+                if (file) formData.append('attachment', file);
+                if (replyToMessageId) formData.append('parent_message_id', replyToMessageId);
+
+                // Disable button & Show Loader
+                const $btn = $("#sendBtn");
+                const originalContent = $btn.html();
+                $btn.prop('disabled', true).html(
+                    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
+                    );
 
                 $.ajax({
-                    url: "{{ route('agent.messages', ['action' => 'createConversation']) }}",
+                    url: "{{ route("messages.send") }}",
                     type: "POST",
                     data: formData,
                     processData: false,
                     contentType: false,
-                    headers: {
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                    },
-                    success: function(data) {
-                        if (data.success) {
-                            alert("Conversation created successfully!");
-                            $("#createConversationForm")[0].reset();
-                            window.location.reload(); // ✅ Refresh Page After Creation
-                            $("#recipientsList").html("");
-                            $("#createConversationModal").modal("hide");
-                        } else {
-                            alert("Failed to create conversation: " + data.error);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        window.location.reload();
-                        console.error("Error creating conversation:", error);
-                        alert("An error occurred. Please try again.");
-                    },
-                });
-            });
-
-            // ✅ Fix Leave Conversation
-            $("#leaveConversation").on("click", function() {
-                currentConversationId = null;
-                $("#messagesPanel").html(
-                    '<div class="alert alert-info text-center">Select a conversation</div>'
-                );
-                $("#messageInputArea, #leaveConversation").addClass("d-none");
-            });
-
-            // delete a message
-            $("#messagesPanel").on("click", ".delete-btn", function() {
-                const messageId = $(this).data("id");
-                // alert("Deleting message with ID: " + messageId);
-                if (!confirm("Are you sure you want to delete this message?")) return;
-
-                $.ajax({
-                    url: "/agent/messages",
-                    type: "POST", // Use POST because DELETE is hard to send with query params
-                    data: {
-                        action: "delete",
-                        id: messageId,
-                        _token: $('meta[name="csrf-token"]').attr(
-                            "content")
-                    },
                     success: function(response) {
                         if (response.success) {
-                            // console.log(response.message);
-                            // alert(response.message);
-                            $(`button[data-id="${messageId}"]`).closest(".message-item")
-                                .remove();
+                            $("#messageInput").val('');
+                            resetAttachment();
+                            resetReply();
+                            fetchMessages(); // Refresh immediately
                         } else {
-                            // console.log(response.message);
-                            alert("You can\'t delete this message!");
-                            // alert("Failed to delete message: " + response.message);
+                            alert("Error: " + response.error);
                         }
                     },
-                    error: function(xhr, status, error) {
-                        // console.error("Error deleting message:", error);
-                        alert("Error deleting message:", error);
+                    error: function(xhr) {
+                        alert("Request failed: " + (xhr.statusText || "Unknown error"));
+                    },
+                    complete: function() {
+                        $btn.prop('disabled', false).html(originalContent);
                     }
                 });
             });
 
+            // --- 4. Attachments ---
+            $("#attachFileBtn").click(function() {
+                $("#attachmentInput").click();
+            });
+
+            $("#attachmentInput").change(function() {
+                if (this.files.length > 0) {
+                    $("#filePreviewName span").text(this.files[0].name);
+                    $("#filePreviewName").removeClass("d-none");
+                }
+            });
+
+            $("#removeFile").click(function() {
+                resetAttachment();
+            });
+
+            function resetAttachment() {
+                $("#attachmentInput").val('');
+                $("#filePreviewName").addClass("d-none");
+            }
+
+            // --- 5. Replies ---
+            $(document).on('click', '.reply-msg-btn', function() {
+                replyToMessageId = $(this).data('id');
+                const user = $(this).data('user');
+                const snippet = $(this).data('content');
+
+                $("#replyToUser").text(user);
+                $("#replyToPreview").text(snippet);
+                $("#replyPreview").removeClass('d-none');
+                $("#messageInput").focus();
+            });
+
+            $("#cancelReply").click(function() {
+                resetReply();
+            });
+
+            function resetReply() {
+                replyToMessageId = null;
+                $("#replyPreview").addClass('d-none');
+            }
+
+            // --- 6. Create Conversation ---
+            $("#createConversationForm").on('submit', function(e) {
+                e.preventDefault();
+                const data = $(this).serialize();
+
+                $.post("{{ route("messages.create") }}", data, function(response) {
+                    if (response.success) {
+                        $("#createConversationModal").modal('hide');
+                        $("#createConversationForm")[0].reset();
+                        loadConversations();
+                    } else {
+                        alert("Error: " + response.error);
+                    }
+                });
+            });
+
+            // --- 7. Search ---
+            $("#searchConversations").on("keyup", function() {
+                const val = $(this).val().toLowerCase();
+                $("#conversationsList li").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(val) > -1)
+                });
+            });
+
+            // --- 8. Delete Message ---
+            $(document).on('click', '.delete-msg-btn', function() {
+                if (!confirm("Delete this message?")) return;
+                const id = $(this).data('id');
+
+                $.ajax({
+                    url: `/agent/messages/api/delete/${id}`,
+                    type: 'DELETE',
+                    success: function(resp) {
+                        if (resp.success) fetchMessages();
+                    }
+                });
+            });
         });
     </script>
 @endsection

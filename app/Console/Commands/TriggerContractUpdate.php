@@ -57,6 +57,26 @@ class TriggerContractUpdate extends Command
 
             $deleteReadNotifications =  Notification::where('read_at', '!=', null)->delete();
 
+            // Notify about Expiring Contracts (7, 3, 1 days remaining)
+            $notifyDays = [7, 3, 1];
+            foreach ($notifyDays as $days) {
+                $targetDate = Carbon::now()->addDays($days)->format('Y-m-d');
+                $expiringContracts = Contract::whereDate('end_date', $targetDate)
+                    ->where('status', 'active')
+                    ->where('is_current_contract', true)
+                    ->get();
+                
+                foreach ($expiringContracts as $contract) {
+                    try {
+                        if ($contract->owner) {
+                            $contract->owner->notify(new \App\Notifications\ContractExpiringNotification($contract, $days));
+                        }
+                    } catch (\Exception $e) {
+                        Log::error("Failed to notify contract expiry for contract {$contract->id}: " . $e->getMessage());
+                    }
+                }
+            }
+
             $this->info("Deactivated {$contractEnd} contracts. Graced {$contractGrace} contracts, Removed {$pendingRemoved} pending contracts, and deleted {$deleteReadNotifications} notifications.");
         } catch (\Exception $e) {
             $this->error($e->getMessage());

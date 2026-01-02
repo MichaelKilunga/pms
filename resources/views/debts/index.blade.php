@@ -1,13 +1,13 @@
-@extends('debts.app')
+@extends("debts.app")
 
-@section('content')
+@section("content")
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800">Stock Debts</h1>
         <!-- Add Debt Button -->
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addDebtModal">Add Debt</button>
+        <button class="btn btn-primary mb-3" data-bs-target="#addDebtModal" data-bs-toggle="modal">Add Debt</button>
     </div>
 
-    <table class="table table-bordered table-triped mt-3" id="Table">
+    <table class="table-bordered table-triped small mt-3 table" id="Table">
         <thead>
             <tr>
                 <th>SN</th>
@@ -27,17 +27,17 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $debt->stock->item->name }}({{ $debt->stock->batch_number }}-{{ $debt->stock->supplier }})</td>
                     <td>{{ number_format($debt->debtAmount) }}</td>
-                    <td>{{ number_format($debt->debtAmount - $debt->installments->sum('amount')) }}</td>
+                    <td>{{ number_format($debt->debtAmount - $debt->installments->sum("amount")) }}</td>
                     <td>{{ number_format($debt->totalPaid()) }}</td>
-                    <td>{{ $debt->created_at->format('Y-m-d H:i') }}</td>
-                    <td>{{ $debt->updated_at->format('Y-m-d H:i') }}</td>
+                    <td>{{ $debt->created_at->format("Y-m-d H:i") }}</td>
+                    <td>{{ $debt->updated_at->format("Y-m-d H:i") }}</td>
                     <td>{{ $debt->status }}</td>
                     <td>
-                     
+
                         <div class="d-flex justify-content-between align-items-center gap-2">
 
                             {{-- Case 1: Debt fully paid --}}
-                            @if ($debt->debtAmount - $debt->installments->sum('amount') == 0)
+                            @if ($debt->debtAmount - $debt->installments->sum("amount") == 0)
                                 {{-- No installments allowed, Edit disabled, Delete disabled if anything paid --}}
                                 <button class="btn btn-primary btn-sm" disabled>
                                     <span class="bi bi-cash"></span>
@@ -45,23 +45,23 @@
                                 <button class="btn btn-success btn-sm" disabled>
                                     <span class="bi bi-pencil"></span>
                                 </button>
-                                <button type="submit" class="btn btn-danger btn-sm" disabled>
+                                <button class="btn btn-danger btn-sm" disabled type="submit">
                                     <span class="bi bi-trash"></span>
                                 </button>
 
                                 {{-- Case 2: Debt partially paid --}}
-                            @elseif ($debt->debtAmount - $debt->installments->sum('amount') > 0 && $debt->totalPaid() > 0)
+                            @elseif ($debt->debtAmount - $debt->installments->sum("amount") > 0 && $debt->totalPaid() > 0)
                                 {{-- Installments allowed, Edit disabled, Delete disabled --}}
                                 <button class="btn btn-primary btn-sm add-installment-btn"
+                                    data-bs-target="#addInstallmentModal{{ $debt->id }}" data-bs-toggle="modal"
                                     data-debt-id="{{ $debt->id }}" data-debt-quantity="{{ $debt->debtAmount }}"
-                                    data-total-paid="{{ $debt->totalPaid() }}" data-bs-toggle="modal"
-                                    data-bs-target="#addInstallmentModal{{ $debt->id }}">
+                                    data-total-paid="{{ $debt->totalPaid() }}">
                                     <span class="bi bi-cash"></span>
                                 </button>
                                 <button class="btn btn-success btn-sm" disabled>
                                     <span class="bi bi-pencil"></span>
                                 </button>
-                                <button type="submit" class="btn btn-danger btn-sm" disabled>
+                                <button class="btn btn-danger btn-sm" disabled type="submit">
                                     <span class="bi bi-trash"></span>
                                 </button>
 
@@ -69,22 +69,22 @@
                             @elseif ($debt->totalPaid() == 0)
                                 {{-- Installments allowed, Edit enabled, Delete enabled --}}
                                 <button class="btn btn-primary btn-sm add-installment-btn"
+                                    data-bs-target="#addInstallmentModal{{ $debt->id }}" data-bs-toggle="modal"
                                     data-debt-id="{{ $debt->id }}" data-debt-quantity="{{ $debt->debtAmount }}"
-                                    data-total-paid="{{ $debt->totalPaid() }}" data-bs-toggle="modal"
-                                    data-bs-target="#addInstallmentModal{{ $debt->id }}">
+                                    data-total-paid="{{ $debt->totalPaid() }}">
                                     <span class="bi bi-cash"></span>
                                 </button>
-                                <button class="btn btn-success btn-sm" data-debt-id="{{ $debt->id }}"
+                                <button class="btn btn-success btn-sm" data-bs-target="#EditDebt{{ $debt->id }}"
+                                    data-bs-toggle="modal" data-debt-id="{{ $debt->id }}"
                                     data-debt-quantity="{{ $debt->debtAmount }}"
-                                    data-total-paid="{{ $debt->totalPaid() }}" data-bs-toggle="modal"
-                                    data-bs-target="#EditDebt{{ $debt->id }}">
+                                    data-total-paid="{{ $debt->totalPaid() }}">
                                     <span class="bi bi-pencil"></span>
                                 </button>
-                                <form action="{{ route('debts.destroy', $debt->id) }}" method="POST" class="d-inline"
+                                <form action="{{ route("debts.destroy", $debt->id) }}" class="d-inline" method="POST"
                                     onsubmit="return confirm('Are you sure you want to delete this debt?');">
                                     @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">
+                                    @method("DELETE")
+                                    <button class="btn btn-danger btn-sm" type="submit">
                                         <span class="bi bi-trash"></span>
                                     </button>
                                 </form>
@@ -93,17 +93,17 @@
                         </div>
 
                         <!-- Add Installment Modal -->
-                        <div class="modal fade" id="addInstallmentModal{{ $debt->id }}" tabindex="-1"
-                            aria-hidden="true">
+                        <div aria-hidden="true" class="modal fade" id="addInstallmentModal{{ $debt->id }}"
+                            tabindex="-1">
                             <div class="modal-dialog">
-                                <form id="addInstallmentForm" method="POST" action="{{ route('debts.inststore') }}">
+                                <form action="{{ route("debts.inststore") }}" id="addInstallmentForm" method="POST">
                                     @csrf
-                                    @method('POST')
-                                    <input type="hidden" name="debt_id" id="installmentDebtId">
+                                    @method("POST")
+                                    <input id="installmentDebtId" name="debt_id" type="hidden">
                                     <div class="modal-content">
                                         <div class="modal-header bg-primary text-white">
                                             <h5 class="modal-title">Add Installment</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
                                         </div>
                                         <div class="modal-body">
                                             <p class="mt-2">Stock Details:
@@ -120,10 +120,10 @@
                                             <hr />
                                             <div class="form-group mt-2">
                                                 <label>Remainig Amount: </label>
-                                                <input type="number" name="debt_id" class="form-control"
-                                                    value="{{ $debt->id }}" hidden>
+                                                <input class="form-control" hidden name="debt_id" type="number"
+                                                    value="{{ $debt->id }}">
                                                 <span
-                                                    class="text-danger fw-bold">{{ number_format($debt->debtAmount - $debt->installments->sum('amount')) }}</span>
+                                                    class="text-danger fw-bold">{{ number_format($debt->debtAmount - $debt->installments->sum("amount")) }}</span>
                                                 </p>
                                                 <hr />
                                             </div>
@@ -133,15 +133,15 @@
                                             </div>
                                             <div class="form-group mt-2">
                                                 <label>Amount</label>
-                                                <input type="number" name="amount" class="form-control" min="1"
-                                                    max="{{ $debt->debtAmount - $debt->installments->sum('amount') }}"
-                                                    required>
+                                                <input class="form-control"
+                                                    max="{{ $debt->debtAmount - $debt->installments->sum("amount") }}"
+                                                    min="1" name="amount" required type="number">
                                             </div>
                                         </div>
                                         <div class="modal-footer d-flex justify-content-between">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-primary"> Save </button>
+                                            <button class="btn btn-secondary" data-bs-dismiss="modal"
+                                                type="button">Cancel</button>
+                                            <button class="btn btn-primary" type="submit"> Save </button>
                                         </div>
                                     </div>
                                 </form>
@@ -149,31 +149,31 @@
                         </div>
 
                         <!-- Add Edit Debt Modal -->
-                        <div class="modal fade" id="EditDebt{{ $debt->id }}" tabindex="-1" aria-hidden="true">
+                        <div aria-hidden="true" class="modal fade" id="EditDebt{{ $debt->id }}" tabindex="-1">
                             <div class="modal-dialog">
-                                <form method="POST" action="{{ route('debts.update', $debt->id) }}">
+                                <form action="{{ route("debts.update", $debt->id) }}" method="POST">
                                     @csrf
-                                    @method('PUT')
+                                    @method("PUT")
 
-                                    <input type="hidden" name="debt_id" id="installmentDebtId">
+                                    <input id="installmentDebtId" name="debt_id" type="hidden">
                                     <div class="modal-content">
                                         <div class="modal-header bg-primary text-white">
                                             <h5 class="modal-title">Edit Debts</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
                                         </div>
                                         <div class="modal-body">
 
-                                            <div class="form-group mt-2 mb-3">
+                                            <div class="form-group mb-3 mt-2">
                                                 <label>Select Stock</label>
-                                                <select name="stock_id" class="form-control" required>
+                                                <select class="form-control" name="stock_id" required>
                                                     {{-- <option value="">-- Select Stock --</option> --}}
-                                                    <option value="{{ $debt->stock->id }}" selected>
+                                                    <option selected value="{{ $debt->stock->id }}">
                                                         {{ $debt->stock->item->name }}({{ $debt->stock->batch_number }}-{{ $debt->stock->supplier }})
                                                     </option>
                                                     @foreach ($stocks as $stock)
-                                                        <option value="{{ $stock->id }}"
+                                                        <option {{ $stock->id == $debt->stock_id ? "selected" : "" }}
                                                             data-max="{{ $stock->buying_price * $stock->quantity }}"
-                                                            {{ $stock->id == $debt->stock_id ? 'selected' : '' }}>
+                                                            value="{{ $stock->id }}">
                                                             {{ $stock->item->name }} ({{ $stock->batch_number }} -
                                                             {{ $stock->supplier }})
                                                         </option>
@@ -183,20 +183,21 @@
 
                                             <div class="form-group mt-2">
                                                 <label>Amount</label>
-                                                <input type="number" name="debt_id" class="form-control"
-                                                    value="{{ $debt->id }}" hidden>
-                                                <input type="number" name="amount" class="form-control" min="1"
-                                                    value="{{ $debt->debtAmount }}" required id="debtAmount2">
+                                                <input class="form-control" hidden name="debt_id" type="number"
+                                                    value="{{ $debt->id }}">
+                                                <input class="form-control" id="debtAmount2" min="1"
+                                                    name="amount" required type="number"
+                                                    value="{{ $debt->debtAmount }}">
                                                 <small class="text-muted maxHint"></small>
-                                                <div class="text-danger mt-1 amountError" style="display:none;"></div>
+                                                <div class="text-danger amountError mt-1" style="display:none;"></div>
                                             </div>
 
                                         </div>
 
                                         <div class="modal-footer d-flex justify-content-between">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-primary"> Save </button>
+                                            <button class="btn btn-secondary" data-bs-dismiss="modal"
+                                                type="button">Cancel</button>
+                                            <button class="btn btn-primary" type="submit"> Save </button>
                                         </div>
                                     </div>
                             </div>
@@ -209,23 +210,23 @@
         </tbody>
     </table>
     <!-- Add Debt Modal -->
-    <div class="modal fade" id="addDebtModal" tabindex="-1" aria-hidden="true">
+    <div aria-hidden="true" class="modal fade" id="addDebtModal" tabindex="-1">
         <div class="modal-dialog">
-            <form id="debtForm" method="POST" action="{{ route('debts.store') }}">
+            <form action="{{ route("debts.store") }}" id="debtForm" method="POST">
                 @csrf
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">Add Debt</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
                             <label>Stock</label>
-                            <select id="Select2" name="stock_id" class="form-control Select2 chosen select" required>
-                                <option value="" disabled selected>-- Select Stock --</option>
+                            <select class="form-control Select2 chosen select" id="Select2" name="stock_id" required>
+                                <option disabled selected value="">-- Select Stock --</option>
                                 @foreach ($stocks as $stock)
-                                    <option value="{{ $stock->id }}"
-                                        data-max="{{ $stock->buying_price * $stock->quantity }}">
+                                    <option data-max="{{ $stock->buying_price * $stock->quantity }}"
+                                        value="{{ $stock->id }}">
                                         {{ $stock->supplier }} - Batch {{ $stock->batch_number }}
                                         ({{ $stock->item->name }})
                                     </option>
@@ -234,15 +235,15 @@
                         </div>
                         <div class="form-group mt-2">
                             <label>Debt Amount</label>
-                            <input type="number" id="debtAmount" name="debtAmount" class="form-control" step="0.001"
-                                min="1" required>
-                            <small id="maxHint" class="text-muted"></small>
-                            <div id="amountError" class="text-danger mt-1" style="display: none;"></div>
+                            <input class="form-control" id="debtAmount" min="1" name="debtAmount" required
+                                step="0.001" type="number">
+                            <small class="text-muted" id="maxHint"></small>
+                            <div class="text-danger mt-1" id="amountError" style="display: none;"></div>
                         </div>
                     </div>
                     <div class="modal-footer d-flex justify-content-between">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary"> Save </button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+                        <button class="btn btn-primary" type="submit"> Save </button>
                     </div>
                 </div>
             </form>

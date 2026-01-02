@@ -1,16 +1,16 @@
-@extends('agent.app')
+@extends("agent.app")
 
-@section('content')
+@section("content")
     <div class="container">
 
-        <div class="mt-4 d-flex justify-content-between">
+        <div class="d-flex justify-content-between mt-4">
             <h1 class="h5 text-primary">Manage Pharmacies</h1>
-            <a href="#" class="btn btn-success m-1" data-bs-toggle="modal" data-bs-target="#addPharmacyModal">Add
+            <a class="btn btn-success m-1" data-bs-target="#addPharmacyModal" data-bs-toggle="modal" href="#">Add
                 Pharmacy</a>
         </div>
 
         <div class="table-responsive mt-4">
-            <table id="Table" class="table table-striped">
+            <table class="table-striped table" id="Table">
                 <thead>
                     <tr>
                         <th>SN</th>
@@ -30,25 +30,25 @@
                             <td>{{ $pharmacy->name }}</td>
                             <td>{{ $pharmacy->location }}</td>
                             <td>{{ $pharmacy->owner->name }}</td>
-                            <td>{{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->name : 'No Package' }}
+                            <td>{{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->name : "No Package" }}
                             </td>
                             <td><small class="text-danger smaller countdown"
-                                    id="countdown{{ $pharmacy->id }}">{{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->end_date : 'No package' }}</small>
+                                    id="countdown{{ $pharmacy->id }}">{{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->end_date : "No package" }}</small>
                             </td>
                             <td>{{ $pharmacy->status }}</td>
                             <td>
-                                <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#viewPharmacy{{ $pharmacy->id }}"><i class="bi bi-eye"></i></a>
+                                <a class="btn btn-primary btn-sm" data-bs-target="#viewPharmacy{{ $pharmacy->id }}"
+                                    data-bs-toggle="modal" href="#"><i class="bi bi-eye"></i></a>
                                 {{-- modal to show  pharmacy details --}}
-                                <div class="modal fade" id="viewPharmacy{{ $pharmacy->id }}" tabindex="-1"
-                                    aria-labelledby="viewPharmacy{{ $pharmacy->id }}Label" aria-hidden="true">
+                                <div aria-hidden="true" aria-labelledby="viewPharmacy{{ $pharmacy->id }}Label"
+                                    class="modal fade" id="viewPharmacy{{ $pharmacy->id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title text-primary"
                                                     id="viewPharmacy{{ $pharmacy->id }}Label">{{ $pharmacy->name }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
+                                                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
+                                                    type="button"></button>
                                             </div>
                                             <div class="modal-body">
                                                 <div class="row">
@@ -84,20 +84,20 @@
                                                     </div>
                                                 </div>
                                                 <div class="row border-top border-danger">
-                                                    <h2 class="h5 mt-3 text-primary">Package Details</h2>
+                                                    <h2 class="h5 text-primary mt-3">Package Details</h2>
                                                     <div class="d-flex">
                                                         @if ($pharmacy->owner->ownerCurrentContract)
                                                             <div class="row">
                                                                 <div class="mb-3">
                                                                     <h5 class="text-primary">Name</h5>
                                                                     <p class="text-secondary">
-                                                                        {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->name : 'No Package' }}
+                                                                        {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->name : "No Package" }}
                                                                     </p>
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <h5 class="text-primary">Duration</h5>
                                                                     <p class="text-secondary">
-                                                                        {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->duration : 'No Package' }}
+                                                                        {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->duration : "No Package" }}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -105,20 +105,20 @@
                                                                 <div class="mb-3">
                                                                     <h5 class="text-primary">Price</h5>
                                                                     <p class="text-secondary">
-                                                                        {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->price : 'No Package' }}
+                                                                        {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->price : "No Package" }}
                                                                     </p>
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <h5 class="text-primary">Start Date</h5>
                                                                     <p class="text-secondary">
-                                                                        {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->start_date : 'No Package' }}
+                                                                        {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->start_date : "No Package" }}
                                                                     </p>
                                                                 </div>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <h5 class="text-primary">End Date</h5>
                                                                 <p class="text-secondary">
-                                                                    {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->end_date : 'No Package' }}
+                                                                    {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->end_date : "No Package" }}
                                                                 </p>
                                                             </div>
                                                         @else
@@ -128,64 +128,62 @@
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Close</button>
+                                                <button class="btn btn-secondary" data-bs-dismiss="modal"
+                                                    type="button">Close</button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <a href="#" class="btn btn-secondary btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#editPharmacy{{ $pharmacy->id }}"><i class="bi bi-pencil"></i></a>
+                                <a class="btn btn-secondary btn-sm" data-bs-target="#editPharmacy{{ $pharmacy->id }}"
+                                    data-bs-toggle="modal" href="#"><i class="bi bi-pencil"></i></a>
                                 {{-- Modal to edit pharmacy details --}}
-                                <div class="modal fade" id="editPharmacy{{ $pharmacy->id }}" tabindex="-1"
-                                    aria-labelledby="editPharmacy{{ $pharmacy->id }}Label" aria-hidden="true">
+                                <div aria-hidden="true" aria-labelledby="editPharmacy{{ $pharmacy->id }}Label"
+                                    class="modal fade" id="editPharmacy{{ $pharmacy->id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title text-primary"
                                                     id="editPharmacy{{ $pharmacy->id }}Label">Edit Pharmacy</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
+                                                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
+                                                    type="button"></button>
                                             </div>
                                             <div class="modal-body">
                                                 <form
-                                                    action="{{ route('agent.pharmacies.update', ['id' => $pharmacy->id, 'action' => 'update']) }}"
+                                                    action="{{ route("agent.pharmacies.update", ["id" => $pharmacy->id, "action" => "update"]) }}"
                                                     method="POST">
                                                     @csrf
-                                                    @method('PUT')
+                                                    @method("PUT")
                                                     <x-validation-errors class="mb-4" />
                                                     <div class="row">
                                                         <div class="col-6">
                                                             <h2 class="h5 text-primary">Pharmacy Details</h2>
                                                             <div class="mb-3">
-                                                                <x-label for="pharmacy_name" value="Name"
-                                                                    class="form-label" />
-                                                                <x-input type="text" class="form-control rounded"
+                                                                <x-label class="form-label" for="pharmacy_name"
+                                                                    value="Name" />
+                                                                <x-input :value="old("pharmacy_name") ?? $pharmacy->name" class="form-control rounded"
                                                                     id="pharmacy_name" name="pharmacy_name"
-                                                                    placeholder="Pill Pharmacy" :value="old('pharmacy_name') ?? $pharmacy->name"
-                                                                    required />
+                                                                    placeholder="Pill Pharmacy" required type="text" />
                                                             </div>
                                                             <div class="mb-3">
-                                                                <x-label for="location" class="form-label"
+                                                                <x-label class="form-label" for="location"
                                                                     value="Location" />
-                                                                <x-input type="text" :value="old('location') ?? $pharmacy->location"
-                                                                    class="form-control rounded" id="location"
-                                                                    name="location" placeholder="Morogoro" />
+                                                                <x-input :value="old("location") ?? $pharmacy->location" class="form-control rounded"
+                                                                    id="location" name="location" placeholder="Morogoro"
+                                                                    type="text" />
                                                             </div>
                                                             <div class="mb-3">
-                                                                <x-label for="status" class="form-label"
+                                                                <x-label class="form-label" for="status"
                                                                     value="Status" />
-                                                                <select class="form-select rounded" id="status"
-                                                                    name="status" required>
-                                                                    <option
-                                                                        {{ old('status') == 'active' ? 'selected' : '' }}
-                                                                        value="active">Active </option>
-                                                                    <option
-                                                                        {{ old('status') == 'inactive' ? 'selected' : '' }}
-                                                                        value="inactive">Inactive
-                                                                    </option>
                                                                 </select>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <x-label class="form-label" for="agent_extra_charge"
+                                                                    value="Agent Extra Charge (Top-up)" />
+                                                                <x-input :value="old("agent_extra_charge") ??
+                                                                    $pharmacy->agent_extra_charge" class="form-control rounded"
+                                                                    id="agent_extra_charge" name="agent_extra_charge"
+                                                                    placeholder="0.00" step="0.01" type="number" />
                                                             </div>
                                                         </div>
                                                         <div class="col-6">
@@ -207,20 +205,20 @@
                                                         </div>
                                                     </div>
                                                     <div class="row border-top border-danger">
-                                                        <h2 class="h5 mt-3 text-primary">Package Details</h2>
+                                                        <h2 class="h5 text-primary mt-3">Package Details</h2>
                                                         <div class="d-flex">
                                                             @if ($pharmacy->owner->ownerCurrentContract)
                                                                 <div class="row">
                                                                     <div class="mb-3">
                                                                         <h5 class="text-primary">Name</h5>
                                                                         <p class="text-secondary">
-                                                                            {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->name : 'No Package' }}
+                                                                            {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->name : "No Package" }}
                                                                         </p>
                                                                     </div>
                                                                     <div class="mb-3">
                                                                         <h5 class="text-primary">Duration</h5>
                                                                         <p class="text-secondary">
-                                                                            {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->duration : 'No Package' }}
+                                                                            {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->duration : "No Package" }}
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -228,20 +226,20 @@
                                                                     <div class="mb-3">
                                                                         <h5 class="text-primary">Price</h5>
                                                                         <p class="text-secondary">
-                                                                            {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->price : 'No Package' }}
+                                                                            {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->package->price : "No Package" }}
                                                                         </p>
                                                                     </div>
                                                                     <div class="mb-3">
                                                                         <h5 class="text-primary">Start Date</h5>
                                                                         <p class="text-secondary">
-                                                                            {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->start_date : 'No Package' }}
+                                                                            {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->start_date : "No Package" }}
                                                                         </p>
                                                                     </div>
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <h5 class="text-primary">End Date</h5>
                                                                     <p class="text-secondary">
-                                                                        {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->end_date : 'No Package' }}
+                                                                        {{ $pharmacy->owner->ownerCurrentContract ? $pharmacy->owner->ownerCurrentContract->end_date : "No Package" }}
                                                                     </p>
                                                                 </div>
                                                             @else
@@ -250,9 +248,9 @@
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary"
-                                                            data-bs-dismiss="modal">Close</button>
-                                                        <button type="submit" class="btn btn-primary">Save
+                                                        <button class="btn btn-secondary" data-bs-dismiss="modal"
+                                                            type="button">Close</button>
+                                                        <button class="btn btn-primary" type="submit">Save
                                                             changes</button>
                                                     </div>
                                                 </form>
@@ -262,13 +260,12 @@
                                 </div>
 
                                 <form
-                                    action="{{ route('agent.pharmacies.destroy', ['id' => $pharmacy->id, 'action' => 'delete']) }}"
+                                    action="{{ route("agent.pharmacies.destroy", ["id" => $pharmacy->id, "action" => "delete"]) }}"
                                     method="POST" style="display:inline;">
                                     @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        {{-- onclick="return confirm('Do you want to delete this pharmacy?')" --}}
-                                        class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                    @method("DELETE")
+                                    <button {{-- onclick="return confirm('Do you want to delete this pharmacy?')" --}} class="btn btn-danger btn-sm" type="submit"><i
+                                            class="bi bi-trash"></i></button>
                                 </form>
                             </td>
                         </tr>
@@ -279,37 +276,37 @@
     </div>
 
     <!-- Modal to create a new pharmacy -->
-    <div class="modal fade" id="addPharmacyModal" tabindex="-1" aria-labelledby="addPharmacyModalLabel"
-        aria-hidden="true">
+    <div aria-hidden="true" aria-labelledby="addPharmacyModalLabel" class="modal fade" id="addPharmacyModal"
+        tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title  text-primary" id="addPharmacyModalLabel">Add a new pharmacy</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title text-primary" id="addPharmacyModalLabel">Add a new pharmacy</h5>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('agent.pharmacies.store', ['action' => 'create']) }}" method="POST">
+                    <form action="{{ route("agent.pharmacies.store", ["action" => "create"]) }}" method="POST">
                         @csrf
                         <x-validation-errors class="mb-4" />
                         <div class="row">
                             <div class="col-6">
                                 <h2 class="h5 text-primary">Pharmacy Details</h2>
                                 <div class="mb-3">
-                                    <x-label for="pharmacy_name" value="Name" class="form-label" />
-                                    <x-input type="text" class="form-control rounded" id="pharmacy_name"
-                                        name="pharmacy_name" placeholder="Pill Pharmacy" :value="old('pharmacy_name')" required />
+                                    <x-label class="form-label" for="pharmacy_name" value="Name" />
+                                    <x-input :value="old("pharmacy_name")" class="form-control rounded" id="pharmacy_name"
+                                        name="pharmacy_name" placeholder="Pill Pharmacy" required type="text" />
                                 </div>
                                 <div class="mb-3">
-                                    <x-label for="location" class="form-label" value="Location" />
-                                    <x-input type="text" :value="old('location')" class="form-control rounded" id="location"
-                                        name="location" placeholder="Morogoro" />
+                                    <x-label class="form-label" for="location" value="Location" />
+                                    <x-input :value="old("location")" class="form-control rounded" id="location"
+                                        name="location" placeholder="Morogoro" type="text" />
                                 </div>
                                 <div class="mb-3">
-                                    <x-label for="status" class="form-label" value="Status" />
+                                    <x-label class="form-label" for="status" value="Status" />
                                     <select class="form-select rounded" id="status" name="status" required>
-                                        <option {{ old('status') == 'active' ? 'selected' : '' }} value="active">Active
+                                        <option {{ old("status") == "active" ? "selected" : "" }} value="active">Active
                                         </option>
-                                        <option {{ old('status') == 'inactive' ? 'selected' : '' }} value="inactive">
+                                        <option {{ old("status") == "inactive" ? "selected" : "" }} value="inactive">
                                             Inactive
                                         </option>
                                     </select>
@@ -318,30 +315,30 @@
                             <div class="col-6">
                                 <h2 class="h5 text-primary">Owner Details</h2>
                                 <div>
-                                    <x-label for="name" value="{{ __('Name') }}" />
-                                    <x-input id="name" class="block mt-1 w-full" type="text" name="name"
-                                        :value="old('name')" required autofocus autocomplete="name"
-                                        placeholder="Pill Point" />
+                                    <x-label for="name" value="{{ __("Name") }}" />
+                                    <x-input :value="old("name")" autocomplete="name" autofocus class="mt-1 block w-full"
+                                        id="name" name="name" placeholder="Pill Point" required
+                                        type="text" />
                                 </div>
 
                                 <div class="mt-4">
-                                    <x-label for="email" value="{{ __('Email') }}" />
-                                    <x-input id="email" class="block mt-1 w-full" type="email" name="email"
-                                        :value="old('email')" required autocomplete="username"
-                                        placeholder="info@pillpoint.com" />
+                                    <x-label for="email" value="{{ __("Email") }}" />
+                                    <x-input :value="old("email")" autocomplete="username" class="mt-1 block w-full"
+                                        id="email" name="email" placeholder="info@pillpoint.com" required
+                                        type="email" />
                                 </div>
 
                                 <div class="mt-4">
-                                    <x-label for="phone_number" value="{{ __('Phone Number') }}" />
-                                    <x-input id="phone_number" class="block mt-1 w-full" type="tel"
-                                        name="phone_number" :value="old('phone_number')" required placeholder="0742177328"
-                                        autocomplete="phone_number" />
+                                    <x-label for="phone_number" value="{{ __("Phone Number") }}" />
+                                    <x-input :value="old("phone_number")" autocomplete="phone_number" class="mt-1 block w-full"
+                                        id="phone_number" name="phone_number" placeholder="0742177328" required
+                                        type="tel" />
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer justify-between">
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button class="btn btn-primary" type="submit">Submit</button>
+                            <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
                         </div>
                     </form>
                 </div>

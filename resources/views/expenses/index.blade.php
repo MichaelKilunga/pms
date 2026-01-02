@@ -1,56 +1,56 @@
-@extends('expenses.app')
+@extends("expenses.app")
 
-@section('content')
+@section("content")
     <div class="container-fluid">
         <!-- Page Header -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold mb-0"><i class="fas fa-wallet me-2"></i> Expenses</h4>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerExpenseModal">
+            <button class="btn btn-primary" data-bs-target="#registerExpenseModal" data-bs-toggle="modal" type="button">
                 <i class="fas fa-plus-circle me-1"></i> New Expense
             </button>
         </div>
 
         <!-- Filter Section -->
-        <div class="card shadow-sm mb-4">
+        <div class="card mb-4 shadow-sm">
             <div class="card-body">
-                <form method="GET" action="{{ route('expenses.index') }}" class="row gy-2 gx-3 align-items-center">
+                <form action="{{ route("expenses.index") }}" class="row gy-2 gx-3 align-items-center" method="GET">
                     <div class="col-md-2">
-                        <input type="date" name="from_date" value="{{ request('from_date') }}" class="form-control"
-                            placeholder="From Date">
+                        <input class="form-control" name="from_date" placeholder="From Date" type="date"
+                            value="{{ request("from_date") }}">
                     </div>
                     <div class="col-md-2">
-                        <input type="date" name="to_date" value="{{ request('to_date') }}" class="form-control"
-                            placeholder="To Date">
+                        <input class="form-control" name="to_date" placeholder="To Date" type="date"
+                            value="{{ request("to_date") }}">
                     </div>
                     <div class="col-md-2">
-                        <select name="pharmacy_id" class="form-select" required readonly>
+                        <select class="form-select" name="pharmacy_id" readonly required>
                             <option value="">All Pharmacies</option>
                             @foreach ($pharmacies as $pharmacy)
-                                <option selected value="{{ $pharmacy->id }}" @selected(request('pharmacy_id') == $pharmacy->id)>
+                                <option @selected(request("pharmacy_id") == $pharmacy->id) selected value="{{ $pharmacy->id }}">
                                     {{ $pharmacy->name }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <select name="category_id" class="form-select">
+                        <select class="form-select" name="category_id">
                             <option value="">All Categories</option>
                             @foreach ($categories as $cat)
-                                <option value="{{ $cat->id }}" @selected(request('category_id') == $cat->id)>{{ $cat->name }}
+                                <option @selected(request("category_id") == $cat->id) value="{{ $cat->id }}">{{ $cat->name }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <select name="status" class="form-select">
+                        <select class="form-select" name="status">
                             <option value="">All Status</option>
-                            <option value="pending" @selected(request('status') == 'pending')>Pending</option>
-                            <option value="approved" @selected(request('status') == 'approved')>Approved</option>
-                            <option value="rejected" @selected(request('status') == 'rejected')>Rejected</option>
+                            <option @selected(request("status") == "pending") value="pending">Pending</option>
+                            <option @selected(request("status") == "approved") value="approved">Approved</option>
+                            <option @selected(request("status") == "rejected") value="rejected">Rejected</option>
                         </select>
                     </div>
                     <div class="col-md-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-outline-primary w-100"><i class="fas fa-search"></i>
+                        <button class="btn btn-outline-primary w-100" type="submit"><i class="fas fa-search"></i>
                             Filter</button>
                     </div>
                 </form>
@@ -61,7 +61,7 @@
         <div class="row">
             <div class="card shadow-sm">
                 <div class="card-body table-responsive">
-                    <table id="Table" class="table table-bordered table-hover align-middle">
+                    <table class="table-bordered table-hover small table align-middle" id="Table">
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
@@ -81,21 +81,21 @@
                             @forelse($expenses as $expense)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $expense->creator->name ?? '-' }}</td>
-                                    <td>{{ $expense->expense_date->format('d M Y') }}</td>
-                                    <td>{{ $expense->pharmacy->name ?? '-' }}</td>
-                                    <td>{{ $expense->category->name ?? '-' }}</td>
-                                    <td>{{ $expense->vendor->name ?? '-' }}</td>
+                                    <td>{{ $expense->creator->name ?? "-" }}</td>
+                                    <td>{{ $expense->expense_date->format("d M Y") }}</td>
+                                    <td>{{ $expense->pharmacy->name ?? "-" }}</td>
+                                    <td>{{ $expense->category->name ?? "-" }}</td>
+                                    <td>{{ $expense->vendor->name ?? "-" }}</td>
                                     <td><span
                                             class="badge bg-info text-dark">{{ ucfirst($expense->payment_method) }}</span>
                                     </td>
                                     <td><strong>{{ number_format($expense->amount, 2) }}</strong> {{ $expense->currency }}
                                     </td>
-                                    <td>{{ $expense->approver?->name ?? '-' }}</td>
+                                    <td>{{ $expense->approver?->name ?? "-" }}</td>
                                     <td>
-                                        @if ($expense->status == 'approved')
+                                        @if ($expense->status == "approved")
                                             <span class="badge bg-success">Approved</span>
-                                        @elseif($expense->status == 'rejected')
+                                        @elseif($expense->status == "rejected")
                                             <span class="badge bg-danger">Rejected</span>
                                         @else
                                             <span class="badge bg-warning text-dark">Pending</span>
@@ -103,87 +103,86 @@
                                     </td>
                                     <td>
                                         <div class="group-item">
-                                            @if ($expense->status == 'pending' && ($users->role == 'owner' || $users->role == 'admin'))
-                                                <button type="button" class="btn btn-sm btn-info view-expense"
-                                                    data-bs-toggle="modal"
+                                            @if ($expense->status == "pending" && ($users->role == "owner" || $users->role == "admin"))
+                                                <button class="btn btn-sm btn-info view-expense"
                                                     data-bs-target="#viewExpenseModal{{ $expense->id }}"
-                                                    data-expense='@json($expense)'><i class="bi bi-eye"></i>
+                                                    data-bs-toggle="modal" data-expense='@json($expense)'
+                                                    type="button"><i class="bi bi-eye"></i>
                                                 </button>
-                                                <button type="button" class="btn btn-sm btn-warning edit-expense"
-                                                    data-bs-toggle="modal"
+                                                <button class="btn btn-sm btn-warning edit-expense"
                                                     data-bs-target="#editExpenseModal{{ $expense->id }}"
-                                                    data-expense='@json($expense)'><i
-                                                        class="bi bi-pencil-square"></i>
+                                                    data-bs-toggle="modal" data-expense='@json($expense)'
+                                                    type="button"><i class="bi bi-pencil-square"></i>
                                                 </button>
-                                                <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST"
-                                                    class="d-inline" onsubmit="return confirm('Are you sure?')">
+                                                <form action="{{ route("expenses.destroy", $expense->id) }}"
+                                                    class="d-inline" method="POST"
+                                                    onsubmit="return confirm('Are you sure?')">
                                                     @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger"><i
+                                                    @method("DELETE")
+                                                    <button class="btn btn-sm btn-danger" type="submit"><i
                                                             class="bi bi-trash"></i></button>
                                                 </form>
-                                                <form action="{{ route('expenses.approve', $expense->id) }}" method="POST"
-                                                    class="d-inline"
+                                                <form action="{{ route("expenses.approve", $expense->id) }}"
+                                                    class="d-inline" method="POST"
                                                     onsubmit="return confirm('Are you sure you want to accept?')">
                                                     @csrf
-                                                    @method('POST')
-                                                    <button type="submit" class="btn btn-sm btn-success view-expense"><i
+                                                    @method("POST")
+                                                    <button class="btn btn-sm btn-success view-expense" type="submit"><i
                                                             class="bi bi-check"></i>
                                                     </button>
                                                 </form>
-                                                <form action="{{ route('expenses.reject', $expense->id) }}" method="POST"
-                                                    class="d-inline"
+                                                <form action="{{ route("expenses.reject", $expense->id) }}"
+                                                    class="d-inline" method="POST"
                                                     onsubmit="return confirm('Are you sure you want to reject?')">
                                                     @csrf
-                                                    @method('POST')
-                                                    <button type="submit" class="btn btn-sm btn-danger view-expense"><i
+                                                    @method("POST")
+                                                    <button class="btn btn-sm btn-danger view-expense" type="submit"><i
                                                             class="bi bi-x"></i>
                                                     </button>
                                                 </form>
                                             @endif
 
-                                            @if ($expense->status == 'pending' && $users->role == 'staff')
-                                                <button type="button" class="btn btn-sm btn-info view-expense"
-                                                    data-bs-toggle="modal"
+                                            @if ($expense->status == "pending" && $users->role == "staff")
+                                                <button class="btn btn-sm btn-info view-expense"
                                                     data-bs-target="#viewExpenseModal{{ $expense->id }}"
-                                                    data-expense='@json($expense)'><i class="bi bi-eye"></i>
+                                                    data-bs-toggle="modal" data-expense='@json($expense)'
+                                                    type="button"><i class="bi bi-eye"></i>
                                                 </button>
-                                                <button type="button" class="btn btn-sm btn-warning edit-expense"
-                                                    data-bs-toggle="modal"
+                                                <button class="btn btn-sm btn-warning edit-expense"
                                                     data-bs-target="#editExpenseModal{{ $expense->id }}"
-                                                    data-expense='@json($expense)'><i
-                                                        class="bi bi-pencil-square"></i>
+                                                    data-bs-toggle="modal" data-expense='@json($expense)'
+                                                    type="button"><i class="bi bi-pencil-square"></i>
                                                 </button>
-                                                <form action="{{ route('expenses.destroy', $expense->id) }}"
-                                                    method="POST" class="d-inline"
+                                                <form action="{{ route("expenses.destroy", $expense->id) }}"
+                                                    class="d-inline" method="POST"
                                                     onsubmit="return confirm('Are you sure you want to delete?')">
                                                     @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger"><i
+                                                    @method("DELETE")
+                                                    <button class="btn btn-sm btn-danger" type="submit"><i
                                                             class="bi bi-trash"></i></button>
                                                 </form>
                                             @endif
 
-                                            @if ($expense->status == 'approved' && ($users->role == 'staff' || $users->role == 'admin' || $users->role == 'owner'))
-                                                <button type="button" class="btn btn-sm btn-info view-expense"
-                                                    data-bs-toggle="modal"
+                                            @if ($expense->status == "approved" && ($users->role == "staff" || $users->role == "admin" || $users->role == "owner"))
+                                                <button class="btn btn-sm btn-info view-expense"
                                                     data-bs-target="#viewExpenseModal{{ $expense->id }}"
-                                                    data-expense='@json($expense)'><i class="bi bi-eye"></i>
+                                                    data-bs-toggle="modal" data-expense='@json($expense)'
+                                                    type="button"><i class="bi bi-eye"></i>
                                                 </button>
                                             @endif
 
-                                            @if ($expense->status == 'rejected' && ($users->role == 'staff' || $users->role == 'admin' || $users->role == 'owner'))
-                                                <button type="button" class="btn btn-sm btn-info view-expense"
-                                                    data-bs-toggle="modal"
+                                            @if ($expense->status == "rejected" && ($users->role == "staff" || $users->role == "admin" || $users->role == "owner"))
+                                                <button class="btn btn-sm btn-info view-expense"
                                                     data-bs-target="#viewExpenseModal{{ $expense->id }}"
-                                                    data-expense='@json($expense)'><i class="bi bi-eye"></i>
+                                                    data-bs-toggle="modal" data-expense='@json($expense)'
+                                                    type="button"><i class="bi bi-eye"></i>
                                                 </button>
-                                                <form action="{{ route('expenses.destroy', $expense->id) }}"
-                                                    method="POST" class="d-inline"
+                                                <form action="{{ route("expenses.destroy", $expense->id) }}"
+                                                    class="d-inline" method="POST"
                                                     onsubmit="return confirm('Are you sure you want to delete?')">
                                                     @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger"><i
+                                                    @method("DELETE")
+                                                    <button class="btn btn-sm btn-danger" type="submit"><i
                                                             class="bi bi-trash"></i></button>
                                                 </form>
                                             @endif
@@ -192,8 +191,8 @@
                                     </td>
                                 </tr>
                                 <!-- View Expense Modal -->
-                                <div class="modal fade" id="viewExpenseModal{{ $expense->id }}" tabindex="-1"
-                                    aria-hidden="true">
+                                <div aria-hidden="true" class="modal fade" id="viewExpenseModal{{ $expense->id }}"
+                                    tabindex="-1">
                                     <div class="modal-dialog modal-lg">
                                         <div class="modal-content">
 
@@ -201,8 +200,8 @@
                                                 <h5 class="modal-title">
                                                     <i class="bi bi-cash me-2"></i> Expense Details
                                                 </h5>
-                                                <button type="button" class="btn-close btn-close-white"
-                                                    data-bs-dismiss="modal"></button>
+                                                <button class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                                    type="button"></button>
                                             </div>
                                             <div class="modal-body">
                                                 <ul class="list-group list-group-flush">
@@ -211,24 +210,24 @@
                                                     <li class="list-group-item"><strong>Category:</strong> <span
                                                             id="modal-category"></span>{{ $expense->category->name }}</li>
                                                     <li class="list-group-item"><strong>Vendor:</strong> <span
-                                                            id="modal-vendor"></span>{{ $expense->vendor->name ?? '-' }}
+                                                            id="modal-vendor"></span>{{ $expense->vendor->name ?? "-" }}
                                                     </li>
                                                     <li class="list-group-item"><strong>Payment Method:</strong> <span
-                                                            id="modal-payment"
-                                                            class="badge bg-info text-dark"></span>{{ $expense->payment_method }}
+                                                            class="badge bg-info text-dark"
+                                                            id="modal-payment"></span>{{ $expense->payment_method }}
                                                     </li>
                                                     <li class="list-group-item"><strong>Amount:</strong> <span
                                                             id="modal-amount"></span> <span id="modal-currency"></span>
                                                         {{ $expense->currency }} {{ $expense->amount }}
                                                     </li>
                                                     <li class="list-group-item"><strong>Date:</strong> <span
-                                                            id="modal-expense-date"></span>{{ $expense->expense_date->format('d M Y') }}
+                                                            id="modal-expense-date"></span>{{ $expense->expense_date->format("d M Y") }}
                                                     </li>
                                                     <li class="list-group-item"><strong>Status:</strong> <span
                                                             id="modal-status"></span>
-                                                        @if ($expense->status == 'approved')
+                                                        @if ($expense->status == "approved")
                                                             <span class="badge bg-success">Approved</span>
-                                                        @elseif($expense->status == 'rejected')
+                                                        @elseif($expense->status == "rejected")
                                                             <span class="badge bg-danger">Rejected</span>
                                                         @else
                                                             <span class="badge bg-warning text-dark">Pending</span>
@@ -236,7 +235,7 @@
                                                     </li>
                                                     <li class="list-group-item"><strong>Description:</strong> <span
                                                             id="modal-description"></span>
-                                                        {{ $expense->description ?? '-' }}
+                                                        {{ $expense->description ?? "-" }}
                                                     </li>
                                                     <li class="list-group-item"><strong>Created At:</strong> <span
                                                             id="modal-created-at"></span> {{ $expense->created_at }}
@@ -244,39 +243,40 @@
 
                                                 </ul>
                                             </div>
-                                            <div class="modal-footer"><button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Close</button></div>
+                                            <div class="modal-footer"><button class="btn btn-secondary"
+                                                    data-bs-dismiss="modal" type="button">Close</button></div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Edit Expense Modal -->
-                                <div class="modal fade" id="editExpenseModal{{ $expense->id }}" tabindex="-1"
-                                    aria-hidden="true">
+                                <div aria-hidden="true" class="modal fade" id="editExpenseModal{{ $expense->id }}"
+                                    tabindex="-1">
                                     <div class="modal-dialog modal-lg">
                                         <div class="modal-content">
-                                            <form id="editExpenseForm" method="POST"
-                                                action="{{ route('expenses.update', $expense->id) }}">
+                                            <form action="{{ route("expenses.update", $expense->id) }}"
+                                                id="editExpenseForm" method="POST">
                                                 @csrf
-                                                @method('PUT')
+                                                @method("PUT")
                                                 <div class="modal-header bg-primary text-white">
                                                     <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit
                                                         Expense</h5>
-                                                    <button type="button" class="btn-close"
-                                                        data-bs-dismiss="modal"></button>
+                                                    <button class="btn-close" data-bs-dismiss="modal"
+                                                        type="button"></button>
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="row g-3">
 
                                                         <div class="col-md-6">
                                                             <label class="form-label">pharmacy</label>
-                                                            <select name="pharmacy_id" id="edit-pharmacy"
-                                                                value="{{ $expense->pharmacy_id }}" class="form-select"
-                                                                required>
+                                                            <select class="form-select" id="edit-pharmacy"
+                                                                name="pharmacy_id" required
+                                                                value="{{ $expense->pharmacy_id }}">
                                                                 <option value="">Select pharmacy</option>
                                                                 @foreach ($pharmacies as $pharmacy)
-                                                                    <option value="{{ $pharmacy->id }}"
-                                                                        {{ $pharmacy->id == $expense->pharmacy_id ? 'selected' : '' }}>
+                                                                    <option
+                                                                        {{ $pharmacy->id == $expense->pharmacy_id ? "selected" : "" }}
+                                                                        value="{{ $pharmacy->id }}">
                                                                         {{ $pharmacy->name }}
                                                                     </option>
                                                                 @endforeach
@@ -284,12 +284,13 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="form-label">Category</label>
-                                                            <select name="category_id" id="edit-category"
-                                                                class="form-select" required>
+                                                            <select class="form-select" id="edit-category"
+                                                                name="category_id" required>
                                                                 <option value="">Select Category</option>
                                                                 @foreach ($categories as $cat)
-                                                                    <option value="{{ $cat->id }}"
-                                                                        {{ $cat->id == $expense->category_id ? 'selected' : '' }}>
+                                                                    <option
+                                                                        {{ $cat->id == $expense->category_id ? "selected" : "" }}
+                                                                        value="{{ $cat->id }}">
                                                                         {{ $cat->name }}
                                                                     </option>
                                                                 @endforeach
@@ -297,21 +298,21 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="form-label">Expense Date</label>
-                                                            <input type="date" name="expense_date"
-                                                                id="edit-expense-date" class="form-control"
-                                                                value="{{ $expense->expense_date->format('Y-m-d') }}"
-                                                                required>
+                                                            <input class="form-control" id="edit-expense-date"
+                                                                name="expense_date" required type="date"
+                                                                value="{{ $expense->expense_date->format("Y-m-d") }}">
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="form-label">Vendor</label>
-                                                            <select name="vendor_id" id="edit-vendor"
-                                                                class="form-select">
+                                                            <select class="form-select" id="edit-vendor"
+                                                                name="vendor_id">
                                                                 <option value="">Select Vendor</option>
                                                                 <option value="">No vendor</option>
 
                                                                 @foreach ($vendors as $vendor)
-                                                                    <option value="{{ $vendor->id }}"
-                                                                        {{ $vendor->id == $expense->vendor_id ? 'selected' : '' }}>
+                                                                    <option
+                                                                        {{ $vendor->id == $expense->vendor_id ? "selected" : "" }}
+                                                                        value="{{ $vendor->id }}">
                                                                         {{ $vendor->name }}
                                                                     </option>
                                                                     {{-- no vendor --}}
@@ -323,41 +324,46 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="form-label">Payment Method</label>
-                                                            <select name="payment_method" id="edit-payment-method"
-                                                                class="form-select" required>
-                                                                <option value="cash"
-                                                                    {{ $expense->payment_method == 'cash' ? 'selected' : '' }}>
+                                                            <select class="form-select" id="edit-payment-method"
+                                                                name="payment_method" required>
+                                                                <option
+                                                                    {{ $expense->payment_method == "cash" ? "selected" : "" }}
+                                                                    value="cash">
                                                                     Cash</option>
-                                                                <option value="mobile_money"
-                                                                    {{ $expense->payment_method == 'mobile_money' ? 'selected' : '' }}>
+                                                                <option
+                                                                    {{ $expense->payment_method == "mobile_money" ? "selected" : "" }}
+                                                                    value="mobile_money">
                                                                     Mobile Money</option>
-                                                                <option value="bank_transfer"
-                                                                    {{ $expense->payment_method == 'bank_transfer' ? 'selected' : '' }}>
+                                                                <option
+                                                                    {{ $expense->payment_method == "bank_transfer" ? "selected" : "" }}
+                                                                    value="bank_transfer">
                                                                     Bank Transfer</option>
-                                                                <option value="cheque"
-                                                                    {{ $expense->payment_method == 'cheque' ? 'selected' : '' }}>
+                                                                <option
+                                                                    {{ $expense->payment_method == "cheque" ? "selected" : "" }}
+                                                                    value="cheque">
                                                                     Cheque</option>
-                                                                <option value="other"
-                                                                    {{ $expense->payment_method == 'other' ? 'selected' : '' }}>
+                                                                <option
+                                                                    {{ $expense->payment_method == "other" ? "selected" : "" }}
+                                                                    value="other">
                                                                     Other</option>
                                                             </select>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="form-label">Amount</label>
-                                                            <input type="number" step="0.01" name="amount"
-                                                                id="edit-amount" class="form-control"
-                                                                value="{{ $expense->amount }}" required>
+                                                            <input class="form-control" id="edit-amount" name="amount"
+                                                                required step="0.01" type="number"
+                                                                value="{{ $expense->amount }}">
                                                         </div>
                                                         <div class="col-md-12">
                                                             <label class="form-label">Description</label>
-                                                            <textarea name="description" id="edit-description" class="form-control" rows="3">{{ $expense->description }}</textarea>
+                                                            <textarea class="form-control" id="edit-description" name="description" rows="3">{{ $expense->description }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Cancel</button>
-                                                    <button type="submit" class="btn btn-primary"><i
+                                                    <button class="btn btn-secondary" data-bs-dismiss="modal"
+                                                        type="button">Cancel</button>
+                                                    <button class="btn btn-primary" type="submit"><i
                                                             class="fas fa-save me-1"></i> Update
                                                         Expense</button>
                                                 </div>
@@ -376,27 +382,27 @@
     </div>
 
     <!-- Register Expense Modal -->
-    <div class="modal fade" id="registerExpenseModal" tabindex="-1" aria-labelledby="registerExpenseLabel"
-        aria-hidden="true">
+    <div aria-hidden="true" aria-labelledby="registerExpenseLabel" class="modal fade" id="registerExpenseModal"
+        tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form action="{{ route('expenses.store') }}" method="POST">
+                <form action="{{ route("expenses.store") }}" method="POST">
                     @csrf
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="registerExpenseLabel"><i class="bi bi-wallet me-2"></i> New Expense
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Expense Date</label>
-                                <input type="date" class="form-control" name="expense_date"
-                                    value="{{ old('expense_date', date('Y-m-d')) }}" required>
+                                <input class="form-control" name="expense_date" required type="date"
+                                    value="{{ old("expense_date", date("Y-m-d")) }}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Pharmacy</label>
-                                <select name="pharmacy_id" class="form-select" required>
+                                <select class="form-select" name="pharmacy_id" required>
                                     <option value="">Select Pharmacy</option>
                                     @foreach ($pharmacies as $pharmacy)
                                         <option selected value="{{ $pharmacy->id }}">{{ $pharmacy->name }}</option>
@@ -405,7 +411,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Category</label>
-                                <select name="category_id" class="form-select" required>
+                                <select class="form-select" name="category_id" required>
                                     <option value="">Select Category</option>
                                     @foreach ($categories as $cat)
                                         <option value="{{ $cat->id }}">{{ $cat->name }}</option>
@@ -414,7 +420,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Vendor</label>
-                                <select name="vendor_id" class="form-select">
+                                <select class="form-select" name="vendor_id">
                                     <option value="">Select Vendor</option>
                                     @foreach ($vendors as $vendor)
                                         <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
@@ -424,7 +430,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Payment Method</label>
-                                <select name="payment_method" class="form-select" required>
+                                <select class="form-select" name="payment_method" required>
                                     <option value="">Select Method</option>
                                     <option value="cash">Cash</option>
                                     <option value="mobile_money">Mobile Money</option>
@@ -435,35 +441,33 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Amount</label>
-                                <input type="number" step="0.01" class="form-control" name="amount"
-                                    value="{{ old('amount') }}" required>
+                                <input class="form-control" name="amount" required step="0.01" type="number"
+                                    value="{{ old("amount") }}">
                             </div>
                             <div class="col-md-12 hidden">
-                                <label for="attachment" class="form-label">Attachment (Any file) <span
+                                <label class="form-label" for="attachment">Attachment (Any file) <span
                                         class="text-danger fw-italic">* Optional</span></label>
-                                <input type="file" class="form-control" name="attachment"
-                                    accept=".png,.jpg,.jpeg,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+                                <input accept=".png,.jpg,.jpeg,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="form-control"
+                                    name="attachment" type="file">
                             </div>
 
                             <div class="col-md-12">
                                 <label class="form-label">Description</label>
-                                <textarea name="description" rows="2" class="form-control">{{ old('description') }}</textarea>
+                                <textarea class="form-control" name="description" rows="2">{{ old("description") }}</textarea>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer"><button type="button" class="btn btn-secondary"
-                            data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary"><i
+                    <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal"
+                            type="button">Cancel</button><button class="btn btn-primary" type="submit"><i
                                 class="fas fa-save me-1"></i> Save Expense</button></div>
                 </form>
             </div>
         </div>
     </div>
 
-
 @endsection
 
-
-@push('scripts')
+@push("scripts")
     <script>
         $(document).ready(function() {
 
