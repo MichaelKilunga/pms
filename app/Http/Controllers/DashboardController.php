@@ -283,6 +283,11 @@ class DashboardController extends Controller
             }
 
             if (!isset($pharmacy) || !$pharmacy) {
+                Log::error('Dashboard Access Failure: User ' . Auth::id() . ' fell through checks.', [
+                    'roles' => Auth::user()->getRoleNames(),
+                    'is_staff_record_found' => $staff ? 'yes' : 'no',
+                    'pharmacy_var_set' => isset($pharmacy) ? 'yes' : 'no'
+                ]);
                 Auth::logout();
                 return redirect()->route('login')->with('error', 'Account configuration error: No associated pharmacy found. Please contact support.');
             }
