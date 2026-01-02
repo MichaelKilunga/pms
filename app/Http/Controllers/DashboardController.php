@@ -208,7 +208,7 @@ class DashboardController extends Controller
         }
 
 
-        if (Auth::user()->hasRole('Owner')) {
+        if (Auth::user()->hasRole('Owner') || Pharmacy::where('owner_id', Auth::user()->id)->exists()) {
 
             // Get pharmacies that belong to the authenticated owner
             $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();
@@ -283,13 +283,10 @@ class DashboardController extends Controller
             }
 
             if (!isset($pharmacy) || !$pharmacy) {
-                Log::error('Dashboard Access Failure: User ' . Auth::id() . ' fell through checks.', [
-                    'roles' => Auth::user()->getRoleNames(),
-                    'is_staff_record_found' => $staff ? 'yes' : 'no',
-                    'pharmacy_var_set' => isset($pharmacy) ? 'yes' : 'no'
-                ]);
-                Auth::logout();
-                return redirect()->route('login')->with('error', 'Account configuration error: No associated pharmacy found. Please contact support.');
+                // If fell through checks (no roles) and no staff record/pharmacy found
+                // Instead of logging out, show them the guest dashboard so they can create a pharmacy.
+                session(['guest-owner' => true]);
+                return view('guest-dashboard');
             }
 
             $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id',  Auth::user()->id)->whereDate('created_at', Carbon::today())->sum(DB::raw('total_price * quantity'));
