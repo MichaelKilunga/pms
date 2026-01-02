@@ -65,7 +65,7 @@ class StaffController extends Controller
                 'name' => 'required|string|max:255',
                 'phone' => 'required|string|max:255|unique:users,phone',
                 'email' => 'required|string|email|max:255|unique:users,email',
-                'role' => 'required|string', // Ensure role is provided
+                'role' => 'required|in:admin,staff', // Restrict to specific roles
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error importing file: ' . $e->getMessage());
@@ -144,10 +144,23 @@ class StaffController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:255',
             'email' => 'required|string|max:255',
+            'role' => 'required|in:admin,staff',
         ]);
 
-        $user = User::where('id', $request->id);
+        $user = User::findOrFail($request->id);
+        
         $user->update($request->only(['name', 'email', 'phone']));
+        
+        // Update Legacy Role
+        $user->role = $request->role;
+        $user->save();
+
+        // Sync Spatie Role
+        if ($request->role === 'admin') {
+             $user->syncRoles(['Manager']);
+        } else {
+             $user->syncRoles(['Staff']);
+        }
 
         return redirect()->route('staff')->with('success', 'Staff updated successfully.');
     }

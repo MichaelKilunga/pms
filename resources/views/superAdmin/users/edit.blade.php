@@ -28,12 +28,12 @@
                             <div class="mb-3">
                                 <label class="form-label" for="role">Role</label>
                                 <select class="form-select" id="role" name="role">
-                                    <option {{ $user->role == "User" ? "selected" : "" }} value="User">User (Owner)
-                                    </option>
-                                    <option {{ $user->role == "Admin" ? "selected" : "" }} value="Admin">Admin</option>
-                                    <option {{ $user->role == "Superadmin" ? "selected" : "" }} value="Superadmin">
-                                        Superadmin</option>
-                                    <option {{ $user->role == "Agent" ? "selected" : "" }} value="Agent">Agent</option>
+                                    @foreach ($roles as $role)
+                                        <option {{ $user->hasRole($role->name) ? "selected" : "" }}
+                                            value="{{ $role->name }}">
+                                            {{ $role->name }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
 

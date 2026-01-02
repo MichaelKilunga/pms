@@ -119,6 +119,18 @@
                                                     </div>
 
                                                     <div class="mb-3">
+                                                        <label class="form-label"
+                                                            for="role{{ $staff->id }}">Role</label>
+                                                        <select class="form-select" id="role{{ $staff->id }}"
+                                                            name="role" required>
+                                                            <option {{ $staff->user->role == "staff" ? "selected" : "" }}
+                                                                value="staff">Pharmacist</option>
+                                                            <option {{ $staff->user->role == "admin" ? "selected" : "" }}
+                                                                value="admin">Manager (Admin)</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="mb-3">
                                                         <input name="pharmacy_id" type="hidden"
                                                             value="{{ session("current_pharmacy_id") }}">
                                                     </div>
@@ -178,7 +190,7 @@
                             <label class="form-label" for="role">Role</label>
                             <select class="form-select" id="role" name="role" required>
                                 <option disabled selected value="">Select Role</option>
-                                {{-- <option value="admin">Admin</option> --}}
+                                <option value="admin">Manager (Admin)</option>
                                 <option value="staff">Pharmacist</option>
                             </select>
                         </div>
