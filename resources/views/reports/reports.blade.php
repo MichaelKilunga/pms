@@ -1,6 +1,6 @@
-@extends('reports.app')
+@extends("reports.app")
 
-@section('content')
+@section("content")
     <div class="container pt-2">
         <!-- Page Title -->
         <div class="row mb-4 text-center">
@@ -11,13 +11,13 @@
         </div>
         <!-- Filters Section -->
         <div class="container">
-            <div class="row mb-2 g-4# p-2 d-flex justify-content-center text-center form-control">
+            <div class="row g-4# d-flex justify-content-center form-control mb-2 p-2 text-center">
                 <div class="col-12 col-md-6 col-lg-3 fs-4 text-success">
                     <p class="">Filter By:</p>
                 </div>
                 <div class="col-12 col-md-6 col-lg-3 mb-2">
                     <label class="label" for="duration">Duration</label>
-                    <select id="dateFilter" class="form-select" required>
+                    <select class="form-select" id="dateFilter" required>
                         <option selected value="">-- Select Duration --</option>
                         <option selected value="today">Today</option>
                         <option value="yesterday">Yesterday</option>
@@ -28,15 +28,15 @@
                         <option value="custom_range">Custom Range</option>
                     </select>
                     <div class="dateDiv">
-                        <input type="date" id="startDate" class="form-control rounded d-none bg-success text-light mt-2"
-                            placeholder="Start Date">
-                        <input type="date" id="endDate" class="form-control rounded d-none bg-success text-light mt-2"
-                            placeholder="End Date">
+                        <input class="form-control d-none bg-success text-light mt-2 rounded" id="startDate"
+                            placeholder="Start Date" type="date">
+                        <input class="form-control d-none bg-success text-light mt-2 rounded" id="endDate"
+                            placeholder="End Date" type="date">
                     </div>
                 </div>
                 <div class="col-12 col-md-6 col-lg-3 mb-2">
                     <label for="category">Category</label>
-                    <select class="form-select onReport" name="category" id="category" required>
+                    <select class="onReport form-select" id="category" name="category" required>
                         {{-- <option value="">-- Select Category --</option> --}}
                         <option selected value="sales">Sales</option>
                         <option value="stocks">Stock</option>
@@ -48,7 +48,7 @@
                 <div class="col-12 col-md-6 col-lg-3" id="medicineDiv">
                     {{-- <input type="text" class="form-control" placeholder="Search by ID or Name"> --}}
                     <label for="medicine">Medicine</label>
-                    <select class="form-select onReport" name="medicine" id="medicine" required>
+                    <select class="onReport form-select" id="medicine" name="medicine" required>
                         <option selected value="0">All Medicines</option>
                         @foreach ($medicines as $medicine)
                             <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
@@ -59,12 +59,12 @@
         </div>
 
         <!-- Summary Cards -->
-        <div class="row mb-2 g-4 justify-content-center text-center">
+        <div class="row g-4 justify-content-center mb-2 text-center">
             <div class="col-6 col-md-4 col-lg-2" id="totalStocksDiv">
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Stocks</h6>
-                        <h3 id="totalStocks" class="fw-bold text-danger">fetching...</h3>
+                        <h3 class="fw-bold text-danger" id="totalStocks">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -72,7 +72,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Sales</h6>
-                        <h3 id="totalSales" class="fw-bold text-primary">fetching...</h3>
+                        <h3 class="fw-bold text-primary" id="totalSales">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -80,7 +80,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Returns</h6>
-                        <h3 id="totalReturns" class="fw-bold text-warning">fetching...</h3>
+                        <h3 class="fw-bold text-warning" id="totalReturns">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -88,7 +88,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Profit</h6>
-                        <h3 id="totalProfit" class="fw-bold text-success">fetching...</h3>
+                        <h3 class="fw-bold text-success" id="totalProfit">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -98,7 +98,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Expenses</h6>
-                        <h3 id="totalExpenses" class="fw-bold text-success">fetching...</h3>
+                        <h3 class="fw-bold text-success" id="totalExpenses">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -106,7 +106,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Debt</h6>
-                        <h3 id="totalDebt" class="fw-bold text-success">fetching...</h3>
+                        <h3 class="fw-bold text-success" id="totalDebt">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -116,7 +116,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Debt Paid</h6>
-                        <h3 id="totalDeptsPaid" class="fw-bold text-success">fetching...</h3>
+                        <h3 class="fw-bold text-success" id="totalDeptsPaid">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -124,7 +124,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Totat Dept Remain</h6>
-                        <h3 id="totalDeptsRemaining" class="fw-bold text-primary">fetching...</h3>
+                        <h3 class="fw-bold text-primary" id="totalDeptsRemaining">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -132,7 +132,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Debts</h6>
-                        <h3 id="totalDebts" class="fw-bold text-dark">fetching...</h3>
+                        <h3 class="fw-bold text-dark" id="totalDebts">fetching...</h3>
                     </div>
                 </div>
             </div>
@@ -142,29 +142,33 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Total Installments</h6>
-                        <h3 id="totalInstallments" class="fw-bold text-primary">fetching...</h3>
+                        <h3 class="fw-bold text-primary" id="totalInstallments">fetching...</h3>
                     </div>
                 </div>
             </div>
 
             {{-- Send Report Button --}}
-            <div id="reportSendDiv" class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-2" id="reportSendDiv">
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Send Report</h6>
                         {{-- pass start date and end date --}}
-                        <form action="{{ route('reports.send') }}" method="POST">
+                        <form action="{{ route("reports.send") }}" method="POST">
                             @csrf
-                            <input type="hidden" name="start_date" id="report_start_date">
-                            <input type="hidden" name="end_date" id="report_end_date">
-                            <button type="submit" class="btn btn-primary">Send Report</button>
+                            <input id="report_start_date" name="start_date" type="hidden">
+                            <input id="report_end_date" name="end_date" type="hidden">
+                            <button class="btn btn-primary d-block w-100 mb-2" type="submit">Send Report (All)</button>
+                            <button class="btn btn-success d-block w-100" name="channel" type="submit"
+                                value="whatsapp">
+                                <i class="fab fa-whatsapp"></i> Receive in WhatsApp
+                            </button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
         <!-- Table Section -->
-        <div class="row mb-2 g-4 justify-content-center text-center">
+        <div class="row g-4 justify-content-center mb-2 text-center">
             <div class="col-12">
                 <div class="table-responsive reportTable">
                     <i>Table will appear here!!!</i>
@@ -173,7 +177,7 @@
         </div>
 
         <!-- Chart Section -->
-        <div class="row mb-4 g-4 justify-content-center text-center" id="DivchartHead">
+        <div class="row g-4 justify-content-center mb-4 text-center" id="DivchartHead">
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
@@ -553,16 +557,16 @@
                                     </thead>
                                     <tbody>
                                         ${response.sales.map((sale, index) => `
-                                                                                                                                                                                                                                                                        <tr>
-                                                                                                                                                                                                                                                                            <td>${index + 1}</td>
-                                                                                                                                                                                                                                                                            <td>${sale.date}</td>
-                                                                                                                                                                                                                                                                            <td class ="text-left">${sale.item['name']}</td>
-                                                                                                                                                                                                                                                                            <td>${sale.quantity}</td>
-                                                                                                                                                                                                                                                                           <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity * sale.stock['selling_price'])}</td>
-                                                                                                                                                                                                                                                                           <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity *((sale.stock['selling_price'])-(sale.stock['buying_price'])))}</td>
+                                                                                                                                                                                                                                                                            <tr>
+                                                                                                                                                                                                                                                                                <td>${index + 1}</td>
+                                                                                                                                                                                                                                                                                <td>${sale.date}</td>
+                                                                                                                                                                                                                                                                                <td class ="text-left">${sale.item['name']}</td>
+                                                                                                                                                                                                                                                                                <td>${sale.quantity}</td>
+                                                                                                                                                                                                                                                                               <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity * sale.stock['selling_price'])}</td>
+                                                                                                                                                                                                                                                                               <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity *((sale.stock['selling_price'])-(sale.stock['buying_price'])))}</td>
 
-                                                                                                                                                                                                                                                                        </tr>
-                                                                                                                                                                                                                                                                    `).join('')}
+                                                                                                                                                                                                                                                                            </tr>
+                                                                                                                                                                                                                                                                        `).join('')}
                                             ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
                                              
                                             </tbody>
@@ -591,21 +595,21 @@
                                     </thead>
                                     <tbody>
                                         ${response.stocks.map((stock, index) => `
-                                                                                                                                                                                                                                                                            <tr>
-                                                                                                                                                                                                                                                                                <td>${index + 1}</td>
-                                                                                                                                                                                                                                                                                <td class="text-left">${stock.item['name']}</td>
-                                                                                                                                                                                                                                                                                <td>${stock.quantity}</td>
-                                                                                                                                                                                                                                                                                <td>${stock.remain_Quantity}</td>
-                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
-                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
-                                                                                                                                                                                                                                                                                <td>${stock.low_stock_percentage}</td>
-                                                                                                                                                                                                                                                                                <td>${stock.expire_date}</td>
-                                                                                                                                                                                                                                                                                <td>${stock.batch_number}</td>
-                                                                                                                                                                                                                                                                                <td>${stock.supplier}</td> 
-                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
-                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
-                                                                                                                                                                                                                                                                                ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>Tsh 0</td>`}
-                                                                                                                                                                                                                                                                            </tr>`).join('')}
+                                                                                                                                                                                                                                                                                <tr>
+                                                                                                                                                                                                                                                                                    <td>${index + 1}</td>
+                                                                                                                                                                                                                                                                                    <td class="text-left">${stock.item['name']}</td>
+                                                                                                                                                                                                                                                                                    <td>${stock.quantity}</td>
+                                                                                                                                                                                                                                                                                    <td>${stock.remain_Quantity}</td>
+                                                                                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
+                                                                                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
+                                                                                                                                                                                                                                                                                    <td>${stock.low_stock_percentage}</td>
+                                                                                                                                                                                                                                                                                    <td>${stock.expire_date}</td>
+                                                                                                                                                                                                                                                                                    <td>${stock.batch_number}</td>
+                                                                                                                                                                                                                                                                                    <td>${stock.supplier}</td> 
+                                                                                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
+                                                                                                                                                                                                                                                                                    <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
+                                                                                                                                                                                                                                                                                    ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>Tsh 0</td>`}
+                                                                                                                                                                                                                                                                                </tr>`).join('')}
                                             ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
                                          
                                     </tbody>
@@ -628,19 +632,19 @@
                                     </thead>
                                     <tbody>
                                             ${response.expenses.map((expense, index) => `
-                                                                                            <tr>
-                                                                                                <td>${index + 1}</td>
-                                                                                                <td>${formatReadableDate(expense.expense_date)}</td>
-                                                                                                <td class="text-left">${expense.category?.name ?? 'N/A'}</td>
-                                                                                                <td class="text-left">${expense.vendor?.name ?? 'N/A'}</td>
-                                                                                                <td>${expense.payment_method}</td>
-                                                                                                <td class="text-left">${expense.status}</td>
-                                                                                                <td class="text-left">${new Intl.NumberFormat('en-TZ', { 
-                                                                                                    style: 'currency', 
-                                                                                                    currency: 'TZS' 
-                                                                                                }).format(expense.amount)}</td>
-                                                                                            </tr>
-                                                                                        `).join('')}
+                                                                                                <tr>
+                                                                                                    <td>${index + 1}</td>
+                                                                                                    <td>${formatReadableDate(expense.expense_date)}</td>
+                                                                                                    <td class="text-left">${expense.category?.name ?? 'N/A'}</td>
+                                                                                                    <td class="text-left">${expense.vendor?.name ?? 'N/A'}</td>
+                                                                                                    <td>${expense.payment_method}</td>
+                                                                                                    <td class="text-left">${expense.status}</td>
+                                                                                                    <td class="text-left">${new Intl.NumberFormat('en-TZ', { 
+                                                                                                        style: 'currency', 
+                                                                                                        currency: 'TZS' 
+                                                                                                    }).format(expense.amount)}</td>
+                                                                                                </tr>
+                                                                                            `).join('')}
 
                                             ${response.expenses.length == 0 ? `<tr><td colspan="7" class="text-center">No data found</td></tr>` : ''}
                                          
@@ -665,20 +669,20 @@
                                         </thead>
                                         <tbody>
                                             ${response.debts.map((debt, index) => `
-                                                                                                                                                                                        <tr>
-                                                                                                                                                                                            <td>${index + 1}</td>
-                                                                                                                                                                                            <td class="text-left">
-                                                                                                                                                                                            <strong>${debt.stock?.item?.name || 'N/A'}</strong> | 
-                                                                                                                                                                                            <small>${debt.stock?.batch_number || 'N/A'} (${debt.stock?.supplier || 'N/A'})</small>
-                                                                                                                                                                                            </td>
-                                                                                                                                                                                            <td>${formatReadableDate(debt.created_at)}</td>
-                                                                                                                                                                                            <td>${formatReadableDate(debt.updated_at)}</td>
-                                                                                                                                                                                            <td>${debt.status}</td>
-                                                                                                                                                                                            <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.debtAmount)}</td>
-                                                                                                                                                                                            <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.totalPaid)}</td>
-                                                                                                                                                                                            <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.debtAmount - debt.totalPaid)}</td>
-                                                                                                                                                                                            </tr>
-                                                                                                                                                                                    `).join('')}
+                                                                                                                                                                                            <tr>
+                                                                                                                                                                                                <td>${index + 1}</td>
+                                                                                                                                                                                                <td class="text-left">
+                                                                                                                                                                                                <strong>${debt.stock?.item?.name || 'N/A'}</strong> | 
+                                                                                                                                                                                                <small>${debt.stock?.batch_number || 'N/A'} (${debt.stock?.supplier || 'N/A'})</small>
+                                                                                                                                                                                                </td>
+                                                                                                                                                                                                <td>${formatReadableDate(debt.created_at)}</td>
+                                                                                                                                                                                                <td>${formatReadableDate(debt.updated_at)}</td>
+                                                                                                                                                                                                <td>${debt.status}</td>
+                                                                                                                                                                                                <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.debtAmount)}</td>
+                                                                                                                                                                                                <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.totalPaid)}</td>
+                                                                                                                                                                                                <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.debtAmount - debt.totalPaid)}</td>
+                                                                                                                                                                                                </tr>
+                                                                                                                                                                                        `).join('')}
                                                 ${response.debts.length == 0 ? `<tr><td colspan="10" class="text-center">No data found</td></tr>` : ''}
                                              
                                         </tbody>
@@ -699,17 +703,17 @@
                                     </thead>
                                     <tbody>
                                         ${response.installments.map((installment, index) => `
-                                                                                                                    <tr>
-                                                                                                                        <td>${index + 1}</td>
-                                                                                                                        <td class="text-left">
-                                                                                                                            <strong>${installment.debt?.stock?.item?.name || 'N/A'}</strong> | 
-                                                                                                                            <small>${installment.debt?.stock?.batch_number || 'N/A'} (${installment.debt?.stock?.supplier || 'N/A'})</small>
-                                                                                                                        </td>
-                                                                                                                        <td class="text-left">${installment.description}</td>
-                                                                                                                        <td>${formatReadableDate(installment.created_at)}</td>
-                                                                                                                        <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(installment.amount)}</td>
-                                                                                                                    </tr>
-                                                                                                            `).join('')}
+                                                                                                                        <tr>
+                                                                                                                            <td>${index + 1}</td>
+                                                                                                                            <td class="text-left">
+                                                                                                                                <strong>${installment.debt?.stock?.item?.name || 'N/A'}</strong> | 
+                                                                                                                                <small>${installment.debt?.stock?.batch_number || 'N/A'} (${installment.debt?.stock?.supplier || 'N/A'})</small>
+                                                                                                                            </td>
+                                                                                                                            <td class="text-left">${installment.description}</td>
+                                                                                                                            <td>${formatReadableDate(installment.created_at)}</td>
+                                                                                                                            <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(installment.amount)}</td>
+                                                                                                                        </tr>
+                                                                                                                `).join('')}
                                             ${response.installments.length == 0 ? `<tr><td colspan="5" class="text-center">No data found</td></tr>` : ''}
                                          
                                     </tbody>
@@ -1125,7 +1129,7 @@
                                                         //expenses total row
                                                         if (category ===
                                                             'expenses'
-                                                            ) {
+                                                        ) {
                                                             // EXPENSES PRINTED FOOTER
                                                             content
                                                                 .table
@@ -1151,9 +1155,10 @@
                                                                     }
                                                                 ]);
                                                         }
-                                                    
+
                                                         //debts total row
-                                                        if (category === 'debts') {
+                                                        if (category ===
+                                                            'debts') {
                                                             // DEPTS PRINTED FOOTER
                                                             content
                                                                 .table
@@ -1196,8 +1201,9 @@
                                                         }
 
                                                         //installments total row
-                                                          if (category ===
-                                                            'installments') {
+                                                        if (category ===
+                                                            'installments'
+                                                            ) {
                                                             // SALES FOOTER
                                                             content
                                                                 .table

@@ -46,6 +46,9 @@ Route::get('/', function () {
 Route::view('/privacy_policy', 'legal.privacy_policy')->name('privacy_policy');
 Route::view('/terms_of_use', 'legal.terms_of_use')->name('terms_of_use');
 
+// Public access for generated temporary reports (to bypass 403 static file issues)
+Route::get('/public/reports/download/{filename}', [WhatsAppController::class, 'downloadReport'])->name('public.reports.download');
+
 Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::get('schedule', function () {
         // Run the Artisan schedule:run command to manually trigger the scheduled tasks

@@ -317,7 +317,7 @@ class ReportPrintController extends Controller
         }
     }
 
-    public function sendReport(Request $request)
+    public function sendReport(Request $request, \App\Services\SmsService $smsService, \App\Services\MetaWhatsAppService $whatsAppService)
     {
         try {
             $pharmacyId = session('current_pharmacy_id');
@@ -408,15 +408,70 @@ class ReportPrintController extends Controller
             ];
 
             // ----------------------
-            // Queue email (non-blocking)
+            // Send Notifications
             // ----------------------
-            if ($pharmacy->owner && $pharmacy->owner->email) {
-                Mail::to($pharmacy->owner->email)
-                    ->send(new DailyPharmacyReport($pharmacy, $salesSummary, $stockStatus, $reportDate, $message));
-                return redirect()->back()->with('success', 'Report sent successfully');
-            } else {
-                return redirect()->back()->with('error', 'No email found for pharmacy');
+            $owner = $pharmacy->owner;
+            if(!$owner) {
+                return redirect()->back()->with('error', 'No owner found for pharmacy');
             }
+
+            $channels = $request->input('channels', ['email', 'sms', 'whatsapp', 'in_app']);
+            if ($request->input('channel') === 'whatsapp') {
+                $channels = ['whatsapp'];
+            }
+
+            $successMessages = [];
+
+            // 1. Email
+            if (in_array('email', $channels) && $owner->email && $owner->wantsNotificationChannel('email')) {
+                Mail::to($owner->email)
+                    ->send(new DailyPharmacyReport($pharmacy, $salesSummary, $stockStatus, $reportDate, $message));
+                $successMessages[] = 'Email';
+            }
+
+            // 2. Push SMS
+            if (in_array('sms', $channels) && $owner->phone && $owner->wantsNotificationChannel('sms')) {
+                $smsMsg = "Daily Report: {$pharmacy->name}\nDate: {$reportDate}\nSales: " . number_format($salesSummary['total_revenue']) . " TZS\nProfit: " . number_format($salesSummary['profit_loss']) . " TZS";
+                $smsService->send($owner->phone, $smsMsg);
+                $successMessages[] = 'SMS';
+            }
+
+            // 3. WhatsApp
+            if (in_array('whatsapp', $channels) && $owner->phone && $owner->wantsNotificationChannel('whatsapp')) {
+                
+                // Construct WhatsApp Message
+                $waMsg = "*Daily Report*\n";
+                $waMsg .= "Pharmacy: {$pharmacy->name}\n";
+                $waMsg .= "Date: {$reportDate}\n\n";
+                $waMsg .= "*Summary:*\n";
+                $waMsg .= "Total Sales: " . number_format($salesSummary['total_revenue']) . " TZS\n";
+                $waMsg .= "Total Cost: " . number_format($salesSummary['total_cost']) . " TZS\n";
+                $waMsg .= "Profit/Loss: " . number_format($salesSummary['profit_loss']) . " TZS\n";
+                $waMsg .= "Transactions: " . $salesSummary['total_transactions'] . "\n\n";
+                $waMsg .= "*Stock Alerts:*\n";
+                $waMsg .= "Out of Stock: " . $stockStatus['out_of_stock']->count() . "\n";
+                $waMsg .= "Low Stock: " . $stockStatus['low_stock']->count() . "\n";
+                $waMsg .= "Expired: " . $stockStatus['expired']->count() . "\n";
+                
+                $whatsAppService->sendMessage($owner->phone, $waMsg);
+                $successMessages[] = 'WhatsApp';
+            }
+
+            // 4. In-App
+            if (in_array('in_app', $channels) && $owner->wantsNotificationChannel('database')) {
+                \Illuminate\Support\Facades\Notification::send($owner, new \App\Notifications\InAppNotification([
+                    'message' => "Daily Report Sent for {$reportDate}", 
+                    'type' => 'info'
+                ]));
+                $successMessages[] = 'In-App';
+            }
+
+            if (count($successMessages) > 0) {
+                return redirect()->back()->with('success', 'Report sent successfully via: ' . implode(', ', $successMessages));
+            } else {
+                 return redirect()->back()->with('warning', 'Report generated but no notifications were sent (check user preferences or contact details).');
+            }
+
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error sending report: ' . $e->getMessage());
         }

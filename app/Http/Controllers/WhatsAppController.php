@@ -56,7 +56,11 @@ class WhatsAppController extends Controller
         Storage::disk('public')->put($path, $pdf->output());
 
         // Create Public URL
-        $url = asset('storage/' . $path);
+        // Use a controller route instead of static asset link to avoid 403 permission issues
+        //$url = asset('storage/' . $path);
+        
+        // We use a route designed to serve this file
+        $url = route('public.reports.download', ['filename' => $filename]);
 
         // Determine User Phone Number
         // Priority: Request input -> Auth User -> Pharmacy Owner
@@ -88,10 +92,6 @@ class WhatsAppController extends Controller
         }
     }
 
-    /**
-     * Format phone number to Tanzania format (255...)
-     * Handles: 07..., +255..., 2550..., etc.
-     */
     private function formatPhoneNumber($number)
     {
         if (!$number) return null;
@@ -116,5 +116,28 @@ class WhatsAppController extends Controller
 
         // 4. Re-add 255
         return '255' . $number;
+    }
+
+    /**
+     * Download the temporary report.
+     * Accessible via public route to bypass static file permission issues.
+     */
+    public function downloadReport($filename)
+    {
+        // Security: Ensure filename is alphanumeric + .pdf only to prevent traversal
+        if (!preg_match('/^[a-zA-Z0-9_]+\.pdf$/', $filename)) {
+            abort(404);
+        }
+
+        $path = 'reports/temp/' . $filename;
+
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+
+        return response()->file(Storage::disk('public')->path($path), [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"'
+        ]);
     }
 }
