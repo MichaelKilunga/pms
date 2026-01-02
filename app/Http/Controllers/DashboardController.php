@@ -283,10 +283,8 @@ class DashboardController extends Controller
             }
 
             if (!isset($pharmacy) || !$pharmacy) {
-                // If fell through checks (no roles) and no staff record/pharmacy found
-                // Instead of logging out, show them the guest dashboard so they can create a pharmacy.
-                session(['guest-owner' => true]);
-                return view('guest-dashboard');
+                // Return 403 Forbidden to stop login loop but deny access
+                abort(403, 'Account configuration incomplete. Please contact the administrator to assign a pharmacy or role.');
             }
 
             $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id',  Auth::user()->id)->whereDate('created_at', Carbon::today())->sum(DB::raw('total_price * quantity'));
