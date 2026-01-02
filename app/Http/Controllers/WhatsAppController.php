@@ -73,9 +73,9 @@ class WhatsAppController extends Controller
         }
 
         // Send Message
-        $sent = $this->whatsAppService->sendDocumentLink($phoneNumber, $url);
+        $result = $this->whatsAppService->sendDocumentLink($phoneNumber, $url);
 
-        if ($sent) {
+        if ($result['success']) {
             return response()->json([
                 'success' => true,
                 'message' => 'Report sent to WhatsApp successfully!'
@@ -83,7 +83,7 @@ class WhatsAppController extends Controller
         } else {
              return response()->json([
                 'success' => false,
-                'message' => 'Failed to send WhatsApp message. Check logs/settings.'
+                'message' => 'Error: ' . ($result['error'] ?? 'Unknown WhatsApp Error')
             ], 500);
         }
     }

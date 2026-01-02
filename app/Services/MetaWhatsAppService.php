@@ -66,8 +66,9 @@ class MetaWhatsAppService
     public function sendMessage($to, $message)
     {
         if (!$this->isEnabled()) {
-            Log::warning("WhatsApp is disabled or missing credentials for pharmacy {$this->pharmacyId}");
-            return false;
+            $msg = "WhatsApp is disabled or missing credentials for pharmacy {$this->pharmacyId}";
+            Log::warning($msg);
+            return ['success' => false, 'error' => $msg];
         }
 
         $url = "{$this->baseUrl}/{$this->phoneNumberId}/messages";
@@ -84,29 +85,24 @@ class MetaWhatsAppService
                 ]);
 
             if ($response->successful()) {
-                return $response->json();
+                return ['success' => true, 'data' => $response->json()];
             } else {
+                $errorData = $response->json();
+                $errorMessage = $errorData['error']['message'] ?? 'Unknown Meta API Error';
                 Log::error("WhatsApp Send Failed: " . $response->body());
-                return false;
+                return ['success' => false, 'error' => $errorMessage];
             }
         } catch (\Exception $e) {
             Log::error("WhatsApp Exception: " . $e->getMessage());
-            return false;
+            return ['success' => false, 'error' => 'Exception: ' . $e->getMessage()];
         }
     }
 
     /**
      * Send a document (PDF link)
-     * Note: sending a link as a message body is often easier than uploading media if not verified.
-     * But we can also implement 'type' => 'document' with a link if the link is public.
      */
     public function sendDocumentLink($to, $link, $caption = "Here is your Stock Suggestion Report")
     {
-        // For simplicity, sending as text with link first.
-        // True "document" type requires the file to be accessible by Facebook servers or uploaded via Media API.
-        // Given we are running on localhost/dev potentially, a link might not be reachable by FB.
-        // FOR NOW: We will send it as a text message containing the link.
-        
         $message = "{$caption}\n\nDownload here: {$link}";
         return $this->sendMessage($to, $message);
     }
