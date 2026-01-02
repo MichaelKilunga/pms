@@ -60,10 +60,10 @@ class WhatsAppController extends Controller
 
         // Determine User Phone Number
         // Priority: Request input -> Auth User -> Pharmacy Owner
-        $phoneNumber = $request->input('phone_number') ?? Auth::user()->phone ?? null;
+        $rawPhone = $request->input('phone_number') ?? Auth::user()->phone ?? null;
         
-        // Clean phone number (basic)
-        $phoneNumber = preg_replace('/[^0-9]/', '', $phoneNumber);
+        // Format phone number
+        $phoneNumber = $this->formatPhoneNumber($rawPhone);
 
         if (!$phoneNumber) {
              return response()->json([
@@ -86,5 +86,35 @@ class WhatsAppController extends Controller
                 'message' => 'Error: ' . ($result['error'] ?? 'Unknown WhatsApp Error')
             ], 500);
         }
+    }
+
+    /**
+     * Format phone number to Tanzania format (255...)
+     * Handles: 07..., +255..., 2550..., etc.
+     */
+    private function formatPhoneNumber($number)
+    {
+        if (!$number) return null;
+
+        // 1. Remove any non-numeric characters
+        $number = preg_replace('/[^0-9]/', '', $number);
+
+        // 2. Initial cleanup log (optional, for debug)
+        // Log::info("Formatting phone: $number");
+
+        // 3. Logic: Strip common prefixes to get the 'core' number, then add 255
+        // Standard TZ number (without code) is 9 digits: 7xxxxxxxx, 6xxxxxxxx
+        // If we strip '255' from start, then strip '0' from start, we should be left with 9 digits.
+        
+        if (Str::startsWith($number, '255')) {
+            $number = substr($number, 3);
+        }
+        
+        if (Str::startsWith($number, '0')) {
+            $number = substr($number, 1);
+        }
+
+        // 4. Re-add 255
+        return '255' . $number;
     }
 }
