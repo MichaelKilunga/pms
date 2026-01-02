@@ -9,6 +9,10 @@ class SystemSettingController extends Controller
 {
     public function index()
     {
+        if (!auth()->user()->hasRole('Superadmin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $pharmacyId = session('current_pharmacy_id');
         
         // Fetch global definitions/defaults
@@ -25,6 +29,10 @@ class SystemSettingController extends Controller
 
     public function update(Request $request)
     {
+        if (!auth()->user()->hasRole('Superadmin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $pharmacyId = session('current_pharmacy_id');
         $data = $request->except(['_token']);
         
