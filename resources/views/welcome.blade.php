@@ -278,7 +278,7 @@
                 href="https://wa.me/{{ config("support.whatsapp", env("SUPPORT_WHATSAPP")) }}?text={{ urlencode("Hello, I need help with...") }}"
                 target="_blank">WhatsApp</a>
             <a class="btn btn-outline-secondary btn-sm"
-                href="mailto:{{ config("support.email", env("SUPPORT_EMAIL")) }}">{{ config("support.email", env("SUPPORT_EMAIL")) }}</a>
+                href="mailto:{{ 'info@skylinksolutions.co.tz' ?? config("support.email", env("SUPPORT_EMAIL")) }}">{{ 'info@skylinksolutions.co.tz' ?? config("support.email", env("SUPPORT_EMAIL")) }}</a>
             <a class="btn btn-outline-secondary btn-sm" href="{{ config("support.website", env("SUPPORT_WEBSITE")) }}"
                 target="_blank">Website</a>
             {{-- normal call --}}
