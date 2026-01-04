@@ -157,11 +157,13 @@
                             @csrf
                             <input id="report_start_date" name="start_date" type="hidden">
                             <input id="report_end_date" name="end_date" type="hidden">
-                            <button class="btn btn-primary d-block w-100 mb-2" type="submit">Send Report (All)</button>
-                            <button class="btn btn-success d-block w-100" name="channel" type="submit"
-                                value="whatsapp">
-                                <i class="fab fa-whatsapp"></i> Receive in WhatsApp
-                            </button>
+                            <div class="d-flex justify-content-between gap-1">
+                                <button class="d-flex gap-1 small btn btn-primary" type="submit"><i class="fab fa-whatsapp"></i> <i class="fas fa-envelope"></i> <i class="fas fa-comments"></i></button>
+                                <button class="btn btn-success" name="channel" type="submit"
+                                    value="whatsapp">
+                                    <i class="fab fa-whatsapp"></i>
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

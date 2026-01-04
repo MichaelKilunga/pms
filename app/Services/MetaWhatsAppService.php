@@ -71,13 +71,15 @@ class MetaWhatsAppService
             return ['success' => false, 'error' => $msg];
         }
 
+        $formattedTo = $this->formatPhoneNumber($to);
+
         $url = "{$this->baseUrl}/{$this->phoneNumberId}/messages";
 
         try {
             $response = Http::withToken($this->accessToken)
                 ->post($url, [
                     'messaging_product' => 'whatsapp',
-                    'to' => $to,
+                    'to' => $formattedTo,
                     'type' => 'text',
                     'text' => [
                         'body' => $message
@@ -105,5 +107,31 @@ class MetaWhatsAppService
     {
         $message = "{$caption}\n\nDownload here: {$link}";
         return $this->sendMessage($to, $message);
+    }
+
+    /**
+     * Format phone number to 255XXXXXXXXX
+     */
+    private function formatPhoneNumber($phone)
+    {
+        // 1. Remove any non-numeric characters
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // 2. If starts with 0, replace with 255
+        if (substr($phone, 0, 1) === '0') {
+            $phone = '255' . substr($phone, 1);
+        }
+
+        // 3. If starts with 2550..., remove the 0 after 255
+        if (substr($phone, 0, 4) === '2550') {
+             $phone = '255' . substr($phone, 4);
+        }
+
+        // 4. Fallback for 9 digits
+        if (strlen($phone) === 9) {
+            $phone = '255' . $phone;
+        }
+
+        return $phone;
     }
 }

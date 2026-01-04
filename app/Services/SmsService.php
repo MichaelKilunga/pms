@@ -38,13 +38,15 @@ class SmsService
         }
 
         try {
+            $formattedTo = $this->formatPhoneNumber($to);
+
             // Documented endpoint for Skypush
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
                 'X-API-KEY' => $this->apiKey,
             ])->post("{$this->baseUrl}/send", [
-                'to' => $to,
+                'to' => $formattedTo,
                 'message' => $message,
                 'sender' => $this->senderId,
                 'client_app' => '1',
@@ -62,5 +64,35 @@ class SmsService
             Log::error("SmsService Exception: " . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Format phone number to 255XXXXXXXXX
+     * Example: 0742177328 -> 255742177328
+     * Example: +255742... -> 255742...
+     */
+    private function formatPhoneNumber($phone)
+    {
+        // 1. Remove any non-numeric characters (spaces, +, -, etc.)
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // 2. If starts with 0, replace with 255
+        if (substr($phone, 0, 1) === '0') {
+            $phone = '255' . substr($phone, 1);
+        }
+
+        // 3. If starts with 2550..., remove the 0 after 255
+        if (substr($phone, 0, 4) === '2550') {
+             $phone = '255' . substr($phone, 4);
+        }
+
+        // 4. If length is less than 12 (e.g. 9 digits w/o prefix?), prepend 255?
+        //    Let's assume standard TZ numbers without prefix are 9 digits (7xxxxxxxx).
+        //    If length == 9, prepend 255.
+        if (strlen($phone) === 9) {
+            $phone = '255' . $phone;
+        }
+
+        return $phone;
     }
 }
