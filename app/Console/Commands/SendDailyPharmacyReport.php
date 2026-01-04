@@ -10,6 +10,10 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use App\Services\SmsService;
+use App\Services\MetaWhatsAppService;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\InAppNotification;
 
 class SendDailyPharmacyReport extends Command
 {
@@ -30,7 +34,7 @@ class SendDailyPharmacyReport extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(SmsService $smsService, MetaWhatsAppService $whatsAppService)
     {
         $pharmacyId = $this->option('pharmacy_id');
         
@@ -41,7 +45,7 @@ class SendDailyPharmacyReport extends Command
         }
 
         foreach ($pharmacies as $pharmacy) {
-            $this->sendReportForPharmacy($pharmacy);
+            $this->sendReportForPharmacy($pharmacy, $smsService, $whatsAppService);
         }
 
         $this->info('Daily pharmacy reports sent successfully');
@@ -112,7 +116,7 @@ class SendDailyPharmacyReport extends Command
      * @param \App\Models\Pharmacy $pharmacy
      * @return void
      */
-    private function sendReportForPharmacy(Pharmacy $pharmacy): void
+    private function sendReportForPharmacy(Pharmacy $pharmacy, SmsService $smsService, MetaWhatsAppService $whatsAppService): void
     {
         $today = Carbon::today();
         $reportDate = $today->format('F j, Y');
@@ -180,13 +184,83 @@ class SendDailyPharmacyReport extends Command
         // ----------------------
         // Queue email (non-blocking)
         // ----------------------
-        if ($pharmacy->owner && $pharmacy->owner->email) {
-            Mail::to($pharmacy->owner->email)
-                ->send(new DailyPharmacyReport($pharmacy, $salesSummary, $stockStatus, $reportDate, $message));
 
-            $this->info("📧 Queued report for {$pharmacy->name} owner: {$pharmacy->owner->email}");
-        } else {
-            $this->warn("⚠️ No email found for pharmacy: {$pharmacy->name}");
+        // ----------------------
+        // Send Notifications
+        // ----------------------
+        $owner = $pharmacy->owner;
+
+        if (!$owner) {
+             $this->warn("⚠️ No owner found for pharmacy: {$pharmacy->name}");
+             return;
+        }
+
+        // 1. Email
+        if ($owner->email && $owner->wantsNotificationChannel('email')) {
+             try {
+                Mail::to($owner->email)
+                    ->send(new DailyPharmacyReport($pharmacy, $salesSummary, $stockStatus, $reportDate, $message));
+                $this->info("📧 Queued email for {$pharmacy->name} owner: {$owner->email}");
+             } catch (\Exception $e) {
+                $this->error("❌ Email failed for {$pharmacy->name}: " . $e->getMessage());
+             }
+        }
+
+        // 2. Push SMS
+        if ($owner->phone && $owner->wantsNotificationChannel('sms')) {
+            try {
+                $smsMsg = "Daily Report: {$pharmacy->name}\nDate: {$reportDate}\nSales: " . number_format($salesSummary['total_revenue']) . " TZS\nProfit: " . number_format($salesSummary['profit_loss']) . " TZS";
+                $sent = $smsService->send($owner->phone, $smsMsg);
+                if ($sent) {
+                    $this->info("📱 SMS sent to {$owner->phone}");
+                } else {
+                     $this->error("❌ SMS failed for {$pharmacy->name}");
+                }
+            } catch (\Exception $e) {
+                 $this->error("❌ SMS Exception for {$pharmacy->name}: " . $e->getMessage());
+            }
+        }
+
+         // 3. WhatsApp
+        if ($owner->phone && $owner->wantsNotificationChannel('whatsapp')) {
+             try {
+                // Construct WhatsApp Message
+                $waMsg = "*Daily Report*\n";
+                $waMsg .= "Pharmacy: {$pharmacy->name}\n";
+                $waMsg .= "Date: {$reportDate}\n\n";
+                $waMsg .= "*Summary:*\n";
+                $waMsg .= "Total Sales: " . number_format($salesSummary['total_revenue']) . " TZS\n";
+                $waMsg .= "Total Cost: " . number_format($salesSummary['total_cost']) . " TZS\n";
+                $waMsg .= "Profit/Loss: " . number_format($salesSummary['profit_loss']) . " TZS\n";
+                $waMsg .= "Transactions: " . $salesSummary['total_transactions'] . "\n\n";
+                $waMsg .= "*Stock Alerts:*\n";
+                $waMsg .= "Out of Stock: " . $stockStatus['out_of_stock']->count() . "\n";
+                $waMsg .= "Low Stock: " . $stockStatus['low_stock']->count() . "\n";
+                $waMsg .= "Expired: " . $stockStatus['expired']->count() . "\n";
+                
+                $result = $whatsAppService->sendMessage($owner->phone, $waMsg);
+                if ($result['success']) {
+                      $this->info("💬 WhatsApp sent to {$owner->phone}");
+                } else {
+                      $this->error("❌ WhatsApp failed for {$pharmacy->name}: " . ($result['error'] ?? 'Unknown error'));
+                }
+
+             } catch (\Exception $e) {
+                  $this->error("❌ WhatsApp Exception for {$pharmacy->name}: " . $e->getMessage());
+             }
+        }
+
+        // 4. In-App
+        if ($owner->wantsNotificationChannel('database')) {
+            try {
+                Notification::send($owner, new InAppNotification([
+                    'message' => "Daily Report Sent for {$reportDate}", 
+                    'type' => 'info'
+                ]));
+                 $this->info("🔔 In-App notification sent to owner");
+            } catch (\Exception $e) {
+                 $this->error("❌ In-App failed for {$pharmacy->name}: " . $e->getMessage());
+            }
         }
     }
 }

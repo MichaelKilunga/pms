@@ -9,6 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 // Schedule daily pharmacy reports at 22:00 (10 PM)
-// Schedule::command('pharmacy:send-daily-report')->dailyAt('22:00');
-// SCHEDULE AFTER EVERY MINUTE
-Schedule::command('app:send-daily-report')->everyMinute();
+// Schedule daily pharmacy reports at 22:00 (10 PM)
+Schedule::command('pharmacy:send-daily-report')->dailyAt('23:59');

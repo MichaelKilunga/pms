@@ -41,16 +41,14 @@ class SmsService
             // Documented endpoint for Skypush
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                // Assuming bearer token usage for the API key if standards follow, 
-                // but if the previous implementation used Basic Auth, I should be careful. 
-                // 'send_sms.md' (from user context) says: curl -X POST ... -H "Authorization: Bearer <token>"
-                'Authorization' => 'Bearer ' . $this->apiKey,
                 'Accept' => 'application/json',
-            ])->post("{$this->baseUrl}/sms/send", [
+                'X-API-KEY' => $this->apiKey,
+            ])->post("{$this->baseUrl}/send", [
                 'to' => $to,
                 'message' => $message,
                 'sender' => $this->senderId,
-                'client_app' => 'PMS_System'
+                'client_app' => '1',
+                'sender_id' => $this->senderId
             ]);
 
             if ($response->successful()) {
