@@ -21,7 +21,7 @@
                         Suggested Stock for Re-stocking
                     </h3>
                     <div class="flex gap-2">
-                        <a class="btn btn-primary btn-sm" href="{{ route("reports.suggested_stock.download") }}"
+                        <a class="btn btn-primary btn-sm" href="{{ route('reports.suggested_stock.download') }}"
                             target="_blank">
                             <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
                         </a>
@@ -33,6 +33,7 @@
 
                 <div class="table-responsive">
                     <table class="table-hover small table" id="suggestedStockTable">
+
                         <thead>
                             <tr>
                                 <th>Medicine Name</th>
@@ -45,6 +46,12 @@
                         <tbody>
                             <!-- Loaded via AJAX -->
                         </tbody>
+                        <tfoot class="fw-bold bg-light">
+                            <tr>
+                                <td colspan="3" class="text-end">Grand Total Estimation:</td>
+                                <td colspan="2" id="grandTotalEstimation">-</td>
+                            </tr>
+                        </tfoot>
                     </table>
                     <div class="py-3 text-center" id="loadingStock">
                         <div class="spinner-border text-primary" role="status">
@@ -59,16 +66,24 @@
         </div>
 
         <script>
+            let suggestedStockDataTable;
+
             document.addEventListener('DOMContentLoaded', function() {
                 fetchSuggestedStock();
             });
 
             function fetchSuggestedStock() {
-                fetch('{{ route("reports.suggested_stock.json") }}')
+                fetch('{{ route('reports.suggested_stock.json') }}')
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('loadingStock').classList.add('d-none');
                         const tbody = document.querySelector('#suggestedStockTable tbody');
+
+                        // Destroy existing DataTable if it exists
+                        if (suggestedStockDataTable) {
+                            suggestedStockDataTable.destroy();
+                        }
+
                         tbody.innerHTML = '';
 
                         if (data.stocks.length === 0) {
@@ -93,14 +108,23 @@
                             tbody.innerHTML += row;
                         });
 
-                        // Add Grand Total Row
-                        const totalRow = `
-                            <tr class="fw-bold bg-light">
-                                <td colspan="3" class="text-end">Grand Total Estimation:</td>
-                                <td colspan="2">${new Intl.NumberFormat(undefined, { minimumFractionDigits: 2 }).format(grandTotal)}</td>
-                            </tr>
-                        `;
-                        tbody.innerHTML += totalRow;
+                        // Update Grand Total in Footer
+                        document.getElementById('grandTotalEstimation').innerText = new Intl.NumberFormat(undefined, {
+                            minimumFractionDigits: 2
+                        }).format(grandTotal);
+
+                        // Initialize DataTables
+                        suggestedStockDataTable = $('#suggestedStockTable').DataTable({
+                            paging: true,
+                            searching: true,
+                            ordering: true,
+                            info: true,
+                            pageLength: 10,
+                            lengthMenu: [10, 25, 50, 100],
+                            order: [
+                                [0, 'asc']
+                            ] // Sort by Medicine Name by default
+                        });
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -111,7 +135,7 @@
             function sendToWhatsApp() {
                 if (!confirm('Request this report to your WhatsApp number?')) return;
 
-                fetch('{{ route("reports.suggested_stock.whatsapp") }}', {
+                fetch('{{ route('reports.suggested_stock.whatsapp') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -136,7 +160,7 @@
     </div>
 
     {{-- <x-pharmacy-selection-modal :pharmacies="$pharmacies" /> --}}
-    @hasrole("Owner")
+    @hasrole('Owner')
         <div aria-hidden="true" aria-labelledby="pharmacyModalLabel" class="modal fade" id="pharmacyModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -144,7 +168,7 @@
                         <h5 class="modal-title" id="pharmacyModalLabel">Select a Pharmacy</h5>
                         <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                     </div>
-                    <form action="{{ route("pharmacies.set") }}" method="POST">
+                    <form action="{{ route('pharmacies.set') }}" method="POST">
                         @csrf
                         <div class="modal-body">
                             <div class="mb-3">

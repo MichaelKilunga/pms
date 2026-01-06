@@ -1,9 +1,9 @@
-    @section("title", "Dashboard")
-    @section("meta_description", "Pharmacy Management System Dashboard")
-    @section("meta_keywords", "Pharmacy Management System Dashborad")
+    @section('title', 'Dashboard')
+    @section('meta_description', 'Pharmacy Management System Dashboard')
+    @section('meta_keywords', 'Pharmacy Management System Dashborad')
 
     <div class="container mt-2">
-        @hasanyrole("Owner|Manager")
+        @hasanyrole('Owner|Manager')
             {{-- Quick Actions Section --}}
             <div class="row g-4 justify-content-center mb-4 text-center">
                 <div class="col-6 col-md-4 col-lg-2">
@@ -15,7 +15,7 @@
                     </button>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a class="card bg-success text-decoration-none text-white shadow" href="{{ route("staff") }}">
+                    <a class="card bg-success text-decoration-none text-white shadow" href="{{ route('staff') }}">
                         <div class="card-body">
                             <h6><i class="bi bi-people-fill fs-1#"></i>Manage Pharmacist</h6>
 
@@ -23,7 +23,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a class="card bg-warning text-dark text-decoration-none shadow" href="{{ route("pharmacies") }}">
+                    <a class="card bg-warning text-dark text-decoration-none shadow" href="{{ route('pharmacies') }}">
                         <div class="card-body">
                             <h6><i class="bi bi-hospital fs-1#"></i> View Pharmacies</h6>
 
@@ -39,7 +39,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a class="card bg-info text-decoration-none text-white shadow" href="{{ route("reports.all") }}">
+                    <a class="card bg-info text-decoration-none text-white shadow" href="{{ route('reports.all') }}">
                         <div class="card-body">
                             <h6><i class="bi bi-file-earmark-bar-graph fs-1#"></i> Generate Report</h6>
 
@@ -47,7 +47,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <a class="card bg-secondary text-decoration-none text-white shadow" href="{{ route("stock") }}">
+                    <a class="card bg-secondary text-decoration-none text-white shadow" href="{{ route('stock') }}">
                         <div class="card-body">
                             <h6><i class="bi bi-box-seam fs-1#"></i> Check Stocks</h6>
 
@@ -120,7 +120,7 @@
                 </div>
             </div>
         @endhasanyrole
-        @hasrole("Staff")
+        @hasrole('Staff')
             {{-- Quick Actions Section --}}
             <div class="row g-4 justify-content-center mb-4 text-center">
                 <div class="col-6 col-md-4 col-lg-2">
@@ -229,7 +229,7 @@
                 </div>
 
                 {{-- Sales filter --}}
-                @hasanyrole("Owner|Manager")
+                @hasanyrole('Owner|Manager')
                     <div class="row mt-2">
                         <div class="col-12">
                             <div class="card shadow">
@@ -240,15 +240,15 @@
                                         <hr>
                                         <div class="col-auto">
                                             <select class="form-select" name="filter" required>
-                                                <option {{ $filter == "day" ? "selected" : "" }} value="day">Today
+                                                <option {{ $filter == 'day' ? 'selected' : '' }} value="day">Today
                                                 </option>
-                                                <option {{ $filter == "week" ? "selected" : "" }} value="week">This
+                                                <option {{ $filter == 'week' ? 'selected' : '' }} value="week">This
                                                     Week
                                                 </option>
-                                                <option {{ $filter == "month" ? "selected" : "" }} value="month">This
+                                                <option {{ $filter == 'month' ? 'selected' : '' }} value="month">This
                                                     Month
                                                 </option>
-                                                <option {{ $filter == "year" ? "selected" : "" }} value="year">This
+                                                <option {{ $filter == 'year' ? 'selected' : '' }} value="year">This
                                                     Year
                                                 </option>
                                             </select>
@@ -272,7 +272,7 @@
                     </div>
                 @endhasanyrole
 
-                @hasrole("Staff")
+                @hasrole('Staff')
                     <!-- Eye icon (initial display) -->
                     <div class="mt-3 text-center" id="unlock-section">
                         <div class="col-12">
@@ -317,7 +317,7 @@
                                         <hr>
                                         <div class="col-auto">
                                             <select class="form-select" name="filter" required>
-                                                <option {{ $filter == "day" ? "selected" : "" }} value="day">Today
+                                                <option {{ $filter == 'day' ? 'selected' : '' }} value="day">Today
                                                 </option>
                                                 {{-- <option value="week" {{ $filter == 'week' ? 'selected' : '' }}>This Week
                                         </option>
@@ -404,7 +404,7 @@
                     <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route("sales.store") }}" id="salesForm" method="POST">
+                    <form action="{{ route('sales.store') }}" id="salesForm" method="POST">
                         @csrf
                         <div id="salesFields">
                             <div class="row sale-entry align-items-center mb-3">
@@ -488,7 +488,7 @@
         id="createSalesNoteModal" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form action="{{ route("salesNotes.store") }}" method="POST">
+                <form action="{{ route('salesNotes.store') }}" method="POST">
                     @csrf
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="createSalesNoteModalLabel">Create Sales Note</h5>
@@ -533,7 +533,7 @@
                         </div>
 
                         <input hidden name="pharmacy_id" placeholder="Pharmacy ID" readonly required type="text"
-                            value="{{ session("current_pharmacy_id") }}">
+                            value="{{ session('current_pharmacy_id') }}">
                         <input hidden name="staff_id" placeholder="Staff ID" readonly required type="text"
                             value="{{ auth()->id() }}">
                     </div>
@@ -707,7 +707,7 @@
 
                 // Perform AJAX request
                 $.ajax({
-                    url: '{{ route("medicines.search") }}',
+                    url: '{{ route('medicines.search') }}',
                     method: 'GET',
                     data: {
                         search: searchValue
@@ -1007,7 +1007,7 @@
 
                 // send backend check request
                 $.ajax({
-                    url: '{{ route("checkPassword") }}',
+                    url: '{{ route('checkPassword') }}',
                     method: 'POST',
                     data: {
                         password: enteredPassword,
