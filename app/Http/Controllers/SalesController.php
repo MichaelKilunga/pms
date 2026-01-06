@@ -2,49 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sales;
-use App\Models\Pharmacy;
 use App\Models\Items;
+use App\Models\Pharmacy;
 use App\Models\PrinterSetting;
+use App\Models\Sales;
 use App\Models\Staff;
 use App\Models\Stock;
 use App\Models\User;
 use App\Notifications\StockLowNotification;
-use Dompdf\Dompdf;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session as FacadesSession;
-use Mike42\Escpos\PrintConnectors\FilePrintConnector;
-use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
-use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\Printer;
 use Yajra\DataTables\Facades\DataTables;
 
-use Illuminate\Routing\Controller as BaseController;
-
-use function PHPUnit\Framework\isEmpty;
-
 class SalesController extends BaseController
 {
-
     private $errorMessage = '';
+
     private $successMessage = '';
 
     // get printer configuration from the database using setPrinterConfig function from dashboard controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            $dashboard = new DashboardController();
+            $dashboard = new DashboardController;
             $dashboard->setPrinterSettings();
+
             return $next($request);
         });
     }
 
-
-
-    //create a printer's name variable
+    // create a printer's name variable
     private $printerName;
 
     /**
@@ -63,6 +54,10 @@ class SalesController extends BaseController
                 ->orderBy('date', 'desc')
                 // sold today only
                 ->whereDate('date', today());
+            // If role is staff to day sales belongig to the current staff
+            if (Auth::user()->role == 'staff') {
+                $sales->where('sales.staff_id', Auth::user()->id);
+            }
 
             return DataTables::of($sales)
                 ->addIndexColumn() // Adds an index column
@@ -86,59 +81,59 @@ class SalesController extends BaseController
                         <div class="d-flex justify-content-between">
                             <!-- View Modal -->
                             <a href="#" class="btn btn-primary  btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#viewSaleModal' . $sale->id . '">
+                                data-bs-target="#viewSaleModal'.$sale->id.'">
                                 <i class="bi bi-eye"></i>
                             </a>
                 
                             <!-- View Sale Modal -->
-                            <div class="modal fade" id="viewSaleModal' . $sale->id . '" tabindex="-1"
-                                aria-labelledby="viewSaleModalLabel' . $sale->id . '" aria-hidden="true">
+                            <div class="modal fade" id="viewSaleModal'.$sale->id.'" tabindex="-1"
+                                aria-labelledby="viewSaleModalLabel'.$sale->id.'" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="viewSaleModalLabel' . $sale->id . '">Sale Details</h5>
+                                            <h5 class="modal-title" id="viewSaleModalLabel'.$sale->id.'">Sale Details</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <div><strong>Sales Name:</strong> ' . htmlspecialchars($sale->item->name, ENT_QUOTES, 'UTF-8') . '</div>
-                                            <div><strong>Price:</strong> ' . ($sale->quantity > 0 ? number_format($sale->total_price / 1, 0) : 'N/A') . '</div>
-                                            <div><strong>Quantity:</strong> ' . $sale->quantity . '</div>
-                                            <div><strong>Amount:</strong> ' . number_format($sale->total_price * $sale->quantity, 0) . '</div>
-                                            <div><strong>Date:</strong> ' . $sale->date . '</div>
+                                            <div><strong>Sales Name:</strong> '.htmlspecialchars($sale->item->name, ENT_QUOTES, 'UTF-8').'</div>
+                                            <div><strong>Price:</strong> '.($sale->quantity > 0 ? number_format($sale->total_price / 1, 0) : 'N/A').'</div>
+                                            <div><strong>Quantity:</strong> '.$sale->quantity.'</div>
+                                            <div><strong>Amount:</strong> '.number_format($sale->total_price * $sale->quantity, 0).'</div>
+                                            <div><strong>Date:</strong> '.$sale->date.'</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                 
                             <!-- Sales Return Link (Only if salesReturn is NULL) -->
-                            ' . ((($sale->salesReturn == null) || ($sale->salesReturn->return_status == 'rejected')) ? '
+                            '.((($sale->salesReturn == null) || ($sale->salesReturn->return_status == 'rejected')) ? '
                                 <a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#salesReturnModal' . $sale->id . '">
+                                    data-bs-target="#salesReturnModal'.$sale->id.'">
                                     <i class="bi bi-arrow-return-left"></i>
                                 </a>
-                            ' : '') . '
+                            ' : '').'
                 
                             <!-- Sales Return Modal -->
-                            <div class="modal fade" id="salesReturnModal' . $sale->id . '" tabindex="-1"
-                                aria-labelledby="salesReturnModalLabel' . $sale->id . '" aria-hidden="true">
+                            <div class="modal fade" id="salesReturnModal'.$sale->id.'" tabindex="-1"
+                                aria-labelledby="salesReturnModalLabel'.$sale->id.'" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="salesReturnModalLabel' . $sale->id . '">Return Sales for 
-                                                <span class="text-primary">' . htmlspecialchars($sale->item->name, ENT_QUOTES, 'UTF-8') . '</span>
+                                            <h5 class="modal-title" id="salesReturnModalLabel'.$sale->id.'">Return Sales for 
+                                                <span class="text-primary">'.htmlspecialchars($sale->item->name, ENT_QUOTES, 'UTF-8').'</span>
                                             </h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                 
-                                        <form id="salesReturnForm" method="POST" action="' . route('salesReturns.store') . '">
-                                            ' . csrf_field() . '
+                                        <form id="salesReturnForm" method="POST" action="'.route('salesReturns.store').'">
+                                            '.csrf_field().'
                                             <div class="modal-body">
-                                                <input type="hidden" name="sale_id" value="' . $sale->id . '">
+                                                <input type="hidden" name="sale_id" value="'.$sale->id.'">
                 
                                                 <div class="mb-3">
                                                     <label for="quantity" class="form-label">Quantity to Return</label>
                                                     <input type="number" name="quantity" class="form-control" readonly min="1"
-                                                        max="' . $sale->quantity . '" value="' . $sale->quantity . '"
+                                                        max="'.$sale->quantity.'" value="'.$sale->quantity.'"
                                                         required>
                                                 </div>
                 
@@ -158,14 +153,14 @@ class SalesController extends BaseController
                 
                             <!-- Edit Button (Hidden) -->
                             <a href="#" class="btn btn-success btn-sm" hidden data-bs-toggle="modal"
-                                data-bs-target="#editSaleModal' . $sale->id . '">
+                                data-bs-target="#editSaleModal'.$sale->id.'">
                                 <i class="bi bi-pencil"></i>
                             </a>
                 
                             <!-- Delete Form (Hidden) -->
-                            <form action="' . route('sales.destroy', $sale->id) . '" method="POST" style="display:inline;">
-                                ' . csrf_field() . '
-                                ' . method_field('DELETE') . '
+                            <form action="'.route('sales.destroy', $sale->id).'" method="POST" style="display:inline;">
+                                '.csrf_field().'
+                                '.method_field('DELETE').'
                                 <button type="submit" hidden class="btn btn-sm btn-danger"
                                     onclick="return confirm(\'Are you sure to delete this sale?\')">
                                     <i class="bi bi-trash"></i>
@@ -210,7 +205,7 @@ class SalesController extends BaseController
         // Validate the incoming request data for all rows of sales
         try {
             $request->validate([
-       
+
                 'item_id' => 'required|array',         // Ensure it's an array of item IDs
                 // 'item_id.*' => 'required|exists:stocks,id', // Validate each item ID in the array
                 'item_id.*' => 'required|exists:items,id', // Validate each item ID in the array
@@ -228,7 +223,7 @@ class SalesController extends BaseController
                 'date.*' => 'required|date',           // Validate each date
             ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Not added because: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Not added because: '.$e->getMessage());
         }
 
         // dd($request->all());
@@ -272,20 +267,20 @@ class SalesController extends BaseController
                         if ($thisSale) {
                             // update the stock quantity to 0
                             $stocks->update(['remain_Quantity' => 0]);
-                            
+
                             // Check Low Stock
                             if ($stocks->remain_Quantity <= $stocks->low_stock_percentage) {
                                 try {
                                     $stocks->pharmacy->owner->notify(new StockLowNotification($stocks));
                                 } catch (\Exception $e) {
-                                    Log::error("Failed to send low stock notification: " . $e->getMessage());
+                                    Log::error('Failed to send low stock notification: '.$e->getMessage());
                                 }
                             }
                         }
                     } else {
 
                         // make sales
-                        $thisSale =  Sales::create([
+                        $thisSale = Sales::create([
                             'pharmacy_id' => $pharmacyId,
                             'staff_id' => $staffId,
                             'item_id' => $item_id,
@@ -299,13 +294,13 @@ class SalesController extends BaseController
                         if ($thisSale) {
                             // update the stock quantity to the remaining quantity
                             $stocks->update(['remain_Quantity' => $stocks->remain_Quantity - $temp_quantity]);
-                            
+
                             // Check Low Stock
                             if ($stocks->remain_Quantity <= $stocks->low_stock_percentage) {
                                 try {
                                     $stocks->pharmacy->owner->notify(new StockLowNotification($stocks));
                                 } catch (\Exception $e) {
-                                    Log::error("Failed to send low stock notification: " . $e->getMessage());
+                                    Log::error('Failed to send low stock notification: '.$e->getMessage());
                                 }
                             }
 
@@ -316,7 +311,7 @@ class SalesController extends BaseController
                 }
             }
 
-            // $printing = $this->printSaleReceipt($saleDate[0]);           
+            // $printing = $this->printSaleReceipt($saleDate[0]);
             $hasPrinter = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
             if ($hasPrinter && $hasPrinter->use_printer) {
 
@@ -327,10 +322,9 @@ class SalesController extends BaseController
                     ->groupBy('date', 'staff_id')
                     ->first();
 
-                if (!$receipt) {
-                    return  false;
+                if (! $receipt) {
+                    return false;
                 }
-
 
                 $medicines = Sales::where('pharmacy_id', session('current_pharmacy_id'))->with('item')
                     ->where('date', $receipt->date)
@@ -340,7 +334,7 @@ class SalesController extends BaseController
 
                 return view('sales.receipt', compact('receipt', 'medicines', 'staff'))->with('success', 'Receipt printed successfully');
             } else {
-                if (!$hasPrinter) {
+                if (! $hasPrinter) {
                     // use factory to create fake data and store in  database
                     $createPrinter = PrinterSetting::create([
                         'name' => 'Printer',
@@ -348,20 +342,19 @@ class SalesController extends BaseController
                         'computer_name' => 'Computer Name',
                         'port' => 9100,
                         'pharmacy_id' => session('current_pharmacy_id'),
-                        'use_printer' => false
+                        'use_printer' => false,
                     ]);
                 }
                 // if ($hasPrinter->use_printer == false) {
                 //     return redirect()->back()->with('error', 'Printer is not set up');
                 // }
             }
+
             return redirect()->back()->with('success', 'Sale added successfully');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Not added because: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Not added because: '.$e->getMessage());
         }
     }
-
-
 
     /**
      * Display the specified sale.
@@ -404,7 +397,7 @@ class SalesController extends BaseController
 
         return redirect()->route('sales')->with('success', 'Sale deleted successfully!');
     }
-     
+
     /****************PRINTER SETING ************/
     /* implement functions for listing all receipts, and printing last receipt */
     public function allReceipts()
@@ -423,7 +416,7 @@ class SalesController extends BaseController
     {
         // check if has enabled  receipt printing
         $hasPrinter = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
-        if (!$hasPrinter) {
+        if (! $hasPrinter) {
             // use factory to create fake data and store in  database
             $createPrinter = PrinterSetting::create([
                 'name' => 'Printer',
@@ -431,7 +424,7 @@ class SalesController extends BaseController
                 'computer_name' => 'Computer Name',
                 'port' => 9100,
                 'pharmacy_id' => session('current_pharmacy_id'),
-                'use_printer' => false
+                'use_printer' => false,
             ]);
             if ($createPrinter->use_printer == false) {
                 return redirect()->back()->with('error', 'Receipt printing is not enabled.');
@@ -451,7 +444,7 @@ class SalesController extends BaseController
             ->first();
 
         // Check if receipt exists
-        if (!$lastReceipt) {
+        if (! $lastReceipt) {
             return redirect()->back()->with('error', 'No sales data found for the last receipt.');
         }
 
@@ -461,17 +454,17 @@ class SalesController extends BaseController
             ->where('date', $lastReceipt->date)
             ->get();
 
-
         $receipt = $lastReceipt;
+
         return view('sales.receipt', compact('receipt', 'medicines', 'staff'))->with('success', 'Receipt printed successfully');
     }
 
-    //implement function for printing a specific receipt after receiving the date of sales made
+    // implement function for printing a specific receipt after receiving the date of sales made
     public function printReceipt(Request $request)
     {
 
         $hasPrinter = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
-        if (!$hasPrinter) {
+        if (! $hasPrinter) {
             // use factory to create fake data and store in  database
             $createPrinter = PrinterSetting::create([
                 'name' => 'Printer',
@@ -479,7 +472,7 @@ class SalesController extends BaseController
                 'computer_name' => 'Computer Name',
                 'port' => 9100,
                 'pharmacy_id' => session('current_pharmacy_id'),
-                'use_printer' => false
+                'use_printer' => false,
             ]);
             if ($createPrinter->use_printer == false) {
                 return redirect()->back()->with('error', 'Receipt printing is not enabled.');
@@ -506,10 +499,9 @@ class SalesController extends BaseController
             ->groupBy('date', 'staff_id')
             ->first();
 
-        if (!$receipt) {
+        if (! $receipt) {
             return redirect()->back()->with('error', 'No sales data found for the specified date.');
         }
-
 
         $medicines = Sales::where('pharmacy_id', session('current_pharmacy_id'))->with('item')
             ->where('date', $receipt->date)
@@ -524,7 +516,7 @@ class SalesController extends BaseController
     {
 
         $hasPrinter = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
-        if (!$hasPrinter) {
+        if (! $hasPrinter) {
             // use factory to create fake data and store in  database
             $createPrinter = PrinterSetting::create([
                 'name' => 'Printer',
@@ -532,7 +524,7 @@ class SalesController extends BaseController
                 'computer_name' => 'Computer Name',
                 'port' => 9100,
                 'pharmacy_id' => session('current_pharmacy_id'),
-                'use_printer' => false
+                'use_printer' => false,
             ]);
             if ($createPrinter->use_printer == false) {
                 return false;
@@ -551,31 +543,32 @@ class SalesController extends BaseController
             ->groupBy('date', 'staff_id')
             ->first();
 
-        if (!$receipt) {
-            return  false;
+        if (! $receipt) {
+            return false;
         }
-
 
         $medicines = Sales::where('pharmacy_id', session('current_pharmacy_id'))->with('item')
             ->where('date', $receipt->date)
             ->get();
 
         $staff = User::where('id', $receipt->staff_id)->first();
+
         // dd($staff);
         return view('sales.receipt', compact('receipt', 'medicines', 'staff'))->with('success', 'Receipt printed successfully');
     }
 
     // Function to get the default printer name on Windows
-    function getDefaultPrinterName()
+    public function getDefaultPrinterName()
     {
         // dd("fdfvd ");
         $output = shell_exec('wmic printer where "Default=True" get Name /value');
 
-
         if ($output) {
             preg_match('/Name=(.+)/', $output, $matches);
+
             return isset($matches[1]) ? trim($matches[1]) : null;
         }
+
         return null;
     }
 }

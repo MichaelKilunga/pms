@@ -198,7 +198,19 @@ class ReportPrintController extends Controller
                 // sum of(quantity*sellingprice) of all sales total
                 $totalSales = $sales->sum(DB::raw('quantity * total_price'));
                 $totalReturns = 0;
-                $totalProfit = $profitsRows->sum('amount');
+                $grossProfit = $profitsRows->sum('amount');
+
+                // NEW: Calculate approved expenses and installments for Net Profit
+                $totalExpenses = Expense::where('pharmacy_id', $pharmacyId)
+                    ->where('status', 'approved')
+                    ->whereBetween('expense_date', [$startDate, $endDate])
+                    ->sum('amount');
+
+                $totalInstallments = Installment::where('pharmacy_id', $pharmacyId)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->sum('amount');
+
+                $totalProfit = $grossProfit - $totalExpenses - $totalInstallments;
                 $totalExpired = $expiredRows->count();
 
                 // Generate labels and data for the chart, where the graph should not change, rather let it always draw medicines names  (as labels) Vs percentage profit the medicine contributes to the total profit (as data).
@@ -206,8 +218,8 @@ class ReportPrintController extends Controller
                     return $profit['item_name'];
                 });
 
-                $data = $profitsRows->map(function ($profit) use ($totalProfit) {
-                    return ($profit['amount'] / $totalProfit) * 100;
+                $data = $profitsRows->map(function ($profit) use ($grossProfit) {
+                    return $grossProfit > 0 ? ($profit['amount'] / $grossProfit) * 100 : 0;
                 });
 
                 return response()->json([
@@ -216,6 +228,9 @@ class ReportPrintController extends Controller
                     'totalStocks' => $totalStocks ?? 0,
                     'totalReturns' => $totalReturns ?? 0,
                     'totalProfit' => $totalProfit ?? 0,
+                    'grossProfit' => $grossProfit ?? 0,
+                    'totalExpenses' => $totalExpenses ?? 0,
+                    'totalInstallments' => $totalInstallments ?? 0,
                     'totalExpired' => $totalExpired ?? 0,
                     'labels' => $labels,
                     'data' => $data,
@@ -365,14 +380,32 @@ class ReportPrintController extends Controller
                 ->selectRaw('COALESCE(SUM(stocks.buying_price * sales.quantity), 0) as total_cost')
                 ->value('total_cost');
 
+            // NEW: Fetch approved expenses and installments for the period
+            $totalExpenses = Expense::where('pharmacy_id', $pharmacy_id)
+                ->where('status', 'approved')
+                ->whereDate('expense_date', '>=', $request->start_date)
+                ->whereDate('expense_date', '<=', $request->end_date)
+                ->sum('amount');
+
+            $totalInstallments = Installment::where('pharmacy_id', $pharmacy_id)
+                ->whereBetween('created_at', [
+                    Carbon::parse($request->start_date)->startOfDay(),
+                    Carbon::parse($request->end_date)->endOfDay()
+                ])
+                ->sum('amount');
+
+            $grossProfit = ($salesData->total_revenue ?? 0) - ($totalCost ?? 0);
+
             /** 
              * @var array<string, int|float> $salesSummary 
              */
             $salesSummary = [
                 'total_revenue'      => (float) ($salesData->total_revenue ?? 0),
-                'total_cost'         => (float) ($totalCost ?? 0),
+                'gross_profit'       => (float) $grossProfit,
+                'total_expenses'     => (float) ($totalExpenses ?? 0),
+                'total_installments' => (float) ($totalInstallments ?? 0),
                 'total_transactions' => (int)   ($salesData->total_transactions ?? 0),
-                'profit_loss'        => (float) (($salesData->total_revenue ?? 0) - ($totalCost ?? 0)),
+                'profit_loss'        => (float) ($grossProfit - $totalExpenses - $totalInstallments), // Net Profit
             ];
 
             // dd($salesSummary, $salesData, $totalCost);
@@ -431,7 +464,7 @@ class ReportPrintController extends Controller
 
             // 2. Push SMS
             if (in_array('sms', $channels) && $owner->phone && $owner->wantsNotificationChannel('sms')) {
-                $smsMsg = "Daily Report: {$pharmacy->name}\nDate: {$reportDate}\nSales: " . number_format($salesSummary['total_revenue']) . " TZS\nProfit: " . number_format($salesSummary['profit_loss']) . " TZS";
+                $smsMsg = "Daily Report: {$pharmacy->name}\nDate: {$reportDate}\nSales: " . number_format($salesSummary['total_revenue']) . " TZS\nGross Profit: " . number_format($salesSummary['gross_profit']) . " TZS\nExpenses: " . number_format($salesSummary['total_expenses']) . " TZS\nInstallments: " . number_format($salesSummary['total_installments']) . " TZS\nNet Profit: " . number_format($salesSummary['profit_loss']) . " TZS";
                 $smsService->send($owner->phone, $smsMsg);
                 $successMessages[] = 'SMS';
             }
@@ -445,8 +478,10 @@ class ReportPrintController extends Controller
                 $waMsg .= "Date: {$reportDate}\n\n";
                 $waMsg .= "*Summary:*\n";
                 $waMsg .= "Total Sales: " . number_format($salesSummary['total_revenue']) . " TZS\n";
-                $waMsg .= "Total Cost: " . number_format($salesSummary['total_cost']) . " TZS\n";
-                $waMsg .= "Profit/Loss: " . number_format($salesSummary['profit_loss']) . " TZS\n";
+                $waMsg .= "Gross Profit: " . number_format($salesSummary['gross_profit']) . " TZS\n";
+                $waMsg .= "Expenses: " . number_format($salesSummary['total_expenses']) . " TZS\n";
+                $waMsg .= "Net Profit: " . number_format($salesSummary['profit_loss']) . " TZS\n";
+                $waMsg .= "Installments: " . number_format($salesSummary['total_installments']) . " TZS\n";
                 $waMsg .= "Transactions: " . $salesSummary['total_transactions'] . "\n\n";
                 $waMsg .= "*Stock Alerts:*\n";
                 $waMsg .= "Out of Stock: " . $stockStatus['out_of_stock']->count() . "\n";
@@ -460,7 +495,7 @@ class ReportPrintController extends Controller
             // 4. In-App
             if (in_array('in_app', $channels) && $owner->wantsNotificationChannel('database')) {
                 \Illuminate\Support\Facades\Notification::send($owner, new \App\Notifications\InAppNotification([
-                    'message' => "Daily Report Sent for {$reportDate}", 
+                    'message' => "Daily Report Sent for {$reportDate}. Net Profit: " . number_format($salesSummary['profit_loss']) . " TZS (Expenses: " . number_format($salesSummary['total_expenses']) . ", Installments: " . number_format($salesSummary['total_installments']) . ")", 
                     'type' => 'info'
                 ]));
                 $successMessages[] = 'In-App';

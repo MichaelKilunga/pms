@@ -2,33 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Stock;
-use App\Models\Pharmacy;
+use App\Models\Item;
 use App\Models\Items;
 use App\Models\Medicine;
-use App\Models\MedicineStore;
+use App\Models\Pharmacy;
+use App\Models\Sales;
 use App\Models\Staff;
+use App\Models\Stock;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
-use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
-use App\Models\Item;
-use App\Models\Sales;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables;
 
 class StockController extends Controller
 {
-
     public function index(Request $request)
     {
         // compute the total value of available stock as sum of (buying_price * remain_Quantity)
         $availableStock = Stock::where('pharmacy_id', session('current_pharmacy_id'))
-                            ->sum(DB::raw('buying_price * remain_Quantity'));
+            ->sum(DB::raw('buying_price * remain_Quantity'));
         $expectedSales = Stock::where('pharmacy_id', session('current_pharmacy_id'))
-                            ->sum(DB::raw('selling_price * remain_Quantity'));
+            ->sum(DB::raw('selling_price * remain_Quantity'));
         $expectedProfit = $expectedSales - $availableStock;
 
         if ($request->ajax()) {
@@ -53,43 +50,44 @@ class StockController extends Controller
                     if ($stock->low_stock_percentage > $stock->remain_Quantity) {
                         return '<span class="text-danger">Low stock threshold</span>';
                     }
+
                     return '<span class="text-success"><i class="bi bi-check fs-3"></i>Fine</span>';
                 })
                 ->addColumn('actions', function ($stock) {
                     return '
                         <div class="d-flex">
                             <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#viewStockModal' . $stock->id . '">
+                                data-bs-target="#viewStockModal'.$stock->id.'">
                                 <i class="bi bi-eye"></i>
                             </a>
                             <a href="#" class="btn btn-success btn-sm ms-1" data-bs-toggle="modal"
-                                data-bs-target="#editStockModal' . $stock->id . '">
+                                data-bs-target="#editStockModal'.$stock->id.'">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            ' . ($stock->remain_Quantity != $stock->quantity
+                            '.($stock->remain_Quantity != $stock->quantity
                         ? '<button type="button" class="btn btn-danger btn-sm ms-1" disabled>
                                     <i class="bi bi-trash"></i>
                                 </button>'
-                        : '<form action="' . route("stock.destroy", $stock->id) . '" method="POST" style="display:inline;">
-                                    ' . csrf_field() . '
-                                    ' . method_field("DELETE") . '
+                        : '<form action="'.route('stock.destroy', $stock->id).'" method="POST" style="display:inline;">
+                                    '.csrf_field().'
+                                    '.method_field('DELETE').'
                                     <button type="submit" onclick="return confirm(\'Do you want to delete this stock?\')" 
                                         class="btn btn-danger btn-sm ms-1">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>'
-                    ) . '
-                            ' . ($stock->selling_price < $stock->buying_price ?
+                    ).'
+                            '.($stock->selling_price < $stock->buying_price ?
                         '<button class="btn btn-warning btn-sm ms-1" data-bs-toggle="modal"
-                                    data-bs-target="#editBuyingSellingPrice' . $stock->id . '">
+                                    data-bs-target="#editBuyingSellingPrice'.$stock->id.'">
                                     <i class="bi bi-recycle"></i>
-                                </button>' : '') . '
+                                </button>' : '').'
                         </div>
     
                         <!-- View Stock Modal -->
                       <!-- View Stock Modal -->
-                        <div class="modal fade" id="viewStockModal' . $stock->id . '" tabindex="-1"
-                            aria-labelledby="viewStockModalLabel' . $stock->id . '" aria-hidden="true">
+                        <div class="modal fade" id="viewStockModal'.$stock->id.'" tabindex="-1"
+                            aria-labelledby="viewStockModalLabel'.$stock->id.'" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-lg">
                                 <div class="modal-content shadow-lg rounded-3">
                                     <div class="modal-header bg-primary text-white">
@@ -105,61 +103,61 @@ class StockController extends Controller
                                                 <div class="col-md-6">
                                                     <div class="p-2 border rounded bg-light">
                                                         <strong>Stock Name:</strong>
-                                                        <div>' . ($stock->item->name ?? 'N/A') . '</div>
+                                                        <div>'.($stock->item->name ?? 'N/A').'</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="p-2 border rounded bg-light">
                                                         <strong>Batch Number:</strong>
-                                                        <div>' . $stock->batch_number . '</div>
+                                                        <div>'.$stock->batch_number.'</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="p-2 border rounded bg-light">
                                                         <strong>Supplier:</strong>
-                                                        <div>' . $stock->supplier . '</div>
+                                                        <div>'.$stock->supplier.'</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="p-2 border rounded bg-light">
                                                         <strong>Buying Price:</strong>
-                                                        <div>' . number_format($stock->buying_price, 2) . '</div>
+                                                        <div>'.number_format($stock->buying_price, 2).'</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="p-2 border rounded bg-light">
                                                         <strong>Selling Price:</strong>
-                                                        <div>' . number_format($stock->selling_price, 2) . '</div>
+                                                        <div>'.number_format($stock->selling_price, 2).'</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="p-2 border rounded bg-light">
                                                         <strong>Stocked Quantity:</strong>
-                                                        <div>' . $stock->quantity . '</div>
+                                                        <div>'.$stock->quantity.'</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="p-2 border rounded bg-light">
                                                         <strong>Remain Quantity:</strong>
-                                                        <div>' . $stock->remain_Quantity . '</div>
+                                                        <div>'.$stock->remain_Quantity.'</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="p-2 border rounded bg-light">
-                                                        <strong>Low Stock (%):</strong>
-                                                        <div>' . $stock->low_stock_percentage . '</div>
+                                                        <strong>Low Stock:</strong>
+                                                        <div>'.$stock->low_stock_percentage.'</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="p-2 border rounded bg-light">
                                                         <strong>In Date:</strong>
-                                                        <div>' . $stock->in_date . '</div>
+                                                        <div>'.$stock->in_date.'</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="p-2 border rounded bg-light">
                                                         <strong>Expire Date:</strong>
-                                                        <div>' . $stock->expire_date . '</div>
+                                                        <div>'.$stock->expire_date.'</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -175,8 +173,8 @@ class StockController extends Controller
                         </div>
     
                         <!-- Edit full Stock Modal -->
-                        <div class="modal fade modal-lg" id="editStockModal' . $stock->id . '" tabindex="-1"
-                            aria-labelledby="editStockModalLabel' . $stock->id . '" aria-hidden="true">
+                        <div class="modal fade modal-lg" id="editStockModal'.$stock->id.'" tabindex="-1"
+                            aria-labelledby="editStockModalLabel'.$stock->id.'" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary text-white">
@@ -185,23 +183,23 @@ class StockController extends Controller
                                             aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="' . route('stock.update', $stock->id) . '" method="POST">
-                                            ' . csrf_field() . '
-                                            ' . method_field('PUT') . '
-                                            <input type="hidden" name="id" value="' . $stock->id . '">
+                                        <form action="'.route('stock.update', $stock->id).'" method="POST">
+                                            '.csrf_field().'
+                                            '.method_field('PUT').'
+                                            <input type="hidden" name="id" value="'.$stock->id.'">
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="item" class="form-label">Stock Name</label>
                                                         <input type="text" class="form-control" name="item_name"
-                                                            value="' . ($stock->item->name ?? '') . '" readonly>
+                                                            value="'.($stock->item->name ?? '').'" readonly>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="batch_number" class="form-label">Batch Number</label>
                                                         <input type="text" class="form-control" name="batch_number"
-                                                            value="' . $stock->batch_number . '" readonly>
+                                                            value="'.$stock->batch_number.'" readonly>
                                                     </div>
                                                 </div>
                                             </div>
@@ -210,7 +208,7 @@ class StockController extends Controller
                                                     <div class="mb-3">
                                                         <label for="supplier" class="form-label">Supplier Name</label>
                                                         <input type="text" class="form-control" name="supplier"
-                                                            value="' . $stock->supplier . '" required>
+                                                            value="'.$stock->supplier.'" required>
                                                     </div>
                                                 </div>
 
@@ -218,28 +216,28 @@ class StockController extends Controller
                                                     <div class="mb-3">
                                                         <label for="buying_price" class="form-label">Buying Price</label>
                                                         <input type="number" class="form-control" name="buying_price"
-                                                            value="' . $stock->buying_price . '" required>
+                                                            value="'.$stock->buying_price.'" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="selling_price" class="form-label">Selling Price</label>
                                                         <input type="number" class="form-control" name="selling_price"
-                                                            value="' . $stock->selling_price . '" required>
+                                                            value="'.$stock->selling_price.'" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="quantity" class="form-label">Stocked Quantity</label>
                                                         <input type="number" class="form-control" name="quantity"
-                                                            value="' . $stock->quantity . '" required>
+                                                            value="'.$stock->quantity.'" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="remain_Quantity" class="form-label">Remain Quantity</label>
                                                         <input type="number" class="form-control" name="remain_Quantity"
-                                                            value="' . $stock->remain_Quantity . '" readonly required>
+                                                            value="'.$stock->remain_Quantity.'" readonly required>
                                                     </div>
                                                 </div>
 
@@ -247,14 +245,14 @@ class StockController extends Controller
                                                     <div class="mb-3">
                                                         <label for="low_stock_percentage" class="form-label">Low Stock</label>
                                                         <input type="number" class="form-control" name="low_stock_percentage"
-                                                            value="' . $stock->low_stock_percentage . '" required>
+                                                            value="'.$stock->low_stock_percentage.'" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="expire_date" class="form-label">Expire Date</label>
                                                         <input type="text" class="form-control" name="expire_date"
-                                                            value="' . $stock->expire_date . '" required>
+                                                            value="'.$stock->expire_date.'" required>
                                                     </div>
                                                 </div>
 
@@ -262,7 +260,7 @@ class StockController extends Controller
                                                     <div class="mb-3 hidden">
                                                         <label for="in_date" class="form-label">In Date</label>
                                                         <input type="text" class="form-control" name="in_date"
-                                                            value="' . $stock->in_date . '" readonly required>
+                                                            value="'.$stock->in_date.'" readonly required>
                                                     </div>
                                                 </div>
                                                 
@@ -278,47 +276,47 @@ class StockController extends Controller
                         </div>
 
                         <!-- Edit Buying/Selling Price Stock Modal -->
-                        <div class="modal fade modal-lg" id="editBuyingSellingPrice' . $stock->id . '" tabindex="-1"
-                            aria-labelledby="editBuyingSellingPriceLabel' . $stock->id . '" aria-hidden="true">
+                        <div class="modal fade modal-lg" id="editBuyingSellingPrice'.$stock->id.'" tabindex="-1"
+                            aria-labelledby="editBuyingSellingPriceLabel'.$stock->id.'" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary text-white">
-                                        <h5 class="modal-title" id="editBuyingSellingPriceLabel' . $stock->id . '">Edit Seling Vs  Buyinig Price of ' . $stock->item->name . '</h5>
+                                        <h5 class="modal-title" id="editBuyingSellingPriceLabel'.$stock->id.'">Edit Seling Vs  Buyinig Price of '.$stock->item->name.'</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                             aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="' . route('stock.updateSBP', $stock->id) . '" method="POST">
-                                            ' . csrf_field() . '
-                                            ' . method_field('PUT') . '
-                                            <input type="hidden" name="id" value="' . $stock->id . '">                                        
+                                        <form action="'.route('stock.updateSBP', $stock->id).'" method="POST">
+                                            '.csrf_field().'
+                                            '.method_field('PUT').'
+                                            <input type="hidden" name="id" value="'.$stock->id.'">                                        
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="buying_price" class="form-label">Buying Price</label>
                                                     <input type="number" class="form-control" name="buying_price"
-                                                        value="' . $stock->buying_price . '" required>
+                                                        value="'.$stock->buying_price.'" required>
                                                 </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="selling_price" class="form-label">Selling Price</label>
                                                     <input type="number" class="form-control" name="selling_price"
-                                                        value="' . $stock->selling_price . '" required>
+                                                        value="'.$stock->selling_price.'" required>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="quantity" class="form-label">Stocked Quantity</label>
                                                         <input type="number" readonly class="form-control" name="quantity"
-                                                            value="' . $stock->quantity . '" required>
+                                                            value="'.$stock->quantity.'" required>
                                                     </div>
                                                     </div>
                                                     <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="remain_Quantity" class="form-label">Remain Quantity</label>
                                                         <input type="number" readonly class="form-control" name="remain_Quantity"
-                                                            value="' . $stock->remain_Quantity . '" readonly required>
+                                                            value="'.$stock->remain_Quantity.'" readonly required>
                                                     </div>
                                             </div>                                            
                                             <div class="d-flex align-items-center justify-content-between">
@@ -343,7 +341,6 @@ class StockController extends Controller
 
         return view('stock.index', compact('availableStock', 'expectedSales', 'expectedProfit'));
     }
-
 
     /**
      * Show the form for creating a new stock entry.
@@ -402,7 +399,7 @@ class StockController extends Controller
                 'quantity' => $request->quantity[$index],
                 'buying_price' => $request->buying_price[$index],
                 'selling_price' => $request->selling_price[$index],
-                'remain_Quantity' =>  $request->quantity[$index],
+                'remain_Quantity' => $request->quantity[$index],
                 'low_stock_percentage' => $request->low_stock_percentage[$index],
                 'in_date' => $request->in_date[$index],
                 'batch_number' => $request->batch_number,
@@ -448,14 +445,13 @@ class StockController extends Controller
                 'supplier' => 'required|string|max:255',
             ]);
         } catch (Exception $e) {
-            return redirect()->back()->withInput()->with('error', "Data  not added because: " . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Data  not added because: '.$e->getMessage());
         }
-
 
         $pharmacy_id = session('current_pharmacy_id');
         $staff_id = Auth::user()->id;
 
-        //a loop to add the medicine name to the items table and stock to the stock table
+        // a loop to add the medicine name to the items table and stock to the stock table
         foreach ($request->item_name as $index => $item_name) {
             $item = Items::create([
                 'pharmacy_id' => $pharmacy_id,
@@ -470,7 +466,7 @@ class StockController extends Controller
                 'quantity' => $request->quantity[$index],
                 'buying_price' => $request->buying_price[$index],
                 'selling_price' => $request->selling_price[$index],
-                'remain_Quantity' =>  $request->quantity[$index],
+                'remain_Quantity' => $request->quantity[$index],
                 'low_stock_percentage' => $request->low_stock_percentage[$index],
                 'in_date' => $request->in_date[$index],
                 'batch_number' => $request->batch_number,
@@ -481,7 +477,6 @@ class StockController extends Controller
 
         return redirect()->route('stock')->with('success', 'Stock & Medicine were added successfully!');
     }
-
 
     /**
      * Display the specified stock entry.
@@ -522,28 +517,27 @@ class StockController extends Controller
                 'in_date' => 'required|date',
                 'expire_date' => 'required|date',
             ]);
-            //if original quantity is greater than remain_Quantity
+            // if original quantity is greater than remain_Quantity
 
             if ($stock->quantity > $stock->remain_Quantity) {
 
-                //if here, it means has already started to make sales on this stock, so we can't  modify buying price and selling price
-                //what to do then? modify only the quantity=remain_Quantity and remain_Quantity=0; as a way to close this stock and create a new one
+                // if here, it means has already started to make sales on this stock, so we can't  modify buying price and selling price
+                // what to do then? modify only the quantity=remain_Quantity and remain_Quantity=0; as a way to close this stock and create a new one
                 // with a new batch number, selling price and buying price;
 
-                //check if he wants to modify prices
+                // check if he wants to modify prices
                 if ((($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && ($request->quantity != $stock->quantity)) {
 
-                    //check if new stocked quantity is greater than sold quanity
-                    if (!($request->quantity >= ($stock->quantity - $stock->remain_Quantity))) {
+                    // check if new stocked quantity is greater than sold quanity
+                    if (! ($request->quantity >= ($stock->quantity - $stock->remain_Quantity))) {
                         throw new Exception('New quantity is less than the sold quantity.');
                     }
 
-                    //close this stock
+                    // close this stock
                     $stock->update([
                         'quantity' => $stock->quantity - $stock->remain_Quantity,
                         'remain_Quantity' => 0,
                     ]);
-
 
                     // create a new similar stock with new prices and quantity
                     if (($request->quantity - ($stock->quantity - $stock->remain_Quantity)) > 0) {
@@ -563,11 +557,11 @@ class StockController extends Controller
                         ]);
                     }
                     $message = 'Price and quantity updated successfully.';
-                } elseif ((($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && !($request->quantity != $stock->quantity)) {
+                } elseif ((($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && ! ($request->quantity != $stock->quantity)) {
 
                     $newStock_quantity = $stock->remain_Quantity;
 
-                    //close this stock
+                    // close this stock
                     $stock->update([
                         'quantity' => $stock->quantity - $stock->remain_Quantity,
                         'remain_Quantity' => 0,
@@ -589,8 +583,8 @@ class StockController extends Controller
                         'item_id' => $stock->item_id,
                     ]);
                     $message = 'Price updated successfully.';
-                } elseif (!(($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && ($request->quantity != $stock->quantity)) {
-                    //check if new stocked quantity is greater than sold quanity
+                } elseif (! (($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && ($request->quantity != $stock->quantity)) {
+                    // check if new stocked quantity is greater than sold quanity
                     if ($request->quantity >= ($stock->quantity - $stock->remain_Quantity)) {
                         $stock->update([
                             'quantity' => $request->quantity,
@@ -600,14 +594,21 @@ class StockController extends Controller
                         throw new Exception('New quantity is less than the sold quantity.');
                     }
                     $message = 'Quantity updated successfully.';
-                } elseif (!(($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && !($request->quantity != $stock->quantity) && ($request->expire_date != $stock->expire_date)) {
+                } elseif (! (($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && ! ($request->quantity != $stock->quantity) && ($request->expire_date != $stock->expire_date)) {
                     $stock->update([
                         'expire_date' => $request->expire_date,
                     ]);
                     $message = 'Expire date updated successfully.';
+                } elseif (! (($request->selling_price != $stock->selling_price) || ($request->buying_price != $stock->buying_price)) && ! ($request->quantity != $stock->quantity) && ! ($request->expire_date != $stock->expire_date) && ($request->low_stock_percentage != $stock->low_stock_percentage)) {
+                    // update low stock percentage
+                    $stock->update([
+                        'low_stock_percentage' => $request->low_stock_percentage,
+                    ]);
+                    $message = 'Low stock percentage updated successfully.';
                 }
 
                 DB::commit();
+
                 return redirect()->route('stock')->with('success', $message);
             } else {
                 $request['remain_Quantity'] = $request['quantity'];
@@ -616,11 +617,13 @@ class StockController extends Controller
                 $stock->update($request->only('quantity', 'low_stock_percentage', 'remain_Quantity', 'buying_price', 'selling_price', 'supplier', 'in_date', 'expire_date'));
 
                 DB::commit();
+
                 return redirect()->route('stock')->with('success', 'Stock updated successfully.');
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', "Data  not added because: " . $e->getMessage());
+
+            return redirect()->back()->withInput()->with('error', 'Data  not added because: '.$e->getMessage());
         }
     }
 
@@ -647,7 +650,7 @@ class StockController extends Controller
                 'in_date' => 'required|date',
             ]);
         } catch (Exception $e) {
-            return redirect()->back()->with('error', 'Error processing the file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error processing the file: '.$e->getMessage());
         }
 
         try {
@@ -677,7 +680,7 @@ class StockController extends Controller
                         'supplier' => 'required|string|max:255',
                     ]);
                 } catch (Exception $e) {
-                    throw new Exception('Validate File input\'s error: ' . $e->getMessage());
+                    throw new Exception('Validate File input\'s error: '.$e->getMessage());
                 }
 
                 // Check if the item exists
@@ -687,7 +690,7 @@ class StockController extends Controller
                         ['category_id' => 1]
                     );
                 } catch (Exception $e) {
-                    throw new Exception('Create Medicine Error: ' . $e->getMessage());
+                    throw new Exception('Create Medicine Error: '.$e->getMessage());
                 }
 
                 // Add stock
@@ -707,17 +710,16 @@ class StockController extends Controller
                         'batch_number' => $request->batch_number__,
                     ]);
                 } catch (Exception $e) {
-                    throw new Exception('Create Stock Error: ' . $e->getMessage());
+                    throw new Exception('Create Stock Error: '.$e->getMessage());
                 }
             }
 
             return redirect()->route('stock')->with('success', 'Medicines and stock imported successfully!');
         } catch (Exception $e) {
 
-            return redirect()->back()->with('error', 'Error processing the file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error processing the file: '.$e->getMessage());
         }
     }
-
 
     public function stockBalancesPage()
     {
@@ -731,18 +733,18 @@ class StockController extends Controller
         $stockBalances = Stock::select(
             'stocks.item_id',
             DB::raw('SUM(stocks.quantity) as quantity'),
-            DB::raw("SUM(CASE WHEN stocks.expire_date > NOW() THEN stocks.remain_quantity ELSE 0 END) as remain_quantity"),
-            DB::raw("SUM(CASE WHEN stocks.expire_date <= NOW() THEN stocks.remain_quantity ELSE 0 END) as expired_remain_quantity")
+            DB::raw('SUM(CASE WHEN stocks.expire_date > NOW() THEN stocks.remain_quantity ELSE 0 END) as remain_quantity'),
+            DB::raw('SUM(CASE WHEN stocks.expire_date <= NOW() THEN stocks.remain_quantity ELSE 0 END) as expired_remain_quantity')
         )
             ->where('stocks.pharmacy_id', $pharmacyId)  // <-- prefix table
             ->groupBy('stocks.item_id')
-            ->with('item','latestStockCheck');
-        
-            // dd($stockBalances->get());
+            ->with('item', 'latestStockCheck');
+
+        // dd($stockBalances->get());
 
         return DataTables::eloquent($stockBalances)
             ->addIndexColumn()
-            ->addColumn('medicine_name', fn($row) => $row->item->name ?? 'Unknown')
+            ->addColumn('medicine_name', fn ($row) => $row->item->name ?? 'Unknown')
             ->addColumn('status', function ($row) {
                 if ($row->remain_quantity > 0) {
                     return '<span class="text-success fw-bold">Available</span>';
@@ -767,14 +769,14 @@ class StockController extends Controller
                                     </div>
                                     <div  class="row">
                                         <div  class="col-md-6">
-                                            <input type="number" class="form-control form-control-sm me-2 physical-qty" 
-                                                style="width:100px;" 
-                                                min="0" 
+                                            <input type="number" class="form-control form-control-sm me-2 physical-qty"
+                                                style="width:100px;"
+                                                min="0"
                                                 placeholder="Qty">
                                         </div>
                                         <div  class="col-md-6">
-                                            <button class="btn btn-success btn-sm save-stock-check" 
-                                                data-item-id="${row.item.id}" 
+                                            <button class="btn btn-success btn-sm save-stock-check"
+                                                data-item-id="${row.item.id}"
                                                 data-stock-id="${row.id}">
                                                 Save
                                             </button>
@@ -790,10 +792,10 @@ class StockController extends Controller
                 return '<div class="d-flex gap-2 justify-content-between">
                                     <div class="d-flex justify-content-start">
                                         <div class="col-4 mb-1 mx-1">
-                                            <small class="badge '. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_quantity ? 'bg-success' : 'bg-danger') : "bg-warning").' text-smaller">'. ($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_quantity ? 'Fine ' : (($row->latestStockCheck->physical_quantity > $row->remain_quantity) ? ($row->latestStockCheck->physical_quantity . ' Over ') : ($row->latestStockCheck->physical_quantity . ' Under '))) : "Unchecked").'</small>
+                                            <small class="badge '.($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_quantity ? 'bg-success' : 'bg-danger') : 'bg-warning').' text-smaller">'.($row->latestStockCheck ? ($row->latestStockCheck->physical_quantity == $row->remain_quantity ? 'Fine ' : (($row->latestStockCheck->physical_quantity > $row->remain_quantity) ? ($row->latestStockCheck->physical_quantity.' Over ') : ($row->latestStockCheck->physical_quantity.' Under '))) : 'Unchecked').'</small>
                                         </div>                                    
-                                        <div class="col-8 mb-1'. ($row->latestStockCheck ? "": "d-none").'">
-                                            <small class="badge text-secondary text-smallest">'. ($row->latestStockCheck ? Carbon::parse($row->latestStockCheck->checked_at)->format('d M Y H:i') : '') . '</small>
+                                        <div class="col-8 mb-1'.($row->latestStockCheck ? '' : 'd-none').'">
+                                            <small class="badge text-secondary text-smallest">'.($row->latestStockCheck ? Carbon::parse($row->latestStockCheck->checked_at)->format('d M Y H:i') : '').'</small>
                                         </div>
                                     </div>
                                     <div  class="d-flex justify-content-end mx-1 ">
@@ -817,13 +819,12 @@ class StockController extends Controller
                 return '<button type="button" class="btn btn-primary btn-sm view-stock-btn" 
                         data-bs-toggle="modal" 
                         data-bs-target="#stockModal" 
-                        data-item-id="' . $row->item_id . '">
+                        data-item-id="'.$row->item_id.'">
                         <i class="bi bi-eye"></i></button>';
             })
-            ->rawColumns(['status', 'action','stock_check_status']) // Allow HTML rendering
+            ->rawColumns(['status', 'action', 'stock_check_status']) // Allow HTML rendering
             ->make(true);
     }
-
 
     public function getStockDetails(Request $request)
     {
@@ -842,7 +843,7 @@ class StockController extends Controller
 
             // Fine stocks
             $fine = $stocks->filter(function ($s) use ($now) {
-                return  $s->remain_Quantity > $s->low_stock_percentage && $s->remain_Quantity > 0 && $s->expire_date && Carbon::parse($s->expire_date)->gt($now);
+                return $s->remain_Quantity > $s->low_stock_percentage && $s->remain_Quantity > 0 && $s->expire_date && Carbon::parse($s->expire_date)->gt($now);
             })->map(function ($s) {
                 return [
                     'batch_no' => $s->batch_number,
@@ -866,7 +867,7 @@ class StockController extends Controller
                 ];
             })->values();
 
-            //low stocks
+            // low stocks
             $lowStock = $stocks->filter(function ($s) use ($now) {
                 return $s->remain_Quantity > 0 && $s->remain_Quantity <= $s->low_stock_percentage && $s->expire_date && Carbon::parse($s->expire_date)->gt($now);
             })->map(function ($s) {
@@ -879,7 +880,7 @@ class StockController extends Controller
                 ];
             })->values();
 
-            //finished stocks
+            // finished stocks
             $finished = $stocks->filter(function ($s) {
                 return $s->remain_Quantity == 0;
             })->map(function ($s) {
@@ -898,17 +899,17 @@ class StockController extends Controller
                 'success' => true,
                 'item' => [
                     'id' => $itemId,
-                    'name' => $item ? $item->name : 'Unknown'
+                    'name' => $item ? $item->name : 'Unknown',
                 ],
                 'fine' => $fine,
                 'expired' => $expired,
                 'lowStock' => $lowStock,
-                'finished' => $finished
+                'finished' => $finished,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }
@@ -920,7 +921,7 @@ class StockController extends Controller
             $request->validate([
                 'id' => 'required|exists:stocks,id',
                 'buying_price' => 'required|numeric',
-                'selling_price' => 'required|numeric'
+                'selling_price' => 'required|numeric',
             ]);
 
             $stock = Stock::find($request->id);
@@ -938,9 +939,11 @@ class StockController extends Controller
             }
 
             DB::commit();
+
             return redirect()->back()->with('success', 'Stock updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

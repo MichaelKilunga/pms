@@ -35,7 +35,7 @@ return [
             'label' => 'Expenses',
             'icon' => 'bi bi-wallet2',
             'children' => [
-                ['label' => 'All Expenses', 'route' => 'expenses.index'],
+                ['label' => 'Expenses', 'route' => 'expenses.index'],
             ],
         ],
     ],
@@ -75,22 +75,14 @@ return [
                 ['label' => 'Contracts', 'route' => 'myContracts'],
             ],
         ],
-        [
-            'label' => 'Reports',
-            'icon' => 'bi bi-bar-chart',
-            'children' => [
-                ['label' => 'Reports', 'route' => 'reports.all'],
-                ['label' => 'Notifications', 'route' => 'notifications'],
-                ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
-            ],
-        ],
+
         [
             'label' => 'Expenses',
             'icon' => 'bi bi-wallet2',
             'children' => [
-                ['label' => 'All Expenses', 'route' => 'expenses.index'],
                 ['label' => 'Categories', 'route' => 'expenses.category'],
                 ['label' => 'Vendors', 'route' => 'expenses.vendors'],
+                ['label' => 'Expenses', 'route' => 'expenses.index'],
             ],
         ],
         [
@@ -99,6 +91,15 @@ return [
             'children' => [
                 ['label' => 'All Debts', 'route' => 'debts.index'],
                 ['label' => 'All Installments', 'route' => 'installments.installment'],
+            ],
+        ],
+        [
+            'label' => 'Reports',
+            'icon' => 'bi bi-bar-chart',
+            'children' => [
+                ['label' => 'Reports', 'route' => 'reports.all'],
+                ['label' => 'Notifications', 'route' => 'notifications'],
+                ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
             ],
         ],
     ],
@@ -143,21 +144,12 @@ return [
             ],
         ],
         [
-            'label' => 'Reports',
-            'icon' => 'bi bi-bar-chart',
-            'children' => [
-                ['label' => 'Reports', 'route' => 'reports.all'],
-                ['label' => 'Notifications', 'route' => 'notifications'],
-                ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
-            ],
-        ],
-        [
             'label' => 'Expenses',
             'icon' => 'bi bi-wallet2',
             'children' => [
-                ['label' => 'All Expenses', 'route' => 'expenses.index'],
                 ['label' => 'Categories', 'route' => 'expenses.category'],
                 ['label' => 'Vendors', 'route' => 'expenses.vendors'],
+                ['label' => 'Expenses', 'route' => 'expenses.index'],
             ],
         ],
         [
@@ -166,6 +158,15 @@ return [
             'children' => [
                 ['label' => 'All Debts', 'route' => 'debts.index'],
                 ['label' => 'All Installments', 'route' => 'installments.installment'],
+            ],
+        ],
+        [
+            'label' => 'Reports',
+            'icon' => 'bi bi-bar-chart',
+            'children' => [
+                ['label' => 'Reports', 'route' => 'reports.all'],
+                ['label' => 'Notifications', 'route' => 'notifications'],
+                ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
             ],
         ],
     ],

@@ -1,6 +1,6 @@
-@extends("expenses.app")
+@extends('expenses.app')
 
-@section("content")
+@section('content')
     <div class="container-fluid">
         <!-- Page Header -->
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -11,7 +11,7 @@
         </div>
 
         <!-- Filter Section -->
-        <div class="card mb-4 shadow-sm">
+        {{-- <div class="card mb-4 shadow-sm">
             <div class="card-body">
                 <form action="{{ route("expenses.index") }}" class="row gy-2 gx-3 align-items-center" method="GET">
                     <div class="col-md-2">
@@ -55,7 +55,7 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Expenses Table -->
         <div class="row">
@@ -81,21 +81,20 @@
                             @forelse($expenses as $expense)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $expense->creator->name ?? "-" }}</td>
-                                    <td>{{ $expense->expense_date->format("d M Y") }}</td>
-                                    <td>{{ $expense->pharmacy->name ?? "-" }}</td>
-                                    <td>{{ $expense->category->name ?? "-" }}</td>
-                                    <td>{{ $expense->vendor->name ?? "-" }}</td>
-                                    <td><span
-                                            class="badge bg-info text-dark">{{ ucfirst($expense->payment_method) }}</span>
+                                    <td>{{ $expense->creator->name ?? '-' }}</td>
+                                    <td>{{ $expense->expense_date->format('d M Y') }}</td>
+                                    <td>{{ $expense->pharmacy->name ?? '-' }}</td>
+                                    <td>{{ $expense->category->name ?? '-' }}</td>
+                                    <td>{{ $expense->vendor->name ?? '-' }}</td>
+                                    <td><span class="badge bg-info text-dark">{{ ucfirst($expense->payment_method) }}</span>
                                     </td>
                                     <td><strong>{{ number_format($expense->amount, 2) }}</strong> {{ $expense->currency }}
                                     </td>
-                                    <td>{{ $expense->approver?->name ?? "-" }}</td>
+                                    <td>{{ $expense->approver?->name ?? '-' }}</td>
                                     <td>
-                                        @if ($expense->status == "approved")
+                                        @if ($expense->status == 'approved')
                                             <span class="badge bg-success">Approved</span>
-                                        @elseif($expense->status == "rejected")
+                                        @elseif($expense->status == 'rejected')
                                             <span class="badge bg-danger">Rejected</span>
                                         @else
                                             <span class="badge bg-warning text-dark">Pending</span>
@@ -103,7 +102,7 @@
                                     </td>
                                     <td>
                                         <div class="group-item">
-                                            @if ($expense->status == "pending" && ($users->role == "owner" || $users->role == "admin"))
+                                            @if ($expense->status == 'pending' && ($users->role == 'owner' || $users->role == 'admin'))
                                                 <button class="btn btn-sm btn-info view-expense"
                                                     data-bs-target="#viewExpenseModal{{ $expense->id }}"
                                                     data-bs-toggle="modal" data-expense='@json($expense)'
@@ -114,35 +113,35 @@
                                                     data-bs-toggle="modal" data-expense='@json($expense)'
                                                     type="button"><i class="bi bi-pencil-square"></i>
                                                 </button>
-                                                <form action="{{ route("expenses.destroy", $expense->id) }}"
+                                                <form action="{{ route('expenses.destroy', $expense->id) }}"
                                                     class="d-inline" method="POST"
                                                     onsubmit="return confirm('Are you sure?')">
                                                     @csrf
-                                                    @method("DELETE")
+                                                    @method('DELETE')
                                                     <button class="btn btn-sm btn-danger" type="submit"><i
                                                             class="bi bi-trash"></i></button>
                                                 </form>
-                                                <form action="{{ route("expenses.approve", $expense->id) }}"
+                                                <form action="{{ route('expenses.approve', $expense->id) }}"
                                                     class="d-inline" method="POST"
                                                     onsubmit="return confirm('Are you sure you want to accept?')">
                                                     @csrf
-                                                    @method("POST")
+                                                    @method('POST')
                                                     <button class="btn btn-sm btn-success view-expense" type="submit"><i
                                                             class="bi bi-check"></i>
                                                     </button>
                                                 </form>
-                                                <form action="{{ route("expenses.reject", $expense->id) }}"
+                                                <form action="{{ route('expenses.reject', $expense->id) }}"
                                                     class="d-inline" method="POST"
                                                     onsubmit="return confirm('Are you sure you want to reject?')">
                                                     @csrf
-                                                    @method("POST")
+                                                    @method('POST')
                                                     <button class="btn btn-sm btn-danger view-expense" type="submit"><i
                                                             class="bi bi-x"></i>
                                                     </button>
                                                 </form>
                                             @endif
 
-                                            @if ($expense->status == "pending" && $users->role == "staff")
+                                            @if ($expense->status == 'pending' && $users->role == 'staff')
                                                 <button class="btn btn-sm btn-info view-expense"
                                                     data-bs-target="#viewExpenseModal{{ $expense->id }}"
                                                     data-bs-toggle="modal" data-expense='@json($expense)'
@@ -153,17 +152,17 @@
                                                     data-bs-toggle="modal" data-expense='@json($expense)'
                                                     type="button"><i class="bi bi-pencil-square"></i>
                                                 </button>
-                                                <form action="{{ route("expenses.destroy", $expense->id) }}"
+                                                <form action="{{ route('expenses.destroy', $expense->id) }}"
                                                     class="d-inline" method="POST"
                                                     onsubmit="return confirm('Are you sure you want to delete?')">
                                                     @csrf
-                                                    @method("DELETE")
+                                                    @method('DELETE')
                                                     <button class="btn btn-sm btn-danger" type="submit"><i
                                                             class="bi bi-trash"></i></button>
                                                 </form>
                                             @endif
 
-                                            @if ($expense->status == "approved" && ($users->role == "staff" || $users->role == "admin" || $users->role == "owner"))
+                                            @if ($expense->status == 'approved' && ($users->role == 'staff' || $users->role == 'admin' || $users->role == 'owner'))
                                                 <button class="btn btn-sm btn-info view-expense"
                                                     data-bs-target="#viewExpenseModal{{ $expense->id }}"
                                                     data-bs-toggle="modal" data-expense='@json($expense)'
@@ -171,17 +170,17 @@
                                                 </button>
                                             @endif
 
-                                            @if ($expense->status == "rejected" && ($users->role == "staff" || $users->role == "admin" || $users->role == "owner"))
+                                            @if ($expense->status == 'rejected' && ($users->role == 'staff' || $users->role == 'admin' || $users->role == 'owner'))
                                                 <button class="btn btn-sm btn-info view-expense"
                                                     data-bs-target="#viewExpenseModal{{ $expense->id }}"
                                                     data-bs-toggle="modal" data-expense='@json($expense)'
                                                     type="button"><i class="bi bi-eye"></i>
                                                 </button>
-                                                <form action="{{ route("expenses.destroy", $expense->id) }}"
+                                                <form action="{{ route('expenses.destroy', $expense->id) }}"
                                                     class="d-inline" method="POST"
                                                     onsubmit="return confirm('Are you sure you want to delete?')">
                                                     @csrf
-                                                    @method("DELETE")
+                                                    @method('DELETE')
                                                     <button class="btn btn-sm btn-danger" type="submit"><i
                                                             class="bi bi-trash"></i></button>
                                                 </form>
@@ -210,7 +209,7 @@
                                                     <li class="list-group-item"><strong>Category:</strong> <span
                                                             id="modal-category"></span>{{ $expense->category->name }}</li>
                                                     <li class="list-group-item"><strong>Vendor:</strong> <span
-                                                            id="modal-vendor"></span>{{ $expense->vendor->name ?? "-" }}
+                                                            id="modal-vendor"></span>{{ $expense->vendor->name ?? '-' }}
                                                     </li>
                                                     <li class="list-group-item"><strong>Payment Method:</strong> <span
                                                             class="badge bg-info text-dark"
@@ -221,13 +220,13 @@
                                                         {{ $expense->currency }} {{ $expense->amount }}
                                                     </li>
                                                     <li class="list-group-item"><strong>Date:</strong> <span
-                                                            id="modal-expense-date"></span>{{ $expense->expense_date->format("d M Y") }}
+                                                            id="modal-expense-date"></span>{{ $expense->expense_date->format('d M Y') }}
                                                     </li>
                                                     <li class="list-group-item"><strong>Status:</strong> <span
                                                             id="modal-status"></span>
-                                                        @if ($expense->status == "approved")
+                                                        @if ($expense->status == 'approved')
                                                             <span class="badge bg-success">Approved</span>
-                                                        @elseif($expense->status == "rejected")
+                                                        @elseif($expense->status == 'rejected')
                                                             <span class="badge bg-danger">Rejected</span>
                                                         @else
                                                             <span class="badge bg-warning text-dark">Pending</span>
@@ -235,7 +234,7 @@
                                                     </li>
                                                     <li class="list-group-item"><strong>Description:</strong> <span
                                                             id="modal-description"></span>
-                                                        {{ $expense->description ?? "-" }}
+                                                        {{ $expense->description ?? '-' }}
                                                     </li>
                                                     <li class="list-group-item"><strong>Created At:</strong> <span
                                                             id="modal-created-at"></span> {{ $expense->created_at }}
@@ -254,10 +253,10 @@
                                     tabindex="-1">
                                     <div class="modal-dialog modal-lg">
                                         <div class="modal-content">
-                                            <form action="{{ route("expenses.update", $expense->id) }}"
+                                            <form action="{{ route('expenses.update', $expense->id) }}"
                                                 id="editExpenseForm" method="POST">
                                                 @csrf
-                                                @method("PUT")
+                                                @method('PUT')
                                                 <div class="modal-header bg-primary text-white">
                                                     <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit
                                                         Expense</h5>
@@ -275,7 +274,7 @@
                                                                 <option value="">Select pharmacy</option>
                                                                 @foreach ($pharmacies as $pharmacy)
                                                                     <option
-                                                                        {{ $pharmacy->id == $expense->pharmacy_id ? "selected" : "" }}
+                                                                        {{ $pharmacy->id == $expense->pharmacy_id ? 'selected' : '' }}
                                                                         value="{{ $pharmacy->id }}">
                                                                         {{ $pharmacy->name }}
                                                                     </option>
@@ -289,7 +288,7 @@
                                                                 <option value="">Select Category</option>
                                                                 @foreach ($categories as $cat)
                                                                     <option
-                                                                        {{ $cat->id == $expense->category_id ? "selected" : "" }}
+                                                                        {{ $cat->id == $expense->category_id ? 'selected' : '' }}
                                                                         value="{{ $cat->id }}">
                                                                         {{ $cat->name }}
                                                                     </option>
@@ -300,7 +299,7 @@
                                                             <label class="form-label">Expense Date</label>
                                                             <input class="form-control" id="edit-expense-date"
                                                                 name="expense_date" required type="date"
-                                                                value="{{ $expense->expense_date->format("Y-m-d") }}">
+                                                                value="{{ $expense->expense_date->format('Y-m-d') }}">
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="form-label">Vendor</label>
@@ -311,7 +310,7 @@
 
                                                                 @foreach ($vendors as $vendor)
                                                                     <option
-                                                                        {{ $vendor->id == $expense->vendor_id ? "selected" : "" }}
+                                                                        {{ $vendor->id == $expense->vendor_id ? 'selected' : '' }}
                                                                         value="{{ $vendor->id }}">
                                                                         {{ $vendor->name }}
                                                                     </option>
@@ -327,23 +326,23 @@
                                                             <select class="form-select" id="edit-payment-method"
                                                                 name="payment_method" required>
                                                                 <option
-                                                                    {{ $expense->payment_method == "cash" ? "selected" : "" }}
+                                                                    {{ $expense->payment_method == 'cash' ? 'selected' : '' }}
                                                                     value="cash">
                                                                     Cash</option>
                                                                 <option
-                                                                    {{ $expense->payment_method == "mobile_money" ? "selected" : "" }}
+                                                                    {{ $expense->payment_method == 'mobile_money' ? 'selected' : '' }}
                                                                     value="mobile_money">
                                                                     Mobile Money</option>
                                                                 <option
-                                                                    {{ $expense->payment_method == "bank_transfer" ? "selected" : "" }}
+                                                                    {{ $expense->payment_method == 'bank_transfer' ? 'selected' : '' }}
                                                                     value="bank_transfer">
                                                                     Bank Transfer</option>
                                                                 <option
-                                                                    {{ $expense->payment_method == "cheque" ? "selected" : "" }}
+                                                                    {{ $expense->payment_method == 'cheque' ? 'selected' : '' }}
                                                                     value="cheque">
                                                                     Cheque</option>
                                                                 <option
-                                                                    {{ $expense->payment_method == "other" ? "selected" : "" }}
+                                                                    {{ $expense->payment_method == 'other' ? 'selected' : '' }}
                                                                     value="other">
                                                                     Other</option>
                                                             </select>
@@ -386,7 +385,7 @@
         tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form action="{{ route("expenses.store") }}" method="POST">
+                <form action="{{ route('expenses.store') }}" method="POST">
                     @csrf
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="registerExpenseLabel"><i class="bi bi-wallet me-2"></i> New Expense
@@ -398,7 +397,7 @@
                             <div class="col-md-6">
                                 <label class="form-label">Expense Date</label>
                                 <input class="form-control" name="expense_date" required type="date"
-                                    value="{{ old("expense_date", date("Y-m-d")) }}">
+                                    value="{{ old('expense_date', date('Y-m-d')) }}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Pharmacy</label>
@@ -442,7 +441,7 @@
                             <div class="col-md-6">
                                 <label class="form-label">Amount</label>
                                 <input class="form-control" name="amount" required step="0.01" type="number"
-                                    value="{{ old("amount") }}">
+                                    value="{{ old('amount') }}">
                             </div>
                             <div class="col-md-12 hidden">
                                 <label class="form-label" for="attachment">Attachment (Any file) <span
@@ -453,7 +452,7 @@
 
                             <div class="col-md-12">
                                 <label class="form-label">Description</label>
-                                <textarea class="form-control" name="description" rows="2">{{ old("description") }}</textarea>
+                                <textarea class="form-control" name="description" rows="2">{{ old('description') }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -467,7 +466,7 @@
 
 @endsection
 
-@push("scripts")
+@push('scripts')
     <script>
         $(document).ready(function() {
 

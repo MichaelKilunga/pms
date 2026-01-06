@@ -55,27 +55,51 @@ class ContactController extends Controller
                 $fullMessage .= "\nService: " . $data['service'];
             }
 
-            // Send to SkyPush API
-            $response = Http::withHeaders([
-                'X-API-KEY' => env('SKYPUSH_API_KEY'),
-                'Accept' => 'application/json',
-            ])->post('https://skypush.skylinksolutions.co.tz/api/v1/contact/contact', [
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'],
-                'message' => $fullMessage,
-                'source' => 'contact',
-            ]);
+            $mailSent = false;
+            $apiSent = false;
 
-            if ($response->successful()) {
-                return response()->json(['status' => 'success', 'message' => 'Message sent. We will contact you shortly.']);
-            } else {
-                Log::error('SkyPush API Error: ' . $response->body());
-                return response()->json(['status' => 'error', 'message' => 'Failed to send message. Please try again later.'], $response->status());
+            // Send to SkyPush API
+            try {
+                $response = Http::withHeaders([
+                    'X-API-KEY' => env('SKYPUSH_API_KEY'),
+                    'Accept' => 'application/json',
+                ])->post('https://skypush.skylinksolutions.co.tz/api/v1/contact/contact', [
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'phone' => $data['phone'],
+                    'message' => $fullMessage,
+                    'source' => 'contact',
+                ]);
+
+                if ($response->successful()) {
+                    $apiSent = true;
+                } else {
+                    Log::error('SkyPush API Error: ' . $response->body());
+                }
+            } catch (\Exception $e) {
+                Log::error('SkyPush API Exception: ' . $e->getMessage());
             }
 
+            // Fallback to Email if API failed
+            if (!$apiSent) {
+                try {
+                    $supportEmail = env('SUPPORT_EMAIL', 'info@skylinksolutions.co.tz');
+                    Mail::to($supportEmail)->send(new ContactUsMail($data));
+                    $mailSent = true;
+                    Log::info('Contact form fallback email sent to: ' . $supportEmail);
+                } catch (\Exception $e) {
+                    Log::error('Contact form email fallback failed: ' . $e->getMessage());
+                }
+            }
+
+            if ($apiSent || $mailSent) {
+                return response()->json(['status' => 'success', 'message' => 'Message sent. We will contact you shortly.']);
+            }
+
+            return response()->json(['status' => 'error', 'message' => 'Failed to send message. Please try again later.'], 500);
+
         } catch (\Throwable $e) {
-            Log::error('Contact API failed: ' . $e->getMessage(), ['data' => $data]);
+            Log::error('Contact process failed: ' . $e->getMessage(), ['data' => $data]);
             return response()->json(['status' => 'error', 'message' => 'An error occurred. Please try again later.'], 500);
         }
     }

@@ -141,14 +141,28 @@ class SendDailyPharmacyReport extends Command
             ->selectRaw('COALESCE(SUM(stocks.buying_price * sales.quantity), 0) as total_cost')
             ->value('total_cost');
 
+        // NEW: Fetch approved expenses and installments for today
+        $totalExpenses = \App\Models\Expense::where('pharmacy_id', $pharmacy->id)
+            ->where('status', 'approved')
+            ->whereDate('expense_date', $today)
+            ->sum('amount');
+
+        $totalInstallments = \App\Models\Installment::where('pharmacy_id', $pharmacy->id)
+            ->whereDate('created_at', $today)
+            ->sum('amount');
+
+        $grossProfit = ($salesData->total_revenue ?? 0) - ($totalCost ?? 0);
+
         /** 
          * @var array<string, int|float> $salesSummary 
          */
         $salesSummary = [
             'total_revenue'      => (float) ($salesData->total_revenue ?? 0),
-            'total_cost'         => (float) ($totalCost ?? 0),
+            'gross_profit'       => (float) $grossProfit,
+            'total_expenses'     => (float) ($totalExpenses ?? 0),
+            'total_installments' => (float) ($totalInstallments ?? 0),
             'total_transactions' => (int)   ($salesData->total_transactions ?? 0),
-            'profit_loss'        => (float) (($salesData->total_revenue ?? 0) - ($totalCost ?? 0)),
+            'profit_loss'        => (float) ($grossProfit - $totalExpenses - $totalInstallments),
         ];
         
 
@@ -209,7 +223,7 @@ class SendDailyPharmacyReport extends Command
         // 2. Push SMS
         if ($owner->phone && $owner->wantsNotificationChannel('sms')) {
             try {
-                $smsMsg = "Daily Report: {$pharmacy->name}\nDate: {$reportDate}\nSales: " . number_format($salesSummary['total_revenue']) . " TZS\nProfit: " . number_format($salesSummary['profit_loss']) . " TZS";
+                $smsMsg = "Daily Report: {$pharmacy->name}\nDate: {$reportDate}\nSales: " . number_format($salesSummary['total_revenue']) . " TZS\nGross Profit: " . number_format($salesSummary['gross_profit']) . " TZS\nExpenses: " . number_format($salesSummary['total_expenses']) . " TZS\nInstallments: " . number_format($salesSummary['total_installments']) . " TZS\nNet Profit: " . number_format($salesSummary['profit_loss']) . " TZS";
                 $sent = $smsService->send($owner->phone, $smsMsg);
                 if ($sent) {
                     $this->info("📱 SMS sent to {$owner->phone}");
@@ -230,8 +244,10 @@ class SendDailyPharmacyReport extends Command
                 $waMsg .= "Date: {$reportDate}\n\n";
                 $waMsg .= "*Summary:*\n";
                 $waMsg .= "Total Sales: " . number_format($salesSummary['total_revenue']) . " TZS\n";
-                $waMsg .= "Total Cost: " . number_format($salesSummary['total_cost']) . " TZS\n";
-                $waMsg .= "Profit/Loss: " . number_format($salesSummary['profit_loss']) . " TZS\n";
+                $waMsg .= "Gross Profit: " . number_format($salesSummary['gross_profit']) . " TZS\n";
+                $waMsg .= "Expenses: " . number_format($salesSummary['total_expenses']) . " TZS\n";
+                $waMsg .= "Net Profit: " . number_format($salesSummary['profit_loss']) . " TZS\n";
+                $waMsg .= "Installments: " . number_format($salesSummary['total_installments']) . " TZS\n";
                 $waMsg .= "Transactions: " . $salesSummary['total_transactions'] . "\n\n";
                 $waMsg .= "*Stock Alerts:*\n";
                 $waMsg .= "Out of Stock: " . $stockStatus['out_of_stock']->count() . "\n";
@@ -254,7 +270,7 @@ class SendDailyPharmacyReport extends Command
         if ($owner->wantsNotificationChannel('database')) {
             try {
                 Notification::send($owner, new InAppNotification([
-                    'message' => "Daily Report Sent for {$reportDate}", 
+                    'message' => "Daily Report Sent for {$reportDate}. Net Profit: " . number_format($salesSummary['profit_loss']) . " TZS (Expenses: " . number_format($salesSummary['total_expenses']) . ", Installments: " . number_format($salesSummary['total_installments']) . ")", 
                     'type' => 'info'
                 ]));
                  $this->info("🔔 In-App notification sent to owner");
