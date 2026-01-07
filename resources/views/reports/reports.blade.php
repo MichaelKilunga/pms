@@ -1,6 +1,21 @@
 @extends('reports.app')
 
 @section('content')
+    <style>
+        .reportTable {
+            max-width: 100%;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .reportsTable {
+            width: 100% !important;
+        }
+
+        #DivchartHead canvas {
+            max-height: 400px;
+        }
+    </style>
     <div class="container pt-2">
         <!-- Page Title -->
         <div class="row mb-4 text-center">
@@ -11,7 +26,7 @@
         </div>
         <!-- Filters Section -->
         <div class="container">
-            <div class="row g-4# d-flex justify-content-center form-control mb-2 p-2 text-center">
+            <div class="row g-4 d-flex justify-content-center form-control mb-2 p-2 text-center">
                 <div class="col-12 col-md-6 col-lg-3 fs-4 text-success">
                     <p class="">Filter By:</p>
                 </div>
@@ -59,93 +74,128 @@
         </div>
 
         <!-- Summary Cards -->
-        <div class="row g-4 justify-content-center mb-2 text-center">
+        <div class="row g-3 justify-content-center mb-4 text-center">
             <div class="col-6 col-md-4 col-lg-2" id="totalStocksDiv">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title">Total Stocks</h6>
-                        <h3 class="fw-bold text-danger" id="totalStocks">fetching...</h3>
+                <div class="card border-0 shadow-sm h-100 py-2">
+                    <div class="card-body p-2">
+                        <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center mb-2"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-box-seam fs-5"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Total Stocks</h6>
+                        <h4 class="fw-bold mb-0 text-dark" id="totalStocks">fetching...</h4>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2" id="totalSalesDiv">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title">Total Sales</h6>
-                        <h3 class="fw-bold text-primary" id="totalSales">fetching...</h3>
+                <div class="card border-0 shadow-sm h-100 py-2">
+                    <div class="card-body p-2">
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center mb-2"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-cart-check fs-5"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Total Sales</h6>
+                        <h4 class="fw-bold mb-0 text-dark" id="totalSales">fetching...</h4>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2" id="totalReturnsDiv">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title">Total Returns</h6>
-                        <h3 class="fw-bold text-warning" id="totalReturns">fetching...</h3>
+                <div class="card border-0 shadow-sm h-100 py-2">
+                    <div class="card-body p-2">
+                        <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-inline-flex align-items-center justify-content-center mb-2"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-arrow-return-left fs-5"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Total Returns</h6>
+                        <h4 class="fw-bold mb-0 text-dark" id="totalReturns">fetching...</h4>
                     </div>
                 </div>
             </div>
-            {{-- Cards will be reordered below --}}
 
-            {{-- total expenses and total debt --}}
             <div class="col-6 col-md-4 col-lg-2" id="totalExpensesDiv">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title">Total Expenses</h6>
-                        <h3 class="fw-bold text-success" id="totalExpenses">fetching...</h3>
+                <div class="card border-0 shadow-sm h-100 py-2">
+                    <div class="card-body p-2">
+                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center mb-2"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-cash-stack fs-5"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Total Expenses</h6>
+                        <h4 class="fw-bold mb-0 text-dark" id="totalExpenses">fetching...</h4>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2 hidden" id="totalDebtDiv">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title">Total Debt</h6>
-                        <h3 class="fw-bold text-success" id="totalDebt">fetching...</h3>
+                <div class="card border-0 shadow-sm h-100 py-2">
+                    <div class="card-body p-2">
+                        <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center mb-2"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-person-exclamation fs-5"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Total Debt</h6>
+                        <h4 class="fw-bold mb-0 text-dark" id="totalDebt">fetching...</h4>
                     </div>
                 </div>
             </div>
 
-            {{-- totalDeptsPaid, totalDeptsRemaining, totalDebts --}}
             <div class="col-6 col-md-4 col-lg-2 hidden" id="totalDeptsPaidDiv">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title">Total Debt Paid</h6>
-                        <h3 class="fw-bold text-success" id="totalDeptsPaid">fetching...</h3>
+                <div class="card border-0 shadow-sm h-100 py-2">
+                    <div class="card-body p-2">
+                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center mb-2"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-check2-circle fs-5"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Total Debt Paid</h6>
+                        <h4 class="fw-bold mb-0 text-dark" id="totalDeptsPaid">fetching...</h4>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2 hidden" id="totalDeptsRemainingDiv">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title">Totat Dept Remain</h6>
-                        <h3 class="fw-bold text-primary" id="totalDeptsRemaining">fetching...</h3>
+                <div class="card border-0 shadow-sm h-100 py-2">
+                    <div class="card-body p-2">
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center mb-2"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-hourglass-split fs-5"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Totat Dept Remain</h6>
+                        <h4 class="fw-bold mb-0 text-dark" id="totalDeptsRemaining">fetching...</h4>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2 hidden" id="totalDebtsDiv">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title">Total Debts</h6>
-                        <h3 class="fw-bold text-dark" id="totalDebts">fetching...</h3>
+                <div class="card border-0 shadow-sm h-100 py-2">
+                    <div class="card-body p-2">
+                        <div class="rounded-circle bg-dark bg-opacity-10 text-dark d-inline-flex align-items-center justify-content-center mb-2"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-list-check fs-5"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Total Debts</h6>
+                        <h4 class="fw-bold mb-0 text-dark" id="totalDebts">fetching...</h4>
                     </div>
                 </div>
             </div>
 
-            {{-- //installments --}}
             <div class="col-6 col-md-4 col-lg-2" id="totalInstallmentsDiv">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title">Total Installments</h6>
-                        <h3 class="fw-bold text-primary" id="totalInstallments">fetching...</h3>
+                <div class="card border-0 shadow-sm h-100 py-2">
+                    <div class="card-body p-2">
+                        <div class="rounded-circle bg-info bg-opacity-10 text-info d-inline-flex align-items-center justify-content-center mb-2"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-credit-card fs-5"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Total Installments</h6>
+                        <h4 class="fw-bold mb-0 text-dark" id="totalInstallments">fetching...</h4>
                     </div>
                 </div>
             </div>
 
-            {{-- //Net Profit --}}
             <div class="col-6 col-md-4 col-lg-2" id="totalProfitDiv">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title">Net Profit</h6>
-                        <h3 class="fw-bold text-success" id="totalProfit">fetching...</h3>
+                <div class="card border-0 shadow-sm h-100 py-2">
+                    <div class="card-body p-2">
+                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center mb-2"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-graph-up-arrow fs-5"></i>
+                        </div>
+                        <h6 class="text-muted small mb-1">Net Profit</h6>
+                        <h4 class="fw-bold mb-0 text-dark" id="totalProfit">fetching...</h4>
                     </div>
                 </div>
             </div>
@@ -185,10 +235,22 @@
         <!-- Chart Section -->
         <div class="row g-4 justify-content-center mb-4 text-center" id="DivchartHead">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h6 class="card-title" id="chartHead">Fetching...</h6>
-                        <canvas id="transactionChart"></canvas>
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4 text-primary">Top 10 Most Sold Medicines</h5>
+                        <div style="height: 400px;">
+                            <canvas id="topSalesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4 text-danger">Bottom 10 Sold Medicines</h5>
+                        <div style="height: 400px;">
+                            <canvas id="bottomSalesChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -198,7 +260,9 @@
     </div>
     <script>
         $(document).ready(function() {
-            var transactionChart = null;
+            var topSalesChart = null;
+            var bottomSalesChart = null;
+            var cachedLogo = null;
             $('.dateDiv').addClass('hidden');
             var medicine = $('#medicine').val();
             var selectedMedicineName = $('#medicine').find(':selected').text();
@@ -220,9 +284,7 @@
             const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
             const startOfYear = new Date(today.getFullYear(), 0, 1);
 
-            $(document).ready(function() {
-                $('#dateFilter').trigger('change');
-            });
+
 
             //CAPTURE CATEGORY & MEDICINES FILTERS
             $('#category').on('change', function() {
@@ -453,7 +515,9 @@
 
             // Example filterData function
             function filterData(start, end, category, medicine = null) {
-                // alert('category: '+category);
+                if ($.fn.DataTable.isDataTable('.reportsTable')) {
+                    $('.reportsTable').DataTable().destroy();
+                }
                 $('#loader-overlay').show(); // show loader initially
                 var transactionChart = null;
                 // Add your AJAX request or data filtering logic here
@@ -478,6 +542,10 @@
                         response.installments = response.installments || [];
                         response.totalExpenses = response.totalExpenses || 0;
                         response.totalInstallments = response.totalInstallments || 0;
+                        response.topLabels = response.topLabels || [];
+                        response.topData = response.topData || [];
+                        response.bottomLabels = response.bottomLabels || [];
+                        response.bottomData = response.bottomData || [];
                         // ----------------
 
                         //capture response type
@@ -565,16 +633,16 @@
                                     </thead>
                                     <tbody>
                                         ${response.sales.map((sale, index) => `
-                                                                                                                                                                                                                                                                                                <tr>
-                                                                                                                                                                                                                                                                                                    <td>${index + 1}</td>
-                                                                                                                                                                                                                                                                                                    <td>${sale.date}</td>
-                                                                                                                                                                                                                                                                                                    <td class ="text-left">${sale.item['name']}</td>
-                                                                                                                                                                                                                                                                                                    <td>${sale.quantity}</td>
-                                                                                                                                                                                                                                                                                                   <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity * sale.stock['selling_price'])}</td>
-                                                                                                                                                                                                                                                                                                   <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity *((sale.stock['selling_price'])-(sale.stock['buying_price'])))}</td>
+                                                                                                                                                                                                                                                                                                                                                                        <tr>
+                                                                                                                                                                                                                                                                                                                                                                            <td>${index + 1}</td>
+                                                                                                                                                                                                                                                                                                                                                                            <td>${sale.date}</td>
+                                                                                                                                                                                                                                                                                                                                                                            <td class ="text-left">${sale.item['name']}</td>
+                                                                                                                                                                                                                                                                                                                                                                            <td>${sale.quantity}</td>
+                                                                                                                                                                                                                                                                                                                                                                           <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity * sale.stock['selling_price'])}</td>
+                                                                                                                                                                                                                                                                                                                                                                           <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(sale.quantity *((sale.stock['selling_price'])-(sale.stock['buying_price'])))}</td>
 
-                                                                                                                                                                                                                                                                                                </tr>
-                                                                                                                                                                                                                                                                                            `).join('')}
+                                                                                                                                                                                                                                                                                                                                                                        </tr>
+                                                                                                                                                                                                                                                                                                                                                                    `).join('')}
                                             ${response.sales.length == 0 ? ` <tr> <td colspan="6" class="text-center">No data found</td> </tr> ` : ''}
                                              
                                             </tbody>
@@ -603,21 +671,21 @@
                                     </thead>
                                     <tbody>
                                         ${response.stocks.map((stock, index) => `
-                                                                                                                                                                                                                                                                                                    <tr>
-                                                                                                                                                                                                                                                                                                        <td>${index + 1}</td>
-                                                                                                                                                                                                                                                                                                        <td class="text-left">${stock.item['name']}</td>
-                                                                                                                                                                                                                                                                                                        <td>${stock.quantity}</td>
-                                                                                                                                                                                                                                                                                                        <td>${stock.remain_Quantity}</td>
-                                                                                                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
-                                                                                                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
-                                                                                                                                                                                                                                                                                                        <td>${stock.low_stock_percentage}</td>
-                                                                                                                                                                                                                                                                                                        <td>${stock.expire_date}</td>
-                                                                                                                                                                                                                                                                                                        <td>${stock.batch_number}</td>
-                                                                                                                                                                                                                                                                                                        <td>${stock.supplier}</td> 
-                                                                                                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
-                                                                                                                                                                                                                                                                                                        <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
-                                                                                                                                                                                                                                                                                                        ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>Tsh 0</td>`}
-                                                                                                                                                                                                                                                                                                    </tr>`).join('')}
+                                                                                                                                                                                                                                                                                                                                                                            <tr>
+                                                                                                                                                                                                                                                                                                                                                                                <td>${index + 1}</td>
+                                                                                                                                                                                                                                                                                                                                                                                <td class="text-left">${stock.item['name']}</td>
+                                                                                                                                                                                                                                                                                                                                                                                <td>${stock.quantity}</td>
+                                                                                                                                                                                                                                                                                                                                                                                <td>${stock.remain_Quantity}</td>
+                                                                                                                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price)}</td>
+                                                                                                                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price)}</td>
+                                                                                                                                                                                                                                                                                                                                                                                <td>${stock.low_stock_percentage}</td>
+                                                                                                                                                                                                                                                                                                                                                                                <td>${stock.expire_date}</td>
+                                                                                                                                                                                                                                                                                                                                                                                <td>${stock.batch_number}</td>
+                                                                                                                                                                                                                                                                                                                                                                                <td>${stock.supplier}</td> 
+                                                                                                                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.selling_price*(stock.quantity-stock.remain_Quantity))}</td>
+                                                                                                                                                                                                                                                                                                                                                                                <td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format((stock.quantity-stock.remain_Quantity)*(stock.selling_price-stock.buying_price))}</td>
+                                                                                                                                                                                                                                                                                                                                                                                ${stock.expire_date < today ? `<td>${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(stock.buying_price*stock.remain_Quantity)}</td>`:`<td>Tsh 0</td>`}
+                                                                                                                                                                                                                                                                                                                                                                            </tr>`).join('')}
                                             ${response.stocks.length == 0 ? `<tr><td colspan="8" class="text-center">No data found</td></tr>` : ''}
                                          
                                     </tbody>
@@ -640,19 +708,19 @@
                                     </thead>
                                     <tbody>
                                             ${response.expenses.map((expense, index) => `
-                                                                                                                    <tr>
-                                                                                                                        <td>${index + 1}</td>
-                                                                                                                        <td>${formatReadableDate(expense.expense_date)}</td>
-                                                                                                                        <td class="text-left">${expense.category?.name ?? 'N/A'}</td>
-                                                                                                                        <td class="text-left">${expense.vendor?.name ?? 'N/A'}</td>
-                                                                                                                        <td>${expense.payment_method}</td>
-                                                                                                                        <td class="text-left">${expense.status}</td>
-                                                                                                                        <td class="text-left">${new Intl.NumberFormat('en-TZ', { 
-                                                                                                                            style: 'currency', 
-                                                                                                                            currency: 'TZS' 
-                                                                                                                        }).format(expense.amount)}</td>
-                                                                                                                    </tr>
-                                                                                                                `).join('')}
+                                                                                                                                                                                            <tr>
+                                                                                                                                                                                                <td>${index + 1}</td>
+                                                                                                                                                                                                <td>${formatReadableDate(expense.expense_date)}</td>
+                                                                                                                                                                                                <td class="text-left">${expense.category?.name ?? 'N/A'}</td>
+                                                                                                                                                                                                <td class="text-left">${expense.vendor?.name ?? 'N/A'}</td>
+                                                                                                                                                                                                <td>${expense.payment_method}</td>
+                                                                                                                                                                                                <td class="text-left">${expense.status}</td>
+                                                                                                                                                                                                <td class="text-left">${new Intl.NumberFormat('en-TZ', { 
+                                                                                                                                                                                                    style: 'currency', 
+                                                                                                                                                                                                    currency: 'TZS' 
+                                                                                                                                                                                                }).format(expense.amount)}</td>
+                                                                                                                                                                                            </tr>
+                                                                                                                                                                                        `).join('')}
 
                                             ${response.expenses.length == 0 ? `<tr><td colspan="7" class="text-center">No data found</td></tr>` : ''}
                                          
@@ -677,20 +745,20 @@
                                         </thead>
                                         <tbody>
                                             ${response.debts.map((debt, index) => `
-                                                                                                                                                                                                                <tr>
-                                                                                                                                                                                                                    <td>${index + 1}</td>
-                                                                                                                                                                                                                    <td class="text-left">
-                                                                                                                                                                                                                    <strong>${debt.stock?.item?.name || 'N/A'}</strong> | 
-                                                                                                                                                                                                                    <small>${debt.stock?.batch_number || 'N/A'} (${debt.stock?.supplier || 'N/A'})</small>
-                                                                                                                                                                                                                    </td>
-                                                                                                                                                                                                                    <td>${formatReadableDate(debt.created_at)}</td>
-                                                                                                                                                                                                                    <td>${formatReadableDate(debt.updated_at)}</td>
-                                                                                                                                                                                                                    <td>${debt.status}</td>
-                                                                                                                                                                                                                    <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.debtAmount)}</td>
-                                                                                                                                                                                                                    <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.totalPaid)}</td>
-                                                                                                                                                                                                                    <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.debtAmount - debt.totalPaid)}</td>
-                                                                                                                                                                                                                    </tr>
-                                                                                                                                                                                                            `).join('')}
+                                                                                                                                                                                                                                                                                        <tr>
+                                                                                                                                                                                                                                                                                            <td>${index + 1}</td>
+                                                                                                                                                                                                                                                                                            <td class="text-left">
+                                                                                                                                                                                                                                                                                            <strong>${debt.stock?.item?.name || 'N/A'}</strong> | 
+                                                                                                                                                                                                                                                                                            <small>${debt.stock?.batch_number || 'N/A'} (${debt.stock?.supplier || 'N/A'})</small>
+                                                                                                                                                                                                                                                                                            </td>
+                                                                                                                                                                                                                                                                                            <td>${formatReadableDate(debt.created_at)}</td>
+                                                                                                                                                                                                                                                                                            <td>${formatReadableDate(debt.updated_at)}</td>
+                                                                                                                                                                                                                                                                                            <td>${debt.status}</td>
+                                                                                                                                                                                                                                                                                            <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.debtAmount)}</td>
+                                                                                                                                                                                                                                                                                            <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.totalPaid)}</td>
+                                                                                                                                                                                                                                                                                            <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(debt.debtAmount - debt.totalPaid)}</td>
+                                                                                                                                                                                                                                                                                            </tr>
+                                                                                                                                                                                                                                                                                    `).join('')}
                                                 ${response.debts.length == 0 ? `<tr><td colspan="10" class="text-center">No data found</td></tr>` : ''}
                                              
                                         </tbody>
@@ -711,17 +779,17 @@
                                     </thead>
                                     <tbody>
                                         ${response.installments.map((installment, index) => `
-                                                                                                                                            <tr>
-                                                                                                                                                <td>${index + 1}</td>
-                                                                                                                                                <td class="text-left">
-                                                                                                                                                    <strong>${installment.debt?.stock?.item?.name || 'N/A'}</strong> | 
-                                                                                                                                                    <small>${installment.debt?.stock?.batch_number || 'N/A'} (${installment.debt?.stock?.supplier || 'N/A'})</small>
-                                                                                                                                                </td>
-                                                                                                                                                <td class="text-left">${installment.description}</td>
-                                                                                                                                                <td>${formatReadableDate(installment.created_at)}</td>
-                                                                                                                                                <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(installment.amount)}</td>
-                                                                                                                                            </tr>
-                                                                                                                                    `).join('')}
+                                                                                                                                                                                                                    <tr>
+                                                                                                                                                                                                                        <td>${index + 1}</td>
+                                                                                                                                                                                                                        <td class="text-left">
+                                                                                                                                                                                                                            <strong>${installment.debt?.stock?.item?.name || 'N/A'}</strong> | 
+                                                                                                                                                                                                                            <small>${installment.debt?.stock?.batch_number || 'N/A'} (${installment.debt?.stock?.supplier || 'N/A'})</small>
+                                                                                                                                                                                                                        </td>
+                                                                                                                                                                                                                        <td class="text-left">${installment.description}</td>
+                                                                                                                                                                                                                        <td>${formatReadableDate(installment.created_at)}</td>
+                                                                                                                                                                                                                        <td class="text-left">${new Intl.NumberFormat('en-TZ', { style: 'currency', currency: 'TZS' }).format(installment.amount)}</td>
+                                                                                                                                                                                                                    </tr>
+                                                                                                                                                                                                            `).join('')}
                                             ${response.installments.length == 0 ? `<tr><td colspan="5" class="text-center">No data found</td></tr>` : ''}
                                          
                                     </tbody>
@@ -793,12 +861,18 @@
 
                             // data = [2200, 2900, 4000, 6000, 3000];
                             // labels = ['June', 'July', 'Aug', 'Sept', 'Nov'];
-                            $('#chartHead').html(
-                                `<p class="h3 sm-h4"><strong  class="text-danger">Sales</strong> trends of <strong class="text-danger">${selectedMedicineName}</strong> </p> <p>From: <span class="h5 sm-h6 text-primary">${start}</span> | To: <span class="h5 sm-h6 text-primary">${end}<span></p>`
-                            );
-                            labels = response.labels;
-                            data = response.data;
-                            drawGraph(labels, data);
+                            drawSalesChart('topSalesChart', response.topLabels, response.topData,
+                                'Top 10 Sold', 'rgba(54, 162, 235, 0.7)', 'rgba(54, 162, 235, 1)',
+                                topSalesChart,
+                                function(chart) {
+                                    topSalesChart = chart;
+                                });
+                            drawSalesChart('bottomSalesChart', response.bottomLabels, response
+                                .bottomData, 'Bottom 10 Sold', 'rgba(255, 99, 132, 0.7)',
+                                'rgba(255, 99, 132, 1)', bottomSalesChart,
+                                function(chart) {
+                                    bottomSalesChart = chart;
+                                });
 
 
                         } else {
@@ -863,9 +937,7 @@
 
                         // Initialize DataTable, but count the number of rows in the table first, if it is greater than 0, then destroy the table and reinitialize it, otherwise skip the initialization
                         if (response.rows > 0) {
-                            $('.reportsTable').DataTable().destroy(); // Destroy the old table
                             getBase64Image(function(logoBase64) {
-                                // alert(logoBase64);
                                 $('.reportsTable').DataTable({
                                     paging: true, // Enable paging
                                     searching: true, // Enable search bar
@@ -932,508 +1004,595 @@
                                             pageSize: 'A4', // A4 page size
                                             footer: false, // hii inasaidia kwenye baadhi ya versions (footer ikiwa true onadisplay)
                                             customize: function(doc) {
-                                                // let reportType = category ===
-                                                //     "sales" ? "Sales Report" :
-                                                //     "Stocks Report";
                                                 let reportTitles = {
-                                                    sales: "Sales Report",
-                                                    stocks: "Stocks Report",
-                                                    expenses: "Expenses Report",
-                                                    debts: "Debts Report",
-                                                    installments: "Installments Report"
+                                                    sales: "SALES REPORT",
+                                                    stocks: "STOCKS REPORT",
+                                                    expenses: "EXPENSES REPORT",
+                                                    debts: "DEBTS REPORT",
+                                                    installments: "INSTALLMENTS REPORT"
                                                 };
 
                                                 let reportType = reportTitles[
                                                         category] ??
-                                                    "Unknown Report";
+                                                    "PHARMACY REPORT";
+                                                let printDate = new Date()
+                                                    .toLocaleString();
 
-                                                let printDate =
-                                                    "From: pillpointone.com \n Date: " +
-                                                    new Date().toLocaleString();
+                                                // Define Styles
+                                                doc.styles.title = {
+                                                    color: '#2c3e50',
+                                                    fontSize: 20,
+                                                    bold: true,
+                                                    alignment: 'left',
+                                                    margin: [0, 0, 0, 5]
+                                                };
+                                                doc.styles.subtitle = {
+                                                    color: '#34495e',
+                                                    fontSize: 16,
+                                                    bold: true,
+                                                    alignment: 'left',
+                                                    margin: [0, 0, 0, 2]
+                                                };
+                                                doc.styles.header = {
+                                                    color: '#7f8c8d',
+                                                    fontSize: 10,
+                                                    italics: true,
+                                                    alignment: 'left',
+                                                    margin: [0, 0, 0, 20]
+                                                };
+                                                doc.styles.tableHeader = {
+                                                    bold: true,
+                                                    fontSize: 11,
+                                                    color: 'white',
+                                                    fillColor: '#2980b9',
+                                                    alignment: 'center',
+                                                    margin: [5, 5, 5, 5]
+                                                };
+                                                doc.styles.tableBody = {
+                                                    fontSize: 9,
+                                                    alignment: 'center'
+                                                };
+                                                doc.styles.tableFooter = {
+                                                    bold: true,
+                                                    fontSize: 10,
+                                                    fillColor: '#ecf0f1',
+                                                    alignment: 'center'
+                                                };
 
-                                                // Header Layout: Logo on Left, Title on Right
-                                                let headerLayout = {
+                                                // Header Layout
+                                                let header = {
                                                     columns: [
-                                                        // Left Side: Logo (if available)
-                                                        {
-                                                            image: logoBase64 ||
-                                                                '', // Use logo if available
-                                                            width: 80, // Adjust size as needed
-                                                            alignment: 'left',
-                                                            margin: [0,
-                                                                0,
-                                                                10,
-                                                                0
-                                                            ] // Spacing
+                                                        logoBase64 ? {
+                                                            image: logoBase64,
+                                                            width: 70,
+                                                            alignment: 'left'
+                                                        } : {
+                                                            text: '',
+                                                            width: 70
                                                         },
-                                                        // Right Side: Report Titles
                                                         {
                                                             stack: [{
-                                                                    text: "PHARMACY MANAGEMENT SYSTEM",
-                                                                    fontSize: 18,
-                                                                    color: '#0000FF', // Blue
-                                                                    bold: true,
-                                                                    alignment: 'left'
-                                                                },
-                                                                {
                                                                     text: "{{ strtoupper($pharmacy->name) }}",
-                                                                    fontSize: 17,
-                                                                    italics: true,
-                                                                    color: '#0000FF', // Blue
-                                                                    bold: true,
-                                                                    alignment: 'left'
+                                                                    style: 'title'
                                                                 },
                                                                 {
                                                                     text: reportType,
-                                                                    fontSize: 15,
-                                                                    color: '#008000', // Green
-                                                                    bold: true,
-                                                                    alignment: 'left',
-                                                                    margin: [
-                                                                        0,
-                                                                        5,
-                                                                        0,
-                                                                        0
-                                                                    ]
+                                                                    style: 'subtitle'
                                                                 },
                                                                 {
-                                                                    text: 'FROM: ' +
+                                                                    text: 'Period: ' +
                                                                         start +
-                                                                        ' TO: ' +
+                                                                        ' to ' +
                                                                         end,
-                                                                    fontSize: 12,
-                                                                    italics: true,
-                                                                    alignment: 'left',
-                                                                    margin: [
-                                                                        0,
-                                                                        0,
-                                                                        0,
-                                                                        20
-                                                                    ]
+                                                                    fontSize: 11,
+                                                                    color: '#34495e'
+                                                                },
+                                                                {
+                                                                    text: 'Generated on: ' +
+                                                                        printDate,
+                                                                    fontSize: 9,
+                                                                    color: '#95a5a6'
                                                                 }
                                                             ],
-                                                            width: '*'
+                                                            margin: [10,
+                                                                0,
+                                                                0, 0
+                                                            ]
                                                         }
                                                     ],
-                                                    margin: [0, 0, 0,
-                                                        10
-                                                    ] // Space after the header
+                                                    margin: [0, 0, 0, 20]
                                                 };
 
-                                                //  Print Date (Below header, right-aligned)
-                                                let printDateText = {
-                                                    text: printDate,
-                                                    fontSize: 10,
-                                                    italics: true,
-                                                    alignment: 'right',
-                                                    margin: [0, 0, 0, 10]
+                                                // Summary Section (for sales especially)
+                                                let summary = {
+                                                    table: {
+                                                        widths: ['*', '*',
+                                                            '*', '*'
+                                                        ],
+                                                        body: [
+                                                            [{
+                                                                text: 'Total Sales',
+                                                                style: 'tableHeader'
+                                                            }, {
+                                                                text: 'Total Expenses',
+                                                                style: 'tableHeader'
+                                                            }, {
+                                                                text: 'Total Installments',
+                                                                style: 'tableHeader'
+                                                            }, {
+                                                                text: 'Net Profit',
+                                                                style: 'tableHeader'
+                                                            }],
+                                                            [{
+                                                                text: $(
+                                                                        '#totalSales'
+                                                                    )
+                                                                    .text(),
+                                                                style: 'tableBody'
+                                                            }, {
+                                                                text: $(
+                                                                        '#totalExpenses'
+                                                                    )
+                                                                    .text(),
+                                                                style: 'tableBody'
+                                                            }, {
+                                                                text: $(
+                                                                        '#totalInstallments'
+                                                                    )
+                                                                    .text(),
+                                                                style: 'tableBody'
+                                                            }, {
+                                                                text: $(
+                                                                        '#totalProfit'
+                                                                    )
+                                                                    .text(),
+                                                                style: 'tableBody'
+                                                            }]
+                                                        ]
+                                                    },
+                                                    layout: 'lightHorizontalLines',
+                                                    margin: [0, 0, 0, 20]
                                                 };
 
-                                                //  **Apply Table Styles**
-                                                doc.styles.tableHeader = {
-                                                    bold: true,
-                                                    fontSize: 12,
-                                                    color: 'white',
-                                                    fillColor: '#333', // Dark gray header
-                                                    alignment: 'center'
-                                                };
-                                                doc.styles.tableBody = {
-                                                    fontSize: 10,
-                                                    color: '#000', // Black text
-                                                    alignment: 'center'
-                                                };
+                                                // Clean up any default blank title/space at the start
+                                                // The original DataTables PDF button generates a default title.
+                                                // We'll find the actual table content and then rebuild doc.content.
+                                                let mainTable = doc.content
+                                                    .find(c => !!c.table);
 
-                                                doc.content.unshift(
-                                                    printDateText
-                                                ); // Add print date
+                                                // Clear default content and rebuild it with our custom layout
+                                                doc.content = [header];
 
-                                                doc.content.unshift(
-                                                    headerLayout
-                                                );
+                                                // Add Summary Section for Sales
+                                                if (category === 'sales') {
+                                                    doc.content.push(summary);
+                                                }
 
-                                                // Format Table Borders
-                                                doc.content.forEach(function(
-                                                    content) {
-                                                    if (content.table) {
-                                                        content
-                                                            .layout = {
-                                                                hLineWidth: function(
-                                                                    i,
-                                                                    node
+                                                // Put the main data table back
+                                                if (mainTable) {
+                                                    doc.content.push(mainTable);
+                                                }
+
+                                                // Table formatting (formatting the mainTable we just added)
+                                                let table = mainTable;
+                                                if (table) {
+                                                    table.layout = {
+                                                        hLineWidth: (i,
+                                                                node) =>
+                                                            0.5,
+                                                        vLineWidth: (i,
+                                                                node) =>
+                                                            0.5,
+                                                        hLineColor: (i,
+                                                                node) =>
+                                                            '#bdc3c7',
+                                                        vLineColor: (i,
+                                                                node) =>
+                                                            '#bdc3c7',
+                                                        paddingLeft: (i,
+                                                                node) =>
+                                                            category ===
+                                                            'stocks' ? 2 :
+                                                            4,
+                                                        paddingRight: (i,
+                                                                node) =>
+                                                            category ===
+                                                            'stocks' ? 2 :
+                                                            4,
+                                                        paddingTop: (i,
+                                                            node) => 4,
+                                                        paddingBottom: (i,
+                                                            node) => 4
+                                                    };
+
+                                                    // Auto widths
+                                                    table.table.widths = Array(
+                                                        table.table.body[0]
+                                                        .length).fill('*');
+
+                                                    // Category-specific formatting
+                                                    if (category === 'sales') {
+                                                        table.table.widths = [
+                                                            'auto', '15%',
+                                                            '*', 'auto',
+                                                            '15%', '15%'
+                                                        ];
+                                                        table.table.body
+                                                            .forEach((row,
+                                                                rowIndex
+                                                            ) => {
+                                                                if (rowIndex >
+                                                                    0) {
+                                                                    // Medicine (Col 2)
+                                                                    if (row[
+                                                                            2
+                                                                            ]) {
+                                                                        if (typeof row[
+                                                                                2
+                                                                            ] ===
+                                                                            'string'
+                                                                        )
+                                                                            row[
+                                                                                2
+                                                                                ] = {
+                                                                                text: row[
+                                                                                    2
+                                                                                ]
+                                                                            };
+                                                                        row[2]
+                                                                            .alignment =
+                                                                            'left';
+                                                                    }
+                                                                    // Qty, Amount, Profit (Cols 3, 4, 5)
+                                                                    [3, 4,
+                                                                        5
+                                                                    ]
+                                                                    .forEach
+                                                                        (i => {
+                                                                            if (row[
+                                                                                    i
+                                                                                    ]) {
+                                                                                if (typeof row[
+                                                                                        i
+                                                                                    ] ===
+                                                                                    'string'
+                                                                                )
+                                                                                    row[
+                                                                                        i
+                                                                                        ] = {
+                                                                                        text: row[
+                                                                                            i
+                                                                                        ]
+                                                                                    };
+                                                                                row[i]
+                                                                                    .alignment =
+                                                                                    'right';
+                                                                            }
+                                                                        });
+                                                                }
+                                                            });
+                                                    } else if (category ===
+                                                        'expenses') {
+                                                        table.table.widths = [
+                                                            'auto', 'auto',
+                                                            '*', '*',
+                                                            'auto', 'auto',
+                                                            '15%'
+                                                        ];
+                                                        table.table.body
+                                                            .forEach((row,
+                                                                rowIndex
+                                                            ) => {
+                                                                if (rowIndex >
+                                                                    0 &&
+                                                                    row[6]
                                                                 ) {
-                                                                    return 0.5;
-                                                                }, // Horizontal lines
-                                                                vLineWidth: function(
-                                                                    i,
-                                                                    node
+                                                                    if (typeof row[
+                                                                            6
+                                                                        ] ===
+                                                                        'string'
+                                                                    )
+                                                                        row[
+                                                                            6
+                                                                            ] = {
+                                                                            text: row[
+                                                                                6
+                                                                            ]
+                                                                        };
+                                                                    row[6]
+                                                                        .alignment =
+                                                                        'right';
+                                                                }
+                                                            });
+                                                    } else if (category ===
+                                                        'debts') {
+                                                        table.table.widths = [
+                                                            'auto', '*',
+                                                            'auto', 'auto',
+                                                            'auto', '12%',
+                                                            '12%', '12%'
+                                                        ];
+                                                        table.table.body
+                                                            .forEach((row,
+                                                                rowIndex
+                                                            ) => {
+                                                                if (rowIndex >
+                                                                    0) {
+                                                                    [5, 6,
+                                                                        7
+                                                                    ]
+                                                                    .forEach
+                                                                        (i => {
+                                                                            if (row[
+                                                                                    i
+                                                                                    ]) {
+                                                                                if (typeof row[
+                                                                                        i
+                                                                                    ] ===
+                                                                                    'string'
+                                                                                )
+                                                                                    row[
+                                                                                        i
+                                                                                        ] = {
+                                                                                        text: row[
+                                                                                            i
+                                                                                        ]
+                                                                                    };
+                                                                                row[i]
+                                                                                    .alignment =
+                                                                                    'right';
+                                                                            }
+                                                                        });
+                                                                }
+                                                            });
+                                                    } else if (category ===
+                                                        'installments') {
+                                                        table.table.widths = [
+                                                            'auto', '*',
+                                                            '*', 'auto',
+                                                            '15%'
+                                                        ];
+                                                        table.table.body
+                                                            .forEach((row,
+                                                                rowIndex
+                                                            ) => {
+                                                                if (rowIndex >
+                                                                    0 &&
+                                                                    row[4]
                                                                 ) {
-                                                                    return 0.5;
-                                                                }, // Vertical lines
-                                                                hLineColor: function(
-                                                                    i,
-                                                                    node
-                                                                ) {
-                                                                    return '#aaa';
-                                                                }, // Light gray lines
-                                                                vLineColor: function(
-                                                                    i,
-                                                                    node
-                                                                ) {
-                                                                    return '#aaa';
-                                                                } // Light gray lines
-                                                            };
-                                                        // Set all columns to auto-adjust width
-                                                        content.table
-                                                            .widths =
-                                                            Array(
-                                                                content
-                                                                .table
-                                                                .body[0]
-                                                                .length)
-                                                            .fill('*');
+                                                                    if (typeof row[
+                                                                            4
+                                                                        ] ===
+                                                                        'string'
+                                                                    )
+                                                                        row[
+                                                                            4
+                                                                            ] = {
+                                                                            text: row[
+                                                                                4
+                                                                            ]
+                                                                        };
+                                                                    row[4]
+                                                                        .alignment =
+                                                                        'right';
+                                                                }
+                                                            });
+                                                    } else if (category ===
+                                                        'stocks') {
+                                                        // 13 columns - Reduce font size and optimize widths
+                                                        table.table.widths = [
+                                                            'auto', '*',
+                                                            'auto', 'auto',
+                                                            'auto', 'auto',
+                                                            'auto', 'auto',
+                                                            'auto', 'auto',
+                                                            'auto', 'auto',
+                                                            'auto'
+                                                        ];
+                                                        table.table.body
+                                                            .forEach((row,
+                                                                rowIndex
+                                                            ) => {
+                                                                row.forEach(
+                                                                    (cell,
+                                                                        cellIndex
+                                                                    ) => {
+                                                                        // Convert to object if string to apply font size
+                                                                        let cellContent =
+                                                                            (typeof cell ===
+                                                                                'string'
+                                                                            ) ?
+                                                                            {
+                                                                                text: cell
+                                                                            } :
+                                                                            cell;
+                                                                        if (
+                                                                            cellContent
+                                                                            ) {
+                                                                            cellContent
+                                                                                .fontSize =
+                                                                                7; // Smaller font for 13 columns
+
+                                                                            // Alignments
+                                                                            if (rowIndex >
+                                                                                0
+                                                                            ) {
+                                                                                if (cellIndex ===
+                                                                                    1
+                                                                                ) { // Medicine
+                                                                                    cellContent
+                                                                                        .alignment =
+                                                                                        'left';
+                                                                                } else if (
+                                                                                    [4, 5,
+                                                                                        10,
+                                                                                        11,
+                                                                                        12
+                                                                                    ]
+                                                                                    .includes(
+                                                                                        cellIndex
+                                                                                    )
+                                                                                ) { // Currency
+                                                                                    cellContent
+                                                                                        .alignment =
+                                                                                        'right';
+                                                                                } else if (
+                                                                                    [2, 3,
+                                                                                        6
+                                                                                    ]
+                                                                                    .includes(
+                                                                                        cellIndex
+                                                                                    )
+                                                                                ) { // Numbers
+                                                                                    cellContent
+                                                                                        .alignment =
+                                                                                        'right';
+                                                                                }
+                                                                            }
+                                                                            row[cellIndex] =
+                                                                                cellContent;
+                                                                        }
+                                                                    });
+                                                            });
                                                     }
-                                                });
 
-                                                //PROPER APPEND FOR TOTAL SALES
-                                                // Append TOTAL row for sales report
-
-                                                doc.content.forEach(function(
-                                                    content) {
-                                                    if (content.table) {
-                                                        if (category ===
-                                                            'sales') {
-                                                            // SALES FOOTER
-                                                            content
-                                                                .table
-                                                                .body
-                                                                .push([{
-                                                                        text: 'TOTAL',
-                                                                        bold: true,
-                                                                        alignment: 'center',
-                                                                        colSpan: 4
-                                                                    },
-                                                                    {},
-                                                                    {},
-                                                                    {},
-                                                                    {
-                                                                        text: $(
-                                                                                '#totalSales'
-                                                                            )
-                                                                            .text(),
-                                                                        bold: true,
-                                                                        alignment: 'center'
-                                                                    },
-                                                                    {
-                                                                        text: $(
-                                                                                '#totalProfit'
-                                                                            )
-                                                                            .text(),
-                                                                        bold: true,
-                                                                        alignment: 'center'
-                                                                    }
-                                                                ]);
-                                                        }
-
-                                                        //expenses total row
-                                                        if (category ===
-                                                            'expenses'
-                                                        ) {
-                                                            // EXPENSES PRINTED FOOTER
-                                                            content
-                                                                .table
-                                                                .body
-                                                                .push([{
-                                                                        text: 'TOTAL',
-                                                                        bold: true,
-                                                                        alignment: 'center',
-                                                                        colSpan: 6
-                                                                    },
-                                                                    {},
-                                                                    {},
-                                                                    {},
-                                                                    {},
-                                                                    {},
-                                                                    {
-                                                                        text: $(
-                                                                                '#totalExpenses'
-                                                                            )
-                                                                            .text(),
-                                                                        bold: true,
-                                                                        alignment: 'left'
-                                                                    }
-                                                                ]);
-                                                        }
-
-                                                        //debts total row
-                                                        if (category ===
-                                                            'debts') {
-                                                            // DEPTS PRINTED FOOTER
-                                                            content
-                                                                .table
-                                                                .body
-                                                                .push([{
-                                                                        text: 'TOTAL',
-                                                                        bold: true,
-                                                                        alignment: 'center',
-                                                                        colSpan: 5
-                                                                    },
-                                                                    {},
-                                                                    {},
-                                                                    {},
-                                                                    {},
-                                                                    {
-                                                                        text: $(
-                                                                                '#totalDebt'
-                                                                            )
-                                                                            .text(),
-                                                                        bold: true,
-                                                                        alignment: 'left'
-                                                                    },
-                                                                    {
-                                                                        text: $(
-                                                                                '#totalDeptsPaid'
-                                                                            )
-                                                                            .text(),
-                                                                        bold: true,
-                                                                        alignment: 'left'
-                                                                    },
-                                                                    {
-                                                                        text: $(
-                                                                                '#totalDeptsRemaining'
-                                                                            )
-                                                                            .text(),
-                                                                        bold: true,
-                                                                        alignment: 'left'
-                                                                    }
-                                                                ]);
-                                                        }
-
-                                                        //installments total row
-                                                        if (category ===
-                                                            'installments'
-                                                        ) {
-                                                            // SALES FOOTER
-                                                            content
-                                                                .table
-                                                                .body
-                                                                .push([{
-                                                                        text: 'TOTAL',
-                                                                        bold: true,
-                                                                        alignment: 'center',
-                                                                        colSpan: 4
-                                                                    },
-                                                                    {},
-                                                                    {},
-                                                                    {},
-                                                                    {
-                                                                        text: $(
-                                                                                '#totalInstallments'
-                                                                            )
-                                                                            .text(),
-                                                                        bold: true,
-                                                                        alignment: 'left'
-                                                                    }
-                                                                ]);
-                                                        }
+                                                    // Add Footer Row
+                                                    let footerData = [];
+                                                    if (category === 'sales') {
+                                                        footerData = [{
+                                                                text: 'TOTAL',
+                                                                colSpan: 4,
+                                                                style: 'tableFooter'
+                                                            }, {}, {}, {},
+                                                            {
+                                                                text: $(
+                                                                        '#totalSales'
+                                                                        )
+                                                                    .text(),
+                                                                style: 'tableFooter',
+                                                                alignment: 'right'
+                                                            },
+                                                            {
+                                                                text: $(
+                                                                        '#totalProfit'
+                                                                        )
+                                                                    .text(),
+                                                                style: 'tableFooter',
+                                                                alignment: 'right'
+                                                            }
+                                                        ];
+                                                    } else if (category ===
+                                                        'expenses') {
+                                                        footerData = [{
+                                                                text: 'TOTAL',
+                                                                colSpan: 6,
+                                                                style: 'tableFooter'
+                                                            }, {}, {}, {},
+                                                            {}, {},
+                                                            {
+                                                                text: $(
+                                                                        '#totalExpenses'
+                                                                        )
+                                                                    .text(),
+                                                                style: 'tableFooter',
+                                                                alignment: 'right'
+                                                            }
+                                                        ];
+                                                    } else if (category ===
+                                                        'debts') {
+                                                        footerData = [{
+                                                                text: 'TOTAL',
+                                                                colSpan: 5,
+                                                                style: 'tableFooter'
+                                                            }, {}, {}, {},
+                                                            {},
+                                                            {
+                                                                text: $(
+                                                                        '#totalDebt'
+                                                                        )
+                                                                    .text(),
+                                                                style: 'tableFooter',
+                                                                alignment: 'right'
+                                                            },
+                                                            {
+                                                                text: $(
+                                                                        '#totalDeptsPaid'
+                                                                        )
+                                                                    .text(),
+                                                                style: 'tableFooter',
+                                                                alignment: 'right'
+                                                            },
+                                                            {
+                                                                text: $(
+                                                                        '#totalDeptsRemaining'
+                                                                        )
+                                                                    .text(),
+                                                                style: 'tableFooter',
+                                                                alignment: 'right'
+                                                            }
+                                                        ];
+                                                    } else if (category ===
+                                                        'installments') {
+                                                        footerData = [{
+                                                                text: 'TOTAL',
+                                                                colSpan: 4,
+                                                                style: 'tableFooter'
+                                                            }, {}, {}, {},
+                                                            {
+                                                                text: $(
+                                                                        '#totalInstallments'
+                                                                        )
+                                                                    .text(),
+                                                                style: 'tableFooter',
+                                                                alignment: 'right'
+                                                            }
+                                                        ];
                                                     }
 
-                                                });
+                                                    if (footerData.length > 0) {
+                                                        table.table.body.push(
+                                                            footerData);
+                                                    }
+                                                }
 
-                                                // page margins
-                                                doc.pageMargins = [20, 60, 20,
+                                                // Page layout
+                                                doc.pageMargins = [40, 40, 40,
                                                     40
                                                 ];
-
-                                                // Add page numbers (footer)
                                                 doc.footer = function(
                                                     currentPage, pageCount
                                                 ) {
                                                     return {
                                                         columns: [{
-                                                            text: 'Page ' +
-                                                                currentPage
-                                                                .toString() +
-                                                                ' of ' +
-                                                                pageCount,
-                                                            alignment: 'right',
-                                                            fontSize: 9,
-                                                            margin: [
-                                                                0,
-                                                                0,
-                                                                20,
-                                                                0
-                                                            ]
-                                                        }]
+                                                                text: 'pillpointone.com',
+                                                                alignment: 'left',
+                                                                fontSize: 8,
+                                                                color: '#95a5a6',
+                                                                margin: [
+                                                                    40,
+                                                                    0
+                                                                ]
+                                                            },
+                                                            {
+                                                                text: 'Page ' +
+                                                                    currentPage +
+                                                                    ' of ' +
+                                                                    pageCount,
+                                                                alignment: 'right',
+                                                                fontSize: 8,
+                                                                color: '#95a5a6',
+                                                                margin: [
+                                                                    0,
+                                                                    0,
+                                                                    40,
+                                                                    0
+                                                                ]
+                                                            }
+                                                        ]
                                                     };
                                                 };
-
-                                                doc.content.forEach(function(
-                                                    content) {
-                                                    if (content.table) {
-                                                        // define adaptive widths for stock table
-                                                        if (category ===
-                                                            'stocks') {
-                                                            content
-                                                                .table
-                                                                .widths = [
-                                                                    'auto', // #
-                                                                    'auto', // Batch Number
-                                                                    'auto', // Buying Price
-                                                                    'auto', // Selling Price
-                                                                    'auto', // Expiry Date
-                                                                    'auto', // Low Stock
-                                                                    'auto', // Supplier
-                                                                    '*', // Medicine (flexible because names are long)
-                                                                    'auto', // Stocked Qty
-                                                                    'auto', // Remained Qty
-                                                                    'auto', // Total Sales
-                                                                    'auto', // Total Profit
-                                                                    'auto' // Expired Loss
-                                                                ];
-                                                        }
-
-                                                        if (category ===
-                                                            'sales') {
-                                                            content
-                                                                .table
-                                                                .widths = [
-                                                                    'auto', // #
-                                                                    'auto', // Date
-                                                                    // 'auto',   // Medicine
-                                                                    '*', // Medicine
-                                                                    'auto', // Quantity
-                                                                    'auto', // Total Sales
-                                                                    'auto' // Total profit
-                                                                ];
-
-                                                            // Force left + top alignment & wrapping for Medicine column
-                                                            content
-                                                                .table
-                                                                .body
-                                                                .forEach(
-                                                                    (row,
-                                                                        rowIndex
-                                                                    ) => {
-                                                                        if (rowIndex >
-                                                                            0
-                                                                        ) { // skip header row
-                                                                            row[2] = {
-                                                                                text: row[
-                                                                                    2
-                                                                                ],
-                                                                                alignment: 'left',
-                                                                                noWrap: false,
-                                                                                margin: [
-                                                                                    0,
-                                                                                    0,
-                                                                                    0,
-                                                                                    0
-                                                                                ], // optional: remove padding
-                                                                                style: 'medicineCell'
-                                                                            };
-                                                                        }
-                                                                    });
-
-                                                            // Add a style in your pdfmake doc definition
-                                                            content
-                                                                .styles = {
-                                                                    medicineCell: {
-                                                                        alignment: 'left',
-                                                                        valign: 'top' // ensure text starts at top of cell
-                                                                    }
-                                                                };
-                                                        }
-
-
-                                                        // format alignment
-                                                        content.table
-                                                            .body
-                                                            .forEach(
-                                                                function(
-                                                                    row,
-                                                                    rowIndex
-                                                                ) {
-                                                                    if (rowIndex ===
-                                                                        0
-                                                                    )
-                                                                        return; // skip header
-                                                                    // align money columns to the right
-                                                                    [2, 3,
-                                                                        10,
-                                                                        11,
-                                                                        12
-                                                                    ]
-                                                                    .forEach
-                                                                        (function(
-                                                                            colIndex
-                                                                        ) {
-                                                                            if (row[
-                                                                                    colIndex
-                                                                                ] &&
-                                                                                row[
-                                                                                    colIndex
-                                                                                ]
-                                                                                .text !==
-                                                                                undefined
-                                                                            ) {
-                                                                                row[colIndex]
-                                                                                    .alignment =
-                                                                                    'right';
-                                                                            } else if (
-                                                                                typeof row[
-                                                                                    colIndex
-                                                                                ] ===
-                                                                                'string'
-                                                                            ) {
-                                                                                row[colIndex] = {
-                                                                                    text: row[
-                                                                                        colIndex
-                                                                                    ],
-                                                                                    alignment: 'right'
-                                                                                };
-                                                                            }
-                                                                        });
-                                                                    // center align qty columns
-                                                                    [0, 8,
-                                                                        9
-                                                                    ]
-                                                                    .forEach
-                                                                        (function(
-                                                                            colIndex
-                                                                        ) {
-                                                                            if (row[
-                                                                                    colIndex
-                                                                                ] &&
-                                                                                row[
-                                                                                    colIndex
-                                                                                ]
-                                                                                .text !==
-                                                                                undefined
-                                                                            ) {
-                                                                                row[colIndex]
-                                                                                    .alignment =
-                                                                                    'center';
-                                                                            } else if (
-                                                                                typeof row[
-                                                                                    colIndex
-                                                                                ] ===
-                                                                                'string'
-                                                                            ) {
-                                                                                row[colIndex] = {
-                                                                                    text: row[
-                                                                                        colIndex
-                                                                                    ],
-                                                                                    alignment: 'center'
-                                                                                };
-                                                                            }
-                                                                        });
-                                                                });
-                                                    }
-
-                                                });
-
                                             }
-                                            // hapa##
+
                                         }
                                     ],
                                     columnDefs: columnDefs,
@@ -1459,48 +1618,75 @@
             }
 
             // Initialize Chart.js
-            function drawGraph(labels, data) {
-                var ctx = $('#transactionChart')[0].getContext('2d');
-                if (transactionChart) {
-                    transactionChart.destroy(); // Destroy the old chart
-                    transactionChart = null;
+            function drawSalesChart(canvasId, labels, data, label, bgColor, borderColor, chartInstance,
+                setChartInstance) {
+                var ctx = document.getElementById(canvasId).getContext('2d');
+                if (chartInstance) {
+                    chartInstance.destroy();
                 }
-                transactionChart = new Chart(ctx, {
+                var newChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Transactions',
+                            label: label,
                             data: data,
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 2
+                            backgroundColor: bgColor,
+                            borderColor: borderColor,
+                            borderWidth: 1,
+                            borderRadius: 5,
                         }]
                     },
                     options: {
+                        indexAxis: 'y', // Better for medicine names
                         responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                display: true,
-                                position: 'top'
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Sold: ' + context.raw;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false
+                                }
                             }
                         }
                     }
                 });
+                setChartInstance(newChart);
             }
 
             // Fetch the base64 image before initializing DataTables
             function getBase64Image(callback) {
+                if (cachedLogo) {
+                    callback(cachedLogo);
+                    return;
+                }
                 $.ajax({
                     url: "/get_logo", // Create this route in Laravel
                     type: "GET",
                     success: function(response) {
-                        // console.log("Logo fetched successfully:", response);
-                        callback(response.base64); // Pass Base64 image to callback
+                        cachedLogo = response.base64;
+                        callback(cachedLogo);
                     },
                     error: function(error) {
-                        // console.error("Error fetching logo. Using default.");
                         console.log("Response Error:", error.responseText);
-                        callback(null); // If error, use null
+                        callback(null);
                     }
                 });
             }
@@ -1514,6 +1700,7 @@
                 return `${day}-${month}-${year}`;
             }
 
+            $('#dateFilter').trigger('change');
 
         });
     </script>

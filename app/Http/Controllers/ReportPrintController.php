@@ -213,14 +213,22 @@ class ReportPrintController extends Controller
                 $totalProfit = $grossProfit - $totalExpenses - $totalInstallments;
                 $totalExpired = $expiredRows->count();
 
-                // Generate labels and data for the chart, where the graph should not change, rather let it always draw medicines names  (as labels) Vs percentage profit the medicine contributes to the total profit (as data).
-                $labels = $profitsRows->map(function ($profit) {
-                    return $profit['item_name'];
-                });
+                // Calculate Top 10 and Bottom 10 Most Sold Medicines by Quantity
+                $allSalesByMedicine = Sales::with('item')
+                    ->where('pharmacy_id', $pharmacyId)
+                    ->whereBetween('date', [$startDate, $endDate])
+                    ->select('item_id', DB::raw('SUM(quantity) as total_quantity'))
+                    ->groupBy('item_id')
+                    ->get();
 
-                $data = $profitsRows->map(function ($profit) use ($grossProfit) {
-                    return $grossProfit > 0 ? ($profit['amount'] / $grossProfit) * 100 : 0;
-                });
+                $top10 = $allSalesByMedicine->sortByDesc('total_quantity')->take(10);
+                $bottom10 = $allSalesByMedicine->sortBy('total_quantity')->take(10);
+
+                $topLabels = $top10->map(fn($s) => $s->item->name ?? 'Unknown')->values();
+                $topData = $top10->pluck('total_quantity')->values();
+
+                $bottomLabels = $bottom10->map(fn($s) => $s->item->name ?? 'Unknown')->values();
+                $bottomData = $bottom10->pluck('total_quantity')->values();
 
                 return response()->json([
                     'success' => true,
@@ -232,8 +240,10 @@ class ReportPrintController extends Controller
                     'totalExpenses' => $totalExpenses ?? 0,
                     'totalInstallments' => $totalInstallments ?? 0,
                     'totalExpired' => $totalExpired ?? 0,
-                    'labels' => $labels,
-                    'data' => $data,
+                    'topLabels' => $topLabels,
+                    'topData' => $topData,
+                    'bottomLabels' => $bottomLabels,
+                    'bottomData' => $bottomData,
                     'sales' => $salesRows,
                     'stocks' => $stocksRows,
                     'expired' => $expiredRows,
