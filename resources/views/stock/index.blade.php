@@ -1,6 +1,6 @@
-@extends("stock.app")
+@extends('stock.app')
 
-@section("content")
+@section('content')
     @php $medicines = App\Models\Items::where('pharmacy_id', session('current_pharmacy_id'))->with('lastStock')->get(); @endphp
 
     <div class="container mt-4">
@@ -9,7 +9,7 @@
         @endforeach --}}
         <div class="d-flex justify-content-between mb-3">
             <h1 class="text-primary fw-bold fs-3">Stock <i
-                    class="bi {{ Auth::user()->hasRole("Owner") ? "" : "hidden" }} text-secondary bi-eye"
+                    class="bi {{ Auth::user()->hasRole('Owner') ? '' : 'hidden' }} text-secondary bi-eye"
                     id="togglePrivateData" style="cursor: pointer;"></i></h1>
             <div>
                 <a class="btn btn-success" data-bs-target="#createStockModal" data-bs-toggle="modal" href="#">Add New
@@ -22,16 +22,16 @@
         </div>
 
         {{-- Check if the user is an owner and define the data display container --}}
-        @hasrole("Owner")
+        @hasrole('Owner')
             <div class="privateData" hidden>
                 {{-- Display available stock's value in currency --}}
                 <div class="d-flex justify-content-between gap-2">
                     <p class="text-secondary"><strong class="fw-bold">Total Stock Value: </strong>
-                        {{ number_format($availableStock) }} {{ session("currency") ?? "TZS" }}</p>
+                        {{ number_format($availableStock) }} {{ session('currency') ?? 'TZS' }}</p>
                     <p class="text-secondary"><strong class="fw-bold">Expected Total Sales: </strong>
-                        {{ number_format($expectedSales) }} {{ session("currency") ?? "TZS" }}</p>
+                        {{ number_format($expectedSales) }} {{ session('currency') ?? 'TZS' }}</p>
                     <p class="text-secondary"><strong class="fw-bold">Expected Total Profit: </strong>
-                        {{ number_format($expectedProfit) }} {{ session("currency") ?? "TZS" }}</p>
+                        {{ number_format($expectedProfit) }} {{ session('currency') ?? 'TZS' }}</p>
                 </div>
                 <hr><br>
             </div>
@@ -94,7 +94,7 @@
                         type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route("stock.store") }}" id="stockForm" method="POST">
+                    <form action="{{ route('stock.store') }}" id="stockForm" method="POST">
                         @csrf
                         <div class="row mb-2">
                             <div class="col-12# col-sm-6# col-md-6 col-lg-2#">
@@ -179,7 +179,7 @@
                         type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route("medicineStock.store") }}" id="stockForm" method="POST">
+                    <form action="{{ route('medicineStock.store') }}" id="stockForm" method="POST">
                         @csrf
                         <div class="row mb-2">
                             <div class="col-12# col-sm-6# col-md-6 col-lg-2#">
@@ -256,7 +256,7 @@
                         type="button"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form action="{{ route("importMedicineStock") }}" enctype="multipart/form-data" method="POST">
+                    <form action="{{ route('importMedicineStock') }}" enctype="multipart/form-data" method="POST">
                         @csrf
                         <div class="mb-3">
                             {{-- Indicate fields required in the label --}}
@@ -490,7 +490,7 @@
             $('#tableOfStocks').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route("stock") }}", // Laravel route
+                ajax: "{{ route('stock') }}", // Laravel route
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -676,7 +676,7 @@
                 $verifyBtn.prop('disabled', true).text('Verifying...');
 
                 $.ajax({
-                    url: '{{ route("checkPassword") }}', // Use the Laravel route name
+                    url: '{{ route('checkPassword') }}', // Use the Laravel route name
                     type: 'POST',
                     data: $('#reAuthForm').serialize(),
                     success: function(response) {

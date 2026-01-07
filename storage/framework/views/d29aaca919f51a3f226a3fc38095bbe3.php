@@ -1,11 +1,11 @@
-<?php $__env->startSection("content"); ?>
+<?php $__env->startSection('content'); ?>
     <?php $medicines = App\Models\Items::where('pharmacy_id', session('current_pharmacy_id'))->with('lastStock')->get(); ?>
 
     <div class="container mt-4">
         
         <div class="d-flex justify-content-between mb-3">
             <h1 class="text-primary fw-bold fs-3">Stock <i
-                    class="bi <?php echo e(Auth::user()->hasRole("Owner") ? "" : "hidden"); ?> text-secondary bi-eye"
+                    class="bi <?php echo e(Auth::user()->hasRole('Owner') ? '' : 'hidden'); ?> text-secondary bi-eye"
                     id="togglePrivateData" style="cursor: pointer;"></i></h1>
             <div>
                 <a class="btn btn-success" data-bs-target="#createStockModal" data-bs-toggle="modal" href="#">Add New
@@ -18,16 +18,16 @@
         </div>
 
         
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', "Owner")): ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Owner')): ?>
             <div class="privateData" hidden>
                 
                 <div class="d-flex justify-content-between gap-2">
                     <p class="text-secondary"><strong class="fw-bold">Total Stock Value: </strong>
-                        <?php echo e(number_format($availableStock)); ?> <?php echo e(session("currency") ?? "TZS"); ?></p>
+                        <?php echo e(number_format($availableStock)); ?> <?php echo e(session('currency') ?? 'TZS'); ?></p>
                     <p class="text-secondary"><strong class="fw-bold">Expected Total Sales: </strong>
-                        <?php echo e(number_format($expectedSales)); ?> <?php echo e(session("currency") ?? "TZS"); ?></p>
+                        <?php echo e(number_format($expectedSales)); ?> <?php echo e(session('currency') ?? 'TZS'); ?></p>
                     <p class="text-secondary"><strong class="fw-bold">Expected Total Profit: </strong>
-                        <?php echo e(number_format($expectedProfit)); ?> <?php echo e(session("currency") ?? "TZS"); ?></p>
+                        <?php echo e(number_format($expectedProfit)); ?> <?php echo e(session('currency') ?? 'TZS'); ?></p>
                 </div>
                 <hr><br>
             </div>
@@ -90,7 +90,7 @@
                         type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="<?php echo e(route("stock.store")); ?>" id="stockForm" method="POST">
+                    <form action="<?php echo e(route('stock.store')); ?>" id="stockForm" method="POST">
                         <?php echo csrf_field(); ?>
                         <div class="row mb-2">
                             <div class="col-12# col-sm-6# col-md-6 col-lg-2#">
@@ -175,7 +175,7 @@
                         type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="<?php echo e(route("medicineStock.store")); ?>" id="stockForm" method="POST">
+                    <form action="<?php echo e(route('medicineStock.store')); ?>" id="stockForm" method="POST">
                         <?php echo csrf_field(); ?>
                         <div class="row mb-2">
                             <div class="col-12# col-sm-6# col-md-6 col-lg-2#">
@@ -252,7 +252,7 @@
                         type="button"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form action="<?php echo e(route("importMedicineStock")); ?>" enctype="multipart/form-data" method="POST">
+                    <form action="<?php echo e(route('importMedicineStock')); ?>" enctype="multipart/form-data" method="POST">
                         <?php echo csrf_field(); ?>
                         <div class="mb-3">
                             
@@ -486,7 +486,7 @@
             $('#tableOfStocks').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "<?php echo e(route("stock")); ?>", // Laravel route
+                ajax: "<?php echo e(route('stock')); ?>", // Laravel route
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -672,7 +672,7 @@
                 $verifyBtn.prop('disabled', true).text('Verifying...');
 
                 $.ajax({
-                    url: '<?php echo e(route("checkPassword")); ?>', // Use the Laravel route name
+                    url: '<?php echo e(route('checkPassword')); ?>', // Use the Laravel route name
                     type: 'POST',
                     data: $('#reAuthForm').serialize(),
                     success: function(response) {
@@ -710,4 +710,4 @@
     </script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make("stock.app", array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\DEVELOPMENT\pms\resources\views/stock/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('stock.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\DEVELOPMENT\pms\resources\views/stock/index.blade.php ENDPATH**/ ?>

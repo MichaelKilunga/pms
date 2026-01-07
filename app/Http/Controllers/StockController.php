@@ -723,7 +723,10 @@ class StockController extends Controller
 
     public function stockBalancesPage()
     {
-        return view('stock.balance');
+        $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
+        $pharmacyName = $pharmacy ? $pharmacy->name : 'Pharmacy';
+
+        return view('stock.balance', compact('pharmacyName'));
     }
 
     public function viewStockBalances()
@@ -798,22 +801,45 @@ class StockController extends Controller
                                             <small class="badge text-secondary text-smallest">'.($row->latestStockCheck ? Carbon::parse($row->latestStockCheck->checked_at)->format('d M Y H:i') : '').'</small>
                                         </div>
                                     </div>
-                                    <div  class="d-flex justify-content-end mx-1 ">
+                                    <div  class="d-flex w-100 justify-content-end">
                                         <div  class="col-md-6">
-                                            <input type="number" class="form-control form-control-sm me-2 physical-qty" 
-                                                style="width:90%;" 
-                                                min="0" 
+                                            <input type="number" class="form-control form-control-sm me-2 physical-qty"
+                                                style="width:100px;"
+                                                min="0"
+                                                data-existing-qty="'.($row->latestStockCheck ? $row->latestStockCheck->physical_quantity : '').'"
+                                                value="'.($row->latestStockCheck ? $row->latestStockCheck->physical_quantity : '').'"
                                                 placeholder="Qty">
                                         </div>
                                         <div  class="col-md-6">
-                                            <button class="btn btn-success btn-sm save-stock-check" 
-                                                data-item-id="'.$row->item_id.'" 
-                                                data-stock-id="'.$row->id.'">
+                                            <button class="btn btn-success btn-sm save-stock-check"
+                                                data-item-id="'.$row->item->id.'">
                                                 Save
                                             </button>
                                         </div>
                                     </div>
+
                                 </div>';
+            })
+            ->addColumn('stock_check_qty', function ($row) {
+                return $row->latestStockCheck ? $row->latestStockCheck->physical_quantity : 'N/A';
+            })
+            ->addColumn('check_status_text', function ($row) {
+                if (! $row->latestStockCheck) {
+                    return 'Unchecked';
+                }
+
+                if ($row->latestStockCheck->physical_quantity == $row->remain_quantity) {
+                    return 'Fine';
+                }
+
+                if ($row->latestStockCheck->physical_quantity > $row->remain_quantity) {
+                    return 'Over by '.($row->latestStockCheck->physical_quantity - $row->remain_quantity);
+                }
+
+                return 'Under by '.($row->remain_quantity - $row->latestStockCheck->physical_quantity);
+            })
+            ->addColumn('checked_on', function ($row) {
+                return $row->latestStockCheck ? Carbon::parse($row->latestStockCheck->checked_at)->format('d M Y H:i') : 'N/A';
             })
             ->addColumn('action', function ($row) {
                 return '<button type="button" class="btn btn-primary btn-sm view-stock-btn" 
@@ -822,7 +848,7 @@ class StockController extends Controller
                         data-item-id="'.$row->item_id.'">
                         <i class="bi bi-eye"></i></button>';
             })
-            ->rawColumns(['status', 'action', 'stock_check_status']) // Allow HTML rendering
+            ->rawColumns(['status', 'action', 'stock_check_status'])
             ->make(true);
     }
 

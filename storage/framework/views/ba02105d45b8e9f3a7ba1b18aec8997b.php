@@ -22,7 +22,7 @@
                 <!-- Logo -->
                 <div class="flex shrink-0 items-center">
                     <a class="flex items-center gap-2 text-xl font-bold tracking-tight text-primary-600 dark:text-primary-400"
-                        href="<?php echo e(route("dashboard")); ?>">
+                        href="<?php echo e(route('dashboard')); ?>">
                         <?php if (isset($component)) { $__componentOriginaldaff26d4e64b9d6b339909684d09d478 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginaldaff26d4e64b9d6b339909684d09d478 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.application-mark','data' => ['class' => 'block h-9 w-auto']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -56,7 +56,7 @@
 
                 <!-- Notification Bell -->
                 <a class="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
-                    href="<?php echo e(route("notifications")); ?>">
+                    href="<?php echo e(route('notifications')); ?>">
                     <i class="bi bi-bell text-xl"></i>
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Auth::user()->unreadNotifications->count() > 0): ?>
                         <div
@@ -96,37 +96,39 @@
                          <?php $__env->slot('content', null, []); ?> 
                             <!-- Account Management -->
                             <div class="block px-4 py-2 text-xs text-gray-400">
-                                <?php echo e(__("Manage Account")); ?>
+                                <?php echo e(__('Manage Account')); ?>
 
                             </div>
 
                             <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
-                                href="<?php echo e(route("profile.show")); ?>">
-                                <?php echo e(__("Profile")); ?>
+                                href="<?php echo e(route('profile.show')); ?>">
+                                <?php echo e(__('Profile')); ?>
 
                             </a>
 
-                            <?php if(Auth::user()->hasRole("Owner")): ?>
+                            <?php if(Auth::user()->hasRole('Superadmin')): ?>
                                 <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
-                                    href="<?php echo e(route("admin.settings.system")); ?>">
-                                    <?php echo e(__("System Configuration")); ?>
+                                    href="<?php echo e(route('admin.settings.system')); ?>">
+                                    <?php echo e(__('System Configuration')); ?>
 
                                 </a>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            <?php if(Auth::user()->hasRole('Owner')): ?>
                                 <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
-                                    href="<?php echo e(route("pharmacies.switch")); ?>">
-                                    <span class="text-red-500"><?php echo e(__("Switch Pharmacy")); ?></span>
+                                    href="<?php echo e(route('pharmacies.switch')); ?>">
+                                    <span class="text-red-500"><?php echo e(__('Switch Pharmacy')); ?></span>
                                 </a>
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                             <div class="border-t border-gray-200 dark:border-gray-600"></div>
 
                             <!-- Authentication -->
-                            <form action="<?php echo e(route("logout")); ?>" method="POST" x-data>
+                            <form action="<?php echo e(route('logout')); ?>" method="POST" x-data>
                                 <?php echo csrf_field(); ?>
                                 <a @click.prevent="$root.submit();"
                                     class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
-                                    href="<?php echo e(route("logout")); ?>">
-                                    <?php echo e(__("Log Out")); ?>
+                                    href="<?php echo e(route('logout')); ?>">
+                                    <?php echo e(__('Log Out')); ?>
 
                                 </a>
                             </form>

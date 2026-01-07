@@ -1,9 +1,9 @@
-@extends("stock.app")
+@extends('stock.app')
 
-@section("content")
+@section('content')
     <div class="container">
-        <h4 class="text-primary fs-2 fw-bold mb-1 mt-2">Stock Balance Summary</h4>
-        <hr>
+        <h4 class="text-primary fs-2 fw-bold mb-1 mt-2 mb-2">Stock Balance Summary</h4>
+        <hr class="mb-2">
 
         <div class="table-responsive">
             <table class="table-bordered table-striped table-hover small table" id="TableOne">
@@ -14,7 +14,12 @@
                         <th>Stocked Remaining Quantity</th>
                         <th>Expired Quantity</th>
                         <th>Status</th>
-                        <th>Stock Check</th> <!-- ✅ NEW COLUMN -->
+                        <th>Stock Check</th>
+                        <!-- Hidden columns for Export -->
+                        <th>Stock Check Quantity</th>
+                        <th>Stock Check Status</th>
+                        <th>Checked On</th>
+
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -337,7 +342,7 @@
             $('#TableOne').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route("stocks.balance.data") }}", // JSON endpoint
+                ajax: "{{ route('stocks.balance.data') }}", // JSON endpoint
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -363,12 +368,30 @@
                         orderable: false,
                         searchable: true
                     },
-
                     {
                         data: 'stock_check_status',
                         name: 'stock_check_status',
                         orderable: false,
                         searchable: false,
+                    },
+                    // Hidden columns for export
+                    {
+                        data: 'stock_check_qty',
+                        name: 'stock_check_qty',
+                        visible: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'check_status_text',
+                        name: 'check_status_text',
+                        visible: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'checked_on',
+                        name: 'checked_on',
+                        visible: false,
+                        searchable: false
                     },
 
                     {
@@ -388,9 +411,78 @@
                 ], // default sort by medicine name
                 dom: 'lBftip', //make sure it does not disable dynamic page length set section
                 buttons: [
-                    // 'print',
-                    'pdf',
-                    'excel'
+                    // 'excel',
+                    {
+                        extend: 'excelHtml5',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 6, 7,
+                                8
+                            ] // Export the hidden columns for cleaner data
+                        }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: 'PDF',
+                        title: '', // Custom header will be used
+                        orientation: 'portrait',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 6, 7,
+                                8
+                            ], // Exclude Stock Check (interactive) and Action, include new columns
+                            stripHtml: true,
+                        },
+                        customize: function(doc) {
+                            // Custom Header
+                            doc.content.splice(0, 0, {
+                                text: [{
+                                        text: 'Pharmacy name: {{ $pharmacyName ?? 'Pharmacy' }}\n',
+                                        fontSize: 11,
+                                        bold: true
+                                    },
+                                    {
+                                        text: 'Report name: Stock Balances Summary\n',
+                                        fontSize: 11,
+                                        bold: true
+                                    },
+                                    {
+                                        text: 'Printed On: ' + new Date()
+                                            .toLocaleString() + '\n',
+                                        fontSize: 10,
+                                        italics: true
+                                    }
+                                ],
+                                margin: [0, 0, 0, 10],
+                                alignment: 'left'
+                            });
+
+                            // Custom Footer with Page Numbers
+                            doc.footer = function(currentPage, pageCount) {
+                                return {
+                                    text: 'Page ' + currentPage.toString() + ' of ' + pageCount
+                                        .toString(),
+                                    alignment: 'center',
+                                    margin: [0, 10, 0, 0]
+                                };
+                            };
+
+                            // Removed Signature as per request
+
+                            // Safely find and adjust table widths
+                            var tableNode;
+                            for (var i = 0; i < doc.content.length; i++) {
+                                if (doc.content[i] && doc.content[i].table) {
+                                    tableNode = doc.content[i];
+                                    break;
+                                }
+                            }
+
+                            if (tableNode) {
+                                tableNode.table.widths = ['5%', '25%', '10%', '10%', '10%', '10%',
+                                    '15%', '15%'
+                                ];
+                            }
+                        }
+                    }
                 ]
             });
         });
@@ -410,7 +502,7 @@
             button.prop('disabled', true).text('Saving...');
 
             $.ajax({
-                url: "{{ route("stocks.check.save") }}", // ✅ create this route
+                url: "{{ route('stocks.check.save') }}", // ✅ create this route
                 method: 'POST',
                 data: {
                     _token: "{{ csrf_token() }}",
