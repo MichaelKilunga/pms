@@ -22,7 +22,7 @@
                 <!-- Logo -->
                 <div class="flex shrink-0 items-center">
                     <a class="flex items-center gap-2 text-xl font-bold tracking-tight text-primary-600 dark:text-primary-400"
-                        href="{{ route("dashboard") }}">
+                        href="{{ route('dashboard') }}">
                         <x-application-mark class="block h-9 w-auto" />
                         <span class="hidden md:block">PILLPOINTONE</span>
                     </a>
@@ -37,7 +37,7 @@
 
                 <!-- Notification Bell -->
                 <a class="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
-                    href="{{ route("notifications") }}">
+                    href="{{ route('notifications') }}">
                     <i class="bi bi-bell text-xl"></i>
                     @if (Auth::user()->unreadNotifications->count() > 0)
                         <div
@@ -67,34 +67,36 @@
                         <x-slot name="content">
                             <!-- Account Management -->
                             <div class="block px-4 py-2 text-xs text-gray-400">
-                                {{ __("Manage Account") }}
+                                {{ __('Manage Account') }}
                             </div>
 
                             <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
-                                href="{{ route("profile.show") }}">
-                                {{ __("Profile") }}
+                                href="{{ route('profile.show') }}">
+                                {{ __('Profile') }}
                             </a>
 
-                            @if (Auth::user()->hasRole("Owner"))
+                            @if (Auth::user()->hasRole('Superadmin'))
                                 <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
-                                    href="{{ route("admin.settings.system") }}">
-                                    {{ __("System Configuration") }}
+                                    href="{{ route('admin.settings.system') }}">
+                                    {{ __('System Configuration') }}
                                 </a>
+                            @endif
+                            @if (Auth::user()->hasRole('Owner'))
                                 <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
-                                    href="{{ route("pharmacies.switch") }}">
-                                    <span class="text-red-500">{{ __("Switch Pharmacy") }}</span>
+                                    href="{{ route('pharmacies.switch') }}">
+                                    <span class="text-red-500">{{ __('Switch Pharmacy') }}</span>
                                 </a>
                             @endif
 
                             <div class="border-t border-gray-200 dark:border-gray-600"></div>
 
                             <!-- Authentication -->
-                            <form action="{{ route("logout") }}" method="POST" x-data>
+                            <form action="{{ route('logout') }}" method="POST" x-data>
                                 @csrf
                                 <a @click.prevent="$root.submit();"
                                     class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
-                                    href="{{ route("logout") }}">
-                                    {{ __("Log Out") }}
+                                    href="{{ route('logout') }}">
+                                    {{ __('Log Out') }}
                                 </a>
                             </form>
                         </x-slot>
