@@ -1,0 +1,4 @@
+item_name,buying_price,selling_price,quantity,low_stock_percentage,expire_date,supplier
+Amoxicillin 500mg,200,300,100,10,2026-12-31,ABC Pharmaceuticals
+Panadol,50,100,500,50,2026-06-30,Global Health
+Cold Cap,150,250,200,20,2025-12-31,Pharma Co

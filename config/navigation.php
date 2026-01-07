@@ -98,6 +98,7 @@ return [
             'icon' => 'bi bi-bar-chart',
             'children' => [
                 ['label' => 'Reports', 'route' => 'reports.all'],
+                ['label' => 'Analytics', 'route' => 'reports.index'],
                 ['label' => 'Notifications', 'route' => 'notifications'],
                 ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
             ],

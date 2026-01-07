@@ -1,6 +1,4 @@
-@extends('reports.app')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <style>
         .reportTable {
             max-width: 100%;
@@ -19,10 +17,10 @@
     <div class="container pt-2">
         <!-- Page Title -->
         <div class="row mb-4 text-center">
-            {{-- <div class="col-6 col-md-4 col-lg-2"> --}}
+            
             <h2 class="fw-bold h2 text-primary">Pharmacy Analytics & Reports</h2>
             <p class="text-muted h5">Monitor your transactions, trends, and financial activities here.</p>
-            {{-- </div> --}}
+            
         </div>
         <!-- Filters Section -->
         <div class="container">
@@ -52,7 +50,7 @@
                 <div class="col-12 col-md-6 col-lg-3 mb-2">
                     <label for="category">Category</label>
                     <select class="onReport form-select" id="category" name="category" required>
-                        {{-- <option value="">-- Select Category --</option> --}}
+                        
                         <option selected value="sales">Sales</option>
                         <option value="stocks">Stock</option>
                         <option value="expenses">Expenses</option>
@@ -61,13 +59,13 @@
                     </select>
                 </div>
                 <div class="col-12 col-md-6 col-lg-3" id="medicineDiv">
-                    {{-- <input type="text" class="form-control" placeholder="Search by ID or Name"> --}}
+                    
                     <label for="medicine">Medicine</label>
                     <select class="onReport form-select" id="medicine" name="medicine" required>
                         <option selected value="0">All Medicines</option>
-                        @foreach ($medicines as $medicine)
-                            <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
-                        @endforeach
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $medicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $medicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($medicine->id); ?>"><?php echo e($medicine->name); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </select>
                 </div>
             </div>
@@ -200,14 +198,14 @@
                 </div>
             </div>
 
-            {{-- Send Report Button --}}
+            
             <div class="col-6 col-md-4 col-lg-2" id="reportSendDiv">
                 <div class="card h-100">
                     <div class="card-body">
                         <h6 class="card-title">Send Report</h6>
-                        {{-- pass start date and end date --}}
-                        <form action="{{ route('reports.send') }}" method="POST">
-                            @csrf
+                        
+                        <form action="<?php echo e(route('reports.send')); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
                             <input id="report_start_date" name="start_date" type="hidden">
                             <input id="report_end_date" name="end_date" type="hidden">
                             <div class="d-flex justify-content-between gap-1">
@@ -256,7 +254,7 @@
             </div>
         </div>
 
-        {{-- <div><p>{{$medicine->pharmacies->name}}</p></div> --}}
+        
     </div>
     <script>
         $(document).ready(function() {
@@ -1074,7 +1072,7 @@
                                                         },
                                                         {
                                                             stack: [{
-                                                                    text: "{{ strtoupper($pharmacy->name) }}",
+                                                                    text: "<?php echo e(strtoupper($pharmacy->name)); ?>",
                                                                     style: 'title'
                                                                 },
                                                                 {
@@ -1713,4 +1711,6 @@
 
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('reports.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\DEVELOPMENT\pms\resources\views/reports/reports.blade.php ENDPATH**/ ?>

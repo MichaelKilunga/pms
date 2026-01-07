@@ -1,6 +1,4 @@
-@extends('reports.app')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <style>
         .analytics-card {
             border-radius: 12px;
@@ -141,7 +139,7 @@
                         <p class="text-muted h5">Comprehensive insights to maximize your pharmacy's profitability</p>
                     </div>
                     <div>
-                        <button class="btn btn-outline-primary" onclick="window.location.href='{{ route('reports.all') }}'">
+                        <button class="btn btn-outline-primary" onclick="window.location.href='<?php echo e(route('reports.all')); ?>'">
                             <i class="bi bi-file-earmark-text me-2"></i>View Reports
                         </button>
                     </div>
@@ -628,7 +626,7 @@
                 $('#loadingOverlay').show();
 
                 $.ajax({
-                    url: '{{ route('analytics.data') }}',
+                    url: '<?php echo e(route('analytics.data')); ?>',
                     method: 'GET',
                     data: {
                         start_date: startDate,
@@ -981,4 +979,6 @@
             }
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('reports.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\DEVELOPMENT\pms\resources\views/reports/index.blade.php ENDPATH**/ ?>

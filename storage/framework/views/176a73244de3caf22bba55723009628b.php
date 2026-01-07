@@ -1,6 +1,6 @@
-    @section('title', 'Dashboard')
-    @section('meta_description', 'Pharmacy Management System Dashboard')
-    @section('meta_keywords', 'Pharmacy Management System Dashborad')
+    <?php $__env->startSection('title', 'Dashboard'); ?>
+    <?php $__env->startSection('meta_description', 'Pharmacy Management System Dashboard'); ?>
+    <?php $__env->startSection('meta_keywords', 'Pharmacy Management System Dashborad'); ?>
 
     <style>
         .quick-card {
@@ -42,8 +42,8 @@
     </style>
 
     <div class="container mt-2">
-        @hasanyrole('Owner|Manager')
-            {{-- Quick Actions Section --}}
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', 'Owner|Manager')): ?>
+            
             <div class="row g-4 justify-content-center mb-4 text-center">
                 <div class="col-6 col-md-4 col-lg-3">
                     <button class="card bg-primary text-decoration-none text-white shadow-sm w-100 border-0 h-100"
@@ -57,7 +57,7 @@
                 </div>
                 <div class="col-6 col-md-4 col-lg-3">
                     <a class="card bg-success text-decoration-none text-white shadow-sm w-100 border-0 h-100"
-                        href="{{ route('stocks.balance') }}">
+                        href="<?php echo e(route('stocks.balance')); ?>">
                         <div class="card-body d-flex flex-column align-items-center justify-content-center">
                             <i class="bi bi-wallet2 fs-1 mb-2"></i>
                             <h6 class="mb-0">Stock Balance</h6>
@@ -66,7 +66,7 @@
                 </div>
                 <div class="col-6 col-md-4 col-lg-3">
                     <a class="card bg-warning text-dark text-decoration-none shadow-sm w-100 border-0 h-100"
-                        href="{{ route('stock') }}">
+                        href="<?php echo e(route('stock')); ?>">
                         <div class="card-body d-flex flex-column align-items-center justify-content-center">
                             <i class="bi bi-box-seam fs-1 mb-2"></i>
                             <h6 class="mb-0">Preview Stocks</h6>
@@ -75,7 +75,7 @@
                 </div>
                 <div class="col-6 col-md-4 col-lg-3">
                     <a class="card bg-danger text-decoration-none text-white shadow-sm w-100 border-0 h-100"
-                        href="{{ route('stockTransfers.index') }}">
+                        href="<?php echo e(route('stockTransfers.index')); ?>">
                         <div class="card-body d-flex flex-column align-items-center justify-content-center">
                             <i class="bi bi-arrow-left-right fs-1 mb-2"></i>
                             <h6 class="mb-0">Stock Transfer</h6>
@@ -95,7 +95,7 @@
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
                     <a class="card bg-secondary text-decoration-none text-white shadow-sm w-100 border-0 h-100"
-                        href="{{ route('staff') }}">
+                        href="<?php echo e(route('staff')); ?>">
                         <div class="card-body">
                             <h6><i class="bi bi-people-fill fs-3 mb-1"></i>Manage Pharmacist</h6>
                         </div>
@@ -103,7 +103,7 @@
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
                     <a class="card bg-dark text-white text-decoration-none shadow-sm w-100 border-0 h-100"
-                        href="{{ route('pharmacies') }}">
+                        href="<?php echo e(route('pharmacies')); ?>">
                         <div class="card-body">
                             <h6><i class="bi bi-hospital fs-3 mb-1"></i> View Pharmacies</h6>
                         </div>
@@ -119,7 +119,7 @@
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
                     <a class="card bg-success text-decoration-none text-white shadow-sm w-100 border-0 h-100"
-                        href="{{ route('reports.all') }}">
+                        href="<?php echo e(route('reports.all')); ?>">
                         <div class="card-body">
                             <h6><i class="bi bi-file-earmark-bar-graph fs-3 mb-1"></i> Reports</h6>
                         </div>
@@ -127,7 +127,7 @@
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
                     <a class="card bg-warning text-dark text-decoration-none shadow-sm w-100 border-0 h-100"
-                        href="{{ route('reports.index') }}">
+                        href="<?php echo e(route('reports.index')); ?>">
                         <div class="card-body">
                             <h6><i class="bi bi-graph-up fs-3 mb-1"></i> Analytics</h6>
                         </div>
@@ -135,7 +135,7 @@
                 </div>
             </div>
 
-            {{-- Summary Section --}}
+            
             <div class="row g-4 justify-content-center mb-4 text-center">
                 <div class="col-6 col-md-4 col-lg-2">
                     <div class="card bg-primary text-white shadow">
@@ -143,7 +143,7 @@
                             <h6>
                                 <i class="bi bi-capsule fs-3# me-2"></i>Medicines
                             </h6>
-                            <p class="fs-5 fw-bold">{{ $totalMedicines }}</p>
+                            <p class="fs-5 fw-bold"><?php echo e($totalMedicines); ?></p>
                         </div>
                     </div>
                 </div>
@@ -153,7 +153,7 @@
                             <h6>
                                 <i class="bi bi-people-fill fs-3# me-2"></i>Pharmacists
                             </h6>
-                            <p class="fs-5 fw-bold">{{ $totalStaff }}</p>
+                            <p class="fs-5 fw-bold"><?php echo e($totalStaff); ?></p>
                         </div>
                     </div>
                 </div>
@@ -163,7 +163,7 @@
                             <h6>
                                 <i class="bi bi-hospital fs-2# me-2"></i>Pharmacies
                             </h6>
-                            <p class="fs-5 fw-bold">{{ $totalPharmacies }}</p>
+                            <p class="fs-5 fw-bold"><?php echo e($totalPharmacies); ?></p>
                         </div>
                     </div>
                 </div>
@@ -173,7 +173,7 @@
                             <h6>
                                 <i class="bi bi-exclamation-triangle fs-3# me-2"></i>Expired
                             </h6>
-                            <p class="fs-5 fw-bold">{{ $stockExpired }}</p>
+                            <p class="fs-5 fw-bold"><?php echo e($stockExpired); ?></p>
                         </div>
                     </div>
                 </div>
@@ -183,7 +183,7 @@
                             <h6>
                                 <i class="bi bi-currency-exchange fs-3# me-2"></i>Today Sales
                             </h6>
-                            <p class="fs-5 fw-bold">{{ number_format($totalSales, 2) }}</p>
+                            <p class="fs-5 fw-bold"><?php echo e(number_format($totalSales, 2)); ?></p>
                         </div>
                     </div>
                 </div>
@@ -193,15 +193,15 @@
                             <h6>
                                 <i class="bi bi-box-seam fs-3# me-2"></i>Low Stock
                             </h6>
-                            <p class="fs-5 fw-bold">{{ $lowStockCount }}</p>
+                            <p class="fs-5 fw-bold"><?php echo e($lowStockCount); ?></p>
                         </div>
                     </div>
                 </div>
             </div>
-        @endhasanyrole
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 
-    {{-- Quick Access Modal --}}
+    
     <div aria-hidden="true" aria-labelledby="quickAccessModalLabel" class="modal fade" id="quickAccessModal"
         tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -248,13 +248,13 @@
         </div>
     </div>
 
-    @php
+    <?php
         $all_medicines = App\Models\Items::where('pharmacy_id', session('current_pharmacy_id'))
             ->with('lastStock')
             ->get();
-    @endphp
+    ?>
 
-    {{-- <!-- Add New Stock Modal --> --}}
+    
     <div aria-hidden="true" aria-labelledby="createStockModalLabel" class="modal fade" id="createStockModal"
         tabindex="-1">
         <div class="modal-dialog modal-xl">
@@ -265,8 +265,8 @@
                         type="button"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form action="{{ route('stock.store') }}" id="stockFormDashboard" method="POST">
-                        @csrf
+                    <form action="<?php echo e(route('stock.store')); ?>" id="stockFormDashboard" method="POST">
+                        <?php echo csrf_field(); ?>
                         <div class="row mb-4">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Stock Batch Number</label>
@@ -285,9 +285,9 @@
                                     <label class="form-label fw-bold">Medicine Name</label>
                                     <select class="medicineSelect chosen form-select" name="item_id[]" required>
                                         <option value="">Select medicine...</option>
-                                        @foreach ($all_medicines as $medicine)
-                                            <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
-                                        @endforeach
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $all_medicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $medicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($medicine->id); ?>"><?php echo e($medicine->name); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </select>
                                 </div>
                                 <div class="col-lg-2 col-md-3">
@@ -314,7 +314,7 @@
                                     <label class="form-label fw-bold">Expire Date</label>
                                     <input class="form-control" name="expire_date[]" required type="date">
                                 </div>
-                                <input name="in_date[]" type="hidden" value="{{ now() }}">
+                                <input name="in_date[]" type="hidden" value="<?php echo e(now()); ?>">
                             </div>
                         </div>
                         <div class="d-flex justify-content-between mt-4">
@@ -342,8 +342,8 @@
                         type="button"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form action="{{ route('medicineStock.store') }}" method="POST">
-                        @csrf
+                    <form action="<?php echo e(route('medicineStock.store')); ?>" method="POST">
+                        <?php echo csrf_field(); ?>
                         <div class="row mb-4">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Stock Batch Number</label>
@@ -384,7 +384,7 @@
                                     <label class="form-label fw-bold">Expire Date</label>
                                     <input class="form-control" name="expire_date[]" required type="date">
                                 </div>
-                                <input name="in_date[]" type="hidden" value="{{ now() }}">
+                                <input name="in_date[]" type="hidden" value="<?php echo e(now()); ?>">
                             </div>
                         </div>
                         <div class="d-flex justify-content-between mt-4">
@@ -401,7 +401,7 @@
         </div>
     </div>
 
-    {{-- Import Medicine and Stock Modal --}}
+    
     <div aria-hidden="true" aria-labelledby="importMedicineStockModalLabel" class="modal fade"
         id="importMedicineStockModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -429,15 +429,15 @@
                             </a>
                         </div>
                     </div>
-                    <form action="{{ route('importMedicineStock') }}" enctype="multipart/form-data" method="POST">
-                        @csrf
+                    <form action="<?php echo e(route('importMedicineStock')); ?>" enctype="multipart/form-data" method="POST">
+                        <?php echo csrf_field(); ?>
                         <div class="mb-4">
                             <label class="form-label fw-bold" for="file">Select CSV File</label>
                             <input accept=".csv" class="form-control form-control-lg" name="file" required
                                 type="file">
                         </div>
                         <input class="batch_num_field" name="batch_number__" type="hidden">
-                        <input name="in_date" type="hidden" value="{{ now() }}">
+                        <input name="in_date" type="hidden" value="<?php echo e(now()); ?>">
                         <button class="btn btn-danger w-100 py-2" type="submit">
                             <i class="bi bi-upload me-2"></i>Start Import Process
                         </button>
@@ -449,7 +449,7 @@
 
     <script shadow>
         $(document).ready(function() {
-            const medicinesData = @json($all_medicines);
+            const medicinesData = <?php echo json_encode($all_medicines, 15, 512) ?>;
 
             // Batch number generation
             const today = new Date();
@@ -530,9 +530,9 @@
                         <div class="col-lg-3 col-md-6">
                             <select class="medicineSelect chosen form-select" name="item_id[]" required>
                                 <option value="">Select medicine...</option>
-                                @foreach ($all_medicines as $medicine)
-                                    <option value="{{ $medicine->id }}">{{ $medicine->name }}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $all_medicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $medicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($medicine->id); ?>"><?php echo e($medicine->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         <div class="col-lg-2 col-md-3">
@@ -553,7 +553,7 @@
                         <div class="col-lg-1 col-md-1 d-flex justify-content-center">
                             <button type="button" class="btn btn-outline-danger btn-sm remove-row-dashboard"><i class="bi bi-trash"></i></button>
                         </div>
-                        <input name="in_date[]" type="hidden" value="{{ now() }}">
+                        <input name="in_date[]" type="hidden" value="<?php echo e(now()); ?>">
                     </div>
                 `);
                 $('#stockFieldsDashboard').append(newRow);
@@ -585,7 +585,7 @@
                         <div class="col-lg-1 col-md-1 d-flex justify-content-center">
                             <button type="button" class="btn btn-outline-danger btn-sm remove-row-dashboard"><i class="bi bi-trash"></i></button>
                         </div>
-                        <input name="in_date[]" type="hidden" value="{{ now() }}">
+                        <input name="in_date[]" type="hidden" value="<?php echo e(now()); ?>">
                     </div>
                 `);
                 $('#medicineStockFieldsDashboard').append(newRow);
@@ -596,8 +596,8 @@
             });
         });
     </script>
-    @hasrole('Staff')
-        {{-- Quick Actions Section --}}
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Staff')): ?>
+        
         <div class="row g-4 justify-content-center mb-4 text-center">
             <div class="col-6 col-md-4 col-lg-2">
                 <a class="card bg-danger text-decoration-none text-white shadow" data-bs-target="#createSalesModal"
@@ -613,18 +613,18 @@
                     data-bs-target="#createSalesNoteModal" data-bs-toggle="modal">
                     <div class="card-body">
                         <h6><i class="bi bi-plus-circle fs-1#"></i> Create Sales Notebook</h6>
-                        {{-- <p class="fs-5 fw-bold">{{ $totalMedicines }}</p> --}}
+                        
                     </div>
                 </button>
             </div>
-            {{-- Summary Section --}}
+            
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="card bg-secondary text-white shadow">
                     <div class="card-body">
                         <h6>
                             <i class="bi bi-capsule fs-3# me-2"></i>Medicines
                         </h6>
-                        <p class="fs-5 fw-bold">{{ $totalMedicines }}</p>
+                        <p class="fs-5 fw-bold"><?php echo e($totalMedicines); ?></p>
                     </div>
                 </div>
             </div>
@@ -634,7 +634,7 @@
                         <h6>
                             <i class="bi bi-exclamation-triangle fs-3# me-2"></i>Expired
                         </h6>
-                        <p class="fs-5 fw-bold">{{ $stockExpired }}</p>
+                        <p class="fs-5 fw-bold"><?php echo e($stockExpired); ?></p>
                     </div>
                 </div>
             </div>
@@ -645,7 +645,7 @@
                         <h6>
                             <i class="bi bi-currency-exchange fs-3# me-2"></i>Today Sales
                         </h6>
-                        <p class="fs-5 fw-bold">{{ number_format($totalSales, 2) }} TZS</p>
+                        <p class="fs-5 fw-bold"><?php echo e(number_format($totalSales, 2)); ?> TZS</p>
                     </div>
                 </div>
             </div>
@@ -655,16 +655,16 @@
                         <h6>
                             <i class="bi bi-box-seam fs-3# me-2"></i>Low Stock
                         </h6>
-                        <p class="fs-5 fw-bold">{{ $lowStockCount }}</p>
+                        <p class="fs-5 fw-bold"><?php echo e($lowStockCount); ?></p>
                     </div>
                 </div>
             </div>
         </div>
-    @endhasrole
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    {{-- Sales Filter Section --}}
+    
     <div class="row mb-4">
-        {{-- Sales Vs medicine graph --}}
+        
         <div class="col-md-6 mb-4">
             <div class="card h-100 shadow">
                 <div class="card-body salesGraph">
@@ -674,7 +674,7 @@
             </div>
         </div>
         <div class="col-md-6 mb-4">
-            {{-- Search   Medicine --}}
+            
             <div class="row">
                 <div class="col-12">
                     <div class="card shadow">
@@ -703,8 +703,8 @@
                 </div>
             </div>
 
-            {{-- Sales filter --}}
-            @hasanyrole('Owner|Manager')
+            
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', 'Owner|Manager')): ?>
                 <div class="row mt-2">
                     <div class="col-12">
                         <div class="card shadow">
@@ -714,15 +714,15 @@
                                     <hr>
                                     <div class="col-auto">
                                         <select class="form-select" name="filter" required>
-                                            <option {{ $filter == 'day' ? 'selected' : '' }} value="day">Today
+                                            <option <?php echo e($filter == 'day' ? 'selected' : ''); ?> value="day">Today
                                             </option>
-                                            <option {{ $filter == 'week' ? 'selected' : '' }} value="week">This
+                                            <option <?php echo e($filter == 'week' ? 'selected' : ''); ?> value="week">This
                                                 Week
                                             </option>
-                                            <option {{ $filter == 'month' ? 'selected' : '' }} value="month">This
+                                            <option <?php echo e($filter == 'month' ? 'selected' : ''); ?> value="month">This
                                                 Month
                                             </option>
-                                            <option {{ $filter == 'year' ? 'selected' : '' }} value="year">This
+                                            <option <?php echo e($filter == 'year' ? 'selected' : ''); ?> value="year">This
                                                 Year
                                             </option>
                                         </select>
@@ -736,7 +736,8 @@
                                 <div class="mt-3 text-center">
                                     <h5 class="fw-bold">
                                         Total Sales in Selected Range: <span
-                                            class="text-success total-sales">{{ number_format($filteredTotalSales) }}
+                                            class="text-success total-sales"><?php echo e(number_format($filteredTotalSales)); ?>
+
                                             TZS</span>
                                     </h5>
                                 </div>
@@ -744,9 +745,9 @@
                         </div>
                     </div>
                 </div>
-            @endhasanyrole
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-            @hasrole('Staff')
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Staff')): ?>
                 <!-- Eye icon (initial display) -->
                 <div class="mt-3 text-center" id="unlock-section">
                     <div class="col-12">
@@ -790,15 +791,9 @@
                                     <hr>
                                     <div class="col-auto">
                                         <select class="form-select" name="filter" required>
-                                            <option {{ $filter == 'day' ? 'selected' : '' }} value="day">Today
+                                            <option <?php echo e($filter == 'day' ? 'selected' : ''); ?> value="day">Today
                                             </option>
-                                            {{-- <option value="week" {{ $filter == 'week' ? 'selected' : '' }}>This Week
-                                        </option>
-                                        <option value="month" {{ $filter == 'month' ? 'selected' : '' }}>This
-                                            Month
-                                        </option>
-                                        <option value="year" {{ $filter == 'year' ? 'selected' : '' }}>This Year
-                                        </option> --}}
+                                            
                                         </select>
                                     </div>
                                     <div class="col-auto">
@@ -810,7 +805,8 @@
                                 <div class="mt-3 text-center">
                                     <h5 class="fw-bold">
                                         Total Sales in Selected Range:
-                                        <span class="text-success total-sales">{{ number_format($filteredTotalSales) }}
+                                        <span class="text-success total-sales"><?php echo e(number_format($filteredTotalSales)); ?>
+
                                             TZS</span>
                                     </h5>
                                 </div>
@@ -818,14 +814,14 @@
                         </div>
                     </div>
                 </div>
-            @endhasrole
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         </div>
     </div>
 
-    {{-- Stock Section --}}
+    
     <div class="row mb-4">
-        {{-- Stock Summary Table --}}
+        
         <div class="col-md-6 mb-4">
             <div class="col-12">
                 <div class="card shadow">
@@ -840,12 +836,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($medicines as $medicine)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $medicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $medicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
-                                            <td>{{ $medicine->medicine_name }}</td>
-                                            <td>{{ $medicine->total_stock }}</td>
+                                            <td><?php echo e($medicine->medicine_name); ?></td>
+                                            <td><?php echo e($medicine->total_stock); ?></td>
                                         </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -853,7 +849,7 @@
                 </div>
             </div>
         </div>
-        {{-- Stock Vs medicine graph --}}
+        
         <div class="col-md-6 mb-4">
             <div class="card h-100 shadow">
                 <div class="card-body">
@@ -876,8 +872,8 @@
                     <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('sales.store') }}" id="salesForm" method="POST">
-                        @csrf
+                    <form action="<?php echo e(route('sales.store')); ?>" id="salesForm" method="POST">
+                        <?php echo csrf_field(); ?>
                         <div id="salesFields">
                             <div class="row sale-entry align-items-center mb-3">
                                 <input hidden name="stock_id[]" required type="text">
@@ -885,20 +881,16 @@
                                     <label class="form-label">Medicine</label>
                                     <select class="chosen form-select" name="item_id[]" required>
                                         <option disabled selected value="">Select Item</option>
-                                        @foreach ($sellMedicines as $sellMedicine)
-                                            {{-- <option value="{{ $sellMedicine->item->id }}">{{ $sellMedicine->item->name }}
-                                        </option> --}}
-                                            {{-- <option value="{{ $sellMedicine->id }}">
-                                            {{ $sellMedicine->item->name }}
-                                            <br><strong
-                                                class="text-danger">({{ number_format($sellMedicine->selling_price) }}Tsh)</strong>
-                                        </option> --}}
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $sellMedicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sellMedicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            
+                                            
                                             <option
-                                                value="{{ $sellMedicine->item->id }}_{{ $sellMedicine->selling_price }}">
-                                                {{ $sellMedicine->item->name }}
-                                                ({{ number_format($sellMedicine->selling_price) }}Tsh)
+                                                value="<?php echo e($sellMedicine->item->id); ?>_<?php echo e($sellMedicine->selling_price); ?>">
+                                                <?php echo e($sellMedicine->item->name); ?>
+
+                                                (<?php echo e(number_format($sellMedicine->selling_price)); ?>Tsh)
                                             </option>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -920,7 +912,7 @@
                                 <div class="col-md-0" hidden>
                                     <label class="form-label">Date</label>
                                     <input class="form-control date" name="date[]" required type="text"
-                                        value="{{ now() }}">
+                                        value="<?php echo e(now()); ?>">
                                 </div>
                             </div>
                         </div>
@@ -955,13 +947,13 @@
         </div>
     </div>
 
-    {{-- Create Sales Note Modal --}}
+    
     <div aria-hidden="true" aria-labelledby="createSalesNoteModalLabel" class="modal fade modal-lg"
         id="createSalesNoteModal" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form action="{{ route('salesNotes.store') }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('salesNotes.store')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="createSalesNoteModalLabel">Create Sales Note</h5>
                         <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
@@ -988,7 +980,7 @@
                                         class="text-danger">*</span></label>
                             </div>
 
-                            {{-- quantity* unit selling price --}}
+                            
                             <div class="col-md-4 form-floating">
                                 <input class="form-control fw-bold text-success" id="floatingTotalPrice"
                                     name="total_price" placeholder="100000" readonly type="text">
@@ -1005,9 +997,9 @@
                         </div>
 
                         <input hidden name="pharmacy_id" placeholder="Pharmacy ID" readonly required type="text"
-                            value="{{ session('current_pharmacy_id') }}">
+                            value="<?php echo e(session('current_pharmacy_id')); ?>">
                         <input hidden name="staff_id" placeholder="Staff ID" readonly required type="text"
-                            value="{{ auth()->id() }}">
+                            value="<?php echo e(auth()->id()); ?>">
                     </div>
                     <div class="modal-footer justify-content-between">
                         <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
@@ -1018,7 +1010,7 @@
         </div>
     </div>
 
-    {{-- Script for Two Separate Graphs --}}
+    
     <script>
         $(document).ready(function() {
             // Sales Graph Initialization
@@ -1050,8 +1042,8 @@
             const salesGraphCtx = $('#salesGraph')[0].getContext('2d');
             const salesChart = initializeGraph(
                 salesGraphCtx,
-                {!! json_encode($medicineNames) !!},
-                {!! json_encode($medicineSales) !!},
+                <?php echo json_encode($medicineNames); ?>,
+                <?php echo json_encode($medicineSales); ?>,
                 'Sales',
                 'rgba(54, 162, 235, 0.6)',
                 'rgba(54, 162, 235, 1)'
@@ -1061,8 +1053,8 @@
             const stockGraphCtx = $('#stockGraph')[0].getContext('2d');
             initializeGraph(
                 stockGraphCtx,
-                {!! json_encode($medicineNames) !!},
-                {!! json_encode($medicineStock) !!},
+                <?php echo json_encode($medicineNames); ?>,
+                <?php echo json_encode($medicineStock); ?>,
                 'Stock',
                 'rgba(255, 99, 132, 0.6)',
                 'rgba(255, 99, 132, 1)'
@@ -1179,7 +1171,7 @@
 
                 // Perform AJAX request
                 $.ajax({
-                    url: '{{ route('medicines.search') }}',
+                    url: '<?php echo e(route('medicines.search')); ?>',
                     method: 'GET',
                     data: {
                         search: searchValue
@@ -1208,7 +1200,7 @@
         document.addEventListener('DOMContentLoaded', function() {
 
             // raw data from Laravel
-            const rawMedicines = @json($sellMedicines); // ensure this includes item relation
+            const rawMedicines = <?php echo json_encode($sellMedicines, 15, 512) ?>; // ensure this includes item relation
 
             // normalize and add compositeKey = "<medicine_id>_<selling_price>"
             const medicines = (rawMedicines || []).map(m => {
@@ -1351,11 +1343,11 @@
                 <div class="col-md-4">
                     <select name="item_id[]" class="form-select chosen" required>
                         <option selected disabled value="">Select Item</option>
-                        @foreach ($sellMedicines as $sellMedicine)
-                            <option value="{{ $sellMedicine->item->id }}_{{ $sellMedicine->selling_price }}">
-                                {{ $sellMedicine->item->name }} ({{ number_format($sellMedicine->selling_price) }}Tsh)
+                        <?php $__currentLoopData = $sellMedicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sellMedicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($sellMedicine->item->id); ?>_<?php echo e($sellMedicine->selling_price); ?>">
+                                <?php echo e($sellMedicine->item->name); ?> (<?php echo e(number_format($sellMedicine->selling_price)); ?>Tsh)
                             </option>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -1369,7 +1361,7 @@
                     <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
                 </div>
                 <div class="col-md-0" hidden>
-                    <input type="text" class="form-control date" name="date[]" value="{{ now() }}" required>
+                    <input type="text" class="form-control date" name="date[]" value="<?php echo e(now()); ?>" required>
                 </div>
                 <div class="col-md-1 d-flex justify-content-center">
                     <button type="button" class="btn btn-danger btn-sm remove-sale-row">
@@ -1479,11 +1471,11 @@
 
                 // send backend check request
                 $.ajax({
-                    url: '{{ route('checkPassword') }}',
+                    url: '<?php echo e(route('checkPassword')); ?>',
                     method: 'POST',
                     data: {
                         password: enteredPassword,
-                        _token: '{{ csrf_token() }}'
+                        _token: '<?php echo e(csrf_token()); ?>'
                     },
                     success: function(response) {
                         if (response.success) {
@@ -1527,3 +1519,4 @@
             });
         });
     </script>
+<?php /**PATH D:\DEVELOPMENT\pms\resources\views/components/welcome.blade.php ENDPATH**/ ?>

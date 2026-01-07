@@ -212,6 +212,12 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::get('/reports/suggested-stock/json', [ReportPrintController::class, 'getSuggestedStockJson'])->name('reports.suggested_stock.json');
     Route::post('/reports/suggested-stock/whatsapp', [WhatsAppController::class, 'sendSuggestedStock'])->name('reports.suggested_stock.whatsapp');
 
+    // Analytics Panel
+    Route::middleware(['eligible:view reports'])->group(function () {
+        Route::get('/analytics', [\App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics.index');
+        Route::get('/analytics/data', [\App\Http\Controllers\AnalyticsController::class, 'getAnalytics'])->name('analytics.data');
+    });
+
     // Route::middleware(['eligible:get sms'])->group(function () {
     //     Route::post('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
     //     Route::get('/send-sms', [SmsPush::class, 'sendSmsNotification'])->name('send-sms');
