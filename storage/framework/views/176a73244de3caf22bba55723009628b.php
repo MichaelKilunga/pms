@@ -600,7 +600,7 @@
         
         <div class="row g-4 justify-content-center mb-4 text-center">
             <div class="col-6 col-md-4 col-lg-2">
-                <a class="card bg-danger text-decoration-none text-white shadow" data-bs-target="#createSalesModal"
+                <a class="card bg-primary text-decoration-none text-white shadow" data-bs-target="#createSalesModal"
                     data-bs-toggle="modal" href="">
                     <div class="card-body">
                         <h6><i class="bi bi-cart-plus fs-1#"></i> Create new Sales</h6>
@@ -609,8 +609,8 @@
                 </a>
             </div>
             <div class="col-6 col-md-4 col-lg-2">
-                <button class="card bg-primary text-decoration-none text-white shadow"
-                    data-bs-target="#createSalesNoteModal" data-bs-toggle="modal">
+                <button class="card bg-info text-decoration-none text-white shadow" data-bs-target="#createSalesNoteModal"
+                    data-bs-toggle="modal">
                     <div class="card-body">
                         <h6><i class="bi bi-plus-circle fs-1#"></i> Create Sales Notebook</h6>
                         
@@ -629,7 +629,7 @@
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2">
-                <div class="card bg-info text-white shadow">
+                <div class="card bg-danger text-white shadow">
                     <div class="card-body">
                         <h6>
                             <i class="bi bi-exclamation-triangle fs-3# me-2"></i>Expired

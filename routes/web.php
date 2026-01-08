@@ -78,6 +78,7 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
 
     //PHARMACIES
     Route::get('/superadmin/pharmacies', [SuperAdminController::class, 'managePharmacies'])->name('superadmin.pharmacies');
+    Route::post('/superadmin/pharmacies', [SuperAdminController::class, 'storePharmacy'])->name('superadmin.pharmacies.store');
     Route::get('/superadmin/pharmacies/{id}/edit', [SuperAdminController::class, 'editPharmacy'])->name('superadmin.pharmacies.edit');
     Route::put('/superadmin/pharmacies/{id}', [SuperAdminController::class, 'updatePharmacy'])->name('superadmin.pharmacies.update');
     Route::get('/superadmin/pharmacies/{id}', [SuperAdminController::class, 'showPharmacy'])->name('superadmin.pharmacies.show');
@@ -321,7 +322,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('create-conversation', [\App\Http\Controllers\MessageController::class, 'createConversation'])->name('messages.create');
             Route::get('conversation/{id}', [\App\Http\Controllers\MessageController::class, 'fetchMessages'])->name('messages.fetch');
             Route::post('send', [\App\Http\Controllers\MessageController::class, 'store'])->name('messages.send');
-            Route::delete('delete/{id}', [\App\Http\Controllers\MessageController::class, 'destroy'])->name('messages.delete');
+            Route::delete('delete/{id}', [\App\Http\Controllers\MessageController::class, 'destroy'])->name('messages.delete'); // Message delete
+            Route::delete('delete-conversation/{id}', [\App\Http\Controllers\MessageController::class, 'deleteConversation'])->name('messages.deleteConversation');
         });
 
         Route::get('agent/cases', [AgentController::class, 'cases'])->name('agent.cases');

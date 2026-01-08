@@ -14,7 +14,7 @@ class Staff extends Model implements Auditable
     use AuditingTrait;
 
     protected $fillable = [
-        'user_id', 'pharmacy_id',
+        'user_id', 'pharmacy_id', 'status',
     ];
     protected $auditEvents = [
         'created',

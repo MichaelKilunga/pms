@@ -1,6 +1,6 @@
-@extends("agent.app")
+@extends('agent.app')
 
-@section("content")
+@section('content')
     <style>
         /* Custom Scrollbar */
         .chat-scroll::-webkit-scrollbar {
@@ -214,6 +214,16 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Re-initialize Select2 specifically for this modal to ensure proper width and behavior
+            $('#createConversationModal').on('shown.bs.modal', function() {
+                $('#conversationParticipants').select2({
+                    dropdownParent: $('#createConversationModal'),
+                    width: '100%',
+                    placeholder: "Select participants...",
+                    allowClear: true
+                });
+            });
+
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -228,7 +238,7 @@
 
             // --- 1. Load Conversations ---
             function loadConversations() {
-                $.get("{{ route("messages.conversations") }}", function(data) {
+                $.get("{{ route('messages.conversations') }}", function(data) {
                     if (data.success) {
                         renderConversations(data.conversations);
                         $("#loadingConversations").remove();
@@ -264,9 +274,18 @@
                         day: 'numeric'
                     });
 
+                    const deleteBtn = (c.creator_id === currentUserId) ? `
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <button class="btn btn-sm text-danger delete-conversation-btn" data-id="${c.id}" title="Delete Chat" style="z-index: 10;">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    ` : '';
+
                     const item = `
-                    <li class="list-group-item conversation-item ${isActive} p-3 border-0 border-bottom" data-id="${c.id}" data-title="${c.title}">
-                        <div class="d-flex justify-content-between align-items-start mb-1">
+                    <li class="list-group-item conversation-item ${isActive} p-3 border-0 border-bottom position-relative" data-id="${c.id}" data-title="${c.title}">
+                         ${deleteBtn}
+                        <div class="d-flex justify-content-between align-items-start mb-1 pe-4">
                             <h6 class="mb-0 text-truncate" style="max-width: 70%;">${c.title}</h6>
                             <small class="text-muted" style="font-size: 0.75rem;">${date}</small>
                         </div>
@@ -279,6 +298,34 @@
                     list.append(item);
                 });
             }
+
+            // Delete Conversation Handler
+            $(document).on('click', '.delete-conversation-btn', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent triggering the conversation selection
+
+                if (!confirm(
+                        "Are you sure you want to delete this conversation? This will remove you from the participant list."
+                    )) return;
+
+                const id = $(this).data('id');
+                const $item = $(this).closest('.conversation-item');
+
+                $.ajax({
+                    url: `/agent/messages/api/delete-conversation/${id}`,
+                    type: 'DELETE',
+                    success: function(resp) {
+                        if (resp.success) {
+                            $item.remove();
+                            if (currentConversationId == id) {
+                                $("#closeChatBtn").click(); // Close if active
+                            }
+                        } else {
+                            alert("Error: " + resp.error);
+                        }
+                    }
+                });
+            });
 
             // --- 2. Switch Conversation / Close Chat ---
             $("#closeChatBtn").click(function() {
@@ -434,10 +481,10 @@
                 const originalContent = $btn.html();
                 $btn.prop('disabled', true).html(
                     '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
-                    );
+                );
 
                 $.ajax({
-                    url: "{{ route("messages.send") }}",
+                    url: "{{ route('messages.send') }}",
                     type: "POST",
                     data: formData,
                     processData: false,
@@ -456,7 +503,7 @@
                         alert("Request failed: " + (xhr.statusText || "Unknown error"));
                     },
                     complete: function() {
-                        $btn.prop('disabled', false).html(originalContent);
+                        $btn.prop('disabled', false).html('<i class="bi bi-send-fill"></i>');
                     }
                 });
             });
@@ -508,7 +555,7 @@
                 e.preventDefault();
                 const data = $(this).serialize();
 
-                $.post("{{ route("messages.create") }}", data, function(response) {
+                $.post("{{ route('messages.create') }}", data, function(response) {
                     if (response.success) {
                         $("#createConversationModal").modal('hide');
                         $("#createConversationForm")[0].reset();

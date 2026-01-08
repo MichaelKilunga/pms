@@ -89,14 +89,14 @@
         @livewire('navigation-menu')
 
         {{-- I have removed flex from here --}}
-        <div class="flex#"> 
+        <div class="flex#">
 
             <!-- SIDEBAR -->
             <x-sidebar />
 
             <main class="flex-1 mt-5 py-6 px-2# lg:ml-64 transition-all duration-300">
-                @if(isset($slot))
-                {{ $slot }}
+                @if (isset($slot))
+                    {{ $slot }}
                 @else
                     {{-- <div class="flex items-center justify-center h-full">
                         <div class="text-gray-600">No content available.</div>
@@ -247,6 +247,9 @@
                         return;
                     }
                     if ($this.is('#addStockBtn')) {
+                        return;
+                    }
+                    if ($this.is('#sendBtn')) {
                         return;
                     }
                     $this.addClass('bg-light border border-danger# text-danger text-muted')

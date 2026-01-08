@@ -28,9 +28,73 @@ class SuperAdminController extends Controller
     }
 
     public function managePharmacies(){
-        $pharmacies = Pharmacy::with('owner')->get();
-        // dd($pharmacies);
-        return view('superAdmin.pharmacies.index', compact('pharmacies'));
+        $pharmacies = Pharmacy::with('owner')->latest()->get();
+        $owners = User::where('role', 'owner')->get();
+        if($owners->isEmpty()){
+             $owners = User::role('Owner')->get();
+        }
+        return view('superAdmin.pharmacies.index', compact('pharmacies', 'owners'));
+    }
+
+    public function storePharmacy(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'location' => 'nullable|string|max:1000',
+            'owner_id' => 'required|exists:users,id',
+        ]);
+
+        Pharmacy::create([
+            'name' => $request->name,
+            'location' => $request->location,
+            'owner_id' => $request->owner_id,
+            'status' => 'active',
+            'package_id' => 1,
+        ]);
+
+        return redirect()->route('superadmin.pharmacies')->with('success', 'Pharmacy created successfully.');
+    }
+
+    public function showPharmacy($id)
+    {
+        $pharmacy = Pharmacy::with('owner')->findOrFail($id);
+        return view('superAdmin.pharmacies.show', compact('pharmacy'));
+    }
+
+    public function editPharmacy($id)
+    {
+        $pharmacy = Pharmacy::findOrFail($id);
+        $owners = User::role('Owner')->get();
+        if($owners->isEmpty()){
+             $owners = User::where('role', 'owner')->get();
+        }
+        return view('superAdmin.pharmacies.edit', compact('pharmacy', 'owners'));
+    }
+
+    public function updatePharmacy(Request $request, $id)
+    {
+         $request->validate([
+            'name' => 'required|string|max:255',
+            'location' => 'nullable|string|max:1000',
+            'owner_id' => 'required|exists:users,id',
+        ]);
+
+        $pharmacy = Pharmacy::findOrFail($id);
+        $pharmacy->update([
+            'name' => $request->name,
+            'location' => $request->location,
+            'owner_id' => $request->owner_id,
+        ]);
+
+        return redirect()->route('superadmin.pharmacies')->with('success', 'Pharmacy updated successfully.');
+    }
+
+    public function deletePharmacy($id)
+    {
+        $pharmacy = Pharmacy::findOrFail($id);
+        $pharmacy->delete();
+
+        return redirect()->route('superadmin.pharmacies')->with('success', 'Pharmacy deleted successfully.');
     }
     /**
      * Edit a user.

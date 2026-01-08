@@ -1,8 +1,8 @@
-@extends("audits.app")
+@extends('audits.app')
 
-@section("content")
+@section('content')
     <div class="table-responsive container">
-        <h2>Audit Logs</h2>
+        <h2 class="text-primary fw-bold h2 mb-2">Audit Logs</h2>
         <table class="table-bordered table-striped small table" id="Table">
             <thead>
                 <tr>
@@ -17,18 +17,17 @@
                 @foreach ($audits as $audit)
                     <tr>
                         <td>{{ $audit->created_at }}</td>
-                        <td>{{ $audit->user->name ?? "N/A" }}</td>
+                        <td>{{ \App\Models\User::find($audit->user_id)?->name ?? 'System' }}</td>
                         <td>{{ $audit->event }}</td>
                         <td>{{ json_encode($audit->old_values) }}</td>
                         <td>{{ json_encode($audit->new_values) }}</td>
                     </tr>
                 @endforeach
             </tbody>
-            <tfoot>
-                {{ $audit->index }}
-            </tfoot>
         </table>
 
-        {{ $audits->links() }}
+        <div class="mt-4">
+            {{ $audits->links() }}
+        </div>
     </div>
 @endsection

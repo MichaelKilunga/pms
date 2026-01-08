@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Contract;
 use App\Models\Package;
 use App\Models\Pharmacy;
-use App\Models\User;
 use App\Models\Sales;
 use App\Models\SystemSetting;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -24,11 +24,11 @@ class ContractController extends Controller
         return view('contracts.admin.index', compact('contracts'));
     }
 
-
     public function createSuperAdmin()
     {
         $packages = Package::all();
         $owners = User::all();
+
         return view('contracts.admin.create', compact('packages', 'owners'));
     }
 
@@ -47,6 +47,7 @@ class ContractController extends Controller
         ]);
 
         Contract::create($validated);
+
         return redirect()->route('contracts.admin.index')->with('success', 'Contract created successfully.');
     }
 
@@ -55,6 +56,7 @@ class ContractController extends Controller
         $contract = Contract::findOrFail($id);
         $packages = Package::all();
         $owners = User::all();
+
         return view('contracts.admin.edit', compact('contract', 'packages', 'owners'));
     }
 
@@ -73,12 +75,14 @@ class ContractController extends Controller
 
         $contract = Contract::findOrFail($id);
         $contract->update($validated);
+
         return redirect()->route('contracts.admin.index')->with('success', 'Contract updated successfully.');
     }
 
     public function showSuperAdmin($id)
     {
         $contract = Contract::with('owner', 'package')->findOrFail($id);
+
         return view('contracts.admin.show', compact('contract'));
     }
 
@@ -106,7 +110,7 @@ class ContractController extends Controller
         $contracts = Contract::where('owner_id', Auth::user()->id)->with('package')->orderBy('created_at', 'desc')->get();
         $current_contract = Contract::where('owner_id', Auth::user()->id)->where('is_current_contract', 1)->first();
 
-        //create a current_contract_end_date date from current_contract 
+        // create a current_contract_end_date date from current_contract
         if ($current_contract) {
             $current_contract_end_date = date('Y-m-d', strtotime($current_contract->end_date));
         } else {
@@ -123,12 +127,12 @@ class ContractController extends Controller
         // --- PRICING DATA CALCULATION ---
         $user = Auth::user();
         $pricingMode = $user->pricing_mode ?? (SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard');
-        
+
         $pricingData = [
             'mode' => $pricingMode,
             'amount' => 0,
             'details' => [],
-            'agent_markup' => Pharmacy::where('owner_id', $user->id)->sum('agent_extra_charge')
+            'agent_markup' => Pharmacy::where('owner_id', $user->id)->sum('agent_extra_charge'),
         ];
 
         if ($pricingMode === 'dynamic') {
@@ -138,23 +142,23 @@ class ContractController extends Controller
             $divisor = $divisor > 0 ? $divisor : 500;
             $multiplier = max(1, floor($totalItems / $divisor));
             $monthlyPrice = $multiplier * $rate * $totalItems;
-            
+
             $pricingData['amount'] = $monthlyPrice;
             $pricingData['details'] = [
                 'total_items' => $totalItems,
                 'rate' => $rate,
-                'multiplier' => $multiplier
+                'multiplier' => $multiplier,
             ];
         } elseif ($pricingMode === 'profit_share') {
             $percentage = (float) (SystemSetting::where('key', 'profit_share_percentage')->value('value') ?? 25);
             $pharmacyIds = Pharmacy::where('owner_id', $user->id)->pluck('id');
             $startDate = now()->subDays(30);
-            
+
             $sales = Sales::whereIn('pharmacy_id', $pharmacyIds)
                 ->where('created_at', '>=', $startDate)
                 ->with('stock')
                 ->get();
-                
+
             $monthlyProfit = 0;
             foreach ($sales as $sale) {
                 if ($sale->stock) {
@@ -165,18 +169,18 @@ class ContractController extends Controller
             }
             $monthlyProfit = max(0, $monthlyProfit);
             $monthlyPrice = $monthlyProfit * ($percentage / 100);
-            
+
             $pricingData['amount'] = $monthlyPrice;
             $pricingData['details'] = [
                 'monthly_profit' => $monthlyProfit,
-                'percentage' => $percentage
+                'percentage' => $percentage,
             ];
         }
 
         return view('contracts.users.index', compact(
-            'contracts', 
-            'packages', 
-            'current_contract_end_date', 
+            'contracts',
+            'packages',
+            'current_contract_end_date',
             'hasActivePaidNotCurrent',
             'pricingData'
         ));
@@ -185,6 +189,7 @@ class ContractController extends Controller
     public function showUser($id)
     {
         $contract = Contract::where('owner_id', Auth::user()->id)->with('package')->findOrFail($id);
+
         return view('contracts.users.show', compact('contract'));
     }
 
@@ -193,8 +198,7 @@ class ContractController extends Controller
 
         $current_contract = Contract::where('owner_id', $request['owner_id'])->where('is_current_contract', 1)->get();
 
-
-        //change all the current contract to not current
+        // change all the current contract to not current
         foreach ($current_contract as $contract) {
             $contract->update(['is_current_contract' => 0]);
             // delete them if they are unpayed and inactive
@@ -216,13 +220,13 @@ class ContractController extends Controller
         $owner = User::find($request['owner_id']);
         // Determine pricing mode: User override > Global setting
         $pricingMode = $owner->pricing_mode ?? (SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard');
-        
+
         $amount = 0;
         $agentMarkup = 0;
         $months = $request['months'];
 
         if ($pricingMode === 'dynamic') {
-             // Calculate total items for the owner
+            // Calculate total items for the owner
             $totalItems = Pharmacy::where('owner_id', $owner->id)
                 ->withCount('item')
                 ->get()
@@ -232,10 +236,10 @@ class ContractController extends Controller
             $rate = (float) (SystemSetting::where('key', 'system_use_rate')->value('value') ?? 100);
             $divisor = (int) (SystemSetting::where('key', 'item_tier_divisor')->value('value') ?? 500);
             $divisor = $divisor > 0 ? $divisor : 500;
-            
+
             $multiplier = max(1, floor($totalItems / $divisor));
             $monthlyPrice = $multiplier * $rate * $totalItems;
-            
+
             $amount = $monthlyPrice * $months;
 
             $agentMarkup = Pharmacy::where('owner_id', $owner->id)->sum('agent_extra_charge') * $months;
@@ -244,11 +248,11 @@ class ContractController extends Controller
         } elseif ($pricingMode === 'profit_share') {
             // Profit Share Logic
             $percentage = (float) (SystemSetting::where('key', 'profit_share_percentage')->value('value') ?? 25);
-            
+
             // Get last 30 days of sales for this owner's pharmacies to estimate monthly profit
             $pharmacyIds = Pharmacy::where('owner_id', $owner->id)->pluck('id');
             $startDate = now()->subDays(30);
-            
+
             // Fetch sales with stock to calculate profit
             // Profit = Sale Total Price - (Sale Quantity * Buying Price)
             // Note: This assumes 100% collection. If partial payment, logic might differ but simplified here.
@@ -256,7 +260,7 @@ class ContractController extends Controller
                 ->where('created_at', '>=', $startDate)
                 ->with('stock')
                 ->get();
-                
+
             $monthlyProfit = 0;
             foreach ($sales as $sale) {
                 if ($sale->stock) {
@@ -267,22 +271,22 @@ class ContractController extends Controller
             }
             // Ensure profit is not negative for billing purposes?
             $monthlyProfit = max(0, $monthlyProfit);
-            
+
             $monthlyPrice = $monthlyProfit * ($percentage / 100);
             $amount = $monthlyPrice * $months;
-            
+
             $agentMarkup = Pharmacy::where('owner_id', $owner->id)->sum('agent_extra_charge') * $months;
             $amount += $agentMarkup;
 
         } else {
-             // Standard Pricing
-             $package = Package::find($request['package_id']);
-             $amount = $package ? $package->price * $months : 0;
+            // Standard Pricing
+            $package = Package::find($request['package_id']);
+            $amount = $package ? $package->price * $months : 0;
         }
 
         $request->merge([
             'amount' => $amount,
-            'agent_markup' => $agentMarkup
+            'agent_markup' => $agentMarkup,
         ]);
 
         try {
@@ -301,20 +305,20 @@ class ContractController extends Controller
             $hasAnyContract = Contract::where('owner_id', Auth::user()->id)->count();
 
             if ($hasAnyContract > 0) {
-                if ($validated['package_id'] ==  1) {
+                if ($validated['package_id'] == 1) {
                     throw new Exception('This is unauthorized action!');
                 }
             } else {
-                if ($validated['package_id'] ==  1) {
+                if ($validated['package_id'] == 1) {
                     $validated['status'] = 'active';
                     $validated['payment_status'] = 'payed';
                     $validated['end_date'] = now()->addDays(14);
                 }
             }
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error: '.$e->getMessage());
         }
-        //validated package id
+        // validated package id
         if ($validated['package_id'] == 1) {
             throw new \Exception('This is unauthorized action!');
         }
@@ -325,7 +329,7 @@ class ContractController extends Controller
             ->count();
         // dd($count);
 
-        //check if the user is trying to upgrade to the same package
+        // check if the user is trying to upgrade to the same package
         if ($count > 0) {
             throw new \Exception('You are already subscribed to this package.');
         } else {
@@ -347,15 +351,15 @@ class ContractController extends Controller
 
                 $current_contract_end_date = date('Y-m-d', strtotime($current_contract->end_date));
 
-                //redirect to route 'myContracts" with success message
+                // redirect to route 'myContracts" with success message
                 return redirect()->back()->with('success', 'Package upgraded successfully.');
             } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+                return redirect()->back()->with('error', 'Error: '.$e->getMessage());
             }
         }
     }
 
-    //function for new subscription
+    // function for new subscription
     public function subscribe(Request $request)
     {
         // dd($request->all());
@@ -373,13 +377,13 @@ class ContractController extends Controller
         $ownerId = $request['owner_id'] ?? Auth::id();
         $owner = User::find($ownerId);
         $pricingMode = $owner->pricing_mode ?? (SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard');
-        
+
         $amount = 0;
         $agentMarkup = 0;
         $months = $request['months'];
 
         if ($pricingMode === 'dynamic') {
-             // Calculate total items for the owner
+            // Calculate total items for the owner
             $totalItems = Pharmacy::where('owner_id', $ownerId)
                 ->withCount('item')
                 ->get()
@@ -389,27 +393,27 @@ class ContractController extends Controller
             $rate = (float) (SystemSetting::where('key', 'system_use_rate')->value('value') ?? 100);
             $divisor = (int) (SystemSetting::where('key', 'item_tier_divisor')->value('value') ?? 500);
             $divisor = $divisor > 0 ? $divisor : 500;
-            
+
             $multiplier = max(1, floor($totalItems / $divisor));
             $monthlyPrice = $multiplier * $rate * $totalItems;
-            
+
             $amount = $monthlyPrice * $months;
 
             $agentMarkup = Pharmacy::where('owner_id', $ownerId)->sum('agent_extra_charge') * $months;
             $amount += $agentMarkup;
 
         } elseif ($pricingMode === 'profit_share') {
-             // Profit Share Logic
+            // Profit Share Logic
             $percentage = (float) (SystemSetting::where('key', 'profit_share_percentage')->value('value') ?? 25);
-            
+
             $pharmacyIds = Pharmacy::where('owner_id', $ownerId)->pluck('id');
             $startDate = now()->subDays(30);
-            
+
             $sales = Sales::whereIn('pharmacy_id', $pharmacyIds)
                 ->where('created_at', '>=', $startDate)
                 ->with('stock')
                 ->get();
-                
+
             $monthlyProfit = 0;
             foreach ($sales as $sale) {
                 if ($sale->stock) {
@@ -419,23 +423,22 @@ class ContractController extends Controller
                 }
             }
             $monthlyProfit = max(0, $monthlyProfit);
-            
+
             $monthlyPrice = $monthlyProfit * ($percentage / 100);
             $amount = $monthlyPrice * $months;
-            
+
             $agentMarkup = Pharmacy::where('owner_id', $ownerId)->sum('agent_extra_charge') * $months;
             $amount += $agentMarkup;
 
         } else {
-             $package = Package::find($request['package_id']);
-             $amount = $package ? $package->price * $months : 0;
+            $package = Package::find($request['package_id']);
+            $amount = $package ? $package->price * $months : 0;
         }
-        
-         $request->merge([
-            'amount' => $amount,
-            'agent_markup' => $agentMarkup
-        ]);
 
+        $request->merge([
+            'amount' => $amount,
+            'agent_markup' => $agentMarkup,
+        ]);
 
         try {
             $validated = $request->validate([
@@ -449,26 +452,23 @@ class ContractController extends Controller
                 'is_current_contract' => 'required|boolean',
             ]);
 
-
             $hasAnyContract = Contract::where('owner_id', Auth::user()->id)->count();
 
             if ($hasAnyContract > 0) {
-                if ($validated['package_id'] ==  1) {
+                if ($validated['package_id'] == 1) {
                     throw new Exception('This is unauthorized action!');
                 }
             } else {
-                if ($validated['package_id'] ==  1) {
+                if ($validated['package_id'] == 1) {
                     $validated['status'] = 'active';
                     $validated['payment_status'] = 'payed';
                     $validated['end_date'] = now()->addDays(14);
                 }
             }
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error: '.$e->getMessage());
         }
 
-
-        
         $contractData = $validated;
         $contractData['amount'] = $request->amount;
         $contractData['agent_markup'] = $request->agent_markup;
@@ -480,7 +480,7 @@ class ContractController extends Controller
 
     public function renew(Request $request)
     {
-        //locate the current contract and change it not current
+        // locate the current contract and change it not current
         $current_contract = Contract::where('owner_id', $request['owner_id'])->where('is_current_contract', 1)->first();
         $current_contract->update(['is_current_contract' => 0]);
 
@@ -504,7 +504,7 @@ class ContractController extends Controller
         $months = $request['months'];
 
         if ($pricingMode === 'dynamic') {
-             // Calculate total items for the owner
+            // Calculate total items for the owner
             $totalItems = Pharmacy::where('owner_id', $ownerId)
                 ->withCount('item')
                 ->get()
@@ -514,27 +514,27 @@ class ContractController extends Controller
             $rate = (float) (SystemSetting::where('key', 'system_use_rate')->value('value') ?? 100);
             $divisor = (int) (SystemSetting::where('key', 'item_tier_divisor')->value('value') ?? 500);
             $divisor = $divisor > 0 ? $divisor : 500;
-            
+
             $multiplier = max(1, floor($totalItems / $divisor));
             $monthlyPrice = $multiplier * $rate * $totalItems;
-            
+
             $amount = $monthlyPrice * $months;
 
             $agentMarkup = Pharmacy::where('owner_id', $ownerId)->sum('agent_extra_charge') * $months;
             $amount += $agentMarkup;
 
         } elseif ($pricingMode === 'profit_share') {
-             // Profit Share Logic
+            // Profit Share Logic
             $percentage = (float) (SystemSetting::where('key', 'profit_share_percentage')->value('value') ?? 25);
-            
+
             $pharmacyIds = Pharmacy::where('owner_id', $ownerId)->pluck('id');
             $startDate = now()->subDays(30);
-            
+
             $sales = Sales::whereIn('pharmacy_id', $pharmacyIds)
                 ->where('created_at', '>=', $startDate)
                 ->with('stock')
                 ->get();
-                
+
             $monthlyProfit = 0;
             foreach ($sales as $sale) {
                 if ($sale->stock) {
@@ -544,21 +544,21 @@ class ContractController extends Controller
                 }
             }
             $monthlyProfit = max(0, $monthlyProfit);
-            
+
             $monthlyPrice = $monthlyProfit * ($percentage / 100);
             $amount = $monthlyPrice * $months;
-            
+
             $agentMarkup = Pharmacy::where('owner_id', $ownerId)->sum('agent_extra_charge') * $months;
             $amount += $agentMarkup;
 
         } else {
-             $package = Package::find($request['package_id']);
-             $amount = $package ? $package->price * $months : 0;
+            $package = Package::find($request['package_id']);
+            $amount = $package ? $package->price * $months : 0;
         }
 
-         $request->merge([
+        $request->merge([
             'amount' => $amount,
-            'agent_markup' => $agentMarkup
+            'agent_markup' => $agentMarkup,
         ]);
 
         // dd($request->all());
@@ -575,10 +575,8 @@ class ContractController extends Controller
                 'is_current_contract' => 'required|boolean',
             ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error: '.$e->getMessage());
         }
-
-
 
         $contractData = $validated;
         $contractData['amount'] = $request->amount;
@@ -593,11 +591,11 @@ class ContractController extends Controller
     public function confirm($id)
     {
         $contract = Contract::findOrFail($id);
-        //calculate days between start_date and end_date
+        // calculate days between start_date and end_date
         $days = Carbon::parse($contract->start_date)->diffInDays(Carbon::parse($contract->end_date));
         // calculate new end_date from today plus days
         $new_end_date = Carbon::now()->addDays($days);
-        //new start date is today
+        // new start date is today
         $new_start_date = Carbon::now();
         // dd($new_start_date, $new_end_date,$days);
 
@@ -605,16 +603,17 @@ class ContractController extends Controller
         $contract->update(['start_date' => $new_start_date]);
         $contract->update(['end_date' => $new_end_date]);
         $contract->update(['payment_status' => 'payed', 'status' => 'active']);
+
         return redirect()->back()->with('success', 'Payment confirmed successfully.');
     }
 
-    //function to activate a contract
+    // function to activate a contract
     public function activate(Request $request)
     {
         // dd($request->all());
-        //find the current contract
+        // find the current contract
         $current_contract = Contract::where('owner_id', $request['owner_id'])->where('is_current_contract', 1)->get();
-        //change all the current contract to not current
+        // change all the current contract to not current
         foreach ($current_contract as $contract) {
             $contract->update(['is_current_contract' => 0]);
             // delete them if they are unpayed and inactive
@@ -623,21 +622,22 @@ class ContractController extends Controller
             }
         }
 
-        //find the contract to activate
+        // find the contract to activate
         $contract = Contract::findOrFail($request['contract_id']);
         $contract->update(['is_current_contract' => 1]);
+
         return redirect()->back()->with('success', 'Contract activated successfully.');
     }
 
-    //function to add a grace period to a contract
+    // function to add a grace period to a contract
     public function grace(Request $request, $id)
     {
         $request['contract_id'] = $id;
-        //receive the number of days to add to the grace period, convert value from string to integer
-        $day = (int)$request['days'];
+        // receive the number of days to add to the grace period, convert value from string to integer
+        $day = (int) $request['days'];
 
         // dd($request->all());
-        //find the contract to add grace period
+        // find the contract to add grace period
         $contract = Contract::findOrFail($request['contract_id']);
 
         $contract->update(['status' => 'graced', 'grace_end_date' => now()->addDays($day)]);

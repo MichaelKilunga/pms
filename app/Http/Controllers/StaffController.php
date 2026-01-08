@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pharmacy;
 use App\Models\Staff;
 use App\Models\User;
-use App\Models\Pharmacy;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules\Unique;
+use Illuminate\Support\Facades\Hash;
 
 class StaffController extends Controller
 {
@@ -68,7 +67,7 @@ class StaffController extends Controller
                 'role' => 'required|in:admin,staff', // Restrict to specific roles
             ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error importing file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error importing file: '.$e->getMessage());
         }
 
         // Check if a user with the same phone or email already exists
@@ -90,7 +89,7 @@ class StaffController extends Controller
             // Assign Spatie role
             if ($request->role == 'admin') {
                 $user->assignRole('Manager');
-                 // Pharmacy::where('pharmacy_id',$request->pharmacy_id)->update(['admin_id' => $user->id]);
+                // Pharmacy::where('pharmacy_id',$request->pharmacy_id)->update(['admin_id' => $user->id]);
             } else {
                 $user->assignRole('Staff');
             }
@@ -107,7 +106,6 @@ class StaffController extends Controller
             return redirect()->route('staff')->with('error', 'Failed to add staff. Please try again.');
         }
     }
-
 
     /**
      * Display the specified staff member.
@@ -148,18 +146,18 @@ class StaffController extends Controller
         ]);
 
         $user = User::findOrFail($request->id);
-        
+
         $user->update($request->only(['name', 'email', 'phone']));
-        
+
         // Update Legacy Role
         $user->role = $request->role;
         $user->save();
 
         // Sync Spatie Role
         if ($request->role === 'admin') {
-             $user->syncRoles(['Manager']);
+            $user->syncRoles(['Manager']);
         } else {
-             $user->syncRoles(['Staff']);
+            $user->syncRoles(['Staff']);
         }
 
         return redirect()->route('staff')->with('success', 'Staff updated successfully.');
@@ -168,13 +166,26 @@ class StaffController extends Controller
     /**
      * Remove the specified staff member from storage.
      */
-
     public function destroy(Request $request)
     {
-        User::destroy($request->id);
+        // select * from staff where user_id=
+        $staff = Staff::where('user_id', $request->id)->first();
 
-        return redirect()->route('staff')->with('success', 'Staff deleted successfully!');
+        if ($staff->status == 'inactive') {
+            // update status to active
+            $staff->update(['status' => 'active']);
+            $staff->save();
+
+            return redirect()->route('staff')->with('success', 'Staff Activated successfully!');
+        } else {
+            // update status to inactive
+            $staff->update(['status' => 'inactive']);
+            $staff->save();
+
+            return redirect()->route('staff')->with('success', 'Staff Deactivated successfully!');
+        }
     }
+
     /**
      * Authorize access to the staff member.
      */

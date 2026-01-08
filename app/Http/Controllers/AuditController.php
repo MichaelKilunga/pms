@@ -10,7 +10,7 @@ class AuditController extends Controller
     public function index()
     {
         $audits = Audit::latest()
-        ->OrderBy( 'created_at', 'desc')
+        ->orderBy( 'created_at', 'desc')
             ->paginate(10);
         // dd($audits);
         return view('audits.index', compact('audits'));

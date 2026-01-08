@@ -108,7 +108,7 @@ if (isset($__slots)) unset($__slots);
 ?>
 
         
-        <div class="flex#"> 
+        <div class="flex#">
 
             <!-- SIDEBAR -->
             <?php if (isset($component)) { $__componentOriginald31f0a1d6e85408eecaaa9471b609820 = $component; } ?>
@@ -134,7 +134,7 @@ if (isset($__slots)) unset($__slots);
 
             <main class="flex-1 mt-5 py-6 px-2# lg:ml-64 transition-all duration-300">
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($slot)): ?>
-                <?php echo e($slot); ?>
+                    <?php echo e($slot); ?>
 
                 <?php else: ?>
                     
@@ -285,6 +285,9 @@ if (isset($__slots)) unset($__slots);
                         return;
                     }
                     if ($this.is('#addStockBtn')) {
+                        return;
+                    }
+                    if ($this.is('#sendBtn')) {
                         return;
                     }
                     $this.addClass('bg-light border border-danger# text-danger text-muted')

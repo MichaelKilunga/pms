@@ -1,24 +1,24 @@
-@extends("agent.app")
+@extends('agent.app')
 
-@section("content")
+@section('content')
     <div class="container mt-4">
 
         {{-- ========================= SELECT OWNER ========================= --}}
         <div class="mb-4">
             <div class="d-flex justify-content-between align-items-center">
                 <h2 class="h3 text-primary">Select Owner to Manage</h2>
-                <span class="{{ session("owner") ? "text-success" : "text-danger" }}">
-                    {{ session("owner") ? session("owner") : "Select Owner" }}
+                <span class="{{ session('owner') ? 'text-success' : 'text-danger' }}">
+                    {{ session('owner') ? session('owner') : 'Select Owner' }}
                 </span>
             </div>
-            <form action="{{ route("agent.packages.manage", ["action" => "index"]) }}" method="post">
+            <form action="{{ route('agent.packages.manage', ['action' => 'index']) }}" method="post">
                 @csrf
                 <div class="row g-2 mt-2">
                     <div class="col-md-8">
                         <select class="form-select rounded" id="owner_id" name="owner_id" required>
                             <option value="">--Select Owner--</option>
                             @foreach ($owners as $owner)
-                                <option {{ session("owner_id") == $owner->id ? "selected" : "" }}
+                                <option {{ session('owner_id') == $owner->id ? 'selected' : '' }}
                                     value="{{ $owner->id }}">
                                     {{ $owner->name }} ({{ $owner->phone }})
                                 </option>
@@ -71,7 +71,7 @@
                                     <p class="card-text mb-1">Time Remaining: <span class="text-danger"
                                             id="countdown"></span></p>
                                     <p class="card-text mb-1">Status: {{ $contract->status }} <small
-                                            class="text-warning">{{ $contract->status == "graced" ? \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() : "" }}</small>
+                                            class="text-warning">{{ $contract->status == 'graced' ? \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() : '' }}</small>
                                     </p>
                                     <p class="card-text mb-0">Payment: {{ $contract->payment_status }}</p>
                                 @endif
@@ -96,12 +96,12 @@
                             <tbody>
                                 @php $activePlans = 0; @endphp
                                 @foreach ($contracts as $contract)
-                                    @if (!$contract->is_current_contract && $contract->payment_status == "payed" && $contract->status != "inactive")
+                                    @if (!$contract->is_current_contract && $contract->payment_status == 'payed' && $contract->status != 'inactive')
                                         <tr>
                                             <td>{{ $contract->package->name }}</td>
                                             <td>
                                                 <a class="btn btn-primary btn-sm"
-                                                    href="{{ route("contracts.users.activate", ["contract_id" => $contract->id, "owner_id" => session("owner_id")]) }}"><i
+                                                    href="{{ route('contracts.users.activate', ['contract_id' => $contract->id, 'owner_id' => session('owner_id')]) }}"><i
                                                         class="fas fa-check-circle"></i>
                                                     Activate</a>
                                             </td>
@@ -142,7 +142,7 @@
                             </thead>
                             <tbody>
                                 @foreach ($contracts as $contract)
-                                    @if ($contract->payment_status != "pending")
+                                    @if ($contract->payment_status != 'pending')
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $contract->package->name }}</td>
@@ -182,30 +182,31 @@
             <h3 class="text-primary fw-bold mb-4 text-center"><i class="fas fa-layer-group"></i> Available Subscription
                 Plans</h3>
 
-            @if (isset($pricingData) && $pricingData["mode"] != "standard")
+            @if (isset($pricingData) && $pricingData['mode'] != 'standard')
                 <div class="row justify-content-center mb-4">
                     <div class="col-md-8">
-                        @if ($pricingData["mode"] == "dynamic")
+                        @if ($pricingData['mode'] == 'dynamic')
                             <div class="alert alert-info border-info text-center shadow-sm">
                                 <h5 class="fw-bold"><i class="fas fa-calculator me-2"></i> Item-Based Pricing Active</h5>
                                 <p class="mb-1">Based on inventory size:
-                                    <strong>{{ number_format($pricingData["details"]["total_items"]) }} items</strong>.</p>
+                                    <strong>{{ number_format($pricingData['details']['total_items']) }} items</strong>.
+                                </p>
                                 <hr class="my-2">
                                 <p class="mb-0">
-                                    Base Rate: {{ number_format($pricingData["details"]["rate"]) }} x
-                                    {{ $pricingData["details"]["multiplier"] }} (Tier) =
-                                    <strong class="fs-5">TZS {{ number_format($pricingData["amount"]) }} / month</strong>
+                                    Base Rate: {{ number_format($pricingData['details']['rate']) }} x
+                                    {{ $pricingData['details']['multiplier'] }} (Tier) =
+                                    <strong class="fs-5">TZS {{ number_format($pricingData['amount']) }} / month</strong>
                                 </p>
                             </div>
-                        @elseif($pricingData["mode"] == "profit_share")
+                        @elseif($pricingData['mode'] == 'profit_share')
                             <div class="alert alert-success border-success text-center shadow-sm">
                                 <h5 class="fw-bold"><i class="fas fa-chart-line me-2"></i> Profit Share Pricing Active</h5>
-                                <p class="mb-1">Based on <strong>{{ $pricingData["details"]["percentage"] }}%</strong> of
+                                <p class="mb-1">Based on <strong>{{ $pricingData['details']['percentage'] }}%</strong> of
                                     last 30 days profit.</p>
                                 <hr class="my-2">
                                 <p class="mb-0">
-                                    Est. Monthly Profit: {{ number_format($pricingData["details"]["monthly_profit"]) }} =
-                                    <strong class="fs-5">TZS {{ number_format($pricingData["amount"]) }} / month</strong>
+                                    Est. Monthly Profit: {{ number_format($pricingData['details']['monthly_profit']) }} =
+                                    <strong class="fs-5">TZS {{ number_format($pricingData['amount']) }} / month</strong>
                                 </p>
                             </div>
                         @endif
@@ -226,41 +227,41 @@
                     <tbody>
                         @foreach ($packages as $package)
                             @php
-                                $activeContracts = \App\Models\Contract::where("owner_id", session("owner_id"))
-                                    ->where("is_current_contract", 1)
+                                $activeContracts = \App\Models\Contract::where('owner_id', session('owner_id'))
+                                    ->where('is_current_contract', 1)
                                     ->get();
-                                $hasAnyContract = \App\Models\Contract::where("owner_id", session("owner_id"))->count();
-                                $activatableContract = \App\Models\Contract::where("owner_id", session("owner_id"))
-                                    ->where("package_id", $package->id)
-                                    ->where("status", "active")
-                                    ->where("payment_status", "payed")
-                                    ->where("is_current_contract", 0)
+                                $hasAnyContract = \App\Models\Contract::where('owner_id', session('owner_id'))->count();
+                                $activatableContract = \App\Models\Contract::where('owner_id', session('owner_id'))
+                                    ->where('package_id', $package->id)
+                                    ->where('status', 'active')
+                                    ->where('payment_status', 'payed')
+                                    ->where('is_current_contract', 0)
                                     ->first();
 
                                 $blockUpgrade = !is_null($activatableContract);
-                                $lastExpiredContract = \App\Models\Contract::where("owner_id", session("owner_id"))
-                                    ->where("package_id", $package->id)
-                                    ->where("status", "inactive")
-                                    ->where("payment_status", "payed")
-                                    ->where("end_date", "<", now())
-                                    ->where("is_current_contract", 0)
-                                    ->orderBy("end_date", "desc")
+                                $lastExpiredContract = \App\Models\Contract::where('owner_id', session('owner_id'))
+                                    ->where('package_id', $package->id)
+                                    ->where('status', 'inactive')
+                                    ->where('payment_status', 'payed')
+                                    ->where('end_date', '<', now())
+                                    ->where('is_current_contract', 0)
+                                    ->orderBy('end_date', 'desc')
                                     ->first();
 
                                 // --- PRICE CALCULATION LOGIC ---
                                 $finalPrice = $package->price; // Default Standard
-                                if (isset($pricingData) && $pricingData["mode"] != "standard") {
-                                    $finalPrice = $pricingData["amount"];
+                                if (isset($pricingData) && $pricingData['mode'] != 'standard') {
+                                    $finalPrice = $pricingData['amount'];
                                 }
                                 // Add Agent Markup per month if applicable (assuming markup is per month? previous logic implied it)
                                 // Actually, ContractController logic showed Markup * Duration in the total.
                                 // Here we show Monthly Price.
                                 // Let's show Base + Markup if applicable.
-                                $agentMarkup = isset($pricingData) ? $pricingData["agent_markup"] : 0;
+$agentMarkup = isset($pricingData) ? $pricingData['agent_markup'] : 0;
                                 $displayPrice = $finalPrice + $agentMarkup;
 
                             @endphp
-                            <tr class="{{ $hasAnyContract > 0 && $package->id == 1 ? "d-none" : "" }}">
+                            <tr class="{{ $hasAnyContract > 0 && $package->id == 1 ? 'd-none' : '' }}">
                                 <td class="fw-bold text-dark ps-4">{{ $package->name }}</td>
                                 <td>
                                     <div class="d-flex flex-column">
@@ -271,11 +272,11 @@
                                                 {{ number_format($finalPrice) }} + Agent Fee:
                                                 {{ number_format($agentMarkup) }})</small>
                                         @endif
-                                        @if (isset($pricingData) && $pricingData["mode"] != "standard")
+                                        @if (isset($pricingData) && $pricingData['mode'] != 'standard')
                                             <span
                                                 class="badge bg-secondary-subtle text-dark border-secondary start-100 translate-middle-y top-0 mt-1 border"
                                                 style="width: fit-content;">
-                                                {{ ucfirst($pricingData["mode"]) }}
+                                                {{ ucfirst($pricingData['mode']) }}
                                             </span>
                                         @endif
                                     </div>
@@ -287,21 +288,23 @@
 
                                     {{-- ========================= CHECK: NO ACTIVE CONTRACTS? (Subscribe State) ========================= --}}
                                     @if ($activeContracts->count() < 1)
-                                        {{-- Month selection for new subscription --}}
-                                        <select class="form-select-sm form-select me-2 w-auto"
-                                            id="months_{{ $package->id }}" required>
-                                            <option value="">Select months</option>
+                                        {{-- Month selection for new subscription (Hidden for Trial ID 1) --}}
+                                        @if ($package->id != 1)
+                                            <select class="form-select-sm form-select me-2 w-auto"
+                                                id="months_{{ $package->id }}" required>
+                                                <option value="">Select months</option>
 
-                                            {{-- Loop months 1–12 --}}
-                                            @for ($i = 1; $i <= 12; $i++)
-                                                <option value="{{ $i }}">{{ $i }}
-                                                    month{{ $i > 1 ? "s" : "" }}</option>
-                                            @endfor
-                                        </select>
+                                                {{-- Loop months 1–12 --}}
+                                                @for ($i = 1; $i <= 12; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}
+                                                        month{{ $i > 1 ? 's' : '' }}</option>
+                                                @endfor
+                                            </select>
+                                        @endif
 
                                         {{-- Subscribe button --}}
                                         <button class="btn btn-primary btn-sm rounded-pill subscribe-btn shadow"
-                                            data-url="{{ route("contracts.users.subscribe", ["package_id" => $package->id, "owner_id" => session("owner_id")]) }}"
+                                            data-url="{{ route('contracts.users.subscribe', ['package_id' => $package->id, 'owner_id' => session('owner_id')]) }}"
                                             type="button">
                                             <i class="fa-solid fa-badge-check"></i> Subscribe
                                         </button>
@@ -325,19 +328,21 @@
                                             @endphp
 
                                             {{-- ========================= CONTRACT END DATE CHECK (Renew or Current Plan) ========================= --}}
-                                            @if ($endDate->isPast() && $currentContract->status == "inactive")
+                                            @if ($endDate->isPast() && $currentContract->status == 'inactive')
                                                 {{-- Contract expired → Show Renew --}}
-                                                <select class="form-select-sm form-select me-2 w-auto"
-                                                    id="months_{{ $package->id }}" required>
-                                                    <option value="">Select months</option>
-                                                    @for ($i = 1; $i <= 12; $i++)
-                                                        <option value="{{ $i }}">{{ $i }}
-                                                            month{{ $i > 1 ? "s" : "" }}</option>
-                                                    @endfor
-                                                </select>
+                                                @if ($package->id != 1)
+                                                    <select class="form-select-sm form-select me-2 w-auto"
+                                                        id="months_{{ $package->id }}" required>
+                                                        <option value="">Select months</option>
+                                                        @for ($i = 1; $i <= 12; $i++)
+                                                            <option value="{{ $i }}">{{ $i }}
+                                                                month{{ $i > 1 ? 's' : '' }}</option>
+                                                        @endfor
+                                                    </select>
+                                                @endif
 
                                                 <button class="btn btn-warning btn-sm rounded-pill subscribe-btn shadow"
-                                                    data-url="{{ route("contracts.users.renew", ["package_id" => $package->id, "owner_id" => session("owner_id")]) }}"
+                                                    data-url="{{ route('contracts.users.renew', ['package_id' => $package->id, 'owner_id' => session('owner_id')]) }}"
                                                     type="button">
                                                     <i class="fa-solid fa-clock-rotate-left"></i> Renew
                                                 </button>
@@ -354,23 +359,25 @@
                                             {{-- If upgrade is blocked, allow "Activate" previous contract --}}
                                             @if ($blockUpgrade)
                                                 <a class="btn btn-primary btn-sm rounded-pill shadow"
-                                                    href="{{ route("contracts.users.activate", ["contract_id" => $activatableContract->id, "owner_id" => session("owner_id")]) }}">
+                                                    href="{{ route('contracts.users.activate', ['contract_id' => $activatableContract->id, 'owner_id' => session('owner_id')]) }}">
                                                     <i class="fas fa-check-circle"></i> Activate
                                                 </a>
                                             @else
                                                 {{-- Show Upgrade option --}}
-                                                <select class="form-select-sm form-select me-2 w-auto"
-                                                    id="months_{{ $package->id }}" required>
-                                                    <option value="">Select months</option>
+                                                @if ($package->id != 1)
+                                                    <select class="form-select-sm form-select me-2 w-auto"
+                                                        id="months_{{ $package->id }}" required>
+                                                        <option value="">Select months</option>
 
-                                                    @for ($i = 1; $i <= 12; $i++)
-                                                        <option value="{{ $i }}">{{ $i }}
-                                                            month{{ $i > 1 ? "s" : "" }}</option>
-                                                    @endfor
-                                                </select>
+                                                        @for ($i = 1; $i <= 12; $i++)
+                                                            <option value="{{ $i }}">{{ $i }}
+                                                                month{{ $i > 1 ? 's' : '' }}</option>
+                                                        @endfor
+                                                    </select>
+                                                @endif
 
                                                 <button class="btn btn-primary btn-sm rounded-pill subscribe-btn shadow"
-                                                    data-url="{{ route("contracts.users.upgrade", ["package_id" => $package->id, "owner_id" => session("owner_id")]) }}"
+                                                    data-url="{{ route('contracts.users.upgrade', ['package_id' => $package->id, 'owner_id' => session('owner_id')]) }}"
                                                     type="button">
                                                     <i class="fa-solid fa-arrow-trend-up"></i> Upgrade
                                                 </button>
@@ -531,16 +538,22 @@
                     select.style.border = '';
 
                     if (!months) {
-                        // Show alert
-                        alert('Please select the number of months first!');
-                        // Highlight the select box with a red border
-                        select.style.border = '2px solid red';
-                        // Scroll to it (optional for better UX)
-                        select.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                        return;
+                        // Check if it's the specific trial package logic (no month selector)
+                        if (!select) {
+                            // Default to 1 month for cases where selector is hidden (e.g. Trial)
+                            months = 1;
+                        } else {
+                            // Show alert
+                            alert('Please select the number of months first!');
+                            // Highlight the select box with a red border
+                            select.style.border = '2px solid red';
+                            // Scroll to it (optional for better UX)
+                            select.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
+                            return;
+                        }
                     }
 
                     // Redirect with months as query parameter

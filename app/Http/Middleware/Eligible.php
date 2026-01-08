@@ -20,10 +20,7 @@ class Eligible
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @param  string  $action
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next, $action): Response
     {
@@ -39,17 +36,18 @@ class Eligible
                 if ($agent != null) {
                     if ($agent->registration_status != 'complete') {
                         return redirect()->route('agent.completeRegistration', [
-                            'action' => 'index'
+                            'action' => 'index',
                         ])->with('info', 'Please complete your registration to continue!');
                     }
                 } else {
                     // create new agent
                     $agent = Agent::create([
                         'user_id' => Auth::user()->id,
-                        'registration_status' => 'step_1'
+                        'registration_status' => 'step_1',
                     ]);
+
                     return redirect()->route('agent.completeRegistration', [
-                        'action' => 'index'
+                        'action' => 'index',
                     ])->with('info', 'Please complete your registration to continue!');
                 }
                 if ($agent->registration_status === 'complete') {
@@ -57,7 +55,7 @@ class Eligible
                 }
             }
             // if is owner
-            if (Auth::user()->hasRole('Owner')) {
+            if (Auth::user()->hasRole(['Owner', 'Staff'])) {
                 return $next($request);
             }
         }
@@ -66,15 +64,15 @@ class Eligible
         $user = Auth::user();
         $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
 
-        if (!$pharmacy && Auth::user()->hasRole('Owner')) {
+        if (! $pharmacy && Auth::user()->hasRole('Owner')) {
             // return redirect()->route('dashboard')->with('error', 'No pharmacy found in the session.');
             // $owner = Auth::user();
             if (Auth::user()->pharmacies->count() < 1) {
-                if ($action == "create pharmacy") {
+                if ($action == 'create pharmacy') {
                     return $next($request);
                 }
 
-                if ($action != "create pharmacy") {
+                if ($action != 'create pharmacy') {
                     return redirect()->route('dashboard')->with('info', 'You don\'t have any pharmacy, select or create one to continue!');
                 }
             } else {
@@ -90,8 +88,7 @@ class Eligible
             $owner = $user;
         }
 
-
-        if (!$owner) {
+        if (! $owner) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
         }
 
@@ -101,10 +98,9 @@ class Eligible
             ->whereIn('status', ['active', 'graced'])
             ->first();
 
-
         switch ($action) {
             case 'hasContract':
-                if (!$contract) {
+                if (! $contract) {
                     $pricingMode = $owner->pricing_mode ?? \App\Models\SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard';
 
                     // Allow setup routes for Dynamic Pricing users so they can populate items
@@ -114,15 +110,15 @@ class Eligible
                             'pharmacies', 'pharmacies.create', 'pharmacies.store', 'pharmacies.show', 'pharmacies.update',
                             'medicines', 'medicines.create', 'medicines.store', 'medicines.show', 'medicines.update', 'medicines.search',
                             'stock', 'stock.create', 'stock.store', 'stock.show', 'stock.update',
-                            'import', 'importStore', 'medicines.import-form', 'medicines.import'
+                            'import', 'importStore', 'medicines.import-form', 'medicines.import',
                         ];
-                        
+
                         // Check if current route name matches allowed list or patterns
                         $currentRoute = $request->route()->getName();
-                        
+
                         // Simple check if route is in allowed list
-                        if (in_array($currentRoute, $allowedRoutes) || 
-                            str_starts_with($currentRoute, 'medicines.') || 
+                        if (in_array($currentRoute, $allowedRoutes) ||
+                            str_starts_with($currentRoute, 'medicines.') ||
                             str_starts_with($currentRoute, 'stock.') ||
                             str_starts_with($currentRoute, 'pharmacies.')) {
                             return $next($request);
@@ -140,19 +136,20 @@ class Eligible
                     );
 
                     $redirectRoute = $user->hasRole('Staff') ? 'dashboard' : 'myContracts';
+
                     return redirect()->route($redirectRoute)->with('error', 'You do not have an active subscription plan.');
                 }
                 break;
 
             case 'create pharmacy':
-                if (!$contract) {
+                if (! $contract) {
                     return redirect()->route('myContracts')->with('error', 'You need an active subscription plan to add pharmacies.');
                 }
 
                 $package = Package::find($contract->package_id);
                 $pharmaciesCount = Pharmacy::where('owner_id', $owner->id)->count();
 
-                if (!$package) {
+                if (! $package) {
                     return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
                 }
 
@@ -163,14 +160,14 @@ class Eligible
 
             case 'add staff':
                 $package = Package::find($contract->package_id);
-                
-                if (!$package) {
+
+                if (! $package) {
                     return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
                 }
 
                 // Check strict feature flag first
-                if (!$package->staff_management) {
-                     return redirect()->route('staff')->with('error', 'Your subscription plan does not support Staff Management.');
+                if (! $package->staff_management) {
+                    return redirect()->route('staff')->with('error', 'Your subscription plan does not support Staff Management.');
                 }
 
                 $staffCount = Staff::where('pharmacy_id', $pharmacy->id)->count();
@@ -184,16 +181,17 @@ class Eligible
                 $package = Package::find($contract->package_id);
                 $medicineCount = Items::where('pharmacy_id', $pharmacy->id)->count();
 
-                if (!$package) {
+                if (! $package) {
                     return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
                 }
 
                 if ($medicineCount >= $package->number_of_medicines) {
-                    //check if request is ajax
-                    if ($request->ajax())
+                    // check if request is ajax
+                    if ($request->ajax()) {
                         return response()->json(['message' => 'maximum'], 200);
+                    }
 
-                    //check if not ajax
+                    // check if not ajax
                     return redirect()->route('medicines')->with('error', 'You have reached the maximum number of medicines allowed by your subscription.');
                 }
                 break;
@@ -201,7 +199,7 @@ class Eligible
             case 'view reports':
                 $package = Package::find($contract->package_id);
 
-                if (!$package) {
+                if (! $package) {
                     return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
                 }
 
@@ -209,18 +207,18 @@ class Eligible
                     return redirect()->back()->with('error', 'You\'re not allowed to see reports with your subscription plan, please upgrade!');
                 }
                 break;
-            
+
             case 'stock':
                 $package = Package::find($contract->package_id);
-                if (!$package || !$package->stock_management) {
-                     return redirect()->route('dashboard')->with('error', 'Stock Management is not available in your current plan.');
+                if (! $package || ! $package->stock_management) {
+                    return redirect()->route('dashboard')->with('error', 'Stock Management is not available in your current plan.');
                 }
                 break;
-                
+
             case 'transfers':
                 $package = Package::find($contract->package_id);
-                if (!$package || !$package->stock_transfer) {
-                     return redirect()->route('dashboard')->with('error', 'Stock Transfers are not available in your current plan.');
+                if (! $package || ! $package->stock_transfer) {
+                    return redirect()->route('dashboard')->with('error', 'Stock Transfers are not available in your current plan.');
                 }
                 break;
 
@@ -234,10 +232,6 @@ class Eligible
 
     /**
      * Send an in-app notification.
-     *
-     * @param  \App\Models\User  $user
-     * @param  string  $message
-     * @param  string  $type
      */
     private function notify(User $user, string $message, string $type): void
     {

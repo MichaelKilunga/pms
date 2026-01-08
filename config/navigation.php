@@ -24,11 +24,11 @@ return [
             ],
         ],
         [
-            'label' => 'Notifications',
-            'icon' => 'bi bi-bell',
+            'label' => 'Communication',
+            'icon' => 'bi bi-chat-dots',
             'children' => [
-                ['label' => 'All Notifications', 'route' => 'notifications'],
                 ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
+                ['label' => 'Notifications', 'route' => 'notifications'],
             ],
         ],
         [
@@ -70,7 +70,7 @@ return [
             'icon' => 'bi bi-shield-lock',
             'children' => [
                 ['label' => 'Pharmacist', 'route' => 'staff'],
-                ['label' => 'Category', 'route' => 'category'],
+                // ['label' => 'Category', 'route' => 'category'],
                 ['label' => 'Pharmacies', 'route' => 'pharmacies'],
                 ['label' => 'Contracts', 'route' => 'myContracts'],
             ],
@@ -94,13 +94,20 @@ return [
             ],
         ],
         [
+            'label' => 'Communication',
+            'icon' => 'bi bi-chat-dots',
+            'children' => [
+                ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
+                ['label' => 'Notifications', 'route' => 'notifications'],
+            ],
+        ],
+
+        [
             'label' => 'Reports',
             'icon' => 'bi bi-bar-chart',
             'children' => [
                 ['label' => 'Reports', 'route' => 'reports.all'],
                 ['label' => 'Analytics', 'route' => 'reports.index'],
-                ['label' => 'Notifications', 'route' => 'notifications'],
-                ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
             ],
         ],
     ],
@@ -174,23 +181,65 @@ return [
 
     'super' => [
         [
-            'label' => 'System',
-            'icon' => 'bi bi-motherboard',
+            'label' => 'Dashboard',
+            'route' => 'dashboard',
+            'icon' => 'bi bi-grid-fill',
+        ],
+        [
+            'label' => 'User Management',
+            'icon' => 'bi bi-people',
             'children' => [
-                ['label' => 'Dashboard', 'route' => 'dashboard'],
                 ['label' => 'System Users', 'route' => 'superadmin.users'],
+                ['label' => 'Agents Registration', 'route' => 'agent.completeRegistration', 'params' => ['action' => 'index']],
+                // ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
+            ],
+        ],
+        [
+            'label' => 'Pharmacies',
+            'icon' => 'bi bi-hospital',
+            'children' => [
                 ['label' => 'Pharmacies', 'route' => 'superadmin.pharmacies'],
-                ['label' => 'Packages', 'route' => 'packages'],
-                ['label' => 'All medicines', 'route' => 'allMedicines.all'],
-                ['label' => 'Notifications', 'route' => 'notifications'],
+            ],
+        ],
+        [
+            'label' => 'Package',
+            'icon' => 'bi bi-box-seam',
+            'children' => [
+                ['label' => 'Packages & Subscriptions', 'route' => 'packages'],
+            ],
+        ],
+
+        [
+            'label' => 'Contracts',
+            'icon' => 'bi bi-file-earmark-text',
+            'children' => [
                 ['label' => 'Contracts', 'route' => 'contracts'],
                 ['label' => "Agent's Contracts", 'route' => 'agent.packages', 'params' => ['action' => 'index']],
                 ['label' => 'Schedules', 'route' => 'update.contracts'],
                 ['label' => 'Pharmacies (Agent)', 'route' => 'agent.pharmacies', 'params' => ['action' => 'index']],
+            ],
+        ],
+        [
+            'label' => 'Medicines',
+            'icon' => 'bi bi-capsule',
+            'children' => [
+                ['label' => 'All medicines', 'route' => 'allMedicines.all'],
+            ],
+        ],
+        [
+            'label' => 'Communication',
+            'icon' => 'bi bi-chat-dots',
+            'children' => [
                 ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
-                ['label' => 'Agents Registration', 'route' => 'agent.completeRegistration', 'params' => ['action' => 'index']],
-                ['label' => 'Activities', 'route' => 'audits.index'],
+                ['label' => 'Notifications', 'route' => 'notifications'],
                 ['label' => 'Global Notifications', 'route' => 'superAdmin.notifications.index'],
+            ],
+        ],
+        [
+            'label' => 'System Logs',
+            'icon' => 'bi bi-journal-text',
+            'children' => [
+                ['label' => 'Activities', 'route' => 'audits.index'],
             ],
         ],
     ],

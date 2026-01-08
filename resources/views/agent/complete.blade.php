@@ -1,12 +1,12 @@
-@extends("agent.app")
+@extends('agent.app')
 
-@section("content")
+@section('content')
 
     {{-- check if user is agent --}}
-    @hasrole("Agent")
+    @hasrole('Agent')
         <h1 class="text-primary h4 mt-4 text-center">Registration Pannel</h1>
         <!-- Progress Bar -->
-        @if (in_array($me->registration_status, ["step_1", "incomplete", "step_3"]))
+        @if ($me && in_array($me->registration_status, ['step_1', 'incomplete', 'step_3']))
             <div class="progress mx-auto mb-2" style="width: 70%;">
                 <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="0"
                     class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="progressBar" role="progressbar"
@@ -17,19 +17,19 @@
         @endif
 
         @php
-            $compulsoryDocuments = ["Passport Copy", "Driving License", "National ID"];
-            $optionalDocuments = array_merge(["Utility Bill", "Bank Statement", "Other"], $compulsoryDocuments);
+            $compulsoryDocuments = ['Passport Copy', 'Driving License', 'National ID'];
+            $optionalDocuments = array_merge(['Utility Bill', 'Bank Statement', 'Other'], $compulsoryDocuments);
         @endphp
 
         {{-- if is in step_1 --}}
-        @if ($me == null || $me->registration_status == "step_1")
+        @if ($me == null || $me->registration_status == 'step_1')
             <div class="container mt-2">
                 <div class="card shadow-lg">
                     <div class="card-header bg-primary text-white">
                         <h4 class="text-center"> Step 1</h4>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route("agent.completeRegistration") }}" enctype="multipart/form-data" method="POST">
+                        <form action="{{ route('agent.completeRegistration') }}" enctype="multipart/form-data" method="POST">
                             @csrf
                             <input name="action" type="hidden" value="store">
 
@@ -38,14 +38,14 @@
                                     <label class="form-label" for="country">Nationality</label>
                                     <input class="form-control required-field" id="country" name="country"
                                         placeholder="Tanzania" required type="text"
-                                        value="{{ old("country", $agent->country ?? "") }}">
+                                        value="{{ old('country', $agent->country ?? '') }}">
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label" for="NIN">National Identification Number (NIN)</label>
                                     <input class="form-control required-field" id="NIN" name="NIN"
                                         placeholder="19981107303750000227" required type="text"
-                                        value="{{ old("NIN", $agent->NIN ?? "") }}">
+                                        value="{{ old('NIN', $agent->NIN ?? '') }}">
                                 </div>
 
                                 <!-- Compulsory Document -->
@@ -56,7 +56,7 @@
                                         <option disabled selected>Select Document</option>
                                         @foreach ($compulsoryDocuments as $option)
                                             <option
-                                                {{ old("document_attachment_1_name", $agent->document_attachment_1_name ?? "") == $option ? "selected" : "" }}
+                                                {{ old('document_attachment_1_name', $agent->document_attachment_1_name ?? '') == $option ? 'selected' : '' }}
                                                 value="{{ $option }}">
                                                 {{ $option }}
                                             </option>
@@ -80,18 +80,18 @@
                                             Documents</button>
                                     </div>
                                     <label class="form-label" for="agent_code">Agent Code: <span
-                                            class="text-primary">{{ isset($agent_code) ? $agent_code : "not assigned" }}</span>
+                                            class="text-primary">{{ isset($agent_code) ? $agent_code : 'not assigned' }}</span>
                                     </label>
                                     <br>
                                     <label class="form-label" for="agent_code">Verification Status: <span
-                                            class="text-primary">{{ isset($agent_code) ? $agent_code : "not verified" }}</span>
+                                            class="text-primary">{{ isset($agent_code) ? $agent_code : 'not verified' }}</span>
                                     </label>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label" for="address">Address</label>
                                     <textarea class="form-control required-field" id="address" name="address"
-                                        placeholder="Tanzania, Morogoro, Morogoro municipal, Chief Kingalu market, A115." rows="2">{{ old("address", $agent->address ?? "") }}</textarea>
+                                        placeholder="Tanzania, Morogoro, Morogoro municipal, Chief Kingalu market, A115." rows="2">{{ old('address', $agent->address ?? '') }}</textarea>
                                     <small class="text-danger d-none" id="addressError">Address must follow this format:
                                         Country,
                                         Region, District, Ward, Street, House number.</small>
@@ -142,7 +142,7 @@
                     </div>
                 </div>
             </div>
-        @elseif($me->registration_status == "step_3")
+        @elseif($me->registration_status == 'step_3')
             {{-- Show a place to download aggreement document and a place to upload the signed agreement document --}}
             {{-- <div class="container m-3 w-50 row"> --}}
             <center>
@@ -154,7 +154,7 @@
                         <div class="row">
                             <div class="col-md-5">
                                 <label class="form-label" for="agreement">Agreement</label> <br>
-                                <a class="btn btn-primary" href="{{ asset("storage/agreement_forms/agreement_form.pdf") }}"
+                                <a class="btn btn-primary" href="{{ asset('storage/agreement_forms/agreement_form.pdf') }}"
                                     target="_blank">Download Agreement</a>
                                 <br>
                                 <small class="text-danger">Please download the agreement and sign it before uploading
@@ -166,7 +166,7 @@
                             <div class="col-md-1 border-start border-primary"></div>
 
                             <div class="col-md-6">
-                                <form action="{{ route("agent.completeRegistration") }}" enctype="multipart/form-data"
+                                <form action="{{ route('agent.completeRegistration') }}" enctype="multipart/form-data"
                                     id="uploadSignedAgreement" method="POST">
                                     @csrf
                                     <input hidden name="action" type="text" value="upload_agreement_form">
@@ -191,7 +191,7 @@
                     </div>
                 </div>
             </center>
-        @elseif($me->registration_status == "incomplete")
+        @elseif($me->registration_status == 'incomplete')
             {{-- display Agent informations in a table --}}
             <center>
                 <div class="card mx-2">
@@ -205,7 +205,7 @@
                                     Your registration has been rejected!
                                 </p>
                                 {{-- check if not verified yet --}}
-                                @if ($me->status == "unverified")
+                                @if ($me->status == 'unverified')
                                     <div class="my-4 text-center">
                                         <div class="text-success" role="status">
                                             verification status: 100%
@@ -216,7 +216,7 @@
                                     {{-- set route to go to next step --}}
                                     <div class="my-4 text-center">
                                         <a class="btn btn-primary"
-                                            href="{{ route("agent.completeRegistration", ["action" => "restart_steps"]) }}">Re-Apply</a>
+                                            href="{{ route('agent.completeRegistration', ['action' => 'restart_steps']) }}">Re-Apply</a>
                                     </div>
                                 @endif
                                 <p class="text-warning text-center">
@@ -227,7 +227,7 @@
                     </div>
                 </div>
             </center>
-        @elseif($me->registration_status == "step_2")
+        @elseif($me->registration_status == 'step_2')
             {{-- Display a message and a loader to ask client to wait while her documents are being verified --}}
             <center>
                 <div class="card mx-2">
@@ -242,7 +242,7 @@
                                     This may take a few minutes to 24 hours.
                                 </p>
                                 {{-- check if not verified yet --}}
-                                @if ($me->status == "unverified")
+                                @if ($me->status == 'unverified')
                                     <div class="my-4 text-center">
                                         <div class="spinner-border text-primary" role="status">
                                         </div> <br>
@@ -251,16 +251,16 @@
                                     {{-- set route to go to next step --}}
                                     <div class="my-4 text-center">
                                         <a class="btn btn-danger"
-                                            href="{{ route("agent.completeRegistration", ["action" => "restart_steps"]) }}"
+                                            href="{{ route('agent.completeRegistration', ['action' => 'restart_steps']) }}"
                                             onclick="confirm('Are you sure you want to cancel?')">Cancel to Process</a>
                                     </div>
                                 @endif
-                                @if ($me->status == "verified")
+                                @if ($me->status == 'verified')
                                     {{-- set route to go to next step --}}
                                     <div class="my-4 text-center">
                                         <h1 class="h5 text-success"><i class="bi bi-person-check"> Verified!</i></h1>
                                         <a class="btn btn-primary"
-                                            href="{{ route("agent.completeRegistration", ["action" => "next_step"]) }}">Next</a>
+                                            href="{{ route('agent.completeRegistration', ['action' => 'next_step']) }}">Next</a>
                                     </div>
                                 @endif
                                 <p class="text-success text-center">
@@ -271,7 +271,7 @@
                     </div>
                 </div>
             </center>
-        @elseif($me->registration_status == "complete")
+        @elseif($me->registration_status == 'complete')
             {{-- display Agent information with code and with a button to download the code --}}
             <center>
                 <div class="mx-2">
@@ -286,7 +286,7 @@
 
                             {{-- agent code --}}
                             <span class="col-md-4">Your Agent Code: <span
-                                    class="text-{{ $me->agent_code == null ? "warning" : "success fw-bold" }}">{{ $me->agent_code ?? "Waiting..." }}</span>
+                                    class="text-{{ $me->agent_code == null ? 'warning' : 'success fw-bold' }}">{{ $me->agent_code ?? 'Waiting...' }}</span>
                         </h3>
                     </div>
                 </div>
@@ -304,10 +304,10 @@
                                 <br>
                                 <strong>Email:</strong>
                                 <a class="text-primary"
-                                    href="mailto:{{ App\Models\User::where("role", "super")->first()->email }}">{{ App\Models\User::where("role", "super")->first()->email }}</a>
+                                    href="mailto:{{ App\Models\User::where('role', 'super')->first()->email }}">{{ App\Models\User::where('role', 'super')->first()->email }}</a>
 
                                 <strong>Phone:</strong> <a class="text-success"
-                                    href="tel:{{ App\Models\User::where("role", "super")->first()->phone }}">{{ App\Models\User::where("role", "super")->first()->phone }}</a>
+                                    href="tel:{{ App\Models\User::where('role', 'super')->first()->phone }}">{{ App\Models\User::where('role', 'super')->first()->phone }}</a>
                             </p>
                         </div>
                     </div>
@@ -444,7 +444,7 @@
         </script>
     @endhasrole
     {{-- check if user is admin --}}
-    @hasrole("Superadmin")
+    @hasrole('Superadmin')
         {{-- List all agents data in a table, alow super admin to preview their documents and approve/reject them --}}
 
         <div class="container mt-4">
@@ -465,35 +465,35 @@
                         @foreach ($agents as $agent)
                             <tr class="small">
                                 <td>{{ $agent->name }} <br> <span class="text-danger">
-                                        {{ $agent->isAgent && $agent->isAgent->agent_code != null ? "Code: " . $agent->isAgent->agent_code : "" }}</span>
+                                        {{ $agent->isAgent && $agent->isAgent->agent_code != null ? 'Code: ' . $agent->isAgent->agent_code : '' }}</span>
                                 </td>
                                 <td>{{ $agent->email }}</td>
                                 <td>{{ $agent->phone }}</td>
-                                <td>{{ $agent->isAgent != null ? $agent->isAgent->address : "-" }}</td>
-                                <td>{{ $agent->isAgent != null ? ($agent->isAgent->registration_status == "incomplete" ? "Rejected" : $agent->isAgent->status) : "unverified" }}
+                                <td>{{ $agent->isAgent != null ? $agent->isAgent->address : '-' }}</td>
+                                <td>{{ $agent->isAgent != null ? ($agent->isAgent->registration_status == 'incomplete' ? 'Rejected' : $agent->isAgent->status) : 'unverified' }}
                                 </td>
                                 <td>
                                     @if ($agent->isAgent != null)
                                         {{-- display a document name as a link to open the document in a new tab --}}
-                                        <a href="{{ asset("storage/" . $agent->isAgent->document_attachment_1) }}"
+                                        <a href="{{ asset('storage/' . $agent->isAgent->document_attachment_1) }}"
                                             target="_blank">
                                             <small
-                                                class="text-primary smallest">{{ $agent->isAgent->document_attachment_1 ? $agent->isAgent->document_attachment_1_name : "" }}</small>
+                                                class="text-primary smallest">{{ $agent->isAgent->document_attachment_1 ? $agent->isAgent->document_attachment_1_name : '' }}</small>
                                         </a><br>
-                                        <a href="{{ asset("storage/" . $agent->isAgent->signed_agreement_form) }}"
+                                        <a href="{{ asset('storage/' . $agent->isAgent->signed_agreement_form) }}"
                                             target="_blank">
                                             <small
-                                                class="text-primary smallest">{{ $agent->isAgent->signed_agreement_form ? "Agreement Form" : "" }}</small>
+                                                class="text-primary smallest">{{ $agent->isAgent->signed_agreement_form ? 'Agreement Form' : '' }}</small>
                                         </a> <br>
-                                        <a href="{{ asset("storage/" . $agent->isAgent->document_attachment_2) }}"
+                                        <a href="{{ asset('storage/' . $agent->isAgent->document_attachment_2) }}"
                                             target="_blank">
                                             <small
-                                                class="text-primary smallest">{{ $agent->isAgent->document_attachment_2 ? $agent->isAgent->document_attachment_2_name : "" }}</small>
+                                                class="text-primary smallest">{{ $agent->isAgent->document_attachment_2 ? $agent->isAgent->document_attachment_2_name : '' }}</small>
                                         </a> <br>
-                                        <a href="{{ asset("storage/" . $agent->isAgent->document_attachment_3) }}"
+                                        <a href="{{ asset('storage/' . $agent->isAgent->document_attachment_3) }}"
                                             target="_blank">
                                             <small
-                                                class="text-primary smallest">{{ $agent->isAgent->document_attachment_3 ? $agent->isAgent->document_attachment_3_name : "" }}</small>
+                                                class="text-primary smallest">{{ $agent->isAgent->document_attachment_3 ? $agent->isAgent->document_attachment_3_name : '' }}</small>
                                         </a>
                                     @else
                                         N/A
@@ -502,14 +502,14 @@
                                 <td class="">
                                     <div class="d-flex justify-content-center">
                                         @if ($agent->isAgent != null)
-                                            <a class="{{ $agent->isAgent->registration_status == "step_2" ? "" : "hidden" }} text-success"
-                                                href="{{ route("agent.completeRegistration", ["action" => "verify", "set_status" => "accepted", "id" => $agent->isAgent->id]) }}"><small
+                                            <a class="{{ $agent->isAgent->registration_status == 'step_2' ? '' : 'hidden' }} text-success"
+                                                href="{{ route('agent.completeRegistration', ['action' => 'verify', 'set_status' => 'accepted', 'id' => $agent->isAgent->id]) }}"><small
                                                     class="smallest"><i class="bi bi-check"> Verify</i></small></a> <br>
-                                            <a class="{{ $agent->isAgent->registration_status == "step_2" ? "" : "hidden" }} text-danger"
-                                                href="{{ route("agent.completeRegistration", ["action" => "verify", "set_status" => "rejected", "id" => $agent->isAgent->id]) }}"><small
+                                            <a class="{{ $agent->isAgent->registration_status == 'step_2' ? '' : 'hidden' }} text-danger"
+                                                href="{{ route('agent.completeRegistration', ['action' => 'verify', 'set_status' => 'rejected', 'id' => $agent->isAgent->id]) }}"><small
                                                     class="smallest"><i class="bi bi-x"> Reject</i></small></a>
-                                            <a class="{{ $agent->isAgent->registration_status == "complete" ? "" : "hidden" }} {{ $agent->isAgent->agent_code != null ? "hidden" : "" }} text-primary"
-                                                href="{{ route("agent.completeRegistration", ["action" => "generateAgentCode", "id" => $agent->isAgent->id]) }}"><small
+                                            <a class="{{ $agent->isAgent->registration_status == 'complete' ? '' : 'hidden' }} {{ $agent->isAgent->agent_code != null ? 'hidden' : '' }} text-primary"
+                                                href="{{ route('agent.completeRegistration', ['action' => 'generateAgentCode', 'id' => $agent->isAgent->id]) }}"><small
                                                     class="smallest"><i class="bi bi-gear"> Generate code</small></i></a>
                                             {{-- <form action="" method="POST" style="display: inline;">
                                                 @csrf
@@ -532,7 +532,7 @@
             $(document).ready(function() {
                 // initialize dataTable
                 $('#Table').DataTable({
-                    "lengthMenu": [10, 25, 50, "All"]
+                    "lengthMenu": [10, 25, 50, "All"],
                     "pageLength": 10,
                     "order": [0, "asc"]
                 });
