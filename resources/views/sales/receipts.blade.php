@@ -34,7 +34,7 @@
                                 {{-- implement a print button, when clicked send request with date as parameter, guard the content so that it may not be altered by the browther --}}
                                 <td>
                                     <a href="{{ route('printReceipt', ['date' => $receipt->date]) }}"
-                                        class="btn btn-primary"><i class="bi bi-printer" ></i> Print</a>
+                                        class="btn btn-primary"><i class="bi bi-printer"></i> Print</a>
                                 </td>
                             </tr>
                         @endforeach

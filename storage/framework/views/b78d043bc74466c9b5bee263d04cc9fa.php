@@ -44,7 +44,7 @@
     <script>
         window.onload = function() {
             window.print();
-            setTimeout(() => window.location.href = '{{ route('sales') }}', 0);
+            setTimeout(() => window.location.href = '<?php echo e(route('sales')); ?>', 0);
         };
     </script>
 </head>
@@ -59,16 +59,17 @@
             <span class="d-flex justify-content-between">
                 <strong>Pharmacy:</strong>
                 <span>
-                    {{ APP\Models\Pharmacy::where('id', session('current_pharmacy_id'))->first()->name }}
+                    <?php echo e(APP\Models\Pharmacy::where('id', session('current_pharmacy_id'))->first()->name); ?>
+
                 </span>
             </span>
             <span class="d-flex justify-content-between">
                 <strong>Date:</strong>
-                <span>{{ $receipt->date }}</span>
+                <span><?php echo e($receipt->date); ?></span>
             </span>
             <span class="d-flex justify-content-between">
                 <strong>Pharmacist:</strong>
-                <span>{{ $staff->name }}</span>
+                <span><?php echo e($staff->name); ?></span>
             </span>
         </div>
         <br>
@@ -83,17 +84,17 @@
                 </tr>
             </thead>
             <tbody class="fs-20">
-                @foreach ($medicines as $medicine)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $medicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $medicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr>
-                        <td class="text-left">{{ $medicine->item->name }}</td>
-                        <td class="text-left">{{ $medicine->quantity }}</td>
-                        <td class="text-right">{{ number_format($medicine->total_price * $medicine->quantity, 0) }}/=
+                        <td class="text-left"><?php echo e($medicine->item->name); ?></td>
+                        <td class="text-left"><?php echo e($medicine->quantity); ?></td>
+                        <td class="text-right"><?php echo e(number_format($medicine->total_price * $medicine->quantity, 0)); ?>/=
                         </td>
                     </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 <tr>
                     <td colspan="2" class="text-right"><strong>Total:</strong></td>
-                    <td><b>{{ number_format($receipt->total_amount, 0) }}/=</b></td>
+                    <td><b><?php echo e(number_format($receipt->total_amount, 0)); ?>/=</b></td>
                 </tr>
             </tbody>
         </table>
@@ -104,3 +105,4 @@
 </body>
 
 </html>
+<?php /**PATH D:\DEVELOPMENT\pms\resources\views/sales/receipt.blade.php ENDPATH**/ ?>

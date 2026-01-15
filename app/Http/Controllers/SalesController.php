@@ -404,7 +404,7 @@ class SalesController extends BaseController
     {
         // Get all receipts from sales data for the current pharmacy group the by date where the sales of same date belongs to the same receipt, return a collection of receipts including serial number, date, total amount and staff name
         $receipts = Sales::where('pharmacy_id', session('current_pharmacy_id'))
-            ->selectRaw('date, sum(total_price) as total_amount, staff_id')
+            ->selectRaw('date, sum(total_price*quantity) as total_amount, staff_id')
             ->groupBy('date', 'staff_id')
             ->orderBy('date', 'desc')
             ->get();
@@ -438,7 +438,7 @@ class SalesController extends BaseController
 
         // Get the last receipt from sales data for the current pharmacy group
         $lastReceipt = Sales::where('pharmacy_id', session('current_pharmacy_id'))
-            ->selectRaw('date, sum(total_price) as total_amount, staff_id')
+            ->selectRaw('date, sum(total_price*quantity) as total_amount, staff_id')
             ->groupBy('date', 'staff_id')
             ->latest('date')
             ->first();
@@ -495,7 +495,7 @@ class SalesController extends BaseController
         // Get the sales data for the current pharmacy group for the specified date, but ensure the date is in datetime datatype to match the date in the database
         $receipt = Sales::where('pharmacy_id', session('current_pharmacy_id'))
             ->where('date', $request->date)
-            ->selectRaw('date, sum(total_price) as total_amount, staff_id')
+            ->selectRaw('date, sum(total_price*quantity) as total_amount, staff_id')
             ->groupBy('date', 'staff_id')
             ->first();
 
@@ -539,7 +539,7 @@ class SalesController extends BaseController
         // Get the sales data for the current pharmacy group for the specified date, but ensure the date is in datetime datatype to match the date in the database
         $receipt = Sales::where('pharmacy_id', session('current_pharmacy_id'))
             ->where('date', $salesDate)
-            ->selectRaw('date, sum(total_price) as total_amount, staff_id')
+            ->selectRaw('date, sum(total_price*quantity) as total_amount, staff_id')
             ->groupBy('date', 'staff_id')
             ->first();
 
