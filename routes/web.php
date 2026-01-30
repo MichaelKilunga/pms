@@ -37,10 +37,21 @@ use App\Http\Controllers\DebtController;
 use App\Http\Controllers\InstallmentController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\SuperAdminNotificationController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\BusinessSettingsController;
 
 Route::get('/', function () {
-    //return welcome view with packages
-    return view('welcome', ['packages' => Package::where('id', '!=', 1)->get(), 'agents' => User::where('role', 'agent')->get()]);
+    // Fetch global settings
+    $settings = \App\Models\SystemSetting::whereNull('pharmacy_id')->pluck('value', 'key');
+    
+    // Fetch active packages (excluding custom/legacy ones if needed)
+    $packages = \App\Models\Package::where('status', 'active')->where('id', '!=', 1)->get();
+    
+    return view('welcome', [
+        'packages' => $packages, 
+        'systemSettings' => $settings,
+        'agents' => User::where('role', 'agent')->get()
+    ]);
 });
 
 Route::view('/privacy_policy', 'legal.privacy_policy')->name('privacy_policy');
@@ -268,6 +279,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('contracts/users/subscribe', [ContractController::class, 'subscribe'])->name('contracts.users.subscribe');
     Route::get('/contracts/users/activate', [ContractController::class, 'activate'])->name('contracts.users.activate');
     Route::get('/contracts/users/renew', [ContractController::class, 'renew'])->name('contracts.users.renew');
+    Route::post('/contracts/users/generate-bill', [ContractController::class, 'generateBill'])->name('contracts.users.generate_bill');
+    Route::delete('/contracts/{id}', [ContractController::class, 'destroy'])->name('contracts.destroy');
+
+    // Business Settings (Owner Configuration)
+    Route::get('/settings', [BusinessSettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [BusinessSettingsController::class, 'update'])->name('settings.update');
 
     Route::get('/update-contracts', [ContractUpdateController::class, 'updateContracts'])->name('update.contracts');
 

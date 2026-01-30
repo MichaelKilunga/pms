@@ -150,9 +150,28 @@ class SuperAdminController extends Controller
      */
     public function deleteUser($id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
 
-        return redirect()->route('superadmin.users')->with('success', 'User deleted successfully');
+            return redirect()->route('superadmin.users')->with('success', 'User deleted successfully');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Check for foreign key constraint violation (Code 23000 is common for SQL integrity constraint violations)
+            if ($e->getCode() == "23000") {
+                return redirect()->route('superadmin.users')->with('error', 'Cannot delete user because they are associated with other records (e.g., Pharmacies, Contracts).');
+            }
+            return redirect()->route('superadmin.users')->with('error', 'An error occurred while deleting the user.');
+        } catch (\Exception $e) {
+            return redirect()->route('superadmin.users')->with('error', 'An unexpected error occurred.');
+        }
+    }
+
+    /**
+     * Show a user.
+     */
+    public function showUser($id)
+    {
+        $user = User::with('roles')->findOrFail($id);
+        return view('superAdmin.users.show', compact('user'));
     }
 }

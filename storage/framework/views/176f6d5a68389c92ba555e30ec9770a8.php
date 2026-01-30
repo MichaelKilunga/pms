@@ -1,4 +1,4 @@
-<?php $__env->startSection("content"); ?>
+<?php $__env->startSection('content'); ?>
     <div class="container-fluid px-4 py-4">
 
         <div class="row align-items-center mb-4">
@@ -7,7 +7,7 @@
                 <p class="text-muted small">Manage global pricing strategies and subscription packages.</p>
             </div>
             <div class="col-auto">
-                <a class="btn btn-primary rounded-pill shadow-sm" href="<?php echo e(route("packages.create")); ?>">
+                <a class="btn btn-primary rounded-pill shadow-sm" href="<?php echo e(route('packages.create')); ?>">
                     <i class="bi bi-plus-lg me-1"></i> New Package
                 </a>
             </div>
@@ -35,7 +35,7 @@
             <div aria-labelledby="settings-tab" class="tab-pane fade show active" id="settings" role="tabpanel">
                 <div class="card rounded-4 border-0 shadow-sm">
                     <div class="card-body p-4">
-                        <form action="<?php echo e(route("packages.settings.update")); ?>" method="POST">
+                        <form action="<?php echo e(route('packages.settings.update')); ?>" method="POST">
                             <?php echo csrf_field(); ?>
 
                             <div class="row g-4">
@@ -47,12 +47,12 @@
 
                                         <div class="col-md-4">
                                             <div class="form-check custom-card-radio">
-                                                <input <?php echo e($currentMode == "standard" ? "checked" : ""); ?>
+                                                <input <?php echo e($currentMode == 'standard' ? 'checked' : ''); ?>
 
                                                     class="form-check-input" id="modeStandard" name="pricing_mode"
                                                     type="radio" value="standard">
                                                 <label
-                                                    class="form-check-label card h-100 <?php echo e($currentMode == "standard" ? "border-primary bg-light" : ""); ?> border-2 p-3"
+                                                    class="form-check-label card h-100 <?php echo e($currentMode == 'standard' ? 'border-primary bg-light' : ''); ?> border-2 p-3"
                                                     for="modeStandard">
                                                     <div class="fw-bold"><i class="bi bi-distribute-vertical me-2"></i>
                                                         Standard Packages</div>
@@ -64,12 +64,12 @@
 
                                         <div class="col-md-4">
                                             <div class="form-check custom-card-radio">
-                                                <input <?php echo e($currentMode == "dynamic" ? "checked" : ""); ?>
+                                                <input <?php echo e($currentMode == 'dynamic' ? 'checked' : ''); ?>
 
                                                     class="form-check-input" id="modeDynamic" name="pricing_mode"
                                                     type="radio" value="dynamic">
                                                 <label
-                                                    class="form-check-label card h-100 <?php echo e($currentMode == "dynamic" ? "border-primary bg-light" : ""); ?> border-2 p-3"
+                                                    class="form-check-label card h-100 <?php echo e($currentMode == 'dynamic' ? 'border-primary bg-light' : ''); ?> border-2 p-3"
                                                     for="modeDynamic">
                                                     <div class="fw-bold"><i class="bi bi-calculator me-2"></i> Dynamic
                                                         (Item-Based)</div>
@@ -81,12 +81,12 @@
 
                                         <div class="col-md-4">
                                             <div class="form-check custom-card-radio">
-                                                <input <?php echo e($currentMode == "profit_share" ? "checked" : ""); ?>
+                                                <input <?php echo e($currentMode == 'profit_share' ? 'checked' : ''); ?>
 
                                                     class="form-check-input" id="modeProfit" name="pricing_mode"
                                                     type="radio" value="profit_share">
                                                 <label
-                                                    class="form-check-label card h-100 <?php echo e($currentMode == "profit_share" ? "border-primary bg-light" : ""); ?> border-2 p-3"
+                                                    class="form-check-label card h-100 <?php echo e($currentMode == 'profit_share' ? 'border-primary bg-light' : ''); ?> border-2 p-3"
                                                     for="modeProfit">
                                                     <div class="fw-bold"><i class="bi bi-graph-up-arrow me-2"></i> Profit
                                                         Share</div>
@@ -104,21 +104,37 @@
                                 <div class="col-md-6">
                                     <h5 class="fw-bold text-dark mb-3">Dynamic Pricing Parameters</h5>
                                     <div class="card bg-light border-0 p-3">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold small text-uppercase text-muted">Rate per
-                                                Tier</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text border-end-0 bg-white">TZS</span>
-                                                <input class="form-control border-start-0" name="system_use_rate"
-                                                    type="number" value="<?php echo e($settings["system_use_rate"]->value ?? 100); ?>">
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label class="form-label fw-bold small text-uppercase text-muted">Rate per
+                                                    Item</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text border-end-0 bg-white">TZS</span>
+                                                    <input class="form-control border-start-0" name="dynamic_rate_per_item"
+                                                        type="number"
+                                                        value="<?php echo e($settings['dynamic_rate_per_item']->value ?? 100); ?>">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="mb-0">
-                                            <label class="form-label fw-bold small text-uppercase text-muted">Items per Tier
-                                                (Divisor)</label>
-                                            <input class="form-control" name="item_tier_divisor" type="number"
-                                                value="<?php echo e($settings["item_tier_divisor"]->value ?? 500); ?>">
-                                            <div class="form-text">e.g., Every 500 items counts as 1 unit.</div>
+                                            <div class="col-12">
+                                                <label class="form-label fw-bold small text-uppercase text-muted">Rate per
+                                                    Staff</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text border-end-0 bg-white">TZS</span>
+                                                    <input class="form-control border-start-0"
+                                                        name="dynamic_rate_per_staff" type="number"
+                                                        value="<?php echo e($settings['dynamic_rate_per_staff']->value ?? 5000); ?>">
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label fw-bold small text-uppercase text-muted">Rate per
+                                                    Branch</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text border-end-0 bg-white">TZS</span>
+                                                    <input class="form-control border-start-0"
+                                                        name="dynamic_rate_per_branch" type="number"
+                                                        value="<?php echo e($settings['dynamic_rate_per_branch']->value ?? 20000); ?>">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -132,7 +148,7 @@
                                             <div class="input-group">
                                                 <input class="form-control border-end-0" name="profit_share_percentage"
                                                     step="0.01" type="number"
-                                                    value="<?php echo e($settings["profit_share_percentage"]->value ?? 25); ?>">
+                                                    value="<?php echo e($settings['profit_share_percentage']->value ?? 25); ?>">
                                                 <span class="input-group-text border-start-0 bg-white">%</span>
                                             </div>
                                             <div class="form-text">Percentage of profit to charge (e.g., 25%).</div>
@@ -197,18 +213,18 @@
                                             <td class="pe-4 text-end">
                                                 <div class="btn-group">
                                                     <a class="btn btn-sm btn-outline-secondary rounded-start-pill"
-                                                        href="<?php echo e(route("packages.edit", $package->id)); ?>" title="Edit">
+                                                        href="<?php echo e(route('packages.edit', $package->id)); ?>" title="Edit">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
                                                     <a class="btn btn-sm btn-outline-secondary"
-                                                        href="<?php echo e(route("packages.show", $package->id)); ?>" title="View">
+                                                        href="<?php echo e(route('packages.show', $package->id)); ?>" title="View">
                                                         <i class="bi bi-eye"></i>
                                                     </a>
-                                                    <form action="<?php echo e(route("packages.destroy", $package->id)); ?>"
+                                                    <form action="<?php echo e(route('packages.destroy', $package->id)); ?>"
                                                         class="d-inline" method="POST"
                                                         onsubmit="return confirm('Are you sure?');">
                                                         <?php echo csrf_field(); ?>
-                                                        <?php echo method_field("DELETE"); ?>
+                                                        <?php echo method_field('DELETE'); ?>
                                                         <button class="btn btn-sm btn-outline-danger rounded-end-pill"
                                                             title="Delete" type="submit">
                                                             <i class="bi bi-trash"></i>
@@ -249,4 +265,4 @@
     </style>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make("packages.app", array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\DEVELOPMENT\pms\resources\views/packages/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('packages.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\DEVELOPMENT\pms\resources\views/packages/index.blade.php ENDPATH**/ ?>

@@ -14,19 +14,28 @@ class Pharmacy extends Model implements Auditable
     use AuditingTrait;
     
     protected $fillable = [
+        'user_id',
         'name',
         'location',
+        'status',
         'owner_id',
         'package_id',
-        'status',
         'agent_id',
+        'config',
+        'agent_extra_charge',
     ];
+
     protected $auditEvents = [
         'created',
         'updated',
         'deleted',
         'restored',  // Soft deletes, if applicable
         'saved',     // General save event
+    ];
+
+    protected $casts = [
+        'config' => 'array',
+        'agent_extra_charge' => 'decimal:2',
     ];
 
     public function owner()

@@ -361,72 +361,197 @@
     <!-- Subscription Plans Section -->
     
     
-    <section class="subscription-plans" id="plans">
+    <section class="subscription-plans bg-light py-5" id="plans">
         <div class="container">
-            <h2 class="fw-bold text-primary mb-5 text-center">Estimate Your Price</h2>
+            <h2 class="fw-bold text-primary mb-5 text-center">Transparent Pricing Calculator</h2>
 
-            <div class="row justify-content-center g-4">
-                <!-- System Use Price Calculator -->
-                <div class="col-md-5">
-                    <div class="card h-100 calculator-card border-0 shadow-lg">
-                        <div class="card-header bg-primary py-4 text-center text-white">
-                            <h4 class="mb-0"><i class="bi bi-laptop me-2"></i>System Use</h4>
-                            <small class="opacity-75">Monthly Subscription</small>
+            <!-- Pricing Mode Switcher (Removed for single active mode) -->
+
+            <div class="tab-content" id="pricingTabContent">
+
+                <?php $activeMode = $systemSettings['pricing_mode'] ?? 'standard'; ?>
+
+                <!-- Standard Packages -->
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeMode == 'standard'): ?>
+                    <div class="tab-pane fade show active" id="standard" role="tabpanel">
+                        <div class="row g-4 justify-content-center">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $packages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pkg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-0 shadow-sm hover-scale transition-all">
+                                        <div class="card-header bg-transparent border-0 pt-4 text-center">
+                                            <h4 class="fw-bold text-primary"><?php echo e($pkg->name); ?></h4>
+                                            <h2 class="display-6 fw-bold my-3">TZS <?php echo e(number_format($pkg->price)); ?>
+
+                                            </h2>
+                                            <span
+                                                class="badge bg-light text-dark rounded-pill border"><?php echo e($pkg->duration); ?>
+
+                                                Days</span>
+                                        </div>
+                                        <div class="card-body p-4">
+                                            <ul class="list-unstyled mb-4">
+                                                <li class="mb-2"><i
+                                                        class="bi bi-check-circle-fill text-success me-2"></i><?php echo e($pkg->number_of_pharmacies); ?>
+
+                                                    Pharmacy</li>
+                                                <li class="mb-2"><i
+                                                        class="bi bi-check-circle-fill text-success me-2"></i><?php echo e($pkg->number_of_users); ?>
+
+                                                    Staff Accounts</li>
+                                                <li class="mb-2"><i
+                                                        class="bi bi-check-circle-fill text-success me-2"></i>Real-time
+                                                    Analytics</li>
+                                            </ul>
+                                            <div class="d-grid">
+                                                <a href="<?php echo e(route('register')); ?>"
+                                                    class="btn btn-outline-primary rounded-pill">Choose
+                                                    <?php echo e($pkg->name); ?></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
-                        <div class="card-body p-4">
-                            <div class="mb-4">
-                                <label class="form-label fw-bold text-secondary" for="systemItems">Number of Items
-                                    / Medicines</label>
-                                <input class="form-control form-control-lg border-primary shadow-sm" id="systemItems"
-                                    min="0" placeholder="e.g. 500" type="number">
-                                <small class="text-muted">Enter the total number of distinct items in your
-                                    pharmacy.</small>
-                            </div>
-                            <hr class="my-4">
-                            <div class="text-center">
-                                <p class="text-secondary mb-1">Estimated Price</p>
-                                <h2 class="fw-bold text-success mb-0">Tshs. <span id="systemPrice">0</span></h2>
-                                <small class="text-muted">/ Month</small>
-                            </div>
-                            <div class="d-grid mt-4 gap-2">
-                                <a class="btn btn-primary btn-lg mt-3" data-bs-target="#contactModal"
-                                    data-bs-toggle="modal" type="button">Get Started</a>
+                    </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                <!-- Dynamic Pricing -->
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeMode == 'dynamic'): ?>
+                    <div class="tab-pane fade show active" id="dynamic" role="tabpanel">
+                        <div class="card border-0 shadow-lg mx-auto" style="max-width: 800px;">
+                            <div class="card-body p-5">
+                                <h4 class="text-center mb-4">Calculate Your Dynamic Rate</h4>
+                                <p class="text-muted text-center mb-4">Pay based on your business size. Fair and
+                                    transparent.</p>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Number of Items</label>
+                                        <input type="number" class="form-control" id="dynamicItems"
+                                            placeholder="e.g. 500">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Number of Staff</label>
+                                        <input type="number" class="form-control" id="dynamicStaff"
+                                            placeholder="e.g. 2">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Number of Branches</label>
+                                        <input type="number" class="form-control" id="dynamicBranches"
+                                            placeholder="e.g. 1">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="fw-bold mb-2">Add-ons</label>
+                                        <div class="d-flex gap-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="addonWhatsapp">
+                                                <label class="form-check-label" for="addonWhatsapp">WhatsApp
+                                                    Alerts</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="addonSms">
+                                                <label class="form-check-label" for="addonSms">SMS Alerts</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-light p-4 rounded-3 mt-4 text-center">
+                                    <span class="d-block text-muted small text-uppercase fw-bold">Estimated Monthly
+                                        Cost</span>
+                                    <h2 class="fw-bold text-primary mb-0">TZS <span id="dynamicTotal">0</span></h2>
+                                    <small class="text-muted fst-italic mt-2 d-block">*Final price may vary based on
+                                        exact usage</small>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-                <!-- Stocking Price Calculator -->
-                <div class="col-md-5">
-                    <div class="card h-100 calculator-card border-0 shadow-lg">
-                        <div class="card-header bg-success py-4 text-center text-white">
-                            <h4 class="mb-0"><i class="bi bi-box-seam me-2"></i>Stocking Service</h4>
-                            <small class="opacity-75">One-time / Service Fee</small>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="mb-4">
-                                <label class="form-label fw-bold text-secondary" for="stockingItems">Number of
-                                    Items / Medicines</label>
-                                <input class="form-control form-control-lg border-success shadow-sm"
-                                    id="stockingItems" min="0" placeholder="e.g. 500" type="number">
-                                <small class="text-muted">Enter the total number of items to be stocked.</small>
-                            </div>
-                            <hr class="my-4">
-                            <div class="text-center">
-                                <p class="text-secondary mb-1">Estimated Price</p>
-                                <h2 class="fw-bold text-primary mb-0">Tshs. <span id="stockingPrice">0</span></h2>
-                                <small class="text-muted">Total Cost</small>
-                            </div>
-                            <div class="d-grid mt-4 gap-2">
-                                <a class="btn btn-success btn-lg mt-3" data-bs-target="#contactModal"
-                                    data-bs-toggle="modal" type="button">Request Service</a>
+                <!-- Profit Share -->
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeMode == 'profit_share'): ?>
+                    <div class="tab-pane fade show active" id="profit" role="tabpanel">
+                        <div class="card border-0 shadow-lg mx-auto" style="max-width: 600px;">
+                            <div class="card-body p-5 text-center">
+                                <i class="bi bi-graph-up-arrow display-4 text-success mb-3"></i>
+                                <h4 class="mb-3">Profit Share Model</h4>
+                                <p class="text-muted mb-4">We grow when you grow. Pay a small percentage of your
+                                    monthly profit.</p>
+
+                                <div class="mb-4 text-start">
+                                    <label class="form-label fw-bold">Estimated Monthly Profit (TZS)</label>
+                                    <input type="number" class="form-control form-control-lg" id="profitInput"
+                                        placeholder="Enter amount...">
+                                </div>
+
+                                <div
+                                    class="d-flex justify-content-between align-items-center bg-light p-3 rounded mb-3">
+                                    <span>Platform Fee Rate:</span>
+                                    <span
+                                        class="fw-bold"><?php echo e($systemSettings['profit_share_percentage'] ?? 5); ?>%</span>
+                                </div>
+
+                                <div class="bg-primary text-white p-4 rounded-3 mt-4">
+                                    <span class="d-block opacity-75 small text-uppercase fw-bold">Your Estimated
+                                        Fee</span>
+                                    <h2 class="fw-bold mb-0">TZS <span id="profitTotal">0</span></h2>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
             </div>
         </div>
+
+        <!-- Pass PHP settings to JS -->
+        <div id="calculator-settings" data-rate-item="<?php echo e($systemSettings['dynamic_rate_per_item'] ?? 100); ?>"
+            data-rate-staff="<?php echo e($systemSettings['dynamic_rate_per_staff'] ?? 5000); ?>"
+            data-rate-branch="<?php echo e($systemSettings['dynamic_rate_per_branch'] ?? 20000); ?>"
+            data-profit-share="<?php echo e($systemSettings['profit_share_percentage'] ?? 5); ?>">
+        </div>
+
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const settings = document.getElementById('calculator-settings').dataset;
+            const rateItem = parseFloat(settings.rateItem);
+            const rateStaff = parseFloat(settings.rateStaff);
+            const rateBranch = parseFloat(settings.rateBranch);
+            const profitSharePct = parseFloat(settings.profitShare);
+
+            // Dynamic Calculator
+            function calculateDynamic() {
+                const items = parseInt(document.getElementById('dynamicItems').value) || 0;
+                const staff = parseInt(document.getElementById('dynamicStaff').value) || 0;
+                const branches = parseInt(document.getElementById('dynamicBranches').value) || 0;
+
+                let total = (items * rateItem) + (staff * rateStaff) + (branches * rateBranch);
+
+                // Add-ons (Dummy values for demo if not in settings)
+                if (document.getElementById('addonWhatsapp').checked) total += 5000;
+                if (document.getElementById('addonSms').checked) total += 10000;
+
+                document.getElementById('dynamicTotal').textContent = new Intl.NumberFormat().format(total);
+            }
+
+            ['dynamicItems', 'dynamicStaff', 'dynamicBranches', 'addonWhatsapp', 'addonSms'].forEach(id => {
+                document.getElementById(id)?.addEventListener('input', calculateDynamic);
+                document.getElementById(id)?.addEventListener('change', calculateDynamic);
+            });
+
+            // Profit Share Calculator
+            function calculateProfit() {
+                const profit = parseFloat(document.getElementById('profitInput').value) || 0;
+                const fee = (profit * profitSharePct) / 100;
+                document.getElementById('profitTotal').textContent = new Intl.NumberFormat().format(fee);
+            }
+
+            document.getElementById('profitInput')?.addEventListener('input', calculateProfit);
+        });
+    </script>
+
 
     <style>
         .calculator-card {

@@ -22,6 +22,16 @@ class Contract extends Model implements Auditable
         'grace_end_date',
         'payment_status',
         'is_current_contract',
+        'amount',
+        'agent_markup',
+        'pricing_strategy',
+        'details',
+    ];
+    
+    protected $casts = [
+        'details' => 'array',
+        'amount' => 'decimal:2',
+        'agent_markup' => 'decimal:2',
     ];
     protected $auditEvents = [
         'created',
@@ -39,6 +49,16 @@ class Contract extends Model implements Auditable
     public function package()
     {
         return $this->belongsTo(Package::class, 'package_id');
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(ContractPayment::class);
+    }
+
+    public function scopeInvoices($query)
+    {
+        return $query->whereIn('payment_status', ['pending', 'unpayed']);
     }
 }
 
