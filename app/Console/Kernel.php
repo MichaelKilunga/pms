@@ -12,10 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Schedule the route to run every minute
-        $schedule->call(function () {
-            \Illuminate\Support\Facades\Artisan::call('route:run /update-contracts');
-        })->everyMinute();
+        //
     }
 
     /**
