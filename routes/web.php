@@ -236,7 +236,6 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     // });
 
     // expenses controller
-    // Homepage should redirect to expenses index
     Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
     Route::get('expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
     Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
@@ -245,15 +244,15 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
 
     //vendors
     Route::get('expenses/vendors', [ExpenseController::class, 'vendors'])->name('expenses.vendors');
-    Route::post('expenses/vendors', [ExpenseController::class, 'storeVendor'])->name('vendors.store');
-    Route::put('expenses/vendors/{id}', [ExpenseController::class, 'updateVendor'])->name('vendors.update');
-    Route::delete('expenses/vendors/{id}', [ExpenseController::class, 'destroyVendor'])->name('vendors.destroy');
+    Route::post('expenses/vendors', [ExpenseController::class, 'storeVendor'])->name('expenses.vendors.store');
+    Route::put('expenses/vendors/{id}', [ExpenseController::class, 'updateVendor'])->name('expenses.vendors.update');
+    Route::delete('expenses/vendors/{id}', [ExpenseController::class, 'destroyVendor'])->name('expenses.vendors.destroy');
 
     //categories
     Route::get('expenses/category', [ExpenseController::class, 'category'])->name('expenses.category');
-    Route::post('expenses/category', [ExpenseController::class, 'storeCategory'])->name('category.store');
-    Route::put('expenses/category/{id}', [ExpenseController::class, 'updateCategory'])->name('category.update');
-    Route::delete('expenses/category/{id}', [ExpenseController::class, 'destroyCategory'])->name('category.destroy');
+    Route::post('expenses/category', [ExpenseController::class, 'storeCategory'])->name('expenses.category.store');
+    Route::put('expenses/category/{id}', [ExpenseController::class, 'updateCategory'])->name('expenses.category.update');
+    Route::delete('expenses/category/{id}', [ExpenseController::class, 'destroyCategory'])->name('expenses.category.destroy');
     Route::post('expenses/{expense}/approve', [ExpenseController::class, 'approve'])->name('expenses.approve');
     Route::post('expenses/{expense}/reject', [ExpenseController::class, 'reject'])->name('expenses.reject');
 });
@@ -325,7 +324,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Agent routes
     Route::get('agent/complete-registration', [AgentController::class, 'completeRegistration'])->name('agent.completeRegistration');
-    Route::post('agent/complete-registration', [AgentController::class, 'completeRegistration'])->name('agent.completeRegistration');
+    Route::post('agent/complete-registration', [AgentController::class, 'completeRegistration']);
 
     Route::middleware(['eligible:registered'])->group(function () {
 
@@ -344,7 +343,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         Route::get('agent/cases', [AgentController::class, 'cases'])->name('agent.cases');
-        Route::post('agent/cases', [AgentController::class, 'cases'])->name('agent.cases');
+        Route::post('agent/cases', [AgentController::class, 'cases']);
 
         Route::get('agent/pharmacies', [AgentController::class, 'pharmacies'])->name('agent.pharmacies');
         Route::post('agent/pharmacies/create', [AgentController::class, 'pharmacies'])->name('agent.pharmacies.store');
@@ -355,7 +354,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('agent/packages', [AgentController::class, 'packages'])->name('agent.packages.manage');
 
         Route::get('agent/contracts', [AgentController::class, 'contracts'])->name('agent.contracts');
-        Route::post('agent/contracts', [AgentController::class, 'contracts'])->name('agent.contracts');
+        Route::post('agent/contracts', [AgentController::class, 'contracts']);
     });
 
     // AUDITS
@@ -368,37 +367,7 @@ Route::middleware(['auth', 'eligible:create pharmacy'])->group(function () {
     Route::post('pharmacies', [PharmacyController::class, 'store'])->name('pharmacies.store');
 });
 
-// expenses controller
-Route::middleware(['auth'])->group(function () {
-    // Homepage should redirect to expenses index
-    Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
-    Route::get('expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
-    Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
-    Route::put('expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
-    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
-    //vendors
-    Route::get('expenses/vendors', [ExpenseController::class, 'vendors'])->name('expenses.vendors');
-    Route::post('expenses/vendors', [ExpenseController::class, 'storeVendor'])->name('vendors.store');
-    Route::put('expenses/vendors/{id}', [ExpenseController::class, 'updateVendor'])->name('vendors.update');
-    Route::delete('expenses/vendors/{id}', [ExpenseController::class, 'destroyVendor'])->name('vendors.destroy');
-
-    //categories
-    Route::get('expenses/category', [ExpenseController::class, 'category'])->name('expenses.category');
-    Route::post('expenses/category', [ExpenseController::class, 'storeCategory'])->name('category.store');
-    Route::put('expenses/category/{id}', [ExpenseController::class, 'updateCategory'])->name('category.update');
-    Route::delete('expenses/category/{id}', [ExpenseController::class, 'destroyCategory'])->name('category.destroy');
-
-    // Full CRUD routes for expenses
-    // Route::resource('expenses', ExpenseController::class);
-
-    // Approve & Reject actions
-    Route::post('expenses/{expense}/approve', [ExpenseController::class, 'approve'])
-        ->name('expenses.approve');
-
-    Route::post('expenses/{expense}/reject', [ExpenseController::class, 'reject'])
-        ->name('expenses.reject');
-});
 
 
 //debts controller and installations

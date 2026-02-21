@@ -110,7 +110,7 @@
                                         {{-- ================= Edit Category Modal ================= --}}
                                         <div class="modal fade" id="editCategoryModal{{ $category->id }}" tabindex="-1">
                                             <div class="modal-dialog">
-                                                <form method="POST" action="{{ route('category.update', $category->id) }}"
+                                                <form method="POST" action="{{ route('expenses.category.update', $category->id) }}"
                                                     class="modal-content" id="editCategoryForm{{ $category->id }}">
                                                     @csrf @method('PUT')
                                                     <div class="modal-header">
@@ -155,7 +155,7 @@
                                             </div>
                                         </div>
 
-                                        <form action="{{ route('category.destroy', $category->id) }}" method="POST"
+                                        <form action="{{ route('expenses.category.destroy', $category->id) }}" method="POST"
                                             class="d-inline" onsubmit="return confirm('Delete this category?')">
                                             @csrf @method('DELETE')
                                             <button class="btn btn-danger btn-sm">
@@ -177,7 +177,7 @@
     {{-- ================= Add Category Modal ================= --}}
     <div class="modal fade" id="addCategoryModal" tabindex="-1">
         <div class="modal-dialog">
-            <form action="{{ route('category.store') }}" method="POST" class="modal-content">
+            <form action="{{ route('expenses.category.store') }}" method="POST" class="modal-content">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Add Expense Category</h5>

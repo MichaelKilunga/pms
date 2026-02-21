@@ -61,7 +61,7 @@
                                         </button>
 
                                         <!-- Delete -->
-                                        <form action="{{ route('vendors.destroy', $vendor->id) }}" method="POST"
+                                        <form action="{{ route('expenses.vendors.destroy', $vendor->id) }}" method="POST"
                                             class="d-inline" onsubmit="return confirm('Delete this vendor?')">
                                             @csrf
                                             @method('DELETE')
@@ -132,7 +132,7 @@
                                     <div class="modal-dialog modal-lg">
 
                                         <div class="modal-content">
-                                            <form method="POST" action="{{ route('vendors.update', $vendor->id) }}"
+                                            <form method="POST" action="{{ route('expenses.vendors.update', $vendor->id) }}"
                                                 class="modal-content">
                                                 @csrf
                                                 @method('PUT')
@@ -211,7 +211,7 @@
     <div class="modal fade" id="addVendorModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form action="{{ route('vendors.store') }}" method="POST">
+                <form action="{{ route('expenses.vendors.store') }}" method="POST">
                     @csrf
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title"><i class="bi bi-person-badge me-2"></i> Vendor Registration</h5>
