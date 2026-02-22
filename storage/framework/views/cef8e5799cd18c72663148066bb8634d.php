@@ -1,5 +1,5 @@
 <?php $__env->startSection('content'); ?>
-    <?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Superadmin')): ?>
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Superadmin')): ?>
         <style>
             .quick-card {
                 transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -231,7 +231,7 @@
                 </div>
             </div>
         </div>
-    <?php endif; ?>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('superAdmin.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /media/michaelkilunga/C/SKYLINK/pms/resources/views/superAdmin/index.blade.php ENDPATH**/ ?>

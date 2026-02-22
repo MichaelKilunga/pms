@@ -58,13 +58,13 @@
                 <a class="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
                     href="<?php echo e(route('notifications')); ?>">
                     <i class="bi bi-bell text-xl"></i>
-                    <!--[if BLOCK]><![endif]--><?php if(Auth::user()->unreadNotifications->count() > 0): ?>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Auth::user()->unreadNotifications->count() > 0): ?>
                         <div
                             class="absolute -right-1 -top-1 inline-flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 text-xs font-bold text-white dark:border-gray-900">
                             <?php echo e(Auth::user()->unreadNotifications->count()); ?>
 
                         </div>
-                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </a>
 
                 <!-- Settings Dropdown -->
@@ -106,19 +106,19 @@
 
                             </a>
 
-                            <?php if(Auth::user()->hasRole('Superadmin')): ?>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Auth::user()->hasRole('Superadmin')): ?>
                                 <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
                                     href="<?php echo e(route('admin.settings.system')); ?>">
                                     <?php echo e(__('System Configuration')); ?>
 
                                 </a>
-                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                            <?php if(Auth::user()->hasRole('Owner')): ?>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Auth::user()->hasRole('Owner')): ?>
                                 <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:bg-gray-800"
                                     href="<?php echo e(route('pharmacies.switch')); ?>">
                                     <span class="text-red-500"><?php echo e(__('Switch Pharmacy')); ?></span>
                                 </a>
-                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                             <div class="border-t border-gray-200 dark:border-gray-600"></div>
 

@@ -5,8 +5,8 @@
     <!-- Sidebar Wrapper -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed top-0 left-0 z-30 w-64 h-screen overflow-y-auto pt-16 transition-transform duration-300 bg-white border-r border-gray-200 lg:translate-x-0 lg:static# lg:fixed dark:bg-gray-800 dark:border-gray-700">
     <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-        <?php $__currentLoopData = $menu; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <?php if(isset($item['children'])): ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $menu; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($item['children'])): ?>
                 
                 <?php
                     $isActive = false;
@@ -24,9 +24,9 @@
                             ? 'bg-primary-50 text-primary-700 dark:bg-gray-700 dark:text-primary-400'
                             : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50'); ?>">
                         <div class="flex items-center gap-3">
-                            <?php if(isset($item['icon'])): ?>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($item['icon'])): ?>
                                 <i class="<?php echo e($item['icon']); ?> text-lg <?php echo e($isActive ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'); ?>"></i>
-                            <?php endif; ?>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             <span><?php echo e(__($item['label'])); ?></span>
                         </div>
                         <svg :class="{ 'rotate-90': open }" class="w-4 h-4 text-gray-400 transition-transform duration-200"
@@ -36,7 +36,7 @@
                     </button>
 
                     <div x-show="open" x-cloak x-collapse class="pl-4 space-y-1">
-                        <?php $__currentLoopData = $item['children']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $child): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $item['children']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $child): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <?php
                                 $childActive = request()->routeIs($child['route']);
                                 $routeParams = $child['params'] ?? [];
@@ -50,7 +50,7 @@
                                 <?php echo e(__($child['label'])); ?>
 
                             </a>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                 </div>
             <?php else: ?>
@@ -63,13 +63,13 @@
                     <?php echo e($isActive
                         ? 'bg-primary-50 text-primary-700 dark:bg-gray-700 dark:text-primary-400'
                         : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50'); ?>">
-                    <?php if(isset($item['icon'])): ?>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($item['icon'])): ?>
                         <i class="<?php echo e($item['icon']); ?> text-lg <?php echo e($isActive ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'); ?>"></i>
-                    <?php endif; ?>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     <span><?php echo e(__($item['label'])); ?></span>
                 </a>
-            <?php endif; ?>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 </aside>
 <?php /**PATH /media/michaelkilunga/C/SKYLINK/pms/resources/views/components/sidebar.blade.php ENDPATH**/ ?>

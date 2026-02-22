@@ -92,7 +92,11 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('navigation-menu');
 
-$__html = app('livewire')->mount($__name, $__params, 'lw-1127466065-0', $__slots ?? [], get_defined_vars());
+$key = null;
+
+$key ??= \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::generateKey('lw-1127466065-0', null);
+
+$__html = app('livewire')->mount($__name, $__params, $key);
 
 echo $__html;
 
@@ -129,13 +133,13 @@ if (isset($__slots)) unset($__slots);
 <?php endif; ?>
 
             <main class="flex-1 mt-5 py-6 px-2# lg:ml-64 transition-all duration-300">
-                <?php if(isset($slot)): ?>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($slot)): ?>
                     <?php echo e($slot); ?>
 
                 <?php else: ?>
                     
                     <?php echo $__env->yieldContent('content'); ?>
-                <?php endif; ?>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </main>
 
             <!-- Loader Overlay -->

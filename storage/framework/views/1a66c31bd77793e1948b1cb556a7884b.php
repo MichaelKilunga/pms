@@ -42,7 +42,7 @@
     </style>
 
     <div class="container mt-2">
-        <?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', 'Owner|Manager')): ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', 'Owner|Manager')): ?>
             
             <div class="row g-4 justify-content-center mb-4 text-center">
                 <div class="col-6 col-md-4 col-lg-3">
@@ -198,7 +198,7 @@
                     </div>
                 </div>
             </div>
-        <?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 
     
@@ -285,9 +285,9 @@
                                     <label class="form-label fw-bold">Medicine Name</label>
                                     <select class="medicineSelect chosen form-select" name="item_id[]" required>
                                         <option value="">Select medicine...</option>
-                                        <?php $__currentLoopData = $all_medicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $medicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $all_medicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $medicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <option value="<?php echo e($medicine->id); ?>"><?php echo e($medicine->name); ?></option>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </select>
                                 </div>
                                 <div class="col-lg-2 col-md-3">
@@ -596,7 +596,7 @@
             });
         });
     </script>
-    <?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Staff')): ?>
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Staff')): ?>
         
         <div class="row g-4 justify-content-center mb-4 text-center">
             <div class="col-6 col-md-4 col-lg-2">
@@ -660,7 +660,7 @@
                 </div>
             </div>
         </div>
-    <?php endif; ?>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     
     <div class="row mb-4">
@@ -704,7 +704,7 @@
             </div>
 
             
-            <?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', 'Owner|Manager')): ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', 'Owner|Manager')): ?>
                 <div class="row mt-2">
                     <div class="col-12">
                         <div class="card shadow">
@@ -745,9 +745,9 @@
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-            <?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Staff')): ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Staff')): ?>
                 <!-- Eye icon (initial display) -->
                 <div class="mt-3 text-center" id="unlock-section">
                     <div class="col-12">
@@ -814,7 +814,7 @@
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         </div>
     </div>
@@ -836,12 +836,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $__currentLoopData = $medicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $medicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $medicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $medicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
                                             <td><?php echo e($medicine->medicine_name); ?></td>
                                             <td><?php echo e($medicine->total_stock); ?></td>
                                         </tr>
-                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -881,7 +881,7 @@
                                     <label class="form-label">Medicine</label>
                                     <select class="chosen form-select" name="item_id[]" required>
                                         <option disabled selected value="">Select Item</option>
-                                        <?php $__currentLoopData = $sellMedicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sellMedicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $sellMedicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sellMedicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             
                                             
                                             <option
@@ -890,7 +890,7 @@
 
                                                 (<?php echo e(number_format($sellMedicine->selling_price)); ?>Tsh)
                                             </option>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
