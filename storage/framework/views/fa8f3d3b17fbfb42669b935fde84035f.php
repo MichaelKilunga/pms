@@ -155,7 +155,7 @@
         <div class="container">
             <h1 class="display-4 fw-bold">Welcome to Pharmacy Management System (PILLPOINTONE)</h1>
             <p class="lead">A powerful solution for managing your Pharmacies</p>
-            <?php if(auth()->guard()->check()): ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->guard()->check()): ?>
                 <a class="btn btn-primary btn-lg me-2 mt-3" href="<?php echo e(route('dashboard')); ?>">Go to Dashboard</a>
             <?php else: ?>
                 
@@ -163,9 +163,9 @@
                         class="bi bi-person-plus"></i> Become Agent</a>
                 <a class="btn btn-outline-light btn-lg mt-3" href="<?php echo e(route('login')); ?>"><i
                         class="bi bi-box-arrow-in-right"></i> Login</a>
-            <?php endif; ?>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             <button class="btn btn-primary btn-lg mt-3" data-bs-target="#contactModal" data-bs-toggle="modal"
-                type="button"><i class="bi bi-chat"></i> Request Trial</button>
+                type="button"><i class="bi bi-chat"></i> Get Started</button>
         </div>
         <div class="scroll-indicator" onclick="scrollToContent()">⬇ Scroll to Learn More</div>
     </div>
@@ -372,10 +372,10 @@
                 <?php $activeMode = $systemSettings['pricing_mode'] ?? 'standard'; ?>
 
                 <!-- Standard Packages -->
-                <?php if($activeMode == 'standard'): ?>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeMode == 'standard'): ?>
                     <div class="tab-pane fade show active" id="standard" role="tabpanel">
                         <div class="row g-4 justify-content-center">
-                            <?php $__currentLoopData = $packages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pkg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $packages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pkg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="col-md-4">
                                     <div class="card h-100 border-0 shadow-sm hover-scale transition-all">
                                         <div class="card-header bg-transparent border-0 pt-4 text-center">
@@ -410,13 +410,13 @@
                                         </div>
                                     </div>
                                 </div>
-                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
                     </div>
-                <?php endif; ?>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                 <!-- Dynamic Pricing -->
-                <?php if($activeMode == 'dynamic'): ?>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeMode == 'dynamic'): ?>
                     <div class="tab-pane fade show active" id="dynamic" role="tabpanel">
                         <div class="card border-0 shadow-lg mx-auto" style="max-width: 800px;">
                             <div class="card-body p-5">
@@ -466,10 +466,10 @@
                             </div>
                         </div>
                     </div>
-                <?php endif; ?>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                 <!-- Profit Share -->
-                <?php if($activeMode == 'profit_share'): ?>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeMode == 'profit_share'): ?>
                     <div class="tab-pane fade show active" id="profit" role="tabpanel">
                         <div class="card border-0 shadow-lg mx-auto" style="max-width: 600px;">
                             <div class="card-body p-5 text-center">
@@ -499,7 +499,7 @@
                             </div>
                         </div>
                     </div>
-                <?php endif; ?>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
             </div>
         </div>
