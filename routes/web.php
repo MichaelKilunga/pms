@@ -146,14 +146,16 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::put('staff', [StaffController::class, 'update'])->name('staff.update');
     Route::delete('staff/delete/{id}', [StaffController::class, 'destroy'])->name('staff.destroy');
 
-    Route::get('stock', [StockController::class, 'index'])->name('stock');
-    Route::get('stock/create', [StockController::class, 'create'])->name('stock.create');
-    Route::post('stock', [StockController::class, 'store'])->name('stock.store');
-    Route::get('stock/{id}', [StockController::class, 'show'])->name('stock.show');
-    Route::put('stock', [StockController::class, 'update'])->name('stock.update');
-    Route::put('stock/updateSBP', [StockController::class, 'updateSBP'])->name('stock.updateSBP');
-    Route::delete('stock/delete/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
-    Route::post('/stock/import', [StockController::class, 'import'])->name('importMedicineStock');
+    Route::middleware(['eligible:stock'])->group(function () {
+        Route::get('stock', [StockController::class, 'index'])->name('stock');
+        Route::get('stock/create', [StockController::class, 'create'])->name('stock.create');
+        Route::post('stock', [StockController::class, 'store'])->name('stock.store');
+        Route::get('stock/{id}', [StockController::class, 'show'])->name('stock.show');
+        Route::put('stock', [StockController::class, 'update'])->name('stock.update');
+        Route::put('stock/updateSBP', [StockController::class, 'updateSBP'])->name('stock.updateSBP');
+        Route::delete('stock/delete/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
+        Route::post('/stock/import', [StockController::class, 'import'])->name('importMedicineStock');
+    });
     // Route::get('/stock-balances', [StockController::class, 'stockBalancesPage'])->name('stocks.balance');
     // Route::get('/stock-balances/view', [StockController::class, 'viewStockBalances'])->name('stock.balance.page');
     // //adde these for viewing stock balance
@@ -173,12 +175,14 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::post('/stocks/check/save', [StockController::class, 'saveStockCheck'])->name('stocks.check.save');
 
     //stock stransfer
-    Route::get('stockTransfers', [StockTransferController::class, 'index'])->name('stockTransfers');
-    Route::get('/stock-transfers', [StockTransferController::class, 'index'])->name('stockTransfers.index');
-    Route::post('stockTransfers', [StockTransferController::class, 'store'])->name('stockTransfers.store');
-    Route::delete('stockTransfers/{id}', [StockTransferController::class, 'destroy'])->name('stockTransfers.destroy');
-    Route::get('stockTransfers/{id}/confirm', [StockTransferController::class, 'confirm'])->name('stockTransfers.confirm');
-    Route::get('stockTransfers/{id}/print', [StockTransferController::class, 'print'])->name('stockTransfers.print');
+    Route::middleware(['eligible:transfers'])->group(function () {
+        Route::get('stockTransfers', [StockTransferController::class, 'index'])->name('stockTransfers');
+        Route::get('/stock-transfers', [StockTransferController::class, 'index'])->name('stockTransfers.index');
+        Route::post('stockTransfers', [StockTransferController::class, 'store'])->name('stockTransfers.store');
+        Route::delete('stockTransfers/{id}', [StockTransferController::class, 'destroy'])->name('stockTransfers.destroy');
+        Route::get('stockTransfers/{id}/confirm', [StockTransferController::class, 'confirm'])->name('stockTransfers.confirm');
+        Route::get('stockTransfers/{id}/print', [StockTransferController::class, 'print'])->name('stockTransfers.print');
+    });
 
     Route::get('sales', [SalesController::class, 'index'])->name('sales');
     Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');
@@ -225,7 +229,7 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::post('/reports/suggested-stock/whatsapp', [WhatsAppController::class, 'sendSuggestedStock'])->name('reports.suggested_stock.whatsapp');
 
     // Analytics Panel
-    Route::middleware(['eligible:view reports'])->group(function () {
+    Route::middleware(['eligible:analytics'])->group(function () {
         Route::get('/analytics', [\App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics.index');
         Route::get('/analytics/data', [\App\Http\Controllers\AnalyticsController::class, 'getAnalytics'])->name('analytics.data');
     });
@@ -270,6 +274,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/contracts/{id}/edit', [ContractController::class, 'editSuperAdmin'])->name('contracts.admin.edit');
     Route::put('/contracts/{id}', [ContractController::class, 'updateSuperAdmin'])->name('contracts.admin.update');
     Route::get('/contracts/{id}/confirm', [ContractController::class, 'confirm'])->name('contracts.admin.confirm');
+    Route::get('/contracts/{id}/initiate', [ContractController::class, 'initiateSuperAdmin'])->name('contracts.admin.initiate');
     Route::get('/contracts/{id}/grace', [ContractController::class, 'grace'])->name('contracts.admin.grace');
 
     Route::get('myContracts', [ContractController::class, 'indexUser'])->name('myContracts');
@@ -278,7 +283,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('contracts/users/subscribe', [ContractController::class, 'subscribe'])->name('contracts.users.subscribe');
     Route::get('/contracts/users/activate', [ContractController::class, 'activate'])->name('contracts.users.activate');
     Route::get('/contracts/users/renew', [ContractController::class, 'renew'])->name('contracts.users.renew');
+    Route::get('/contracts/{id}/notify-payment', [ContractController::class, 'notifyPayment'])->name('contracts.users.notify_payment');
     Route::post('/contracts/users/generate-bill', [ContractController::class, 'generateBill'])->name('contracts.users.generate_bill');
+    Route::post('/contracts/users/request-upgrade', [ContractController::class, 'requestUpgrade'])->name('contracts.users.request_upgrade');
     Route::delete('/contracts/{id}', [ContractController::class, 'destroy'])->name('contracts.destroy');
 
     // Business Settings (Owner Configuration)

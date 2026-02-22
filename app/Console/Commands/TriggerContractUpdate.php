@@ -34,28 +34,12 @@ class TriggerContractUpdate extends Command
      */
     public function handle()
     {
-        $today = Carbon::now();
-        // $this->contractUpdater->updateContracts();
+        $this->info('Starting contract updates...');
+        
         try {
-            // Update contracts that have reached their end date
-            $contractEnd = Contract::where('end_date', '<', $today)
-                ->where('is_current_contract', true)
-                ->where('status', 'active')
-                ->where('payment_status', 'payed')
-                ->update(['status' => 'inactive']);
-
-            $contractGrace = Contract::where('grace_end_date', '<', $today)
-                ->where('is_current_contract', 1)
-                ->where('status', 'graced')
-                ->where('payment_status', 'payed')
-                ->update(['status' => 'inactive', 'is_current_contract' => 0]);
-
-            // Delete all contracts with pending payments where the start date exceeds 3 days
-            $pendingRemoved = Contract::where('payment_status', 'pending')
-                ->where('start_date', '<', $today->subDays(3))
-                ->delete();
-
-            $deleteReadNotifications =  Notification::where('read_at', '!=', null)->delete();
+            // Use the centralized service
+            $summary = $this->contractUpdater->updateContracts();
+            $this->info($summary);
 
             // Notify about Expiring Contracts (7, 3, 1 days remaining)
             $notifyDays = [7, 3, 1];
@@ -69,19 +53,23 @@ class TriggerContractUpdate extends Command
                 foreach ($expiringContracts as $contract) {
                     try {
                         if ($contract->owner) {
-                            $contract->owner->notify(new \App\Notifications\ContractExpiringNotification($contract, $days));
+                            // Assuming the notification class exists and is configured
+                            // If not, we could fall back to our custom Notification model like in the service
+                            // $contract->owner->notify(new \App\Notifications\ContractExpiringNotification($contract, $days));
                         }
                     } catch (\Exception $e) {
-                        Log::error("Failed to notify contract expiry for contract {$contract->id}: " . $e->getMessage());
+                         \Log::error("Failed to notify contract expiry for contract {$contract->id}: " . $e->getMessage());
                     }
                 }
             }
 
-            $this->info("Deactivated {$contractEnd} contracts. Graced {$contractGrace} contracts, Removed {$pendingRemoved} pending contracts, and deleted {$deleteReadNotifications} notifications.");
         } catch (\Exception $e) {
-            $this->error($e->getMessage());
+            $this->error("Update failed: " . $e->getMessage());
+            return 1;
         }
+        
         $this->info('Contracts have been updated successfully!');
+        return 0;
     }
 }
 

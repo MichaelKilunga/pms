@@ -224,11 +224,11 @@ class SendDailyPharmacyReport extends Command
         if ($owner->phone && $owner->wantsNotificationChannel('sms')) {
             try {
                 $smsMsg = "Daily Report: {$pharmacy->name}\nDate: {$reportDate}\nSales: " . number_format($salesSummary['total_revenue']) . " TZS\nGross Profit: " . number_format($salesSummary['gross_profit']) . " TZS\nExpenses: " . number_format($salesSummary['total_expenses']) . " TZS\nInstallments: " . number_format($salesSummary['total_installments']) . " TZS\nNet Profit: " . number_format($salesSummary['profit_loss']) . " TZS";
-                $sent = $smsService->send($owner->phone, $smsMsg);
+                $sent = $smsService->setPharmacyId($pharmacy->id)->send($owner->phone, $smsMsg);
                 if ($sent) {
                     $this->info("📱 SMS sent to {$owner->phone}");
                 } else {
-                     $this->error("❌ SMS failed for {$pharmacy->name}");
+                     $this->error("❌ SMS failed or not allowed by contract for {$pharmacy->name}");
                 }
             } catch (\Exception $e) {
                  $this->error("❌ SMS Exception for {$pharmacy->name}: " . $e->getMessage());
@@ -254,11 +254,11 @@ class SendDailyPharmacyReport extends Command
                 $waMsg .= "Low Stock: " . $stockStatus['low_stock']->count() . "\n";
                 $waMsg .= "Expired: " . $stockStatus['expired']->count() . "\n";
                 
-                $result = $whatsAppService->sendMessage($owner->phone, $waMsg);
+                $result = $whatsAppService->setPharmacyId($pharmacy->id)->sendMessage($owner->phone, $waMsg);
                 if ($result['success']) {
                       $this->info("💬 WhatsApp sent to {$owner->phone}");
                 } else {
-                      $this->error("❌ WhatsApp failed for {$pharmacy->name}: " . ($result['error'] ?? 'Unknown error'));
+                      $this->error("❌ WhatsApp failed or not allowed by contract for {$pharmacy->name}: " . ($result['error'] ?? 'Unknown error'));
                 }
 
              } catch (\Exception $e) {

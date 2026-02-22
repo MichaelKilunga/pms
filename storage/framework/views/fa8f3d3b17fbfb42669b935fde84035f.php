@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <meta content="{{ env('SKYPUSH_API_KEY') }}" name="api-key">
-    <title>{{ env('APP_NAME') }}</title>
-    <meta content="{{ csrf_token() }}" name="csrf-token">
+    <meta content="<?php echo e(env('SKYPUSH_API_KEY')); ?>" name="api-key">
+    <title><?php echo e(env('APP_NAME')); ?></title>
+    <meta content="<?php echo e(csrf_token()); ?>" name="csrf-token">
 
-    {{-- META CONFIG --}}
+    
     <meta
         content="Pharmacy Management System (PILLPOINTONE) is a comprehensive solution for managing pharmacies, including inventory, sales, and customer management."
         name="description">
@@ -17,7 +17,7 @@
         name="keywords">
     <meta content="SKYLINK SOLUTIONS" name="author">
     <!-- Favicon -->
-    <link href="{{ asset('favicon.ico') }}" rel="shortcut icon" type="image/x-icon">
+    <link href="<?php echo e(asset('favicon.ico')); ?>" rel="shortcut icon" type="image/x-icon">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,10 +26,10 @@
     <!-- Bootstrap Icons CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-    {{-- //bootstrap 5 link --}}
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    {{-- jQuery script --}}
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <style>
@@ -88,18 +88,18 @@
 
         @keyframes slideshow {
             0% {
-                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/1.jpg') }}');
+                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('<?php echo e(asset('images/background/1.jpg')); ?>');
             }
 
             /*33% {*/
-            /*    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/2.jpg') }}');*/
+            /*    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('<?php echo e(asset('images/background/2.jpg')); ?>');*/
             /*}*/
             66% {
-                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/3.jpg') }}');
+                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('<?php echo e(asset('images/background/3.jpg')); ?>');
             }
 
             100% {
-                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/background/1.jpg') }}');
+                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('<?php echo e(asset('images/background/1.jpg')); ?>');
             }
         }
 
@@ -132,7 +132,7 @@
 
 <body>
 
-    {{-- TAWK START --}}
+    
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
         var Tawk_API = Tawk_API || {},
@@ -148,24 +148,24 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
-    {{-- TAWK END --}}
+    
 
     <!-- Hero Section -->
     <div class="hero">
         <div class="container">
             <h1 class="display-4 fw-bold">Welcome to Pharmacy Management System (PILLPOINTONE)</h1>
             <p class="lead">A powerful solution for managing your Pharmacies</p>
-            @auth
-                <a class="btn btn-primary btn-lg me-2 mt-3" href="{{ route('dashboard') }}">Go to Dashboard</a>
-            @else
-                {{-- onclick="return (confirm('Still under maintanance!') && false)" --}}
-                <a class="btn btn-primary btn-lg me-2 mt-3" href="{{ route('register') }}"><i
+            <?php if(auth()->guard()->check()): ?>
+                <a class="btn btn-primary btn-lg me-2 mt-3" href="<?php echo e(route('dashboard')); ?>">Go to Dashboard</a>
+            <?php else: ?>
+                
+                <a class="btn btn-primary btn-lg me-2 mt-3" href="<?php echo e(route('register')); ?>"><i
                         class="bi bi-person-plus"></i> Become Agent</a>
-                <a class="btn btn-outline-light btn-lg mt-3" href="{{ route('login') }}"><i
+                <a class="btn btn-outline-light btn-lg mt-3" href="<?php echo e(route('login')); ?>"><i
                         class="bi bi-box-arrow-in-right"></i> Login</a>
-            @endauth
+            <?php endif; ?>
             <button class="btn btn-primary btn-lg mt-3" data-bs-target="#contactModal" data-bs-toggle="modal"
-                type="button"><i class="bi bi-chat"></i> Get Started</button>
+                type="button"><i class="bi bi-chat"></i> Request Trial</button>
         </div>
         <div class="scroll-indicator" onclick="scrollToContent()">⬇ Scroll to Learn More</div>
     </div>
@@ -219,17 +219,7 @@
                 </div>
             </div>
             <!-- VIDEO -->
-            {{-- <div class="mt-4">
-                    <iframe 
-                        width="560" 
-                        height="315" 
-                        src="https://www.youtube.com/embed/YOUR_VIDEO_ID" 
-                        title="YouTube video player" 
-                        frameborder="0" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                        allowfullscreen>
-                    </iframe>
-                </div> --}}
+            
 
             <div class="row g-4 mt-4">
                 <div class="col-md-4">
@@ -272,18 +262,18 @@
         </div>
     </section>
 
-    {{-- Quick contact links --}}
+    
     <div class="mt-2 text-center">
         <a class="btn btn-success btn-sm"
-            href="https://wa.me/{{ config('support.whatsapp', env('SUPPORT_WHATSAPP')) }}?text={{ urlencode('Hello, I need help with...') }}"
+            href="https://wa.me/<?php echo e(config('support.whatsapp', env('SUPPORT_WHATSAPP'))); ?>?text=<?php echo e(urlencode('Hello, I need help with...')); ?>"
             target="_blank">WhatsApp</a>
         <a class="btn btn-outline-secondary btn-sm"
-            href="mailto:{{ config('support.email', env('SUPPORT_EMAIL')) }}">{{ config('support.email', env('SUPPORT_EMAIL')) }}</a>
-        <a class="btn btn-outline-secondary btn-sm" href="{{ config('support.website', env('SUPPORT_WEBSITE')) }}"
+            href="mailto:<?php echo e(config('support.email', env('SUPPORT_EMAIL'))); ?>"><?php echo e(config('support.email', env('SUPPORT_EMAIL'))); ?></a>
+        <a class="btn btn-outline-secondary btn-sm" href="<?php echo e(config('support.website', env('SUPPORT_WEBSITE'))); ?>"
             target="_blank">Website</a>
-        {{-- normal call --}}
+        
         <a class="btn btn-outline-secondary btn-sm"
-            href="tel:{{ config('support.phone', env('SUPPORT_PHONE')) }}">Call</a>
+            href="tel:<?php echo e(config('support.phone', env('SUPPORT_PHONE'))); ?>">Call</a>
     </div>
 
     <!-- Contact Us Modal -->
@@ -292,7 +282,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <form id="contactForm">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="contactModalLabel">Contact Us</h5>
                         <span aria-label="Close" class="close" data-bs-dismiss="modal"
@@ -369,8 +359,8 @@
     </div>
 
     <!-- Subscription Plans Section -->
-    {{-- CHeck if is user logged in and is agent --}}
-    {{-- @if (Auth::check() && Auth::user()->role == 'agent') --}}
+    
+    
     <section class="subscription-plans bg-light py-5" id="plans">
         <div class="container">
             <h2 class="fw-bold text-primary mb-5 text-center">Transparent Pricing Calculator</h2>
@@ -379,50 +369,54 @@
 
             <div class="tab-content" id="pricingTabContent">
 
-                @php $activeMode = $systemSettings['pricing_mode'] ?? 'standard'; @endphp
+                <?php $activeMode = $systemSettings['pricing_mode'] ?? 'standard'; ?>
 
                 <!-- Standard Packages -->
-                @if ($activeMode == 'standard')
+                <?php if($activeMode == 'standard'): ?>
                     <div class="tab-pane fade show active" id="standard" role="tabpanel">
                         <div class="row g-4 justify-content-center">
-                            @foreach ($packages as $pkg)
+                            <?php $__currentLoopData = $packages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pkg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="col-md-4">
                                     <div class="card h-100 border-0 shadow-sm hover-scale transition-all">
                                         <div class="card-header bg-transparent border-0 pt-4 text-center">
-                                            <h4 class="fw-bold text-primary">{{ $pkg->name }}</h4>
-                                            <h2 class="display-6 fw-bold my-3">TZS {{ number_format($pkg->price) }}
+                                            <h4 class="fw-bold text-primary"><?php echo e($pkg->name); ?></h4>
+                                            <h2 class="display-6 fw-bold my-3">TZS <?php echo e(number_format($pkg->price)); ?>
+
                                             </h2>
                                             <span
-                                                class="badge bg-light text-dark rounded-pill border">{{ $pkg->duration }}
+                                                class="badge bg-light text-dark rounded-pill border"><?php echo e($pkg->duration); ?>
+
                                                 Days</span>
                                         </div>
                                         <div class="card-body p-4">
                                             <ul class="list-unstyled mb-4">
                                                 <li class="mb-2"><i
-                                                        class="bi bi-check-circle-fill text-success me-2"></i>{{ $pkg->number_of_pharmacies }}
+                                                        class="bi bi-check-circle-fill text-success me-2"></i><?php echo e($pkg->number_of_pharmacies); ?>
+
                                                     Pharmacy</li>
                                                 <li class="mb-2"><i
-                                                        class="bi bi-check-circle-fill text-success me-2"></i>{{ $pkg->number_of_users }}
+                                                        class="bi bi-check-circle-fill text-success me-2"></i><?php echo e($pkg->number_of_users); ?>
+
                                                     Staff Accounts</li>
                                                 <li class="mb-2"><i
                                                         class="bi bi-check-circle-fill text-success me-2"></i>Real-time
                                                     Analytics</li>
                                             </ul>
                                             <div class="d-grid">
-                                                <a href="{{ route('register') }}"
+                                                <a href="<?php echo e(route('register')); ?>"
                                                     class="btn btn-outline-primary rounded-pill">Choose
-                                                    {{ $pkg->name }}</a>
+                                                    <?php echo e($pkg->name); ?></a>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
-                @endif
+                <?php endif; ?>
 
                 <!-- Dynamic Pricing -->
-                @if ($activeMode == 'dynamic')
+                <?php if($activeMode == 'dynamic'): ?>
                     <div class="tab-pane fade show active" id="dynamic" role="tabpanel">
                         <div class="card border-0 shadow-lg mx-auto" style="max-width: 800px;">
                             <div class="card-body p-5">
@@ -472,10 +466,10 @@
                             </div>
                         </div>
                     </div>
-                @endif
+                <?php endif; ?>
 
                 <!-- Profit Share -->
-                @if ($activeMode == 'profit_share')
+                <?php if($activeMode == 'profit_share'): ?>
                     <div class="tab-pane fade show active" id="profit" role="tabpanel">
                         <div class="card border-0 shadow-lg mx-auto" style="max-width: 600px;">
                             <div class="card-body p-5 text-center">
@@ -494,7 +488,7 @@
                                     class="d-flex justify-content-between align-items-center bg-light p-3 rounded mb-3">
                                     <span>Platform Fee Rate:</span>
                                     <span
-                                        class="fw-bold">{{ $systemSettings['profit_share_percentage'] ?? 5 }}%</span>
+                                        class="fw-bold"><?php echo e($systemSettings['profit_share_percentage'] ?? 5); ?>%</span>
                                 </div>
 
                                 <div class="bg-primary text-white p-4 rounded-3 mt-4">
@@ -505,16 +499,16 @@
                             </div>
                         </div>
                     </div>
-                @endif
+                <?php endif; ?>
 
             </div>
         </div>
 
         <!-- Pass PHP settings to JS -->
-        <div id="calculator-settings" data-rate-item="{{ $systemSettings['dynamic_rate_per_item'] ?? 100 }}"
-            data-rate-staff="{{ $systemSettings['dynamic_rate_per_staff'] ?? 5000 }}"
-            data-rate-branch="{{ $systemSettings['dynamic_rate_per_branch'] ?? 20000 }}"
-            data-profit-share="{{ $systemSettings['profit_share_percentage'] ?? 5 }}">
+        <div id="calculator-settings" data-rate-item="<?php echo e($systemSettings['dynamic_rate_per_item'] ?? 100); ?>"
+            data-rate-staff="<?php echo e($systemSettings['dynamic_rate_per_staff'] ?? 5000); ?>"
+            data-rate-branch="<?php echo e($systemSettings['dynamic_rate_per_branch'] ?? 20000); ?>"
+            data-profit-share="<?php echo e($systemSettings['profit_share_percentage'] ?? 5); ?>">
         </div>
 
     </section>
@@ -580,7 +574,7 @@
     <section class="py-5 text-center">
         <div class="container">
             <h3 class="mb-4">Join thousands of businesses growing with Our System!</h3>
-            <a class="btn btn-success btn-lg" href="{{ route('register') }}"
+            <a class="btn btn-success btn-lg" href="<?php echo e(route('register')); ?>"
                 onclick="return (confirm('Still under maintanance!') && false)">Become Agent</a>
         </div>
     </section>
@@ -588,7 +582,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p class="mb-0">&copy; 2024 {{ env('APP_NAME') }}. All rights reserved.</p>
+            <p class="mb-0">&copy; 2024 <?php echo e(env('APP_NAME')); ?>. All rights reserved.</p>
             <p>Built by <a class="text-light" href="https://skylinksolutions.co.tz">SKYLINK SOLUTIONS</a></p>
         </div>
     </footer>
@@ -671,7 +665,7 @@
         $(document).ready(function() {
             // Fetch dynamic rates from DB
             const systemRate =
-                {{ \App\Models\SystemSetting::where('key', 'system_use_rate')->value('value') ?? 100 }};
+                <?php echo e(\App\Models\SystemSetting::where('key', 'system_use_rate')->value('value') ?? 100); ?>;
             // Divisor logic removed as per new formula
 
             function calculatePrice(n, rate) {
@@ -703,9 +697,10 @@
     </script>
 
     <!-- Add these CDN links (put in head/footer as needed) -->
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script> --}}
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script> --}}
+    
+    
 
 </body>
 
 </html>
+<?php /**PATH /media/michaelkilunga/C/SKYLINK/pms/resources/views/welcome.blade.php ENDPATH**/ ?>

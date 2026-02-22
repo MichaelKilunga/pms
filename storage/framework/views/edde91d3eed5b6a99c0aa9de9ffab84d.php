@@ -1,28 +1,28 @@
-@extends('agent.app')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="container mt-4">
 
-        {{-- ========================= SELECT OWNER ========================= --}}
+        
         <div class="mb-4">
             <div class="d-flex justify-content-between align-items-center">
                 <h2 class="h3 text-primary">Select Owner to Manage</h2>
-                <span class="{{ session('owner') ? 'text-success' : 'text-danger' }}">
-                    {{ session('owner') ? session('owner') : 'Select Owner' }}
+                <span class="<?php echo e(session('owner') ? 'text-success' : 'text-danger'); ?>">
+                    <?php echo e(session('owner') ? session('owner') : 'Select Owner'); ?>
+
                 </span>
             </div>
-            <form action="{{ route('agent.packages.manage', ['action' => 'index']) }}" method="post">
-                @csrf
+            <form action="<?php echo e(route('agent.packages.manage', ['action' => 'index'])); ?>" method="post">
+                <?php echo csrf_field(); ?>
                 <div class="row g-2 mt-2">
                     <div class="col-md-8">
                         <select class="form-select rounded" id="owner_id" name="owner_id" required>
                             <option value="">--Select Owner--</option>
-                            @foreach ($owners as $owner)
-                                <option {{ session('owner_id') == $owner->id ? 'selected' : '' }}
-                                    value="{{ $owner->id }}">
-                                    {{ $owner->name }} ({{ $owner->phone }})
+                            <?php $__currentLoopData = $owners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $owner): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option <?php echo e(session('owner_id') == $owner->id ? 'selected' : ''); ?>
+
+                                    value="<?php echo e($owner->id); ?>">
+                                    <?php echo e($owner->name); ?> (<?php echo e($owner->phone); ?>)
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
                     <div class="col-md-4 d-flex align-items-start">
@@ -34,114 +34,59 @@
 
         <hr>
 
-        {{-- ========================= CURRENT & ACTIVE PLANS ========================= --}}
+        
         <div class="row g-4 mt-4">
 
-            {{-- Current & Active Plans --}}
+            
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm">
 
-                    {{-- Current Plan --}}
+                    
                     <div class="card-body">
-                        {{-- <div class="p-3 border rounded bg-light mb-3 shadow-sm"> --}}
+                        
                         <h5 class="card-title fs-4 text-primary text-center"><i class="fas fa-bolt"></i> Current Plan
                         </h5>
-                        {{-- </div> --}}
-                        @if ($contracts->count() > 0)
-                            @foreach ($contracts as $contract)
-                                @if ($contract->is_current_contract)
+                        
+                        <?php if($contracts->count() > 0): ?>
+                            <?php $__currentLoopData = $contracts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $contract): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php if($contract->is_current_contract): ?>
                                     <div class="bg-light mb-3 rounded border p-3 shadow-sm">
                                         <h5 class="card-title text-primary fw-bold"><i class="fas fa-layer-group"></i>
-                                            {{ $contract->package->name }}</h5>
+                                            <?php echo e($contract->package->name); ?></h5>
                                     </div>
                                     <p class="card-text mb-1">Package Price: TZS
-                                        {{ number_format($contract->package->price) }} / {{ $contract->package->duration }}
+                                        <?php echo e(number_format($contract->package->price)); ?> / <?php echo e($contract->package->duration); ?>
+
                                         days</p>
                                     <p class="card-text mb-1">Amount Paid: TZS
-                                        {{ number_format((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) * $contract->package->price) }}
+                                        <?php echo e(number_format((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) * $contract->package->price)); ?>
+
                                     </p>
                                     <p class="card-text mb-1">Duration:
-                                        {{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) }}
+                                        <?php echo e(\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date))); ?>
+
                                         days
-                                        ({{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30 }}
+                                        (<?php echo e(\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30); ?>
+
                                         Month)
                                     </p>
-                                    <p class="card-text mb-1">Start Date: {{ $contract->start_date }}</p>
-                                    <p class="card-text mb-1">End Date: {{ $contract->end_date }}</p>
+                                    <p class="card-text mb-1">Start Date: <?php echo e($contract->start_date); ?></p>
+                                    <p class="card-text mb-1">End Date: <?php echo e($contract->end_date); ?></p>
                                     <p class="card-text mb-1">Time Remaining: <span class="text-danger"
                                             id="countdown"></span></p>
-                                    <p class="card-text mb-1">Status: {{ $contract->status }} <small
-                                            class="text-warning">{{ $contract->status == 'graced' ? \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() : '' }}</small>
+                                    <p class="card-text mb-1">Status: <?php echo e($contract->status); ?> <small
+                                            class="text-warning"><?php echo e($contract->status == 'graced' ? \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() : ''); ?></small>
                                     </p>
-                                    <p class="card-text mb-0">Payment: {{ $contract->payment_status }}</p>
-
-                                    <div class="mt-4 border-top pt-3">
-                                        <h6 class="fw-bold mb-3 small text-uppercase text-muted"><i class="fas fa-list-check me-1"></i> What's Included?</h6>
-                                        @php
-                                            $pkg = $contract->package;
-                                            $det = $contract->details ?? [];
-                                            $extraBranches = $det['extra_pharmacies'] ?? 0;
-                                            $extraStaff = $det['extra_pharmacists'] ?? 0;
-                                            $extraItems = $det['extra_medicines'] ?? 0;
-                                        @endphp
-                                        
-                                        <ul class="list-unstyled small mb-0">
-                                            <li class="mb-2">
-                                                <i class="fas fa-hospital text-info me-2"></i> 
-                                                <strong>{{ ($pkg->number_of_pharmacies ?? 0) + $extraBranches }}</strong> Branches
-                                                @if($extraBranches > 0) <span class="badge bg-success shadow-sm ms-1">+{{ $extraBranches }}</span> @endif
-                                            </li>
-                                            <li class="mb-2">
-                                                <i class="fas fa-users text-info me-2"></i> 
-                                                <strong>{{ ($pkg->number_of_pharmacists ?? 0) + $extraStaff }}</strong> Staff
-                                                @if($extraStaff > 0) <span class="badge bg-success shadow-sm ms-1">+{{ $extraStaff }}</span> @endif
-                                            </li>
-                                            <li class="mb-2">
-                                                <i class="fas fa-pills text-info me-2"></i> 
-                                                <strong>{{ ($pkg->number_of_medicines ?? 0) + $extraItems }}</strong> Items
-                                                @if($extraItems > 0) <span class="badge bg-success shadow-sm ms-1">+{{ $extraItems }}</span> @endif
-                                            </li>
-                                            
-                                            @php
-                                                $features = [
-                                                    'stock_management' => 'Stock Management',
-                                                    'stock_transfer' => 'Stock Transfer',
-                                                    'staff_management' => 'Staff Management',
-                                                    'receipts' => 'Receipts',
-                                                    'analytics' => 'Analytics',
-                                                    'has_whatsapp' => 'WhatsApp',
-                                                    'has_sms' => 'SMS',
-                                                    'has_reports' => 'Reports',
-                                                ];
-                                            @endphp
-                                            
-                                            <div class="row g-0">
-                                                @foreach($features as $key => $label)
-                                                    @php 
-                                                        $active = ($pkg->$key ?? false) || ($det[$key] ?? false);
-                                                        $isUpgrade = !($pkg->$key ?? false) && ($det[$key] ?? false);
-                                                    @endphp
-                                                    <div class="col-6 mb-1">
-                                                        @if($active)
-                                                            <span class="text-success"><i class="fas fa-check-circle me-1"></i> {{ $label }}</span>
-                                                            @if($isUpgrade) <i class="fas fa-arrow-up text-info small" title="Upgraded"></i> @endif
-                                                        @else
-                                                            <span class="text-muted opacity-50"><i class="fas fa-times-circle me-1"></i> {{ $label }}</span>
-                                                        @endif
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </ul>
-                                    </div>
-                                @endif
-                            @endforeach
-                        @else
+                                    <p class="card-text mb-0">Payment: <?php echo e($contract->payment_status); ?></p>
+                                <?php endif; ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php else: ?>
                             <p class="card-text">No activated plan</p>
-                        @endif
+                        <?php endif; ?>
                         <hr>
                     </div>
 
-                    {{-- Active but not current plans --}}
+                    
                     <div class="card-body table-responsive">
                         <h5 class="card-title fs-4 text-primary text-center"><i class="fas fa-sync-alt"></i>
                             Activate Plans (Not Current)</h5>
@@ -153,26 +98,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @php $activePlans = 0; @endphp
-                                @foreach ($contracts as $contract)
-                                    @if (!$contract->is_current_contract && $contract->payment_status == 'payed' && $contract->status != 'inactive')
+                                <?php $activePlans = 0; ?>
+                                <?php $__currentLoopData = $contracts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $contract): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if(!$contract->is_current_contract && $contract->payment_status == 'payed' && $contract->status != 'inactive'): ?>
                                         <tr>
-                                            <td>{{ $contract->package->name }}</td>
+                                            <td><?php echo e($contract->package->name); ?></td>
                                             <td>
                                                 <a class="btn btn-primary btn-sm"
-                                                    href="{{ route('contracts.users.activate', ['contract_id' => $contract->id, 'owner_id' => session('owner_id')]) }}"><i
+                                                    href="<?php echo e(route('contracts.users.activate', ['contract_id' => $contract->id, 'owner_id' => session('owner_id')])); ?>"><i
                                                         class="fas fa-check-circle"></i>
                                                     Activate</a>
                                             </td>
                                         </tr>
-                                        @php $activePlans++; @endphp
-                                    @endif
-                                @endforeach
-                                @if ($activePlans == 0)
+                                        <?php $activePlans++; ?>
+                                    <?php endif; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php if($activePlans == 0): ?>
                                     <tr>
                                         <td class="text-muted text-center" colspan="2">No Active Plans</td>
                                     </tr>
-                                @endif
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -180,7 +125,7 @@
                 </div>
             </div>
 
-            {{-- Previous Plans --}}
+            
             <div class="col-md-8">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body table-responsive">
@@ -200,34 +145,34 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($contracts as $contract)
-                                    @if ($contract->payment_status != 'pending')
+                                <?php $__currentLoopData = $contracts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $contract): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if($contract->payment_status != 'pending'): ?>
                                         <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $contract->package->name }}</td>
-                                            <td>{{ $contract->start_date }}</td>
-                                            <td>{{ $contract->end_date }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) }}
+                                            <td><?php echo e($loop->iteration); ?></td>
+                                            <td><?php echo e($contract->package->name); ?></td>
+                                            <td><?php echo e($contract->start_date); ?></td>
+                                            <td><?php echo e($contract->end_date); ?></td>
+                                            <td><?php echo e(\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date))); ?>
+
                                                 days
-                                                ({{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30 }}
+                                                (<?php echo e(\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30); ?>
+
                                                 Month)
                                             </td>
-                                            <td>{{ number_format((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) * $contract->package->price) }}
+                                            <td><?php echo e(number_format((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) * $contract->package->price)); ?>
+
                                             </td>
-                                            <td>{{ $contract->payment_status }}</td>
-                                            <td>{{ $contract->status }}
-                                                @if ($contract->is_current_contract)
+                                            <td><?php echo e($contract->payment_status); ?></td>
+                                            <td><?php echo e($contract->status); ?>
+
+                                                <?php if($contract->is_current_contract): ?>
                                                     <span class="badge bg-success">Current</span>
-                                                @endif
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
-                                    @endif
-                                @endforeach
-                                {{-- @if ($contracts->count() == 0)
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted">No Plans</td>
-                                    </tr>
-                                @endif --}}
+                                    <?php endif; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                
                             </tbody>
                         </table>
                     </div>
@@ -236,42 +181,42 @@
 
         </div>
 
-        {{-- ========================= AVAILABLE SUBSCRIPTION PLANS ========================= --}}
+        
         <div class="mt-5">
             <h3 class="text-primary fw-bold mb-4 text-center"><i class="fas fa-layer-group"></i> Available Subscription
                 Plans</h3>
 
-            @if (isset($pricingData) && $pricingData['mode'] != 'standard')
+            <?php if(isset($pricingData) && $pricingData['mode'] != 'standard'): ?>
                 <div class="row justify-content-center mb-4">
                     <div class="col-md-8">
-                        @if ($pricingData['mode'] == 'dynamic')
+                        <?php if($pricingData['mode'] == 'dynamic'): ?>
                             <div class="alert alert-info border-info text-center shadow-sm">
                                 <h5 class="fw-bold"><i class="fas fa-calculator me-2"></i> Item-Based Pricing Active</h5>
                                 <p class="mb-1">Based on inventory size:
-                                    <strong>{{ number_format($pricingData['details']['total_items']) }} items</strong>.
+                                    <strong><?php echo e(number_format($pricingData['details']['total_items'])); ?> items</strong>.
                                 </p>
                                 <hr class="my-2">
                                 <p class="mb-0">
-                                    Base Rate: {{ number_format($pricingData['details']['rate']) }} x
-                                    {{ $pricingData['details']['multiplier'] }} (Tier) =
-                                    <strong class="fs-5">TZS {{ number_format($pricingData['amount']) }} / month</strong>
+                                    Base Rate: <?php echo e(number_format($pricingData['details']['rate'])); ?> x
+                                    <?php echo e($pricingData['details']['multiplier']); ?> (Tier) =
+                                    <strong class="fs-5">TZS <?php echo e(number_format($pricingData['amount'])); ?> / month</strong>
                                 </p>
                             </div>
-                        @elseif($pricingData['mode'] == 'profit_share')
+                        <?php elseif($pricingData['mode'] == 'profit_share'): ?>
                             <div class="alert alert-success border-success text-center shadow-sm">
                                 <h5 class="fw-bold"><i class="fas fa-chart-line me-2"></i> Profit Share Pricing Active</h5>
-                                <p class="mb-1">Based on <strong>{{ $pricingData['details']['percentage'] }}%</strong> of
+                                <p class="mb-1">Based on <strong><?php echo e($pricingData['details']['percentage']); ?>%</strong> of
                                     last 30 days profit.</p>
                                 <hr class="my-2">
                                 <p class="mb-0">
-                                    Est. Monthly Profit: {{ number_format($pricingData['details']['monthly_profit']) }} =
-                                    <strong class="fs-5">TZS {{ number_format($pricingData['amount']) }} / month</strong>
+                                    Est. Monthly Profit: <?php echo e(number_format($pricingData['details']['monthly_profit'])); ?> =
+                                    <strong class="fs-5">TZS <?php echo e(number_format($pricingData['amount'])); ?> / month</strong>
                                 </p>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <div class="table-responsive">
                 <table class="table-hover rounded-3 table overflow-hidden align-middle shadow-sm">
@@ -284,8 +229,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($packages as $package)
-                            @php
+                        <?php $__currentLoopData = $packages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $package): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $activeContracts = \App\Models\Contract::where('owner_id', session('owner_id'))
                                     ->where('is_current_contract', 1)
                                     ->get();
@@ -319,60 +264,64 @@
 $agentMarkup = isset($pricingData) ? $pricingData['agent_markup'] : 0;
                                 $displayPrice = $finalPrice + $agentMarkup;
 
-                            @endphp
-                            <tr class="{{ $hasAnyContract > 0 && $package->id == 1 ? 'd-none' : '' }}">
-                                <td class="fw-bold text-dark ps-4">{{ $package->name }}</td>
+                            ?>
+                            <tr class="<?php echo e($hasAnyContract > 0 && $package->id == 1 ? 'd-none' : ''); ?>">
+                                <td class="fw-bold text-dark ps-4"><?php echo e($package->name); ?></td>
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span class="fw-bold text-primary fs-5">TZS {{ number_format($displayPrice) }}
+                                        <span class="fw-bold text-primary fs-5">TZS <?php echo e(number_format($displayPrice)); ?>
+
                                             <small class="text-muted fs-6">/ mo</small></span>
-                                        @if ($agentMarkup > 0)
+                                        <?php if($agentMarkup > 0): ?>
                                             <small class="text-muted" style="font-size: 0.8em;">(Base:
-                                                {{ number_format($finalPrice) }} + Agent Fee:
-                                                {{ number_format($agentMarkup) }})</small>
-                                        @endif
-                                        @if (isset($pricingData) && $pricingData['mode'] != 'standard')
+                                                <?php echo e(number_format($finalPrice)); ?> + Agent Fee:
+                                                <?php echo e(number_format($agentMarkup)); ?>)</small>
+                                        <?php endif; ?>
+                                        <?php if(isset($pricingData) && $pricingData['mode'] != 'standard'): ?>
                                             <span
                                                 class="badge bg-secondary-subtle text-dark border-secondary start-100 translate-middle-y top-0 mt-1 border"
                                                 style="width: fit-content;">
-                                                {{ ucfirst($pricingData['mode']) }}
+                                                <?php echo e(ucfirst($pricingData['mode'])); ?>
+
                                             </span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                                 <td><span
-                                        class="badge bg-light text-dark rounded-pill border px-3">{{ $package->duration }}
+                                        class="badge bg-light text-dark rounded-pill border px-3"><?php echo e($package->duration); ?>
+
                                         days</span></td>
                                 <td class="d-flex align-items-center flex-wrap gap-2">
 
-                                    {{-- ========================= CHECK: NO ACTIVE CONTRACTS? (Subscribe State) ========================= --}}
-                                    @if ($activeContracts->count() < 1)
-                                        {{-- Month selection for new subscription (Hidden for Trial ID 1) --}}
-                                        @if ($package->id != 1)
+                                    
+                                    <?php if($activeContracts->count() < 1): ?>
+                                        
+                                        <?php if($package->id != 1): ?>
                                             <select class="form-select-sm form-select me-2 w-auto"
-                                                id="months_{{ $package->id }}" required>
+                                                id="months_<?php echo e($package->id); ?>" required>
                                                 <option value="">Select months</option>
 
-                                                {{-- Loop months 1–12 --}}
-                                                @for ($i = 1; $i <= 12; $i++)
-                                                    <option value="{{ $i }}">{{ $i }}
-                                                        month{{ $i > 1 ? 's' : '' }}</option>
-                                                @endfor
-                                            </select>
-                                        @endif
+                                                
+                                                <?php for($i = 1; $i <= 12; $i++): ?>
+                                                    <option value="<?php echo e($i); ?>"><?php echo e($i); ?>
 
-                                        {{-- Subscribe button --}}
+                                                        month<?php echo e($i > 1 ? 's' : ''); ?></option>
+                                                <?php endfor; ?>
+                                            </select>
+                                        <?php endif; ?>
+
+                                        
                                         <button class="btn btn-primary btn-sm rounded-pill subscribe-btn shadow"
-                                            data-url="{{ route('contracts.users.subscribe', ['package_id' => $package->id, 'owner_id' => session('owner_id')]) }}"
+                                            data-url="<?php echo e(route('contracts.users.subscribe', ['package_id' => $package->id, 'owner_id' => session('owner_id')])); ?>"
                                             type="button">
                                             <i class="fa-solid fa-badge-check"></i> Subscribe
                                         </button>
-                                    @else
-                                        {{-- ========================= HAS ACTIVE CONTRACT(S) ========================= --}}
+                                    <?php else: ?>
+                                        
 
-                                        {{-- Check if the active contract belongs to this package --}}
-                                        @if ($activeContracts->first()->package->id == $package->id)
-                                            @php
+                                        
+                                        <?php if($activeContracts->first()->package->id == $package->id): ?>
+                                            <?php
                                                 // The user currently has an active contract for this package
                                                 $currentContract = $activeContracts->first();
 
@@ -384,69 +333,71 @@ $agentMarkup = isset($pricingData) ? $pricingData['agent_markup'] : 0;
                                                 if ($lastExpiredContract) {
                                                     $endDate = \Carbon\Carbon::parse($lastExpiredContract->end_date);
                                                 }
-                                            @endphp
+                                            ?>
 
-                                            {{-- ========================= CONTRACT END DATE CHECK (Renew or Current Plan) ========================= --}}
-                                            @if ($endDate->isPast() && $currentContract->status == 'inactive')
-                                                {{-- Contract expired → Show Renew --}}
-                                                @if ($package->id != 1)
+                                            
+                                            <?php if($endDate->isPast() && $currentContract->status == 'inactive'): ?>
+                                                
+                                                <?php if($package->id != 1): ?>
                                                     <select class="form-select-sm form-select me-2 w-auto"
-                                                        id="months_{{ $package->id }}" required>
+                                                        id="months_<?php echo e($package->id); ?>" required>
                                                         <option value="">Select months</option>
-                                                        @for ($i = 1; $i <= 12; $i++)
-                                                            <option value="{{ $i }}">{{ $i }}
-                                                                month{{ $i > 1 ? 's' : '' }}</option>
-                                                        @endfor
+                                                        <?php for($i = 1; $i <= 12; $i++): ?>
+                                                            <option value="<?php echo e($i); ?>"><?php echo e($i); ?>
+
+                                                                month<?php echo e($i > 1 ? 's' : ''); ?></option>
+                                                        <?php endfor; ?>
                                                     </select>
-                                                @endif
+                                                <?php endif; ?>
 
                                                 <button class="btn btn-warning btn-sm rounded-pill subscribe-btn shadow"
-                                                    data-url="{{ route('contracts.users.renew', ['package_id' => $package->id, 'owner_id' => session('owner_id')]) }}"
+                                                    data-url="<?php echo e(route('contracts.users.renew', ['package_id' => $package->id, 'owner_id' => session('owner_id')])); ?>"
                                                     type="button">
                                                     <i class="fa-solid fa-clock-rotate-left"></i> Renew
                                                 </button>
-                                            @else
-                                                {{-- Contract still active → user cannot renew --}}
+                                            <?php else: ?>
+                                                
                                                 <button class="btn btn-success btn-sm rounded-pill" disabled
                                                     type="button">
                                                     Current Plan
                                                 </button>
-                                            @endif
-                                        @else
-                                            {{-- ========================= USER HAS ACTIVE CONTRACT BUT FOR ANOTHER PACKAGE ========================= --}}
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            
 
-                                            {{-- If upgrade is blocked, allow "Activate" previous contract --}}
-                                            @if ($blockUpgrade)
+                                            
+                                            <?php if($blockUpgrade): ?>
                                                 <a class="btn btn-primary btn-sm rounded-pill shadow"
-                                                    href="{{ route('contracts.users.activate', ['contract_id' => $activatableContract->id, 'owner_id' => session('owner_id')]) }}">
+                                                    href="<?php echo e(route('contracts.users.activate', ['contract_id' => $activatableContract->id, 'owner_id' => session('owner_id')])); ?>">
                                                     <i class="fas fa-check-circle"></i> Activate
                                                 </a>
-                                            @else
-                                                {{-- Show Upgrade option --}}
-                                                @if ($package->id != 1)
+                                            <?php else: ?>
+                                                
+                                                <?php if($package->id != 1): ?>
                                                     <select class="form-select-sm form-select me-2 w-auto"
-                                                        id="months_{{ $package->id }}" required>
+                                                        id="months_<?php echo e($package->id); ?>" required>
                                                         <option value="">Select months</option>
 
-                                                        @for ($i = 1; $i <= 12; $i++)
-                                                            <option value="{{ $i }}">{{ $i }}
-                                                                month{{ $i > 1 ? 's' : '' }}</option>
-                                                        @endfor
+                                                        <?php for($i = 1; $i <= 12; $i++): ?>
+                                                            <option value="<?php echo e($i); ?>"><?php echo e($i); ?>
+
+                                                                month<?php echo e($i > 1 ? 's' : ''); ?></option>
+                                                        <?php endfor; ?>
                                                     </select>
-                                                @endif
+                                                <?php endif; ?>
 
                                                 <button class="btn btn-primary btn-sm rounded-pill subscribe-btn shadow"
-                                                    data-url="{{ route('contracts.users.upgrade', ['package_id' => $package->id, 'owner_id' => session('owner_id')]) }}"
+                                                    data-url="<?php echo e(route('contracts.users.upgrade', ['package_id' => $package->id, 'owner_id' => session('owner_id')])); ?>"
                                                     type="button">
                                                     <i class="fa-solid fa-arrow-trend-up"></i> Upgrade
                                                 </button>
-                                            @endif
-                                        @endif
-                                    @endif
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
 
-                                    {{-- ========================= PACKAGE DETAILS MODAL BUTTON ========================= --}}
+                                    
                                     <a class="btn btn-danger btn-sm rounded-pill text-white"
-                                        data-bs-target="#packageModal{{ $package->id }}" data-bs-toggle="modal"
+                                        data-bs-target="#packageModal<?php echo e($package->id); ?>" data-bs-toggle="modal"
                                         href="#">
                                         <i class="bi bi-eye"></i> More
                                     </a>
@@ -455,13 +406,13 @@ $agentMarkup = isset($pricingData) ? $pricingData['agent_markup'] : 0;
 
                             </tr>
 
-                            {{-- Modal --}}
-                            <div aria-hidden="true" aria-labelledby="packageModalLabel{{ $package->id }}"
-                                class="modal fade" id="packageModal{{ $package->id }}" tabindex="-1">
+                            
+                            <div aria-hidden="true" aria-labelledby="packageModalLabel<?php echo e($package->id); ?>"
+                                class="modal fade" id="packageModal<?php echo e($package->id); ?>" tabindex="-1">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title">{{ $package->name }}</h5>
+                                            <h5 class="modal-title"><?php echo e($package->name); ?></h5>
                                             <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
                                                 type="button"></button>
                                         </div>
@@ -470,47 +421,47 @@ $agentMarkup = isset($pricingData) ? $pricingData['agent_markup'] : 0;
                                                 <div class="card-body">
                                                     <h5 class="card-title">Package Details</h5>
                                                     <p class="card-text">
-                                                        <strong>Name:</strong> {{ $package->name }}<br>
-                                                        <strong>Price:</strong> {{ $package->price }}<br>
-                                                        <strong>Description:</strong> {{ $package->description }}<br>
-                                                        <strong>Duration:</strong> {{ $package->duration }} days<br>
+                                                        <strong>Name:</strong> <?php echo e($package->name); ?><br>
+                                                        <strong>Price:</strong> <?php echo e($package->price); ?><br>
+                                                        <strong>Description:</strong> <?php echo e($package->description); ?><br>
+                                                        <strong>Duration:</strong> <?php echo e($package->duration); ?> days<br>
                                                         <strong>Features:</strong>
                                                     </p>
                                                     <ul class="list-unstyled mb-0">
-                                                        <li>✔ {{ $package->number_of_pharmacists }} pharmacist per 1
+                                                        <li>✔ <?php echo e($package->number_of_pharmacists); ?> pharmacist per 1
                                                             Pharmacy</li>
-                                                        <li>✔ {{ $package->number_of_owner_accounts }} Owner account</li>
-                                                        <li>✔ {{ $package->number_of_admin_accounts }} Admin account</li>
-                                                        <li>✔ {{ $package->number_of_pharmacies }} pharmacy</li>
-                                                        <li>✔ {{ $package->number_of_medicines }} Medicines per Pharmacy
+                                                        <li>✔ <?php echo e($package->number_of_owner_accounts); ?> Owner account</li>
+                                                        <li>✔ <?php echo e($package->number_of_admin_accounts); ?> Admin account</li>
+                                                        <li>✔ <?php echo e($package->number_of_pharmacies); ?> pharmacy</li>
+                                                        <li>✔ <?php echo e($package->number_of_medicines); ?> Medicines per Pharmacy
                                                         </li>
-                                                        @if ($package->email_notification)
+                                                        <?php if($package->email_notification): ?>
                                                             <li>✔ Email Notification</li>
-                                                        @endif
-                                                        @if ($package->sms_notifications)
+                                                        <?php endif; ?>
+                                                        <?php if($package->sms_notifications): ?>
                                                             <li>✔ SMS Notifications</li>
-                                                        @endif
-                                                        @if ($package->whatsapp_chat)
+                                                        <?php endif; ?>
+                                                        <?php if($package->whatsapp_chat): ?>
                                                             <li>✔ WhatsApp Chat</li>
-                                                        @endif
-                                                        @if ($package->reports)
+                                                        <?php endif; ?>
+                                                        <?php if($package->reports): ?>
                                                             <li>✔ Sales Reporting</li>
-                                                        @endif
-                                                        @if ($package->analytics)
+                                                        <?php endif; ?>
+                                                        <?php if($package->analytics): ?>
                                                             <li>✔ Sales Analytics</li>
-                                                        @endif
-                                                        @if ($package->receipts)
+                                                        <?php endif; ?>
+                                                        <?php if($package->receipts): ?>
                                                             <li>✔ Receipts</li>
-                                                        @endif
-                                                        @if ($package->stock_management)
+                                                        <?php endif; ?>
+                                                        <?php if($package->stock_management): ?>
                                                             <li>✔ Stocks Management</li>
-                                                        @endif
-                                                        @if ($package->staff_management)
+                                                        <?php endif; ?>
+                                                        <?php if($package->staff_management): ?>
                                                             <li>✔ Staffs Management</li>
-                                                        @endif
-                                                        @if ($package->stock_transfer)
+                                                        <?php endif; ?>
+                                                        <?php if($package->stock_transfer): ?>
                                                             <li>✔ Stocks Transfer</li>
-                                                        @endif
+                                                        <?php endif; ?>
                                                         <li>✔ Free Online support</li>
                                                         <li>✔ Works on PC, Mac, mobile and Tablet</li>
                                                     </ul>
@@ -524,12 +475,12 @@ $agentMarkup = isset($pricingData) ? $pricingData['agent_markup'] : 0;
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
-                        @if ($packages->count() == 0)
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php if($packages->count() == 0): ?>
                             <tr>
                                 <td class="text-muted text-center" colspan="4">No Packages</td>
                             </tr>
-                        @endif
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -539,7 +490,7 @@ $agentMarkup = isset($pricingData) ? $pricingData['agent_markup'] : 0;
 
     <script>
         // Set the date we're counting down to
-        var countDownDate = new Date("{{ $current_contract_end_date }}").getTime();
+        var countDownDate = new Date("<?php echo e($current_contract_end_date); ?>").getTime();
 
         // Update the count down every 1 second
         var x = setInterval(function() {
@@ -632,4 +583,6 @@ $agentMarkup = isset($pricingData) ? $pricingData['agent_markup'] : 0;
             });
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('agent.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /media/michaelkilunga/C/SKYLINK/pms/resources/views/agent/packages.blade.php ENDPATH**/ ?>

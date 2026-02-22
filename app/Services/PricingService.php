@@ -75,38 +75,24 @@ class PricingService
 
     protected function calculateDynamicPrice(User $user, int $months): array
     {
-        // Inputs: Number of Branches, Staff, Items, Services, Modules.
-        // Configuration: SystemSetting
-        
-        $settings = SystemSetting::pluck('value', 'key')->toArray();
-        $ratePerBranch = $settings['dynamic_rate_per_branch'] ?? 20000;
-        $ratePerStaff = $settings['dynamic_rate_per_staff'] ?? 5000;
-        $ratePerItem = $settings['dynamic_rate_per_item'] ?? 100;
-        
-        // Fetch User counts
-        // Assuming User model has relationships to count these.
-        // NOTE: User might be owner, so we look at their owned entities.
+        $rates = $this->getUpgradeRates();
+        $res = $rates['resources'];
         
         $branchesCount = $user->pharmacies()->count(); 
-        // Logic for staff: User -> Pharmacy -> Staff? or User -> Staff (if owner)?
-        // Assuming owner has many pharmacies and pharmacies have many staff.
-        // Also adding +1 for the owner themselves as they are a staff member of the business.
+        
         $staffCount = 1; // Start with owner
         foreach($user->pharmacies as $pharmacy){
             $staffCount += $pharmacy->staff()->count();
         }
         
-        // Items count (medicines/stocks)
         $itemsCount = 0;
-         foreach($user->pharmacies as $pharmacy){
-             // Count items in each pharmacy
-             // Verified: Pharmacy model has 'item()' relationship.
+        foreach($user->pharmacies as $pharmacy){
              $itemsCount += $pharmacy->item()->count(); 
         }
 
-        $baseAmount = ($branchesCount * $ratePerBranch) + 
-                      ($staffCount * $ratePerStaff) + 
-                      ($itemsCount * $ratePerItem);
+        $baseAmount = ($branchesCount * $res['pharmacy']) + 
+                      ($staffCount * $res['staff']) + 
+                      ($itemsCount * $res['item']);
         
         $totalAmount = $baseAmount * $months;
 
@@ -115,11 +101,11 @@ class PricingService
             'strategy' => 'dynamic',
             'details' => [
                 'branches_count' => $branchesCount,
-                'branches_rate' => $ratePerBranch,
+                'branches_rate' => $res['pharmacy'],
                 'staff_count' => $staffCount,
-                'staff_rate' => $ratePerStaff,
+                'staff_rate' => $res['staff'],
                 'items_count' => $itemsCount,
-                'items_rate' => $ratePerItem,
+                'items_rate' => $res['item'],
                 'months' => $months
             ],
             'agent_markup' => 0
@@ -128,12 +114,9 @@ class PricingService
 
     protected function calculateProfitSharePrice(User $user, int $months): array
     {
-         $settings = SystemSetting::pluck('value', 'key')->toArray();
-         $percentage = $settings['profit_share_percentage'] ?? 0; // e.g. 25 for 25%
+         $settings = SystemSetting::whereNull('pharmacy_id')->pluck('value', 'key')->toArray();
+         $percentage = (float)($settings['profit_share_percentage'] ?? 0); 
 
-         // Get Last 30 Days Profit
-         // This requires complex logic depending on how profit is stored/calculated.
-         // For now, I'll assume there's a way to get this or placeholder it.
          $last30DaysProfit = $this->getLast30DaysProfit($user);
 
          $monthlyFee = $last30DaysProfit * ($percentage / 100);
@@ -149,6 +132,77 @@ class PricingService
              ],
              'agent_markup' => 0
          ];
+    }
+
+    public function getUpgradeRates(): array
+    {
+        $settings = SystemSetting::whereNull('pharmacy_id')->pluck('value', 'key')->toArray();
+
+        // 1. Resource Rates (Dynamic)
+        $resourceRates = [
+            'pharmacy' => (float)($settings['dynamic_rate_per_branch'] ?? 20000),
+            'staff' => (float)($settings['dynamic_rate_per_staff'] ?? 5000),
+            'item' => (float)($settings['dynamic_rate_per_item'] ?? 100),
+        ];
+
+        // 2. Feature Rates (Add-ons)
+        $featureRates = [
+            'has_whatsapp' => (float)($settings['upgrade_rate_whatsapp'] ?? 5000),
+            'has_sms' => (float)($settings['upgrade_rate_sms'] ?? 10000),
+            'has_reports' => (float)($settings['upgrade_rate_reports'] ?? 15000),
+            'stock_management' => (float)($settings['upgrade_rate_stock_management'] ?? 10000),
+            'stock_transfer' => (float)($settings['upgrade_rate_stock_transfer'] ?? 10000),
+            'staff_management' => (float)($settings['upgrade_rate_staff_management'] ?? 5000),
+            'receipts' => (float)($settings['upgrade_rate_receipts'] ?? 5000),
+            'analytics' => (float)($settings['upgrade_rate_analytics'] ?? 15000),
+        ];
+
+        return [
+            'resources' => $resourceRates,
+            'features' => $featureRates
+        ];
+    }
+
+    public function calculateUpgradePrice(array $requestedUpgrades, int $months): array
+    {
+        $rates = $this->getUpgradeRates();
+        $res = $rates['resources'];
+        $feat = $rates['features'];
+        
+        $amount = 0;
+        $details = [];
+
+        // Incremental Resources
+        if (($requestedUpgrades['extra_pharmacies'] ?? 0) > 0) {
+            $count = $requestedUpgrades['extra_pharmacies'];
+            $amount += $count * $res['pharmacy'] * $months;
+            $details['extra_pharmacies'] = $count;
+        }
+        
+        if (($requestedUpgrades['extra_pharmacists'] ?? 0) > 0) {
+            $count = $requestedUpgrades['extra_pharmacists'];
+            $amount += $count * $res['staff'] * $months;
+            $details['extra_pharmacists'] = $count;
+        }
+
+        if (($requestedUpgrades['extra_medicines'] ?? 0) > 0) {
+            $count = $requestedUpgrades['extra_medicines'];
+            $amount += $count * $res['item'] * $months;
+            $details['extra_medicines'] = $count;
+        }
+
+        // Fixed Price Add-ons (Monthly rates)
+        foreach ($feat as $key => $rate) {
+            if ($requestedUpgrades[$key] ?? false) {
+                $amount += $rate * $months;
+                $details[$key] = true;
+            }
+        }
+
+        return [
+            'amount' => $amount,
+            'details' => $details
+        ];
     }
 
     protected function getLast30DaysProfit(User $user): float

@@ -1,7 +1,5 @@
-@extends("sales.app")
-
-@section("content")
-    @php
+<?php $__env->startSection("content"); ?>
+    <?php
         use App\Models\Stock;
         use Illuminate\Support\Facades\DB;
 
@@ -17,22 +15,22 @@
             ->groupBy("item_id", "selling_price")
             ->with("item")
             ->get();
-    @endphp
+    ?>
 
     <div class="mt-4# container">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="text-primary fs-2 fw-bold">Sales Management</h2>
             <div class="d-flex align-items-center gap-2">
-                @if (Auth::user()->hasRole("Owner") || Auth::user()->hasRole("Superadmin") || Auth::user()->hasRole("Manager"))
+                <?php if(Auth::user()->hasRole("Owner") || Auth::user()->hasRole("Superadmin") || Auth::user()->hasRole("Manager")): ?>
                     <div style="width: 250px;">
                         <div class="input-group">
                             <span class="input-group-text bg-primary text-white"><i class="bi bi-calendar3"></i></span>
                             <input class="form-control" id="saleDateFilter" type="date"
-                                value="{{ today()->toDateString() }}">
+                                value="<?php echo e(today()->toDateString()); ?>">
                         </div>
                     </div>
-                @endif
+                <?php endif; ?>
                 <a class="btn btn-success" data-bs-target="#createSalesModal" data-bs-toggle="modal" href="#">
                     <i class="bi bi-plus-lg"></i> New Sales
                 </a>
@@ -40,10 +38,10 @@
         </div>
         <hr>
         <div class="d-flex justify-content-between">
-            {{-- checkbox to enable use of printer --}}
+            
             <div>
                 <div class="form-control form-check form-switch mt-2">
-                    <input {{ session("use_printer") ? "checked" : "" }} class="form-check-input" id="printerCheckbox"
+                    <input <?php echo e(session("use_printer") ? "checked" : ""); ?> class="form-check-input" id="printerCheckbox"
                         type="checkbox">
                     <label class="form-check-label" for="printerCheckbox">Printer Enabled</label>
                 </div>
@@ -86,8 +84,8 @@
                     <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route("sales.store") }}" id="salesForm" method="POST">
-                        @csrf
+                    <form action="<?php echo e(route("sales.store")); ?>" id="salesForm" method="POST">
+                        <?php echo csrf_field(); ?>
                         <div id="salesFields">
                             <div class="row sale-entry align-items-center mb-3">
                                 <input hidden name="stock_id[]" required type="text">
@@ -95,13 +93,14 @@
                                     <label class="form-label" for="medicines">Medicine</label>
                                     <select class="salesChosen form-select" name="item_id[]" required>
                                         <option selected value="">Select medicine</option>
-                                        @foreach ($medicines as $medicine)
-                                            <option value="{{ $medicine->id . "-" . $medicine->selling_price }}">
-                                                {{ $medicine->item->name }}
+                                        <?php $__currentLoopData = $medicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $medicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($medicine->id . "-" . $medicine->selling_price); ?>">
+                                                <?php echo e($medicine->item->name); ?>
+
                                                 <br><strong
-                                                    class="text-danger">({{ number_format($medicine->selling_price) }}Tsh)</strong>
+                                                    class="text-danger">(<?php echo e(number_format($medicine->selling_price)); ?>Tsh)</strong>
                                             </option>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -119,10 +118,10 @@
                                     <input class="form-control amount" name="amount[]" placeholder="Amount" readonly
                                         type="number">
                                 </div>
-                                <div {{ Auth::user()->hasRole("Staff") ? "hidden" : "" }} class="col-md-2">
+                                <div <?php echo e(Auth::user()->hasRole("Staff") ? "hidden" : ""); ?> class="col-md-2">
                                     <label class="form-label">Date</label>
                                     <input class="form-control date" name="date[]" required type="text"
-                                        value="{{ now() }}">
+                                        value="<?php echo e(now()); ?>">
                                 </div>
                             </div>
                         </div>
@@ -157,11 +156,9 @@
         </div>
     </div>
 
-    {{-- A MODAL FOR SELECTING PRINTERS FROM THE LIST OF ACTIVE PRINTERS, MODAL SHOULD DETECT ACTIVE PRINTERS
-         USING JS AND RETURN THEM AS A DROP-DOWN LIST, USER WILL SELECT THE PRINTER HE/SHE WANTS AND SUBMIT,
-         USER SHOULD ONLY SELECT WHILE THE FORM SHOULD CATCH IP address and Printe's path using JS --}}
-    {{-- Modal for Selecting Printers --}}
-    @if (false)
+    
+    
+    <?php if(false): ?>
         <div aria-hidden="true" aria-labelledby="printerModalLabel" class="modal fade" id="printerModal"
             tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
@@ -171,8 +168,8 @@
                         <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <form action="{{ route("printer.store") }}" method="POST">
-                            @csrf
+                        <form action="<?php echo e(route("printer.store")); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
                             <div class="mb-3">
                                 <label class="form-label" for="printer">Printer's Name</label>
                                 <input class="form-control" id="printer" name="printer" placeholder="TM-20ll Receipt"
@@ -194,7 +191,7 @@
                 </div>
             </div>
         </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Scripts -->
     <script>
@@ -240,7 +237,7 @@
             }
 
             function tellPrice(row) {
-                let medicines = @json($medicines); // Convert medicines to a JS array
+                let medicines = <?php echo json_encode($medicines, 15, 512) ?>; // Convert medicines to a JS array
                 const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
 
                 const selectedMedicine = medicines.find(medicine => medicine.id + '-' + medicine.selling_price ==
@@ -360,12 +357,12 @@
                             <div class="col-md-3">
                                 <select name="item_id[]" data-row-id="item_id[]" class="form-select salesChosen" required>
                                     <option selected disabled value="">Select medicine</option>
-                                    @foreach ($medicines as $medicine)
-                                        <option value="{{ $medicine->id }}-{{ $medicine->selling_price }}">
-                                                {{ $medicine->item->name }} <br><strong
-                                                class="text-danger">({{ number_format($medicine->selling_price) }}Tsh)</strong>
+                                    <?php $__currentLoopData = $medicines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $medicine): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($medicine->id); ?>-<?php echo e($medicine->selling_price); ?>">
+                                                <?php echo e($medicine->item->name); ?> <br><strong
+                                                class="text-danger">(<?php echo e(number_format($medicine->selling_price)); ?>Tsh)</strong>
                                             </option>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
                             <div class="col-md-2">
@@ -378,8 +375,8 @@
                             <div class="col-md-2">
                                 <input type="number" class="form-control amount" name="amount[]" placeholder="Amount" readonly>
                             </div>
-                            <div class="col-md-2" {{ Auth::user()->hasRole("Staff") ? "hidden" : "" }}>
-                            <input type="text" class="form-control date" name="date[]" value="${$('#saleDateFilter').val() || '{{ now() }}'}" required>
+                            <div class="col-md-2" <?php echo e(Auth::user()->hasRole("Staff") ? "hidden" : ""); ?>>
+                            <input type="text" class="form-control date" name="date[]" value="${$('#saleDateFilter').val() || '<?php echo e(now()); ?>'}" required>
                             </div>
                             <div class="col-md-1 d-flex justify-content-center">
                                 <button type="button" class="btn btn-danger btn-sm remove-sale-row">
@@ -457,9 +454,9 @@
                 // Update printer enable status in the db using jquery ajax
                 $.ajax({
                     type: "POST",
-                    url: "{{ route("printer.updateStatus") }}",
+                    url: "<?php echo e(route("printer.updateStatus")); ?>",
                     data: {
-                        _token: "{{ csrf_token() }}",
+                        _token: "<?php echo e(csrf_token()); ?>",
                         current_status: current_status,
                         new_status: new_status,
                     },
@@ -489,7 +486,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route("sales") }}",
+                    url: "<?php echo e(route("sales")); ?>",
                     data: function(d) {
                         d.date = $('#saleDateFilter').val();
                     }
@@ -538,4 +535,6 @@
             });
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make("sales.app", array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /media/michaelkilunga/C/SKYLINK/pms/resources/views/sales/index.blade.php ENDPATH**/ ?>

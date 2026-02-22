@@ -11,11 +11,19 @@ class SmsService
     protected $baseUrl = 'https://skypush.skylinksolutions.co.tz/api/v1'; 
     protected $apiKey;
     protected $senderId;
-    protected $isEnabled;
+    protected $isGlobalEnabled;
+    protected $pharmacyId;
 
     public function __construct()
     {
+        $this->pharmacyId = session('current_pharmacy_id');
         $this->loadSettings();
+    }
+
+    public function setPharmacyId($id)
+    {
+        $this->pharmacyId = $id;
+        return $this;
     }
 
     protected function loadSettings()
@@ -25,15 +33,45 @@ class SmsService
             ->whereIn('key', ['sms_enabled', 'sms_api_key', 'sms_sender_id'])
             ->pluck('value', 'key');
 
-        $this->isEnabled = filter_var($settings['sms_enabled'] ?? 'false', FILTER_VALIDATE_BOOLEAN);
+        $this->isGlobalEnabled = filter_var($settings['sms_enabled'] ?? 'false', FILTER_VALIDATE_BOOLEAN);
         $this->apiKey = $settings['sms_api_key'] ?? null;
         $this->senderId = $settings['sms_sender_id'] ?? 'PILPOINTONE'; 
     }
 
+    public function isEnabled($pharmacyId = null)
+    {
+        $pid = $pharmacyId ?? $this->pharmacyId;
+
+        // 1. Core global check
+        if (!$this->isGlobalEnabled || !$this->apiKey) {
+            return false;
+        }
+
+        // 2. Contract Check
+        if (!$pid) return false;
+
+        $pharmacy = \App\Models\Pharmacy::find($pid);
+        if (!$pharmacy) return false;
+
+        $owner = \App\Models\User::find($pharmacy->owner_id);
+        if (!$owner) return false;
+
+        $contract = \App\Models\Contract::where('owner_id', $owner->id)
+            ->where('is_current_contract', 1)
+            ->whereIn('status', ['active', 'graced'])
+            ->first();
+
+        if (!$contract || !($contract->details['has_sms'] ?? false)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function send($to, $message)
     {
-        if (!$this->isEnabled || !$this->apiKey) {
-            Log::warning("SmsService: SMS disabled or missing API key.");
+        if (!$this->isEnabled()) {
+            Log::warning("SmsService: SMS disabled, missing API key, or no active contract for pharmacy {$this->pharmacyId}.");
             return false;
         }
 

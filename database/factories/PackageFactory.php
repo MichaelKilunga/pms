@@ -17,9 +17,9 @@ class PackageFactory extends Factory
     public function definition(): array
     {
         return [
-        'name'=>'TRIAL PACKAGE',
-        'price'=>0,
-        'duration'=>14,
+        'name'=>'BASIC PACKAGE',
+        'price'=>50000,
+        'duration'=>30,
         'status'=>1,
         ];
     }

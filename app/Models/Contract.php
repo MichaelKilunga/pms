@@ -21,6 +21,7 @@ class Contract extends Model implements Auditable
         'status',
         'grace_end_date',
         'payment_status',
+        'payment_notified',
         'is_current_contract',
         'amount',
         'agent_markup',

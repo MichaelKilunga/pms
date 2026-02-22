@@ -1,138 +1,110 @@
-@extends('packages.app')
+@extends('contracts.app')
 
 @section('content')
-    <div class="container">
-        <h1>Edit Package</h1>
-        <form action="{{ route('packages.update', $package->id) }}" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" name="name" id="name" class="form-control" value="{{ $package->name }}" required>
+    <div class="container my-4">
+        <div class="card shadow-sm rounded-3 border-0">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3">
+                <h4 class="mb-0 fw-bold"><i class="fas fa-edit me-2"></i> Edit Contract</h4>
+                <a href="{{ route('contracts.admin.index') }}" class="btn btn-sm btn-light rounded-pill px-3">
+                    <i class="fas fa-arrow-left me-1"></i> Back to List
+                </a>
             </div>
-            <div class="form-group">
-                <label for="price">Price:</label>
-                <input type="number" name="price" id="price" class="form-control" value="{{ $package->price }}"
-                    required>
+            <div class="card-body p-4">
+                <form action="{{ route('contracts.admin.update', $contract->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="row g-3">
+                        {{-- Owner & Package --}}
+                        <div class="col-md-6 text-left">
+                            <label class="form-label fw-bold small text-uppercase">Owner</label>
+                            <select name="owner_id" class="form-select" required>
+                                @foreach($owners as $owner)
+                                    <option value="{{ $owner->id }}" {{ $contract->owner_id == $owner->id ? 'selected' : '' }}>
+                                        {{ $owner->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6 text-left">
+                            <label class="form-label fw-bold small text-uppercase">Package</label>
+                            <select name="package_id" class="form-select" required>
+                                @foreach($packages as $package)
+                                    <option value="{{ $package->id }}" {{ $contract->package_id == $package->id ? 'selected' : '' }}>
+                                        {{ $package->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Dates --}}
+                        <div class="col-md-6 text-left">
+                            <label class="form-label fw-bold small text-uppercase">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ \Carbon\Carbon::parse($contract->start_date)->format('Y-m-d') }}" required>
+                        </div>
+                        <div class="col-md-6 text-left">
+                            <label class="form-label fw-bold small text-uppercase">End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ \Carbon\Carbon::parse($contract->end_date)->format('Y-m-d') }}" required>
+                        </div>
+
+                        {{-- Status & Payment --}}
+                        <div class="col-md-4 text-left">
+                            <label class="form-label fw-bold small text-uppercase">Status</label>
+                            <select name="status" class="form-select" required>
+                                <option value="active" {{ $contract->status == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ $contract->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                <option value="graced" {{ $contract->status == 'graced' ? 'selected' : '' }}>Graced</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 text-left">
+                            <label class="form-label fw-bold small text-uppercase">Payment Status</label>
+                            <select name="payment_status" class="form-select" required>
+                                <option value="payed" {{ $contract->payment_status == 'payed' ? 'selected' : '' }}>Paid</option>
+                                <option value="unpayed" {{ $contract->payment_status == 'unpayed' ? 'selected' : '' }}>Unpaid</option>
+                                <option value="pending" {{ $contract->payment_status == 'pending' ? 'selected' : '' }}>Pending</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 text-left">
+                            <label class="form-label fw-bold small text-uppercase">Is Current Plan?</label>
+                            <select name="is_current_contract" class="form-select" required>
+                                <option value="1" {{ $contract->is_current_contract ? 'selected' : '' }}>Yes</option>
+                                <option value="0" {{ !$contract->is_current_contract ? 'selected' : '' }}>No</option>
+                            </select>
+                        </div>
+
+                        {{-- Special Add-ons Section --}}
+                        <div class="col-12 mt-4">
+                            <div class="p-3 bg-light rounded border border-info">
+                                <h6 class="fw-bold text-info mb-3"><i class="fas fa-plus-circle me-2"></i> Manual Add-ons (No Extra Charge)</h6>
+                                <div class="d-flex gap-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="has_whatsapp" id="editWhatsapp" 
+                                            {{ ($contract->details['has_whatsapp'] ?? false) ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-bold" for="editWhatsapp">
+                                            Enable WhatsApp Alerts
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="has_sms" id="editSms"
+                                            {{ ($contract->details['has_sms'] ?? false) ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-bold" for="editSms">
+                                            Enable SMS Alerts
+                                        </label>
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-2 d-block">Checking these will enable features on the current contract without generating a new bill.</small>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                            Update Contract
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="duration">Duration (days):</label>
-                <input type="text" name="duration" id="duration" class="form-control" value="{{ $package->duration }}"
-                    required>
-            </div>
-            <div class="form-group">
-                <label for="status">Status:</label>
-                <select name="status" id="status" class="form-control">
-                    <option value="1" {{ $package->status ? 'selected' : '' }}>Active</option>
-                    <option value="0" {{ !$package->status ? 'selected' : '' }}>Inactive</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="number_of_pharmacies">Number of Pharmacies:</label>
-                <input type="number" name="number_of_pharmacies" id="number_of_pharmacies" class="form-control"
-                    value="{{ $package->number_of_pharmacies }}" required>
-            </div>
-            <div class="form-group">
-                <label for="number_of_pharmacists">Number of Pharmacists:</label>
-                <input type="number" name="number_of_pharmacists" id="number_of_pharmacists" class="form-control"
-                    value="{{ $package->number_of_pharmacists }}" required>
-            </div>
-            <div class="form-group">
-                <label for="number_of_medicines">Number of Medicines:</label>
-                <input type="number" name="number_of_medicines" id="number_of_medicines" class="form-control"
-                    value="{{ $package->number_of_medicines }}" required>
-            </div>
-            <div class="form-group">
-                <label for="in_app_notification">In App Notification:</label>
-                <select name="in_app_notification" id="in_app_notification" class="form-control">
-                    <option value="1" {{ $package->in_app_notification ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->in_app_notification ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="email_notification">Email Notification:</label>
-                <select name="email_notification" id="email_notification" class="form-control">
-                    <option value="1" {{ $package->email_notification ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->email_notification ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="sms_notifications">SMS Notifications:</label>
-                <select name="sms_notifications" id="sms_notifications" class="form-control">
-                    <option value="1" {{ $package->sms_notifications ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->sms_notifications ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="online_support">Online Support:</label>
-                <select name="online_support" id="online_support" class="form-control">
-                    <option value="1" {{ $package->online_support ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->online_support ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="number_of_owner_accounts">Number of Owner Accounts:</label>
-                <input type="number" name="number_of_owner_accounts" id="number_of_owner_accounts" class="form-control"
-                    value="{{ $package->number_of_owner_accounts }}" required>
-            </div>
-            <div class="form-group">
-                <label for="number_of_admin_accounts">Number of Admin Accounts:</label>
-                <input type="number" name="number_of_admin_accounts" id="number_of_admin_accounts" class="form-control"
-                    value="{{ $package->number_of_admin_accounts }}" required>
-            </div>
-            <div class="form-group">
-                <label for="reports">Reports:</label>
-                <select name="reports" id="reports" class="form-control">
-                    <option value="1" {{ $package->reports ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->reports ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="stock_transfer">Stock Transfer:</label>
-                <select name="stock_transfer" id="stock_transfer" class="form-control">
-                    <option value="1" {{ $package->stock_transfer ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->stock_transfer ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="stock_management">Stock Management:</label>
-                <select name="stock_management" id="stock_management" class="form-control">
-                    <option value="1" {{ $package->stock_management ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->stock_management ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="staff_management">Staff Management:</label>
-                <select name="staff_management" id="staff_management" class="form-control">
-                    <option value="1" {{ $package->staff_management ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->staff_management ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="receipts">Receipts:</label>
-                <select name="receipts" id="receipts" class="form-control">
-                    <option value="1" {{ $package->receipts ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->receipts ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="analytics">Analytics:</label>
-                <select name="analytics" id="analytics" class="form-control">
-                    <option value="1" {{ $package->analytics ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->analytics ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="whatsapp_chats">Whatsapp Chats:</label>
-                <select name="whatsapp_chats" id="whatsapp_chats" class="form-control">
-                    <option value="1" {{ $package->whatsapp_chats ? 'selected' : '' }}>Yes</option>
-                    <option value="0" {{ !$package->whatsapp_chats ? 'selected' : '' }}>No</option>
-                </select>
-            </div>
-            <div class="d-flex justify-content-between m-2">
-                <a href="{{ route('packages') }}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary">Save</button>
-            </div>
-        </form>
+        </div>
     </div>
 @endsection

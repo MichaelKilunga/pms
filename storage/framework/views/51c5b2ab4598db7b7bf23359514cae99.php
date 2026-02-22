@@ -1,13 +1,11 @@
-@extends('contracts.app')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 
     <div class="container my-4">
 
-        {{-- ========================= CURRENT PLAN ========================= --}}
+        
         <div class="row g-4">
 
-            {{-- CURRENT PLAN CARD --}}
+            
             <div class="col-md-4">
                 <div class="card rounded-3 border-0 shadow">
                     <div class="card-body">
@@ -25,7 +23,7 @@
                                     </div>
                                     <div class="modal-body p-4">
 
-                                        @php
+                                        <?php
                                             // Fetch settings directly to ensure availability
                                             $sysSettings = \App\Models\SystemSetting::pluck('value', 'key');
                                             $rateItem = $sysSettings['dynamic_rate_per_item'] ?? 100;
@@ -36,15 +34,15 @@
 
                                             // Determine if user is inactive (no current active contract)
                                             $isInactive = $contracts->where('is_current_contract', true)->isEmpty();
-                                        @endphp
+                                        ?>
 
-                                        <form action="{{ route('contracts.users.generate_bill') }}" method="POST"
+                                        <form action="<?php echo e(route('contracts.users.generate_bill')); ?>" method="POST"
                                             id="billingForm">
-                                            @csrf
-                                            <input type="hidden" name="pricing_mode" value="{{ $activeMode }}">
+                                            <?php echo csrf_field(); ?>
+                                            <input type="hidden" name="pricing_mode" value="<?php echo e($activeMode); ?>">
 
-                                            {{-- DYNAMIC --}}
-                                            @if ($activeMode == 'dynamic')
+                                            
+                                            <?php if($activeMode == 'dynamic'): ?>
                                                 <div id="modal-dynamic-container">
                                                     <div class="row g-3">
                                                         <div class="col-md-4">
@@ -52,27 +50,27 @@
                                                                 (Stock)</label>
                                                             <input type="number" class="form-control" id="modalItems"
                                                                 name="items_count" placeholder="0"
-                                                                value="{{ $pricingData['details']['items_count'] ?? 0 }}">
+                                                                value="<?php echo e($pricingData['details']['items_count'] ?? 0); ?>">
                                                             <small class="text-muted">Rate: TZS
-                                                                {{ number_format($rateItem) }}/item</small>
+                                                                <?php echo e(number_format($rateItem)); ?>/item</small>
                                                         </div>
                                                         <div class="col-md-4">
                                                             <label
                                                                 class="form-label fw-bold small text-uppercase">Staff</label>
                                                             <input type="number" class="form-control" id="modalStaff"
                                                                 name="staff_count" placeholder="0"
-                                                                value="{{ $pricingData['details']['staff_count'] ?? 0 }}">
+                                                                value="<?php echo e($pricingData['details']['staff_count'] ?? 0); ?>">
                                                             <small class="text-muted">Rate: TZS
-                                                                {{ number_format($rateStaff) }}/staff</small>
+                                                                <?php echo e(number_format($rateStaff)); ?>/staff</small>
                                                         </div>
                                                         <div class="col-md-4">
                                                             <label
                                                                 class="form-label fw-bold small text-uppercase">Branches</label>
                                                             <input type="number" class="form-control" id="modalBranches"
                                                                 name="branches_count" placeholder="0"
-                                                                value="{{ $pricingData['details']['branches_count'] ?? 0 }}">
+                                                                value="<?php echo e($pricingData['details']['branches_count'] ?? 0); ?>">
                                                             <small class="text-muted">Rate: TZS
-                                                                {{ number_format($rateBranch) }}/branch</small>
+                                                                <?php echo e(number_format($rateBranch)); ?>/branch</small>
                                                         </div>
 
                                                         <div class="col-12 mt-3">
@@ -97,8 +95,8 @@
                                                     </div>
                                                 </div>
 
-                                                {{-- PROFIT SHARE --}}
-                                            @elseif($activeMode == 'profit_share')
+                                                
+                                            <?php elseif($activeMode == 'profit_share'): ?>
                                                 <div id="modal-profit-container">
                                                     <div class="row justify-content-center">
                                                         <div class="col-md-8 text-center">
@@ -109,20 +107,20 @@
                                                                 <input type="number" class="form-control fw-bold"
                                                                     name="profit_amount" id="modalProfitInput"
                                                                     placeholder="Enter Amount"
-                                                                    value="{{ $pricingData['details']['last_30_days_profit'] ?? 0 }}">
+                                                                    value="<?php echo e($pricingData['details']['last_30_days_profit'] ?? 0); ?>">
                                                             </div>
                                                             <small class="text-muted">Platform Fee: <span
-                                                                    class="fw-bold text-dark">{{ $profitPct }}%</span> of
+                                                                    class="fw-bold text-dark"><?php echo e($profitPct); ?>%</span> of
                                                                 profit</small>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            @else
+                                            <?php else: ?>
                                                 <div class="text-center py-4">
                                                     <h5 class="text-muted">Standard Pricing Active</h5>
                                                     <p>Your pricing is fixed based on the selected package.</p>
                                                 </div>
-                                            @endif
+                                            <?php endif; ?>
 
                                             <div class="row g-3 mt-2">
                                                 <div class="col-md-6">
@@ -146,7 +144,7 @@
                                             </div>
 
                                             <div class="modal-footer border-">
-                                                {{-- generate bill --}}
+                                                
                                                 <button type="submit" class="btn btn-primary rounded-pill px-4"
                                                     id="btnGenerateBill">Generate
                                                     bill</button>
@@ -180,13 +178,13 @@
                                             aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body p-4">
-                                        @php
+                                        <?php
                                             $currentContract = $contracts->where('is_current_contract', true)->first();
                                             $details = $currentContract->details ?? [];
                                             $rates = $pricingData['upgrade_rates'];
-                                        @endphp
-                                        <form action="{{ route('contracts.users.request_upgrade') }}" method="POST">
-                                            @csrf
+                                        ?>
+                                        <form action="<?php echo e(route('contracts.users.request_upgrade')); ?>" method="POST">
+                                            <?php echo csrf_field(); ?>
                                             <p class="text-muted small mb-4">Select items to add to your current active contract. Prices are calculated for the duration you select.</p>
                                             
                                             <div class="mb-4">
@@ -204,25 +202,25 @@
                                                     <label class="form-label fw-bold small text-uppercase text-info">2. Increase Limits</label>
                                                     <div class="mb-3">
                                                         <label class="small fw-bold">Extra Branches</label>
-                                                        <input type="number" name="extra_pharmacies" class="form-control upgrade-count" value="0" min="0" data-rate="{{ $rates['resources']['pharmacy'] }}">
-                                                        <small class="text-muted">TZS {{ number_format($rates['resources']['pharmacy']) }} / branch / mo</small>
+                                                        <input type="number" name="extra_pharmacies" class="form-control upgrade-count" value="0" min="0" data-rate="<?php echo e($rates['resources']['pharmacy']); ?>">
+                                                        <small class="text-muted">TZS <?php echo e(number_format($rates['resources']['pharmacy'])); ?> / branch / mo</small>
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="small fw-bold">Extra Staff</label>
-                                                        <input type="number" name="extra_pharmacists" class="form-control upgrade-count" value="0" min="0" data-rate="{{ $rates['resources']['staff'] }}">
-                                                        <small class="text-muted">TZS {{ number_format($rates['resources']['staff']) }} / staff / mo</small>
+                                                        <input type="number" name="extra_pharmacists" class="form-control upgrade-count" value="0" min="0" data-rate="<?php echo e($rates['resources']['staff']); ?>">
+                                                        <small class="text-muted">TZS <?php echo e(number_format($rates['resources']['staff'])); ?> / staff / mo</small>
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="small fw-bold">Extra Medicines/Items</label>
-                                                        <input type="number" name="extra_medicines" class="form-control upgrade-count" value="0" min="0" data-rate="{{ $rates['resources']['item'] }}">
-                                                        <small class="text-muted">TZS {{ number_format($rates['resources']['item']) }} / item / mo</small>
+                                                        <input type="number" name="extra_medicines" class="form-control upgrade-count" value="0" min="0" data-rate="<?php echo e($rates['resources']['item']); ?>">
+                                                        <small class="text-muted">TZS <?php echo e(number_format($rates['resources']['item'])); ?> / item / mo</small>
                                                     </div>
                                                 </div>
 
                                                 <div class="col-md-6 mb-4">
                                                     <label class="form-label fw-bold small text-uppercase text-info">3. Add Features</label>
                                                     <div class="upgrade-features-list" style="max-height: 250px; overflow-y: auto;">
-                                                        @php
+                                                        <?php
                                                             $features = [
                                                                 'has_whatsapp' => ['name' => 'WhatsApp Alerts', 'key' => 'has_whatsapp'],
                                                                 'has_sms' => ['name' => 'SMS Alerts', 'key' => 'has_sms'],
@@ -233,19 +231,19 @@
                                                                 'receipts' => ['name' => 'Receipts Generation', 'key' => 'receipts'],
                                                                 'analytics' => ['name' => 'Business Analytics', 'key' => 'analytics'],
                                                             ];
-                                                        @endphp
-                                                        @foreach($features as $fKey => $f)
-                                                            @php $price = $rates['features'][$f['key']] ?? 0; @endphp
+                                                        ?>
+                                                        <?php $__currentLoopData = $features; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fKey => $f): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <?php $price = $rates['features'][$f['key']] ?? 0; ?>
                                                             <div class="form-check mb-2">
-                                                                <input class="form-check-input upgrade-feature-check" type="checkbox" name="{{ $fKey }}" id="up_{{ $fKey }}" 
-                                                                    data-rate="{{ $price }}"
-                                                                    {{ ($details[$fKey] ?? false) ? 'disabled checked' : '' }}>
-                                                                <label class="form-check-label small" for="up_{{ $fKey }}">
-                                                                    {{ $f['name'] }} ({{ number_format($price) }}/mo)
-                                                                    @if($details[$fKey] ?? false) <span class="badge bg-success ms-1">Active</span> @endif
+                                                                <input class="form-check-input upgrade-feature-check" type="checkbox" name="<?php echo e($fKey); ?>" id="up_<?php echo e($fKey); ?>" 
+                                                                    data-rate="<?php echo e($price); ?>"
+                                                                    <?php echo e(($details[$fKey] ?? false) ? 'disabled checked' : ''); ?>>
+                                                                <label class="form-check-label small" for="up_<?php echo e($fKey); ?>">
+                                                                    <?php echo e($f['name']); ?> (<?php echo e(number_format($price)); ?>/mo)
+                                                                    <?php if($details[$fKey] ?? false): ?> <span class="badge bg-success ms-1">Active</span> <?php endif; ?>
                                                                 </label>
                                                             </div>
-                                                        @endforeach
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                     </div>
                                                 </div>
                                             </div>
@@ -266,7 +264,7 @@
                             </div>
                         </div>
 
-                        {{-- Script for Upgrade Modal Calculation --}}
+                        
                         <script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 const upgradeMonths = document.getElementById('upgradeMonths');
@@ -302,11 +300,11 @@
                             });
                         </script>
 
-                        {{-- Hidden Settings for Modal Script --}}
-                        <div id="modal-calc-settings" data-rate-item="{{ $rateItem }}"
-                            data-rate-staff="{{ $rateStaff }}" data-rate-branch="{{ $rateBranch }}"
-                            data-rate-profit="{{ $profitPct }}" data-active-mode="{{ $activeMode }}"
-                            data-is-inactive="{{ $isInactive ? '1' : '0' }}">
+                        
+                        <div id="modal-calc-settings" data-rate-item="<?php echo e($rateItem); ?>"
+                            data-rate-staff="<?php echo e($rateStaff); ?>" data-rate-branch="<?php echo e($rateBranch); ?>"
+                            data-rate-profit="<?php echo e($profitPct); ?>" data-active-mode="<?php echo e($activeMode); ?>"
+                            data-is-inactive="<?php echo e($isInactive ? '1' : '0'); ?>">
                         </div>
 
                         <script>
@@ -451,40 +449,45 @@
                             <i class="fas fa-bolt"></i> Current Plan
                         </h4>
 
-                        @if ($contracts->count() > 0)
-                            @foreach ($contracts as $contract)
-                                @if ($contract->is_current_contract)
+                        <?php if($contracts->count() > 0): ?>
+                            <?php $__currentLoopData = $contracts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $contract): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php if($contract->is_current_contract): ?>
                                     <div class="bg-light mb-3 rounded border p-3 shadow-sm">
                                         <h5 class="fw-bold text-primary">
-                                            <i class="fas fa-layer-group"></i> {{ $contract->package->name }}
+                                            <i class="fas fa-layer-group"></i> <?php echo e($contract->package->name); ?>
+
                                         </h5>
                                     </div>
 
-                                    @if (!session('agent'))
+                                    <?php if(!session('agent')): ?>
                                         <p class="mb-1">
                                             <strong>Amount Paid:</strong>
                                             <span class="text-success fw-bold">
                                                 TZS
-                                                {{ number_format((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) * $contract->package->price) }}
+                                                <?php echo e(number_format((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) * $contract->package->price)); ?>
+
                                             </span>
                                         </p>
-                                    @endif
+                                    <?php endif; ?>
 
                                     <p class="mb-1"><strong>Package Price:</strong> TZS
-                                        {{ number_format($contract->package->price) }} /
-                                        {{ $contract->package->duration }}
+                                        <?php echo e(number_format($contract->package->price)); ?> /
+                                        <?php echo e($contract->package->duration); ?>
+
                                         days</p>
 
                                     <p class="mb-1">
                                         <strong>Duration:</strong>
-                                        {{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) }}
+                                        <?php echo e(\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date))); ?>
+
                                         days
-                                        ({{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30 }}
+                                        (<?php echo e(\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30); ?>
+
                                         month)
                                     </p>
 
-                                    <p class="mb-1"><strong>Start Date:</strong> {{ $contract->start_date }}</p>
-                                    <p class="mb-1"><strong>End Date:</strong> {{ $contract->end_date }}</p>
+                                    <p class="mb-1"><strong>Start Date:</strong> <?php echo e($contract->start_date); ?></p>
+                                    <p class="mb-1"><strong>End Date:</strong> <?php echo e($contract->end_date); ?></p>
 
                                     <p class="mb-1">
                                         <strong>Time Remaining:</strong>
@@ -493,48 +496,48 @@
 
                                     <p class="mb-1">
                                         <strong>Status:</strong>
-                                        <span class="badge bg-info">{{ $contract->status }}</span>
+                                        <span class="badge bg-info"><?php echo e($contract->status); ?></span>
 
-                                        @if ($contract->status == 'graced')
+                                        <?php if($contract->status == 'graced'): ?>
                                             <small class="text-warning">
-                                                ({{ \Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans() }})
+                                                (<?php echo e(\Carbon\Carbon::parse($contract->grace_end_date)->diffForHumans()); ?>)
                                             </small>
-                                        @endif
+                                        <?php endif; ?>
                                     </p>
 
                                     <p>
                                         <strong>Payment:</strong>
-                                        <span class="badge bg-success">{{ $contract->payment_status }}</span>
+                                        <span class="badge bg-success"><?php echo e($contract->payment_status); ?></span>
                                     </p>
 
                                     <div class="mt-4 border-top pt-3">
                                         <h6 class="fw-bold mb-3"><i class="fas fa-list-check me-1"></i> What's Included?</h6>
-                                        @php
+                                        <?php
                                             $pkg = $contract->package;
                                             $det = $contract->details ?? [];
                                             $extraBranches = $det['extra_pharmacies'] ?? 0;
                                             $extraStaff = $det['extra_pharmacists'] ?? 0;
                                             $extraItems = $det['extra_medicines'] ?? 0;
-                                        @endphp
+                                        ?>
                                         
                                         <ul class="list-unstyled small mb-0">
                                             <li class="mb-2">
                                                 <i class="fas fa-hospital text-info me-2"></i> 
-                                                <strong>{{ ($pkg->number_of_pharmacies ?? 0) + $extraBranches }}</strong> Pharmacy Branches
-                                                @if($extraBranches > 0) <span class="badge bg-success shadow-sm ms-1">+{{ $extraBranches }} Upgraded</span> @endif
+                                                <strong><?php echo e(($pkg->number_of_pharmacies ?? 0) + $extraBranches); ?></strong> Pharmacy Branches
+                                                <?php if($extraBranches > 0): ?> <span class="badge bg-success shadow-sm ms-1">+<?php echo e($extraBranches); ?> Upgraded</span> <?php endif; ?>
                                             </li>
                                             <li class="mb-2">
                                                 <i class="fas fa-users text-info me-2"></i> 
-                                                <strong>{{ ($pkg->number_of_pharmacists ?? 0) + $extraStaff }}</strong> Staff Members
-                                                @if($extraStaff > 0) <span class="badge bg-success shadow-sm ms-1">+{{ $extraStaff }} Upgraded</span> @endif
+                                                <strong><?php echo e(($pkg->number_of_pharmacists ?? 0) + $extraStaff); ?></strong> Staff Members
+                                                <?php if($extraStaff > 0): ?> <span class="badge bg-success shadow-sm ms-1">+<?php echo e($extraStaff); ?> Upgraded</span> <?php endif; ?>
                                             </li>
                                             <li class="mb-2">
                                                 <i class="fas fa-pills text-info me-2"></i> 
-                                                <strong>{{ ($pkg->number_of_medicines ?? 0) + $extraItems }}</strong> Medicine Items
-                                                @if($extraItems > 0) <span class="badge bg-success shadow-sm ms-1">+{{ $extraItems }} Upgraded</span> @endif
+                                                <strong><?php echo e(($pkg->number_of_medicines ?? 0) + $extraItems); ?></strong> Medicine Items
+                                                <?php if($extraItems > 0): ?> <span class="badge bg-success shadow-sm ms-1">+<?php echo e($extraItems); ?> Upgraded</span> <?php endif; ?>
                                             </li>
                                             
-                                            @php
+                                            <?php
                                                 $features = [
                                                     'stock_management' => 'Stock Management',
                                                     'stock_transfer' => 'Stock Transfer',
@@ -545,10 +548,10 @@
                                                     'has_sms' => 'SMS Alerts',
                                                     'has_reports' => 'Advanced Reports',
                                                 ];
-                                            @endphp
+                                            ?>
                                             
-                                            @foreach($features as $key => $label)
-                                                @php 
+                                            <?php $__currentLoopData = $features; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <?php 
                                                     $inBase = $pkg->$key ?? false;
                                                     // Map feature names to details keys if they differ
                                                     $detKey = $key;
@@ -556,20 +559,21 @@
                                                     
                                                     $inUpgrade = $det[$detKey] ?? false;
                                                     $active = $inBase || $inUpgrade;
-                                                @endphp
-                                                @if($active)
+                                                ?>
+                                                <?php if($active): ?>
                                                     <li class="mb-2">
                                                         <i class="fas fa-check-circle text-success me-2"></i> 
-                                                        {{ $label }}
-                                                        @if(!$inBase && $inUpgrade) <span class="badge bg-info shadow-sm ms-1">Add-on</span> @endif
+                                                        <?php echo e($label); ?>
+
+                                                        <?php if(!$inBase && $inUpgrade): ?> <span class="badge bg-info shadow-sm ms-1">Add-on</span> <?php endif; ?>
                                                     </li>
-                                                @else
+                                                <?php else: ?>
                                                     <li class="mb-2 text-muted">
                                                         <i class="fas fa-times-circle me-2 opacity-50"></i> 
-                                                        <span class="opacity-75">{{ $label }}</span>
+                                                        <span class="opacity-75"><?php echo e($label); ?></span>
                                                     </li>
-                                                @endif
-                                            @endforeach
+                                                <?php endif; ?>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </ul>
                                     </div>
 
@@ -579,15 +583,15 @@
                                             <i class="fas fa-plus-circle me-1"></i> Add Extras (WhatsApp/SMS)
                                         </button>
                                     </div>
-                                @endif
-                            @endforeach
-                        @else
+                                <?php endif; ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php else: ?>
                             <p class="text-muted text-center">No Active Plan</p>
-                        @endif
+                        <?php endif; ?>
 
                         <hr class="my-4">
 
-                        {{-- ========================= ACTIVE BUT NOT CURRENT ========================= --}}
+                        
                         <h5 class="text-primary fw-bold mb-3 text-center">
                             <i class="fas fa-sync-alt"></i> Active Plans (Not Current)
                         </h5>
@@ -601,19 +605,19 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($contracts as $contract)
-                                        @if ($contract->is_current_contract == 0 && $contract->payment_status == 'payed' && $contract->status != 'inactive')
+                                    <?php $__currentLoopData = $contracts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $contract): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if($contract->is_current_contract == 0 && $contract->payment_status == 'payed' && $contract->status != 'inactive'): ?>
                                             <tr>
-                                                <td>{{ $contract->package->name }}</td>
+                                                <td><?php echo e($contract->package->name); ?></td>
                                                 <td>
                                                     <a class="btn btn-primary btn-sm rounded-pill shadow"
-                                                        href="{{ route('contracts.users.activate', ['contract_id' => $contract->id, 'owner_id' => Auth::user()->id]) }}">
+                                                        href="<?php echo e(route('contracts.users.activate', ['contract_id' => $contract->id, 'owner_id' => Auth::user()->id])); ?>">
                                                         <i class="fas fa-check-circle"></i> Activate
                                                     </a>
                                                 </td>
                                             </tr>
-                                        @endif
-                                    @endforeach
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
                             </table>
                         </div>
@@ -622,7 +626,7 @@
                 </div>
             </div>
 
-            {{-- ========================= PAYMENT HISTORY ========================= --}}
+            
             <div class="col-md-8">
                 <div class="card rounded-3 border-0 shadow">
                     <div class="card-body">
@@ -647,41 +651,44 @@
                                 </thead>
 
                                 <tbody>
-                                    @foreach ($contracts as $contract)
-                                        @if ($contract->payment_status != 'pending')
+                                    <?php $__currentLoopData = $contracts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $contract): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if($contract->payment_status != 'pending'): ?>
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $contract->package->name }}</td>
-                                                <td>{{ $contract->start_date }}</td>
-                                                <td>{{ $contract->end_date }}</td>
+                                                <td><?php echo e($loop->iteration); ?></td>
+                                                <td><?php echo e($contract->package->name); ?></td>
+                                                <td><?php echo e($contract->start_date); ?></td>
+                                                <td><?php echo e($contract->end_date); ?></td>
 
                                                 <td>
-                                                    {{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) }}
+                                                    <?php echo e(\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date))); ?>
+
                                                     days
-                                                    ({{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30 }}
+                                                    (<?php echo e(\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30); ?>
+
                                                     month)
                                                 </td>
 
                                                 <td class="fw-bold text-success">
-                                                    {{ number_format(
+                                                    <?php echo e(number_format(
                                                         (\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) *
                                                             $contract->package->price,
-                                                    ) }}
+                                                    )); ?>
+
                                                 </td>
 
                                                 <td>
-                                                    <span>{{ $contract->payment_status }}</span>
+                                                    <span><?php echo e($contract->payment_status); ?></span>
                                                 </td>
 
                                                 <td>
-                                                    <span>{{ $contract->status }}</span>
-                                                    @if ($contract->is_current_contract)
+                                                    <span><?php echo e($contract->status); ?></span>
+                                                    <?php if($contract->is_current_contract): ?>
                                                         <span class="badge bg-success">Current</span>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </td>
                                             </tr>
-                                        @endif
-                                    @endforeach
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
 
                             </table>
@@ -692,7 +699,7 @@
             </div>
         </div>
 
-        {{-- ========================= PENDING INVOICES ========================= --}}
+        
         <div class="col-12 mb-4 mt-4">
             <div class="card border-0 shadow bg-white border-start border-warning border-5">
                 <div class="card-body">
@@ -700,7 +707,7 @@
                         <h5 class="text-warning fw-bold mb-3">
                             <i class="fas fa-file-invoice-dollar"></i> Pending Invoices / Payment Requests
                         </h5>
-                        {{-- add button to compute current billing --}}
+                        
                         <div class="text-right mb-3">
                             <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
                                 data-bs-target="#billingCalculatorModal">
@@ -709,11 +716,11 @@
                         </div>
                     </div>
 
-                    @php
+                    <?php
                         $pendingContracts = $contracts->where('payment_status', 'pending');
-                    @endphp
+                    ?>
 
-                    @if ($pendingContracts->count() > 0)
+                    <?php if($pendingContracts->count() > 0): ?>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
                                 <thead class="table-light">
@@ -726,40 +733,40 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($pendingContracts as $contract)
+                                    <?php $__currentLoopData = $pendingContracts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $contract): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
-                                            <td class="fw-bold text-primary">{{ $contract->package->name }}</td>
-                                            <td>{{ $contract->created_at->format('Y-m-d') }}</td>
-                                            <td class="fw-bold text-dark">TZS {{ number_format($contract->amount) }}</td>
+                                            <td class="fw-bold text-primary"><?php echo e($contract->package->name); ?></td>
+                                            <td><?php echo e($contract->created_at->format('Y-m-d')); ?></td>
+                                            <td class="fw-bold text-dark">TZS <?php echo e(number_format($contract->amount)); ?></td>
                                             <td><span
-                                                    class="badge bg-warning text-dark">{{ $contract->payment_status }}</span>
+                                                    class="badge bg-warning text-dark"><?php echo e($contract->payment_status); ?></span>
                                             </td>
                                             <td>
-                                                @if(!$contract->payment_notified && $contract->payment_status != 'payed')
-                                                    <a href="{{ route('contracts.users.notify_payment', $contract->id) }}" 
+                                                <?php if(!$contract->payment_notified && $contract->payment_status != 'payed'): ?>
+                                                    <a href="<?php echo e(route('contracts.users.notify_payment', $contract->id)); ?>" 
                                                        class="btn btn-success btn-sm rounded-pill shadow-sm">
                                                         <i class="fas fa-paper-plane me-1"></i> Notify Payment
                                                     </a>
                                                     
-                                                    {{-- Modify button opens the calculator --}}
+                                                    
                                                     <button type="button" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm"
                                                         data-bs-toggle="modal" data-bs-target="#billingCalculatorModal">
                                                         <i class="fas fa-edit me-1"></i> Modify
                                                     </button>
-                                                @elseif($contract->payment_status == 'payed' && (!$contract->is_current_contract || $contract->status == 'inactive') && \Carbon\Carbon::parse($contract->end_date)->isFuture())
-                                                    <a href="{{ route('contracts.users.activate', ['contract_id' => $contract->id]) }}" 
+                                                <?php elseif($contract->payment_status == 'payed' && (!$contract->is_current_contract || $contract->status == 'inactive') && \Carbon\Carbon::parse($contract->end_date)->isFuture()): ?>
+                                                    <a href="<?php echo e(route('contracts.users.activate', ['contract_id' => $contract->id])); ?>" 
                                                        class="btn btn-primary btn-sm rounded-pill shadow-sm">
                                                         <i class="fas fa-bolt me-1"></i> Activate Now
                                                     </a>
-                                                @elseif($contract->payment_notified && $contract->payment_status != 'payed')
+                                                <?php elseif($contract->payment_notified && $contract->payment_status != 'payed'): ?>
                                                     <span class="badge bg-info text-white"><i class="fas fa-check-circle me-1"></i> Payment Notified</span>
-                                                @endif
+                                                <?php endif; ?>
 
-                                                <form action="{{ route('contracts.destroy', $contract->id) }}"
+                                                <form action="<?php echo e(route('contracts.destroy', $contract->id)); ?>"
                                                     method="POST" class="d-inline"
                                                     onsubmit="return confirm('Are you sure you want to delete this invoice?');">
-                                                    @csrf
-                                                    @method('DELETE')
+                                                    <?php echo csrf_field(); ?>
+                                                    <?php echo method_field('DELETE'); ?>
                                                     <button type="submit"
                                                         class="btn btn-outline-danger btn-sm rounded-pill shadow-sm">
                                                         <i class="fas fa-trash me-1"></i> Delete
@@ -767,19 +774,19 @@
                                                 </form>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
                             </table>
                         </div>
-                    @else
+                    <?php else: ?>
                         <p class="text-muted mb-0">No pending invoices found.</p>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
 
-        {{-- ========================= AVAILABLE PLANS ========================= --}}
-        @if (!session('agent'))
+        
+        <?php if(!session('agent')): ?>
             <div class="mt-5 mb-5">
                 <div class="card border-0 shadow-sm bg-light">
                     <div class="card-body p-4">
@@ -797,8 +804,8 @@
                                         <i class="fas fa-history text-muted me-2"></i> New Subscription
                                     </a>
 
-                                    {{-- Logic to determine if "Generate Bill" is relevant. Usually implies subscribing/renewing. --}}
-                                    {{-- We can link to the standard package subscription or scroll to options --}}
+                                    
+                                    
                                     <a href="#billingCycle" class="btn btn-primary rounded-pill px-4 shadow-sm"
                                         onclick="document.getElementById('billingCycle').focus();">
                                         <i class="fas fa-plus-circle me-2"></i> Generate New Bill
@@ -815,7 +822,7 @@
                     <i class="fas fa-gift"></i> Subscription Options
                 </h3>
 
-                {{-- CALCULATOR SECTION --}}
+                
                 <div class="card border-0 shadow-sm mb-5 bg-white">
                     <div class="card-header bg-white border-0 pt-4 pb-0">
                         <h4 class="text-primary fw-bold text-center">
@@ -826,11 +833,11 @@
                     </div>
                     <div class="card-body p-4">
 
-                        {{-- DYNAMIC PRICING MODE --}}
-                        @if ($pricingData['mode'] == 'dynamic')
-                            @php
+                        
+                        <?php if($pricingData['mode'] == 'dynamic'): ?>
+                            <?php
                                 $d = $pricingData['details'];
-                            @endphp
+                            ?>
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold small text-uppercase">Items (Stock)</label>
@@ -838,10 +845,10 @@
                                         <span class="input-group-text bg-light border-end-0"><i
                                                 class="fas fa-boxes"></i></span>
                                         <input type="number" class="form-control border-start-0" id="calcItems"
-                                            value="{{ $d['items_count'] ?? 0 }}">
+                                            value="<?php echo e($d['items_count'] ?? 0); ?>">
                                     </div>
                                     <small class="text-muted">Rate: TZS
-                                        {{ number_format($d['items_rate'] ?? 0) }}/item</small>
+                                        <?php echo e(number_format($d['items_rate'] ?? 0)); ?>/item</small>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold small text-uppercase">Staff</label>
@@ -849,10 +856,10 @@
                                         <span class="input-group-text bg-light border-end-0"><i
                                                 class="fas fa-users"></i></span>
                                         <input type="number" class="form-control border-start-0" id="calcStaff"
-                                            value="{{ $d['staff_count'] ?? 0 }}">
+                                            value="<?php echo e($d['staff_count'] ?? 0); ?>">
                                     </div>
                                     <small class="text-muted">Rate: TZS
-                                        {{ number_format($d['staff_rate'] ?? 0) }}/staff</small>
+                                        <?php echo e(number_format($d['staff_rate'] ?? 0)); ?>/staff</small>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold small text-uppercase">Branches</label>
@@ -860,44 +867,44 @@
                                         <span class="input-group-text bg-light border-end-0"><i
                                                 class="fas fa-store"></i></span>
                                         <input type="number" class="form-control border-start-0" id="calcBranches"
-                                            value="{{ $d['branches_count'] ?? 0 }}">
+                                            value="<?php echo e($d['branches_count'] ?? 0); ?>">
                                     </div>
                                     <small class="text-muted">Rate: TZS
-                                        {{ number_format($d['branches_rate'] ?? 0) }}/branch</small>
+                                        <?php echo e(number_format($d['branches_rate'] ?? 0)); ?>/branch</small>
                                 </div>
 
-                                <input type="hidden" id="rateItem" value="{{ $d['items_rate'] ?? 0 }}">
-                                <input type="hidden" id="rateStaff" value="{{ $d['staff_rate'] ?? 0 }}">
-                                <input type="hidden" id="rateBranch" value="{{ $d['branches_rate'] ?? 0 }}">
+                                <input type="hidden" id="rateItem" value="<?php echo e($d['items_rate'] ?? 0); ?>">
+                                <input type="hidden" id="rateStaff" value="<?php echo e($d['staff_rate'] ?? 0); ?>">
+                                <input type="hidden" id="rateBranch" value="<?php echo e($d['branches_rate'] ?? 0); ?>">
                             </div>
 
-                            {{-- PROFIT SHARE MODE --}}
-                        @elseif($pricingData['mode'] == 'profit_share')
-                            @php
+                            
+                        <?php elseif($pricingData['mode'] == 'profit_share'): ?>
+                            <?php
                                 $d = $pricingData['details'];
-                            @endphp
+                            ?>
                             <div class="row justify-content-center">
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold small text-uppercase">Estimated Monthly Profit</label>
                                     <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light border-end-0">TZS</span>
                                         <input type="number" class="form-control border-start-0 fw-bold" id="calcProfit"
-                                            value="{{ $d['last_30_days_profit'] ?? 0 }}">
+                                            value="<?php echo e($d['last_30_days_profit'] ?? 0); ?>">
                                     </div>
                                     <div class="d-flex justify-content-between mt-2">
                                         <small class="text-muted">Platform Fee: <span
-                                                class="fw-bold text-dark">{{ $d['percentage'] ?? 0 }}%</span></small>
+                                                class="fw-bold text-dark"><?php echo e($d['percentage'] ?? 0); ?>%</span></small>
                                     </div>
-                                    <input type="hidden" id="rateProfit" value="{{ $d['percentage'] ?? 0 }}">
+                                    <input type="hidden" id="rateProfit" value="<?php echo e($d['percentage'] ?? 0); ?>">
                                 </div>
                             </div>
-                        @else
+                        <?php else: ?>
                             <div class="alert alert-light text-center border">
                                 Standard Pricing Active. Price is fixed per package.
                             </div>
-                        @endif
+                        <?php endif; ?>
 
-                        @if ($pricingData['mode'] != 'standard')
+                        <?php if($pricingData['mode'] != 'standard'): ?>
                             <div class="text-center mt-4">
                                 <button class="btn btn-primary rounded-pill px-5 shadow-sm" type="button"
                                     onclick="computePrice()">
@@ -910,16 +917,16 @@
                                 <span class="d-block text-muted small text-uppercase fw-bold">Estimated Monthly Cost</span>
                                 <h2 class="fw-bold text-primary mb-0">TZS <span id="calcTotal">0</span></h2>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                     </div>
                 </div>
 
-                {{-- JS For Calculator --}}
+                
                 <script>
                     function computePrice() {
                         let total = 0;
-                        const mode = "{{ $pricingData['mode'] }}";
+                        const mode = "<?php echo e($pricingData['mode']); ?>";
 
                         if (mode === 'dynamic') {
                             const items = parseFloat(document.getElementById('calcItems').value) || 0;
@@ -979,29 +986,29 @@
                                 </thead>
 
                                 <tbody>
-                                    @php
+                                    <?php
                                         // Base values for JS
                                         $isStandard = $pricingData['mode'] == 'standard';
                                         $baseAmount = $isStandard ? 0 : $pricingData['amount']; // For dynamic/profit
                                         $agentMarkup = $isStandard ? 0 : $pricingData['agent_markup'];
-                                    @endphp
+                                    ?>
 
-                                    @foreach ($packages as $package)
-                                        @php
+                                    <?php $__currentLoopData = $packages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $package): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php
                                             $activeContracts = Auth::user()->contracts->where('is_current_contract', 1);
                                             $hasAnyContract = Auth::user()->contracts->count();
                                             // Standard price fallback
                                             $pkgPrice = $package->price;
-                                        @endphp
+                                        ?>
 
-                                        <tr class="package-row {{ $hasAnyContract > 0 && $package->id == 1 ? 'd-none' : '' }}"
-                                            data-agent-markup="{{ $agentMarkup }}"
-                                            data-base-amount="{{ $baseAmount }}"
-                                            data-is-standard="{{ $isStandard ? 'true' : 'false' }}"
-                                            data-package-id="{{ $package->id }}"
-                                            data-standard-price="{{ $pkgPrice }}">
+                                        <tr class="package-row <?php echo e($hasAnyContract > 0 && $package->id == 1 ? 'd-none' : ''); ?>"
+                                            data-agent-markup="<?php echo e($agentMarkup); ?>"
+                                            data-base-amount="<?php echo e($baseAmount); ?>"
+                                            data-is-standard="<?php echo e($isStandard ? 'true' : 'false'); ?>"
+                                            data-package-id="<?php echo e($package->id); ?>"
+                                            data-standard-price="<?php echo e($pkgPrice); ?>">
 
-                                            <td class="fw-bold text-primary">{{ $package->name }}</td>
+                                            <td class="fw-bold text-primary"><?php echo e($package->name); ?></td>
 
                                             <td class="price-cell">
                                                 <!-- Content filled/updated by JS -->
@@ -1009,10 +1016,10 @@
                                                 <div class="agent-fee-display text-muted small fst-italic"></div>
                                             </td>
 
-                                            <td class="duration-display">{{ $package->duration }} days</td>
+                                            <td class="duration-display"><?php echo e($package->duration); ?> days</td>
 
                                             <td>
-                                                @php
+                                                <?php
                                                     $btnClass = 'btn btn-primary btn-sm rounded-pill shadow action-btn';
                                                     $btnIcon = 'fas fa-check-circle';
                                                     $btnText = 'Subscribe';
@@ -1041,19 +1048,20 @@
                                                         'package_id' => $package->id,
                                                         'owner_id' => Auth::user()->id,
                                                     ]);
-                                                @endphp
+                                                ?>
 
-                                                @if ($btnText === 'Current')
+                                                <?php if($btnText === 'Current'): ?>
                                                     <span class="badge bg-success">Current</span>
-                                                @else
-                                                    <a class="{{ $btnClass }}" data-base-url="{{ $baseUrl }}"
-                                                        href="{{ $baseUrl }}" onclick="return confirmAction(this)">
-                                                        <i class="{{ $btnIcon }}"></i> {{ $btnText }}
+                                                <?php else: ?>
+                                                    <a class="<?php echo e($btnClass); ?>" data-base-url="<?php echo e($baseUrl); ?>"
+                                                        href="<?php echo e($baseUrl); ?>" onclick="return confirmAction(this)">
+                                                        <i class="<?php echo e($btnIcon); ?>"></i> <?php echo e($btnText); ?>
+
                                                     </a>
-                                                @endif
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
 
                             </table>
@@ -1132,11 +1140,11 @@
                 </div>
 
             </div>
-        @endif
+        <?php endif; ?>
 
-        {{-- ========================= AGENT DETAILS ========================= --}}
-        @if (session('agent'))
-            @php $agent = session('agentData'); @endphp
+        
+        <?php if(session('agent')): ?>
+            <?php $agent = session('agentData'); ?>
 
             <div class="mt-5">
                 <h3 class="text-primary fw-bold mb-4 text-center">
@@ -1155,9 +1163,9 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>{{ $agent->name }}</td>
-                                    <td>{{ $agent->email }}</td>
-                                    <td>{{ $agent->phone }}</td>
+                                    <td><?php echo e($agent->name); ?></td>
+                                    <td><?php echo e($agent->email); ?></td>
+                                    <td><?php echo e($agent->phone); ?></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1165,14 +1173,14 @@
                 </div>
 
             </div>
-        @endif
+        <?php endif; ?>
 
     </div>
     </div>
 
-    {{-- COUNTDOWN SCRIPT --}}
+    
     <script>
-        var countDownDate = new Date("{{ $current_contract_end_date }}").getTime();
+        var countDownDate = new Date("<?php echo e($current_contract_end_date); ?>").getTime();
 
         var x = setInterval(function() {
             var now = new Date().getTime();
@@ -1193,4 +1201,6 @@
         }, 1000);
     </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('contracts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /media/michaelkilunga/C/SKYLINK/pms/resources/views/contracts/users/index.blade.php ENDPATH**/ ?>

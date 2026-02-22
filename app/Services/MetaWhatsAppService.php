@@ -10,7 +10,7 @@ class MetaWhatsAppService
 {
     protected $baseUrl = 'https://graph.facebook.com/v17.0'; // Or latest version
     protected $pharmacyId;
-    protected $isEnabled;
+    protected $isGlobalEnabled;
     protected $phoneNumberId;
     protected $accessToken;
     protected $businessAccountId;
@@ -19,6 +19,13 @@ class MetaWhatsAppService
     {
         $this->pharmacyId = session('current_pharmacy_id');
         $this->loadSettings();
+    }
+
+    public function setPharmacyId($id)
+    {
+        $this->pharmacyId = $id;
+        $this->loadSettings(); // Reload settings if pharmacy changed
+        return $this;
     }
 
     protected function loadSettings()
@@ -30,24 +37,19 @@ class MetaWhatsAppService
             ->whereIn('key', $keys)
             ->pluck('value', 'key');
 
-        $this->isEnabled = filter_var($settings['whatsapp_enabled'] ?? 'false', FILTER_VALIDATE_BOOLEAN);
+        $this->isGlobalEnabled = filter_var($settings['whatsapp_enabled'] ?? 'false', FILTER_VALIDATE_BOOLEAN);
         $this->phoneNumberId = $settings['whatsapp_phone_number_id'] ?? null;
         $this->accessToken = $settings['whatsapp_access_token'] ?? null;
         $this->businessAccountId = $settings['whatsapp_business_account_id'] ?? null;
 
-        // 2. If not enabled or missing credentials locally, try Global Settings (pharmacy_id = null)
-        // Only if pharmacy not explicitly disabled it? Or should global override? 
-        // Logic: specific setting overrides global. If specific is NOT set (missing), fallback to global.
-        // If specific is set to "false", it means "disabled for this pharmacy".
-        
-        if (!$this->isEnabled && empty($settings['whatsapp_enabled'])) {
+        if (!$this->isGlobalEnabled && empty($settings['whatsapp_enabled'])) {
             // Not explicitly set, so try global
             $globalSettings = SystemSetting::whereNull('pharmacy_id')
                 ->whereIn('key', $keys)
                 ->pluck('value', 'key');
                 
-            $this->isEnabled = filter_var($globalSettings['whatsapp_enabled'] ?? 'false', FILTER_VALIDATE_BOOLEAN);
-            if ($this->isEnabled) {
+            $this->isGlobalEnabled = filter_var($globalSettings['whatsapp_enabled'] ?? 'false', FILTER_VALIDATE_BOOLEAN);
+            if ($this->isGlobalEnabled) {
                  $this->phoneNumberId = $globalSettings['whatsapp_phone_number_id'] ?? null;
                  $this->accessToken = $globalSettings['whatsapp_access_token'] ?? null;
                  $this->businessAccountId = $globalSettings['whatsapp_business_account_id'] ?? null;
@@ -55,9 +57,36 @@ class MetaWhatsAppService
         }
     }
 
-    public function isEnabled()
+    public function isEnabled($pharmacyId = null)
     {
-        return $this->isEnabled && $this->phoneNumberId && $this->accessToken;
+        $pid = $pharmacyId ?? $this->pharmacyId;
+
+        // 1. Core platform check (is it configured correctly?)
+        if (!$this->isGlobalEnabled || !$this->phoneNumberId || !$this->accessToken) {
+            return false;
+        }
+
+        // 2. Subscription/Contract Check
+        if (!$pid) return false;
+
+        $pharmacy = \App\Models\Pharmacy::find($pid);
+        if (!$pharmacy) return false;
+
+        $owner = \App\Models\User::find($pharmacy->owner_id);
+        if (!$owner) return false;
+
+        // Fetch active current contract
+        $contract = \App\Models\Contract::where('owner_id', $owner->id)
+            ->where('is_current_contract', 1)
+            ->whereIn('status', ['active', 'graced'])
+            ->first();
+
+        // Check if WhatsApp is included in the contract details
+        if (!$contract || !($contract->details['has_whatsapp'] ?? false)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

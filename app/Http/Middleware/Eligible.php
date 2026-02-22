@@ -146,6 +146,11 @@ class Eligible
                     return redirect()->route('myContracts')->with('error', 'You need an active subscription plan to add pharmacies.');
                 }
 
+                // Premium pricing strategies allow unlimited pharmacies (or handled via billing)
+                if (in_array($contract->pricing_strategy, ['dynamic', 'profit_share'])) {
+                    return $next($request);
+                }
+
                 $package = Package::find($contract->package_id);
                 $pharmaciesCount = Pharmacy::where('owner_id', $owner->id)->count();
 
@@ -153,7 +158,9 @@ class Eligible
                     return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
                 }
 
-                if ($pharmaciesCount >= $package->number_of_pharmacies) {
+                $limit = $package->number_of_pharmacies + ($contract->details['extra_pharmacies'] ?? 0);
+
+                if ($pharmaciesCount >= $limit) {
                     return redirect()->route('myContracts')->with('error', 'You have reached the maximum number of pharmacies allowed by your subscription.');
                 }
                 break;
@@ -161,31 +168,46 @@ class Eligible
             case 'add staff':
                 $package = Package::find($contract->package_id);
 
+                // Premium pricing strategies get full features
+                if (in_array($contract->pricing_strategy, ['dynamic', 'profit_share'])) {
+                    return $next($request);
+                }
+
                 if (! $package) {
                     return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
                 }
 
-                // Check strict feature flag first
-                if (! $package->staff_management) {
+                // Check strict feature flag first (either in package or enabled via upgrade)
+                if (! $package->staff_management && ! ($contract->details['staff_management'] ?? false)) {
                     return redirect()->route('staff')->with('error', 'Your subscription plan does not support Staff Management.');
                 }
 
                 $staffCount = Staff::where('pharmacy_id', $pharmacy->id)->count();
 
-                if ($staffCount >= $package->number_of_pharmacists) {
+                $limit = $package->number_of_pharmacists + ($contract->details['extra_pharmacists'] ?? 0);
+
+                if ($staffCount >= $limit) {
                     return redirect()->route('staff')->with('error', 'You have reached the maximum number of pharmacists allowed by your subscription.');
                 }
                 break;
 
             case 'add medicine':
                 $package = Package::find($contract->package_id);
-                $medicineCount = Items::where('pharmacy_id', $pharmacy->id)->count();
+
+                // Premium strategies handle counts via resource-based pricing, but we allow the action
+                if (in_array($contract->pricing_strategy, ['dynamic', 'profit_share'])) {
+                    return $next($request);
+                }
 
                 if (! $package) {
                     return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
                 }
 
-                if ($medicineCount >= $package->number_of_medicines) {
+                $medicineCount = Items::where('pharmacy_id', $pharmacy->id)->count();
+
+                $limit = $package->number_of_medicines + ($contract->details['extra_medicines'] ?? 0);
+
+                if ($medicineCount >= $limit) {
                     // check if request is ajax
                     if ($request->ajax()) {
                         return response()->json(['message' => 'maximum'], 200);
@@ -199,6 +221,16 @@ class Eligible
             case 'view reports':
                 $package = Package::find($contract->package_id);
 
+                // Allow reports for premium pricing strategies by default
+                if (in_array($contract->pricing_strategy, ['dynamic', 'profit_share'])) {
+                    return $next($request);
+                }
+
+                // Check if reports are explicitly enabled in contract details (manual admin override)
+                if ($contract->details['has_reports'] ?? false) {
+                    return $next($request);
+                }
+
                 if (! $package) {
                     return redirect()->route('myContracts')->with('error', 'Invalid package associated with your subscription.');
                 }
@@ -210,6 +242,12 @@ class Eligible
 
             case 'stock':
                 $package = Package::find($contract->package_id);
+                if (in_array($contract->pricing_strategy, ['dynamic', 'profit_share'])) {
+                    return $next($request);
+                }
+                if ($contract->details['stock_management'] ?? false) {
+                    return $next($request);
+                }
                 if (! $package || ! $package->stock_management) {
                     return redirect()->route('dashboard')->with('error', 'Stock Management is not available in your current plan.');
                 }
@@ -217,8 +255,40 @@ class Eligible
 
             case 'transfers':
                 $package = Package::find($contract->package_id);
+                if (in_array($contract->pricing_strategy, ['dynamic', 'profit_share'])) {
+                    return $next($request);
+                }
+                if ($contract->details['stock_transfer'] ?? false) {
+                    return $next($request);
+                }
                 if (! $package || ! $package->stock_transfer) {
                     return redirect()->route('dashboard')->with('error', 'Stock Transfers are not available in your current plan.');
+                }
+                break;
+
+            case 'receipts':
+                $package = Package::find($contract->package_id);
+                if (in_array($contract->pricing_strategy, ['dynamic', 'profit_share'])) {
+                    return $next($request);
+                }
+                if ($contract->details['receipts'] ?? false) {
+                    return $next($request);
+                }
+                if (! $package || ! $package->receipts) {
+                    return redirect()->route('dashboard')->with('error', 'Receipts are not available in your current plan.');
+                }
+                break;
+
+            case 'analytics':
+                $package = Package::find($contract->package_id);
+                if (in_array($contract->pricing_strategy, ['dynamic', 'profit_share'])) {
+                    return $next($request);
+                }
+                if ($contract->details['analytics'] ?? false) {
+                    return $next($request);
+                }
+                if (! $package || ! $package->analytics) {
+                    return redirect()->route('dashboard')->with('error', 'Analytics are not available in your current plan.');
                 }
                 break;
 

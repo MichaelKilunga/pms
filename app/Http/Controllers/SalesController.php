@@ -49,11 +49,11 @@ class SalesController extends BaseController
         //     ->get();
 
         if ($request->ajax()) {
+            $date = $request->get('date', today()->toDateString());
             $sales = Sales::with(['item', 'salesReturn'])
                 ->where('sales.pharmacy_id', session('current_pharmacy_id'))
                 ->orderBy('date', 'desc')
-                // sold today only
-                ->whereDate('date', today());
+                ->whereDate('date', $date);
             // If role is staff to day sales belongig to the current staff
             if (Auth::user()->role == 'staff') {
                 $sales->where('sales.staff_id', Auth::user()->id);

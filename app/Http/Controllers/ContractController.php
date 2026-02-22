@@ -25,8 +25,11 @@ class ContractController extends Controller
     // Super Admin Views
     public function indexSuperAdmin()
     {
-        // Retrieves a collection of contracts
-        $contracts = Contract::with('owner', 'package')->where('is_current_contract', 1)->get();
+        // Retrieves all contracts, prioritizing those where payment was notified but not yet paid
+        $contracts = Contract::with('owner', 'package')
+            ->orderBy('payment_notified', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('contracts.admin.index', compact('contracts'));
     }
@@ -81,7 +84,15 @@ class ContractController extends Controller
         ]);
 
         $contract = Contract::findOrFail($id);
-        $contract->update($validated);
+
+        // Update details for add-ons
+        $details = $contract->details ?? [];
+        $details['has_whatsapp'] = $request->has('has_whatsapp');
+        $details['has_sms'] = $request->has('has_sms');
+        
+        $data = array_merge($validated, ['details' => $details]);
+
+        $contract->update($data);
 
         return redirect()->route('contracts.admin.index')->with('success', 'Contract updated successfully.');
     }
@@ -91,6 +102,27 @@ class ContractController extends Controller
         $contract = Contract::with('owner', 'package')->findOrFail($id);
 
         return view('contracts.admin.show', compact('contract'));
+    }
+
+    public function initiateSuperAdmin($id)
+    {
+        $contract = Contract::findOrFail($id);
+        
+        if ($contract->payment_status !== 'payed') {
+            return redirect()->back()->with('error', 'Contract must be paid before initiation.');
+        }
+
+        // Ensure only one current contract per owner
+        Contract::where('owner_id', $contract->owner_id)
+            ->where('is_current_contract', 1)
+            ->update(['is_current_contract' => 0]);
+
+        $contract->update([
+            'is_current_contract' => 1,
+            'status' => 'active',
+        ]);
+
+        return redirect()->back()->with('success', 'Contract initiated and activated successfully.');
     }
 
     // User (Owner) Views
@@ -146,6 +178,7 @@ class ContractController extends Controller
             'mode' => $pricingResult['strategy'], // This comes from system/user setting inside service
             'base_amount' => $pricingResult['amount'], // Verification: This is 1 month amount
             'details' => $pricingResult['details'],
+            'upgrade_rates' => $this->pricingService->getUpgradeRates(),
             'agent_markup' => Pharmacy::where('owner_id', $user->id)->sum('agent_extra_charge'), // Separate markup if needed specifically
         ];
 
@@ -156,6 +189,19 @@ class ContractController extends Controller
             'hasActivePaidNotCurrent',
             'pricingData'
         ));
+    }
+
+    public function notifyPayment($id)
+    {
+        $contract = Contract::where('owner_id', Auth::id())->findOrFail($id);
+
+        if ($contract->payment_status === 'payed') {
+            return redirect()->back()->with('error', 'This contract is already paid.');
+        }
+
+        $contract->update(['payment_notified' => true]);
+
+        return redirect()->back()->with('success', 'Admin notified of your payment. Please wait for confirmation.');
     }
 
     public function showUser($id)
@@ -280,16 +326,9 @@ class ContractController extends Controller
             'agent_markup' => $agentMarkup,
         ];
 
-        // Auto-activate trial if first contract and trial package
         try {
             $hasAnyContract = Contract::where('owner_id', $ownerId)->count();
-            if ($hasAnyContract == 0 && $request['package_id'] == 1) {
-                $contractData['status'] = 'active';
-                $contractData['payment_status'] = 'payed';
-                $contractData['end_date'] = now()->addDays(14);
-            } elseif ($request['package_id'] == 1) {
-                throw new Exception('This is unauthorized action!');
-            }
+            // Removed trial auto-activation as per system requirements
 
             $validated = $request->validate([
                 'owner_id' => 'required|exists:users,id',
@@ -354,22 +393,116 @@ class ContractController extends Controller
         }
     }
 
+    public function requestUpgrade(Request $request)
+    {
+        $owner = Auth::user();
+        $currentContract = Contract::where('owner_id', $owner->id)
+            ->where('is_current_contract', 1)
+            ->first();
+
+        if (!$currentContract) {
+            return redirect()->back()->with('error', 'You must have an active current contract to request an upgrade.');
+        }
+
+        $months = $request->input('months', 1);
+        $currentDetails = $currentContract->details ?? [];
+        
+        // Prepare requested upgrades
+        $requested = $request->only([
+            'extra_pharmacies', 'extra_pharmacists', 'extra_medicines',
+            'has_whatsapp', 'has_sms', 'has_reports', 
+            'stock_management', 'stock_transfer', 'staff_management', 
+            'receipts', 'analytics'
+        ]);
+
+        // Clean values: remove booleans already active, ensure counts are positive
+        foreach ($requested as $key => $val) {
+            if (str_starts_with($key, 'has_') || in_array($key, ['stock_management', 'stock_transfer', 'staff_management', 'receipts', 'analytics'])) {
+                if ($currentDetails[$key] ?? false) {
+                    unset($requested[$key]); // Already have it
+                } else {
+                    $requested[$key] = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+                }
+            } else {
+                $requested[$key] = max(0, (int)$val);
+            }
+        }
+
+        $upgradeResult = $this->pricingService->calculateUpgradePrice($requested, $months);
+
+        if ($upgradeResult['amount'] <= 0) {
+            return redirect()->back()->with('error', 'No new upgrades selected or already active.');
+        }
+
+        Contract::create([
+            'owner_id' => $owner->id,
+            'package_id' => $currentContract->package_id,
+            'start_date' => now(),
+            'end_date' => $currentContract->end_date, 
+            'status' => 'inactive',
+            'payment_status' => 'pending',
+            'is_current_contract' => 0,
+            'amount' => $upgradeResult['amount'],
+            'pricing_strategy' => $currentContract->pricing_strategy,
+            'details' => array_merge($upgradeResult['details'], ['is_upgrade' => true, 'parent_id' => $currentContract->id]),
+            'agent_markup' => 0,
+        ]);
+
+        return redirect()->back()->with('success', 'Upgrade request generated. Please notify admin after payment.');
+    }
+
     // function "confirm" to confirm payment
     public function confirm($id)
     {
         $contract = Contract::findOrFail($id);
-        // calculate days between start_date and end_date
-        $days = Carbon::parse($contract->start_date)->diffInDays(Carbon::parse($contract->end_date));
-        // calculate new end_date from today plus days
-        $new_end_date = Carbon::now()->addDays($days);
-        // new start date is today
-        $new_start_date = Carbon::now();
-        // dd($new_start_date, $new_end_date,$days);
 
-        // update contract with the new start date and new end date where package start works after activation.
-        $contract->update(['start_date' => $new_start_date]);
-        $contract->update(['end_date' => $new_end_date]);
-        $contract->update(['payment_status' => 'payed', 'status' => 'active']);
+        if ($contract->details && ($contract->details['is_upgrade'] ?? false)) {
+            // This is an upgrade (could be add-ons or increased limits)
+            $parent = Contract::find($contract->details['parent_id']);
+            if ($parent) {
+                $parentDetails = $parent->details ?? [];
+                $upgradeDetails = $contract->details;
+                
+                // Keys to exclude from merging
+                $exclude = ['is_upgrade', 'parent_id'];
+                
+                foreach ($upgradeDetails as $key => $value) {
+                    if (!in_array($key, $exclude)) {
+                        if (is_numeric($value) && str_contains($key, 'extra_')) {
+                            // Incremental values like extra_medicines
+                            $parentDetails[$key] = ($parentDetails[$key] ?? 0) + $value;
+                        } else {
+                            // Boolean or string flags
+                            $parentDetails[$key] = $value;
+                        }
+                    }
+                }
+                $parent->update(['details' => $parentDetails]);
+            }
+
+            $contract->update([
+                'payment_status' => 'payed',
+                'status' => 'active',
+                'payment_notified' => false
+            ]);
+        } else {
+            // Standard contract confirmation
+            $days = Carbon::parse($contract->start_date)->diffInDays(Carbon::parse($contract->end_date));
+            // calculate new end_date from today plus days
+            $new_end_date = Carbon::now()->addDays($days);
+            // new start date is today
+            $new_start_date = Carbon::now();
+            // dd($new_start_date, $new_end_date,$days);
+
+            // update contract with the new start date and new end date where package start works after activation.
+            $contract->update([
+                'start_date' => $new_start_date,
+                'end_date' => $new_end_date,
+                'payment_status' => 'payed',
+                'status' => 'active',
+                'payment_notified' => false
+            ]);
+        }
 
         // Create Payment Record
         ContractPayment::create([
@@ -393,21 +526,26 @@ class ContractController extends Controller
     // function to activate a contract
     public function activate(Request $request)
     {
-        // dd($request->all());
-        // find the current contract
-        $current_contract = Contract::where('owner_id', $request['owner_id'])->where('is_current_contract', 1)->get();
-        // change all the current contract to not current
-        foreach ($current_contract as $contract) {
-            $contract->update(['is_current_contract' => 0]);
-            // delete them if they are unpayed and inactive
-            if ($contract->payment_status == 'unpayed' && $contract->status == 'inactive') {
-                $contract->delete();
-            }
+        $contractId = $request->query('contract_id');
+        $contract = Contract::where('owner_id', Auth::id())->findOrFail($contractId);
+
+        if ($contract->payment_status !== 'payed') {
+            return redirect()->back()->with('error', 'Contract must be paid before activation.');
         }
 
-        // find the contract to activate
-        $contract = Contract::findOrFail($request['contract_id']);
-        $contract->update(['is_current_contract' => 1]);
+        if (Carbon::parse($contract->end_date)->isPast()) {
+            return redirect()->back()->with('error', 'This contract has already expired.');
+        }
+
+        // Ensure only one current contract per owner
+        Contract::where('owner_id', Auth::id())
+            ->where('is_current_contract', 1)
+            ->update(['is_current_contract' => 0]);
+
+        $contract->update([
+            'is_current_contract' => 1,
+            'status' => 'active',
+        ]);
 
         return redirect()->back()->with('success', 'Contract activated successfully.');
     }
@@ -448,31 +586,37 @@ class ContractController extends Controller
 
     public function generateBill(Request $request)
     {
-        // Similar logic to console command but triggers immediate pending contract (invoice)
-        // Validation?
+        $months = $request->input('months', 1);
+        $owner = Auth::user();
 
-        $pricingResult = $this->pricingService->calculatePrice(Auth::user(), 1, null); // 1 month basic
-        // Or if it's dynamic, use request inputs if the service supports it or if we calculate manually here.
-        // For now, relying on service default for the user.
+        // Calculate pricing
+        // If dynamic mode is active, the service will handle it, 
+        // but we might want to pass the intended counts if the user is inactive.
+        // For active users, service usually fetches from current DB state.
+        $pricingResult = $this->pricingService->calculatePrice($owner, $months, null);
 
         $amount = $pricingResult['amount'];
         $strategy = $pricingResult['strategy'];
         $details = $pricingResult['details'];
-        $agentMarkup = Auth::user()->pharmacies()->sum('agent_extra_charge');
+        
+        // Add add-ons if selected in the modal
+        if ($request->has('has_whatsapp')) {
+            $amount += 5000 * $months;
+            $details['has_whatsapp'] = true;
+        }
+        if ($request->has('has_sms')) {
+            $amount += 10000 * $months;
+            $details['has_sms'] = true;
+        }
+
+        $agentMarkup = $owner->pharmacies()->sum('agent_extra_charge') * $months;
         $totalAmount = $amount + $agentMarkup;
 
         Contract::create([
             'owner_id' => Auth::id(),
-            'package_id' => 3, // Default to a standard package ID or find dynamic one?
-            // The view form had hidden inputs for mode, maybe we strictly follow that?
-            // Since I don't see dynamic package management, I'll assume Package 3 (Standard) or just null if allowed,
-            // but schema requires package_id.
-            // Let's use the current active package if any, or default to standard.
-            // Actually, the prompt says "Owners can request the invoice".
-            // Let's assume Package ID 1 for now or better, one that matches "Custom/Dynamic".
-            'package_id' => 1, // Trial/Standard placeholder. Ideally this comes from request or config.
+            'package_id' => 3, // Default to a standard package ID
             'start_date' => now(),
-            'end_date' => now()->addDays(30),
+            'end_date' => now()->addDays($months * 30),
             'status' => 'inactive',
             'payment_status' => 'pending',
             'is_current_contract' => 0,
@@ -482,6 +626,6 @@ class ContractController extends Controller
             'agent_markup' => $agentMarkup,
         ]);
 
-        return redirect()->back()->with('success', 'Bill generated successfully. Please proceed to payment.');
+        return redirect()->back()->with('success', 'Bill generated successfully. Please proceed to payment or notify admin.');
     }
 }
