@@ -662,25 +662,26 @@ class AnalyticsController extends Controller
             // Sales by this staff member
             $sales = Sales::with('stock')
                 ->where('pharmacy_id', $pharmacyId)
-                ->where('staff_id', $staff->id)
+                ->where('staff_id', $staff->user_id) // Match with user_id as recorded in Sales table
                 ->whereBetween('date', [$startDate, $endDate])
                 ->get();
 
             $totalTransactions = $sales->count();
             $totalRevenue = $sales->sum(function ($sale) {
-                if (!$sale->stock) return 0;
-                return $sale->stock->selling_price * $sale->quantity;
+                // Use recorded total_price (unit price) from sale record
+                return ($sale->total_price ?? 0) * $sale->quantity;
             });
             $totalProfit = $sales->sum(function ($sale) {
                 if (!$sale->stock) return 0;
-                return ($sale->stock->selling_price - $sale->stock->buying_price) * $sale->quantity;
+                // Use recorded price minus buying price from stock
+                return (($sale->total_price ?? $sale->stock->selling_price) - $sale->stock->buying_price) * $sale->quantity;
             });
 
             $avgTransactionValue = $totalTransactions > 0 ? $totalRevenue / $totalTransactions : 0;
 
             // Stock added by this staff member
             $stocksAdded = Stock::where('pharmacy_id', $pharmacyId)
-                ->where('staff_id', $staff->id)
+                ->where('staff_id', $staff->user_id) // Match with user_id as recorded in Stock table
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->count();
 

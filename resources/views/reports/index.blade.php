@@ -183,410 +183,479 @@
         <!-- Analytics Content (Hidden until generated) -->
         <div id="analyticsContent" style="display: none;">
 
-            <!-- Overview Metrics -->
-            <div class="row mb-4" id="overviewSection">
-                <div class="col-12 mb-3">
-                    <h3 class="fw-bold"><i class="bi bi-speedometer2 me-2"></i>Performance Overview</h3>
-                </div>
-                <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card analytics-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="metric-icon gradient-success text-white me-3">
-                                    <i class="bi bi-cash-stack"></i>
-                                </div>
-                                <div>
-                                    <h6 class="text-muted mb-0 small">Total Sales</h6>
-                                    <h3 class="fw-bold mb-0" id="totalSales">-</h3>
+            <!-- Tab Navigation -->
+            <ul class="nav nav-pills mb-4 justify-content-center bg-white p-3 rounded shadow-sm section-card" id="analyticsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active px-4 py-2 fw-bold" id="overview-tab" data-bs-toggle="pill" data-bs-target="#overview" type="button" role="tab">
+                        <i class="bi bi-speedometer2 me-2"></i>Summary
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-4 py-2 fw-bold" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory" type="button" role="tab">
+                        <i class="bi bi-boxes me-2"></i>Inventory
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-4 py-2 fw-bold" id="analysis-tab" data-bs-toggle="pill" data-bs-target="#analysis" type="button" role="tab">
+                        <i class="bi bi-graph-up-arrow me-2"></i>Performance
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-4 py-2 fw-bold" id="financials-tab" data-bs-toggle="pill" data-bs-target="#financials" type="button" role="tab">
+                        <i class="bi bi-wallet2 me-2"></i>Financials
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="analyticsTabContent">
+
+                <!-- Tab 1: Summary -->
+                <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                    <!-- Overview Metrics -->
+                    <div class="row mb-4" id="overviewSection">
+                        <div class="col-12 mb-3">
+                            <h3 class="fw-bold"><i class="bi bi-speedometer2 me-2"></i>Performance Overview</h3>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card analytics-card shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="metric-icon gradient-success text-white me-3">
+                                            <i class="bi bi-cash-stack"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="text-muted mb-0 small">Total Sales</h6>
+                                            <h3 class="fw-bold mb-0" id="totalSales">-</h3>
+                                        </div>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar gradient-success" role="progressbar" style="width: 100%"></div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar gradient-success" role="progressbar" style="width: 100%"></div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card analytics-card shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="metric-icon gradient-primary text-white me-3">
+                                            <i class="bi bi-graph-up"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="text-muted mb-0 small">Gross Profit</h6>
+                                            <h3 class="fw-bold mb-0" id="grossProfit">-</h3>
+                                        </div>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar gradient-primary" role="progressbar" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card analytics-card shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="metric-icon gradient-danger text-white me-3">
+                                            <i class="bi bi-wallet2"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="text-muted mb-0 small">Total Expenses</h6>
+                                            <h3 class="fw-bold mb-0" id="totalExpenses">-</h3>
+                                        </div>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar gradient-danger" role="progressbar" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card analytics-card shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="metric-icon gradient-info text-white me-3">
+                                            <i class="bi bi-trophy"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="text-muted mb-0 small">Net Profit</h6>
+                                            <h3 class="fw-bold mb-0" id="netProfit">-</h3>
+                                        </div>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar gradient-info" role="progressbar" style="width: 100%"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card analytics-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="metric-icon gradient-primary text-white me-3">
-                                    <i class="bi bi-graph-up"></i>
+
+                    <!-- Sales by Time of Day -->
+                    <div class="row mb-4">
+                        <div class="col-12 mb-3">
+                            <h3 class="fw-bold"><i class="bi bi-clock-history me-2"></i>Sales Optimization</h3>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <div class="card section-card">
+                                <div class="card-header gradient-info text-white">
+                                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Sales by Time of Day</h5>
                                 </div>
-                                <div>
-                                    <h6 class="text-muted mb-0 small">Gross Profit</h6>
-                                    <h3 class="fw-bold mb-0" id="grossProfit">-</h3>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="salesByHourChart"></canvas>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar gradient-primary" role="progressbar" style="width: 100%"></div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="d-flex justify-content-end mt-4 mb-4">
+                        <button class="btn btn-primary rounded-pill px-4" onclick="$('#inventory-tab').click(); window.scrollTo(0,0);">
+                            Next: Inventory <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card analytics-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="metric-icon gradient-danger text-white me-3">
-                                    <i class="bi bi-wallet2"></i>
+
+                <!-- Tab 2: Inventory -->
+                <div class="tab-pane fade" id="inventory" role="tabpanel">
+                    <!-- Stock Predictions Section -->
+                    <div class="row mb-4">
+                        <div class="col-12 mb-3">
+                            <h3 class="fw-bold"><i class="bi bi-boxes me-2"></i>Stock Predictions & Insights</h3>
+                        </div>
+
+                        <!-- Fast Moving Items -->
+                        <div class="col-lg-6 mb-3">
+                            <div class="card section-card h-100">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0"><i class="bi bi-rocket-takeoff me-2"></i>Fast-Moving Items</h5>
                                 </div>
-                                <div>
-                                    <h6 class="text-muted mb-0 small">Total Expenses</h6>
-                                    <h3 class="fw-bold mb-0" id="totalExpenses">-</h3>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="fastMovingDataTable" class="table table-hover table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Medicine</th>
+                                                    <th>Daily Sales</th>
+                                                    <th>Stock Left</th>
+                                                    <th>Days Left</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="fastMovingTable">
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted">No data available</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar gradient-danger" role="progressbar" style="width: 100%"></div>
+                        </div>
+
+                        <!-- Slow Moving Items -->
+                        <div class="col-lg-6 mb-3">
+                            <div class="card section-card h-100">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0"><i class="bi bi-hourglass-split me-2"></i>Slow-Moving Items</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="slowMovingDataTable" class="table table-hover table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Medicine</th>
+                                                    <th>Daily Sales</th>
+                                                    <th>Stock Left</th>
+                                                    <th>Days Supply</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="slowMovingTable">
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted">No data available</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Urgent Restock -->
+                        <div class="col-lg-6 mb-3">
+                            <div class="card section-card h-100">
+                                <div class="card-header bg-danger text-white">
+                                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Urgent Restock Needed</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="urgentRestockDataTable" class="table table-hover table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Medicine</th>
+                                                    <th>Current Stock</th>
+                                                    <th>Days Until Empty</th>
+                                                    <th>Suggested Order</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="urgentRestockTable">
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted">No urgent restocks needed</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Overstocked Items -->
+                        <div class="col-lg-6 mb-3">
+                            <div class="card section-card h-100">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="bi bi-archive me-2"></i>Overstocked Items</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="overstockedDataTable" class="table table-hover table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Medicine</th>
+                                                    <th>Current Stock</th>
+                                                    <th>Days Supply</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="overstockedTable">
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted">No overstocked items</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card analytics-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="metric-icon gradient-info text-white me-3">
-                                    <i class="bi bi-trophy"></i>
+
+                    <!-- Improvement Suggestions Section -->
+                    <div class="row mb-4">
+                        <div class="col-12 mb-3">
+                            <h3 class="fw-bold"><i class="bi bi-lightbulb me-2"></i>Improvement Suggestions</h3>
+                        </div>
+
+                        <div class="col-lg-4 mb-3">
+                            <div class="card section-card h-100">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0"><i class="bi bi-arrow-up-circle me-2"></i>Maximize These Items</h5>
+                                    <small>High demand, high profit - stock more!</small>
                                 </div>
-                                <div>
-                                    <h6 class="text-muted mb-0 small">Net Profit</h6>
-                                    <h3 class="fw-bold mb-0" id="netProfit">-</h3>
+                                <div class="card-body" id="maximizeList">
+                                    <p class="text-muted text-center">No suggestions available</p>
                                 </div>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar gradient-info" role="progressbar" style="width: 100%"></div>
                             </div>
                         </div>
+
+                        <div class="col-lg-4 mb-3">
+                            <div class="card section-card h-100">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0"><i class="bi bi-arrow-down-circle me-2"></i>Minimize These Items</h5>
+                                    <small>Slow-moving - reduce stock levels</small>
+                                </div>
+                                <div class="card-body" id="minimizeList">
+                                    <p class="text-muted text-center">No suggestions available</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 mb-3">
+                            <div class="card section-card h-100">
+                                <div class="card-header bg-danger text-white">
+                                    <h5 class="mb-0"><i class="bi bi-x-circle me-2"></i>Consider Dropping</h5>
+                                    <small>No sales or high expiry - discontinue</small>
+                                </div>
+                                <div class="card-body" id="dropList">
+                                    <p class="text-muted text-center">No suggestions available</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4 mb-4">
+                        <button class="btn btn-outline-secondary rounded-pill px-4" onclick="$('#overview-tab').click(); window.scrollTo(0,0);">
+                            <i class="bi bi-arrow-left"></i> Previous
+                        </button>
+                        <button class="btn btn-primary rounded-pill px-4" onclick="$('#analysis-tab').click(); window.scrollTo(0,0);">
+                            Next: Performance <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Performance -->
+                <div class="tab-pane fade" id="analysis" role="tabpanel">
+                    <!-- Profit Analysis & Forecasting -->
+                    <div class="row mb-4">
+                        <div class="col-12 mb-3">
+                            <h3 class="fw-bold"><i class="bi bi-currency-dollar me-2"></i>Profit Analysis & Forecasting</h3>
+                        </div>
+
+                        <div class="col-lg-8 mb-3">
+                            <div class="card section-card">
+                                <div class="card-header gradient-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Profit Trend & 30-Day Forecast</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="profitTrendChart"></canvas>
+                                    </div>
+                                    <div class="row text-center mt-3">
+                                        <div class="col-6">
+                                            <h6 class="text-muted">Avg Daily Profit</h6>
+                                            <h4 class="fw-bold text-success" id="avgDailyProfit">-</h4>
+                                        </div>
+                                        <div class="col-6">
+                                            <h6 class="text-muted">30-Day Forecast</h6>
+                                            <h4 class="fw-bold text-primary" id="profitForecast">-</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 mb-3">
+                            <div class="card section-card h-100">
+                                <div class="card-header gradient-success text-white">
+                                    <h5 class="mb-0"><i class="bi bi-gem me-2"></i>High-Margin Products</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="highMarginDataTable" class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Medicine</th>
+                                                    <th>Margin %</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="highMarginTable">
+                                                <tr>
+                                                    <td colspan="2" class="text-center text-muted">No data</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Performing Staff -->
+                    <div class="row mb-4">
+                        <div class="col-12 mb-3">
+                            <h3 class="fw-bold"><i class="bi bi-star me-2"></i>Top Performing Staff</h3>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <div class="card section-card">
+                                <div class="card-header gradient-warning text-white">
+                                    <h5 class="mb-0"><i class="bi bi-star me-2"></i>Top Performing Staff</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="staffPerformanceDataTable" class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Staff Name</th>
+                                                    <th>Sales</th>
+                                                    <th>Revenue</th>
+                                                    <th>Profit</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="staffPerformanceTable">
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted">No data available</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4 mb-4">
+                        <button class="btn btn-outline-secondary rounded-pill px-4" onclick="$('#inventory-tab').click(); window.scrollTo(0,0);">
+                            <i class="bi bi-arrow-left"></i> Previous
+                        </button>
+                        <button class="btn btn-primary rounded-pill px-4" onclick="$('#financials-tab').click(); window.scrollTo(0,0);">
+                            Next: Financials <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Financials -->
+                <div class="tab-pane fade" id="financials" role="tabpanel">
+                    <!-- Expense & Debt Analysis -->
+                    <div class="row mb-4">
+                        <div class="col-12 mb-3">
+                            <h3 class="fw-bold"><i class="bi bi-wallet2 me-2"></i>Financial Health Analysis</h3>
+                        </div>
+
+                        <div class="col-lg-6 mb-3">
+                            <div class="card section-card">
+                                <div class="card-header gradient-danger text-white">
+                                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Expense Breakdown</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="expenseChart"></canvas>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold">Expense to Revenue Ratio:</span>
+                                            <span class="badge badge-custom bg-danger" id="expenseRatio">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-3">
+                            <div class="card section-card">
+                                <div class="card-header bg-dark text-white">
+                                    <h5 class="mb-0"><i class="bi bi-credit-card me-2"></i>Debt Management Insights</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center mb-3">
+                                        <div class="col-4">
+                                            <h6 class="text-muted small">Total Debts</h6>
+                                            <h5 class="fw-bold" id="totalDebts">-</h5>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-muted small">Paid</h6>
+                                            <h5 class="fw-bold text-success" id="debtsPaid">-</h5>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-muted small">Remaining</h6>
+                                            <h5 class="fw-bold text-danger" id="debtsRemaining">-</h5>
+                                        </div>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 20px;">
+                                        <div class="progress-bar bg-success" role="progressbar" id="debtPaymentProgress" style="width: 0%">
+                                            <span id="debtPaymentRate">0%</span>
+                                        </div>
+                                    </div>
+                                    <div id="overdueDebtsSection"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-start mt-4 mb-4">
+                        <button class="btn btn-outline-secondary rounded-pill px-4" onclick="$('#analysis-tab').click(); window.scrollTo(0,0);">
+                            <i class="bi bi-arrow-left"></i> Previous
+                        </button>
                     </div>
                 </div>
             </div>
-
-            <!-- Stock Predictions Section -->
-            <div class="row mb-4">
-                <div class="col-12 mb-3">
-                    <h3 class="fw-bold"><i class="bi bi-boxes me-2"></i>Stock Predictions & Insights</h3>
-                </div>
-
-                <!-- Fast Moving Items -->
-                <div class="col-lg-6 mb-3">
-                    <div class="card section-card h-100">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0"><i class="bi bi-rocket-takeoff me-2"></i>Fast-Moving Items</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Medicine</th>
-                                            <th>Daily Sales</th>
-                                            <th>Stock Left</th>
-                                            <th>Days Left</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="fastMovingTable">
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted">No data available</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slow Moving Items -->
-                <div class="col-lg-6 mb-3">
-                    <div class="card section-card h-100">
-                        <div class="card-header bg-warning text-dark">
-                            <h5 class="mb-0"><i class="bi bi-hourglass-split me-2"></i>Slow-Moving Items</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Medicine</th>
-                                            <th>Daily Sales</th>
-                                            <th>Stock Left</th>
-                                            <th>Days Supply</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="slowMovingTable">
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted">No data available</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Urgent Restock -->
-                <div class="col-lg-6 mb-3">
-                    <div class="card section-card h-100">
-                        <div class="card-header bg-danger text-white">
-                            <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Urgent Restock Needed</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Medicine</th>
-                                            <th>Current Stock</th>
-                                            <th>Days Until Empty</th>
-                                            <th>Suggested Order</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="urgentRestockTable">
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted">No urgent restocks needed
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Overstocked Items -->
-                <div class="col-lg-6 mb-3">
-                    <div class="card section-card h-100">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0"><i class="bi bi-archive me-2"></i>Overstocked Items</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Medicine</th>
-                                            <th>Current Stock</th>
-                                            <th>Days Supply</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="overstockedTable">
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted">No overstocked items</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Profit Predictions Section -->
-            <div class="row mb-4">
-                <div class="col-12 mb-3">
-                    <h3 class="fw-bold"><i class="bi bi-currency-dollar me-2"></i>Profit Analysis & Forecasting</h3>
-                </div>
-
-                <div class="col-lg-8 mb-3">
-                    <div class="card section-card">
-                        <div class="card-header gradient-primary text-white">
-                            <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Profit Trend & 30-Day Forecast
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="profitTrendChart"></canvas>
-                            </div>
-                            <div class="row text-center mt-3">
-                                <div class="col-6">
-                                    <h6 class="text-muted">Avg Daily Profit</h6>
-                                    <h4 class="fw-bold text-success" id="avgDailyProfit">-</h4>
-                                </div>
-                                <div class="col-6">
-                                    <h6 class="text-muted">30-Day Forecast</h6>
-                                    <h4 class="fw-bold text-primary" id="profitForecast">-</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 mb-3">
-                    <div class="card section-card h-100">
-                        <div class="card-header gradient-success text-white">
-                            <h5 class="mb-0"><i class="bi bi-gem me-2"></i>High-Margin Products</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Medicine</th>
-                                            <th>Margin %</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="highMarginTable">
-                                        <tr>
-                                            <td colspan="2" class="text-center text-muted">No data</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Improvement Suggestions Section -->
-            <div class="row mb-4">
-                <div class="col-12 mb-3">
-                    <h3 class="fw-bold"><i class="bi bi-lightbulb me-2"></i>Improvement Suggestions</h3>
-                </div>
-
-                <div class="col-lg-4 mb-3">
-                    <div class="card section-card h-100">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0"><i class="bi bi-arrow-up-circle me-2"></i>Maximize These Items</h5>
-                            <small>High demand, high profit - stock more!</small>
-                        </div>
-                        <div class="card-body" id="maximizeList">
-                            <p class="text-muted text-center">No suggestions available</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 mb-3">
-                    <div class="card section-card h-100">
-                        <div class="card-header bg-warning text-dark">
-                            <h5 class="mb-0"><i class="bi bi-arrow-down-circle me-2"></i>Minimize These Items</h5>
-                            <small>Slow-moving - reduce stock levels</small>
-                        </div>
-                        <div class="card-body" id="minimizeList">
-                            <p class="text-muted text-center">No suggestions available</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 mb-3">
-                    <div class="card section-card h-100">
-                        <div class="card-header bg-danger text-white">
-                            <h5 class="mb-0"><i class="bi bi-x-circle me-2"></i>Consider Dropping</h5>
-                            <small>No sales or high expiry - discontinue</small>
-                        </div>
-                        <div class="card-body" id="dropList">
-                            <p class="text-muted text-center">No suggestions available</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sales Optimization & Staff Performance -->
-            <div class="row mb-4">
-                <div class="col-12 mb-3">
-                    <h3 class="fw-bold"><i class="bi bi-people me-2"></i>Sales Optimization & Staff Performance</h3>
-                </div>
-
-                <div class="col-lg-6 mb-3">
-                    <div class="card section-card">
-                        <div class="card-header gradient-info text-white">
-                            <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Sales by Time of Day</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="salesByHourChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-3">
-                    <div class="card section-card">
-                        <div class="card-header gradient-warning text-white">
-                            <h5 class="mb-0"><i class="bi bi-star me-2"></i>Top Performing Staff</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Staff Name</th>
-                                            <th>Sales</th>
-                                            <th>Revenue</th>
-                                            <th>Profit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="staffPerformanceTable">
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted">No data available</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Expense & Debt Analysis -->
-            <div class="row mb-4">
-                <div class="col-12 mb-3">
-                    <h3 class="fw-bold"><i class="bi bi-wallet2 me-2"></i>Financial Health Analysis</h3>
-                </div>
-
-                <div class="col-lg-6 mb-3">
-                    <div class="card section-card">
-                        <div class="card-header gradient-danger text-white">
-                            <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Expense Breakdown</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="expenseChart"></canvas>
-                            </div>
-                            <div class="mt-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold">Expense to Revenue Ratio:</span>
-                                    <span class="badge badge-custom bg-danger" id="expenseRatio">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-3">
-                    <div class="card section-card">
-                        <div class="card-header bg-dark text-white">
-                            <h5 class="mb-0"><i class="bi bi-credit-card me-2"></i>Debt Management Insights</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row text-center mb-3">
-                                <div class="col-4">
-                                    <h6 class="text-muted small">Total Debts</h6>
-                                    <h5 class="fw-bold" id="totalDebts">-</h5>
-                                </div>
-                                <div class="col-4">
-                                    <h6 class="text-muted small">Paid</h6>
-                                    <h5 class="fw-bold text-success" id="debtsPaid">-</h5>
-                                </div>
-                                <div class="col-4">
-                                    <h6 class="text-muted small">Remaining</h6>
-                                    <h5 class="fw-bold text-danger" id="debtsRemaining">-</h5>
-                                </div>
-                            </div>
-                            <div class="progress mb-3" style="height: 20px;">
-                                <div class="progress-bar bg-success" role="progressbar" id="debtPaymentProgress"
-                                    style="width: 0%">
-                                    <span id="debtPaymentRate">0%</span>
-                                </div>
-                            </div>
-                            <div id="overdueDebtsSection"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -665,6 +734,29 @@
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0
                 }).format(amount);
+            }
+
+            function initDataTable(selector) {
+                if ($.fn.DataTable.isDataTable(selector)) {
+                    $(selector).DataTable().destroy();
+                }
+                $(selector).DataTable({
+                    paging: true,
+                    pageLength: 5,
+                    lengthMenu: [5, 10, 25, 50],
+                    searching: true,
+                    ordering: true,
+                    info: false,
+                    responsive: true,
+                    language: {
+                        search: "_INPUT_",
+                        searchPlaceholder: "Search...",
+                        paginate: {
+                            previous: '<i class="bi bi-chevron-left"></i>',
+                            next: '<i class="bi bi-chevron-right"></i>'
+                        }
+                    }
+                });
             }
 
             function renderAnalytics(data) {
@@ -757,6 +849,12 @@
                 });
                 $('#overstockedTable').html(overstockHtml ||
                     '<tr><td colspan="4" class="text-center text-success">No overstocked items</td></tr>');
+
+                // Initialize DataTables
+                initDataTable('#fastMovingDataTable');
+                initDataTable('#slowMovingDataTable');
+                initDataTable('#urgentRestockDataTable');
+                initDataTable('#overstockedDataTable');
             }
 
             function renderProfitPredictions(data) {
@@ -764,6 +862,7 @@
                 $('#profitForecast').text(formatCurrency(data.forecast_30_days));
 
                 // Profit Trend Chart
+                // ... CHART LOGIC ...
                 if (profitChart) profitChart.destroy();
 
                 const ctx = document.getElementById('profitTrendChart').getContext('2d');
@@ -815,6 +914,8 @@
                 });
                 $('#highMarginTable').html(marginHtml ||
                     '<tr><td colspan="2" class="text-center text-muted">No data</td></tr>');
+
+                initDataTable('#highMarginDataTable');
             }
 
             function renderImprovementSuggestions(data) {
@@ -978,6 +1079,8 @@
                 });
                 $('#staffPerformanceTable').html(staffHtml ||
                     '<tr><td colspan="4" class="text-center text-muted">No data available</td></tr>');
+
+                initDataTable('#staffPerformanceDataTable');
             }
         });
     </script>
