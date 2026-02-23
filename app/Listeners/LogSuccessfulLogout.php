@@ -23,11 +23,7 @@ class LogSuccessfulLogout
                 'user_agent' => request()->userAgent(),
             ]);
 
-            Log::info('User logged out:', [
-                'user_id' => $event->user->id,
-                'ip' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
+
         }
     }
 }

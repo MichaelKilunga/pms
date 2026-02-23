@@ -22,11 +22,7 @@ class LogSuccessfulLogin
                 'user_agent' => request()->userAgent(),
             ]);
 
-            Log::info('User logged in:', [
-                'user_id' => $event->user->id,
-                'ip' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
+
         }
     }
 }
