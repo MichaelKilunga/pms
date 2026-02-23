@@ -102,7 +102,8 @@ class AnalyticsController extends Controller
         
         $grossProfit = $salesData->sum(function ($sale) {
             if (!$sale->stock) return 0;
-            return ($sale->stock->selling_price - $sale->stock->buying_price) * $sale->quantity;
+            $sellingPrice = $sale->total_price ?? $sale->stock->selling_price;
+            return ($sellingPrice - $sale->stock->buying_price) * $sale->quantity;
         });
 
         // Total expenses
@@ -232,13 +233,16 @@ class AnalyticsController extends Controller
         $dailyProfits = Sales::with('stock')
             ->where('pharmacy_id', $pharmacyId)
             ->whereBetween('date', [$startDate, $endDate])
-            ->selectRaw('DATE(date) as sale_date')
+            ->select('id', 'pharmacy_id', 'stock_id', 'quantity', 'total_price', 'date')
             ->get()
-            ->groupBy('sale_date')
+            ->groupBy(function($sale) {
+                return Carbon::parse($sale->date)->format('Y-m-d');
+            })
             ->map(function ($sales, $date) {
                 $profit = $sales->sum(function ($sale) {
                     if (!$sale->stock) return 0;
-                    return ($sale->stock->selling_price - $sale->stock->buying_price) * $sale->quantity;
+                    $sellingPrice = $sale->total_price ?? $sale->stock->selling_price;
+                    return ($sellingPrice - $sale->stock->buying_price) * $sale->quantity;
                 });
                 return [
                     'date' => $date,
@@ -262,11 +266,11 @@ class AnalyticsController extends Controller
                 
                 $totalProfit = $sales->sum(function ($sale) {
                     if (!$sale->stock) return 0;
-                    return ($sale->stock->selling_price - $sale->stock->buying_price) * $sale->quantity;
+                    $sellingPrice = $sale->total_price ?? $sale->stock->selling_price;
+                    return ($sellingPrice - $sale->stock->buying_price) * $sale->quantity;
                 });
                 $totalRevenue = $sales->sum(function ($sale) {
-                    if (!$sale->stock) return 0;
-                    return $sale->stock->selling_price * $sale->quantity;
+                    return ($sale->total_price ?? ($sale->stock->selling_price ?? 0)) * $sale->quantity;
                 });
                 $margin = $totalRevenue > 0 ? ($totalProfit / $totalRevenue) * 100 : 0;
 
@@ -299,7 +303,8 @@ class AnalyticsController extends Controller
                     ->whereBetween('date', [$startDate, $endDate])
                     ->get()
                     ->sum(function ($sale) use ($stock) {
-                        return ($stock->selling_price - $stock->buying_price) * $sale->quantity;
+                        $sellingPrice = $sale->total_price ?? $stock->selling_price;
+                        return ($sellingPrice - $stock->buying_price) * $sale->quantity;
                     });
 
                 $roi = $investment > 0 ? ($profit / $investment) * 100 : 0;
