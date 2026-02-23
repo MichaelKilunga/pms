@@ -50,7 +50,24 @@ class DashboardController extends Controller
         // Notification::send($notifyUser, new WelcomeNotification);
         // // dd('done');
 
-        if (Auth::user()->hasRole('Superadmin')) {
+        $user = Auth::user();
+
+        // Ensure Spatie role is synced with legacy role column if missing
+        if ($user->roles->isEmpty() && $user->role) {
+            $roleMap = [
+                'super' => 'Superadmin',
+                'agent' => 'Agent',
+                'owner' => 'Owner',
+                'admin' => 'Manager',
+                'staff' => 'Staff'
+            ];
+            $roleToAssign = $roleMap[$user->role] ?? null;
+            if ($roleToAssign) {
+                $user->assignRole($roleToAssign);
+            }
+        }
+
+        if (Auth::user()->hasRole('Superadmin') || Auth::user()->role === 'super') {
 
             $totalPharmacies = Pharmacy::all()->count();
             // dd($totalPharmacies);
@@ -85,7 +102,12 @@ class DashboardController extends Controller
             return view('superAdmin.index', compact('totalPharmacies', 'users', 'agents', 'countactivepharmacies', 'activeContracts', 'expiredContracts', 'packages', 'activePackages', 'inactivePackages'));
         }
 
-        if (Auth::user()->hasRole('Agent')) {
+        if (Auth::user()->hasRole('Agent') || Auth::user()->role === 'agent') {
+            // Check if agent registration is complete
+            if (Auth::user()->isAgent && Auth::user()->isAgent->registration_status != 'complete') {
+                return redirect()->route('agent.completeRegistration', ['action' => 'index']);
+            }
+
             // get all pharmacies under this agent
             $totalPharmacies = Pharmacy::where('agent_id', Auth::user()->id)->count();
             $totalPackages = Package::count();
@@ -208,7 +230,7 @@ class DashboardController extends Controller
         }
 
 
-        if (Auth::user()->hasRole('Owner') || Pharmacy::where('owner_id', Auth::user()->id)->exists()) {
+        if (Auth::user()->hasRole('Owner') || Auth::user()->role === 'owner' || Pharmacy::where('owner_id', Auth::user()->id)->exists()) {
 
             // Get pharmacies that belong to the authenticated owner
             $pharmacies = Pharmacy::where('owner_id', Auth::user()->id)->get();

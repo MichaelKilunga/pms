@@ -16,40 +16,46 @@ class InventoryService
      */
     public function getSuggestedStock(int $pharmacyId)
     {
+        // Get all stocks for the pharmacy to group them by item name
         $stocks = Stock::where('pharmacy_id', $pharmacyId)
-            ->whereColumn('remain_Quantity', '<', 'low_stock_percentage')
             ->with(['item'])
             ->get();
 
-        return $stocks->map(function ($stock) {
-            // Logic for Suggested Quantity:
-            // User requested: "suggested quantity 300".
-            // Assumption: Since we don't have a "Max Stock" field, we'll suggest restocking up to 
-            // a reasonable amount. A common heuristic is (LowStock * 3) or restoring to initial 'quantity'.
-            // Let's use: Suggested = (quantity - remain_Quantity).
-            // If the user meant a specific fixed number, we'd need a new DB column.
-            // For now, let's assume they want to replenish the batch to its original level.
-            // OR if 'quantity' represents the batch size, maybe they want to buy a new batch.
-            // Let's go with: Suggested = quantity (buy a full new batch) or (quantity - remain).
-            // Let's use (quantity - remain_Quantity) as 'Top Up', but typically for re-ordering you order packs.
-            // Let's use the 'quantity' (original batch size) as a default suggested re-order amount?
-            // User said: "Medicine name paracetamol, suggested quantity 300"
-            // Let's use: Suggested = quantity (assuming 'quantity' is the standard pack size/restock level).
-            
-            // However, to be safe and logical:
-            // If I have 5 remaining, and low stock is 10.
-            // If I bought 100 initially.
-            // Suggested = 100 - 5 = 95? Or just buy another 100?
-            // "Restocking summary" implies what to buy.
-            // I will compute 'suggested_quantity' as equal to the original 'quantity' of the batch (assuming re-ordering the same amount).
-            
-            $suggestedQty = $stock->quantity; 
-            
-            $stock->suggested_quantity = $suggestedQty;
-            $stock->unit_buying_price = $stock->buying_price; 
-            $stock->total_buying_price = $suggestedQty * $stock->buying_price;
-            
-            return $stock;
+        // Group by medicine name to avoid duplicates if same medicine exists as different items
+        $groupedStocks = $stocks->groupBy(function ($stock) {
+            return trim(strtolower($stock->item->name ?? 'Unknown Item'));
         });
+
+        $suggested = collect();
+
+        foreach ($groupedStocks as $nameKey => $batches) {
+            // Aggregate remaining quantity across all batches of the same item name
+            $totalRemain = $batches->sum('remain_Quantity');
+
+            // Find the latest batch to use its threshold and pricing info
+            $latestBatch = $batches->sortByDesc('created_at')->first();
+
+            if (!$latestBatch) continue;
+
+            // Ensure we use the proper name (not the lowercase key)
+            $itemName = $latestBatch->item->name ?? 'Unknown Item';
+
+            // Use the low stock threshold from the latest batch
+            $threshold = $latestBatch->low_stock_percentage;
+
+            if ($totalRemain < $threshold) {
+                // Determine suggested quantity: Use the latest batch's original quantity as a replenishment target
+                $suggestedQty = $latestBatch->quantity;
+
+                $latestBatch->suggested_quantity = $suggestedQty;
+                $latestBatch->unit_buying_price = $latestBatch->buying_price;
+                $latestBatch->total_buying_price = $suggestedQty * $latestBatch->buying_price;
+                $latestBatch->aggregated_remain = $totalRemain;
+
+                $suggested->push($latestBatch);
+            }
+        }
+
+        return $suggested;
     }
 }

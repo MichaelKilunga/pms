@@ -318,7 +318,7 @@ class SalesController extends BaseController
                 // Get the sales data for the current pharmacy group for the specified date, but ensure the date is in datetime datatype to match the date in the database
                 $receipt = Sales::where('pharmacy_id', session('current_pharmacy_id'))
                     ->where('date', $saleDate[0])
-                    ->selectRaw('date, sum(total_price) as total_amount, staff_id')
+                    ->selectRaw('date, sum(total_price*quantity) as total_amount, staff_id')
                     ->groupBy('date', 'staff_id')
                     ->first();
 

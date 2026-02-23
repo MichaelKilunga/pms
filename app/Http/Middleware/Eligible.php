@@ -31,7 +31,7 @@ class Eligible
 
         // check if agent has completed registration
         if ($action === 'registered') {
-            if (Auth::user()->hasRole('Agent')) {
+            if (Auth::user()->hasRole('Agent') || Auth::user()->role === 'agent') {
                 $agent = Auth::user()->isAgent;
                 if ($agent != null) {
                     if ($agent->registration_status != 'complete') {
@@ -55,7 +55,7 @@ class Eligible
                 }
             }
             // if is owner
-            if (Auth::user()->hasRole(['Owner', 'Staff'])) {
+            if (Auth::user()->hasRole(['Owner', 'Staff']) || in_array(Auth::user()->role, ['owner', 'staff', 'admin'])) {
                 return $next($request);
             }
         }
@@ -82,9 +82,9 @@ class Eligible
 
         // Determine the owner
         $owner = null;
-        if ($user->hasRole('Staff')) {
+        if ($user->hasRole('Staff') || in_array($user->role, ['staff', 'admin'])) {
             $owner = User::find($pharmacy->owner_id);
-        } elseif ($user->hasRole('Owner')) {
+        } elseif ($user->hasRole('Owner') || $user->role === 'owner') {
             $owner = $user;
         }
 

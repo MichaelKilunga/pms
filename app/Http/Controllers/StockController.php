@@ -21,18 +21,46 @@ class StockController extends Controller
 {
     public function index(Request $request)
     {
+        $pharmacy_id = session('current_pharmacy_id');
+
         // compute the total value of available stock as sum of (buying_price * remain_Quantity)
-        $availableStock = Stock::where('pharmacy_id', session('current_pharmacy_id'))
-            ->sum(DB::raw('buying_price * remain_Quantity'));
-        $expectedSales = Stock::where('pharmacy_id', session('current_pharmacy_id'))
-            ->sum(DB::raw('selling_price * remain_Quantity'));
+        $totalsQuery = Stock::where('pharmacy_id', $pharmacy_id);
+
+        if ($request->filled('start_date')) {
+            $totalsQuery->whereDate('in_date', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $totalsQuery->whereDate('in_date', '<=', $request->end_date);
+        }
+        if ($request->filled('medicine_name')) {
+            $name = $request->medicine_name;
+            $totalsQuery->whereHas('item', function ($q) use ($name) {
+                $q->where('name', 'LIKE', "%{$name}%");
+            });
+        }
+
+        $availableStock = (clone $totalsQuery)->sum(DB::raw('buying_price * remain_Quantity'));
+        $expectedSales = (clone $totalsQuery)->sum(DB::raw('selling_price * remain_Quantity'));
         $expectedProfit = $expectedSales - $availableStock;
 
         if ($request->ajax()) {
             $stocks = Stock::with('item', 'staff') // Load relationships
-                ->where('pharmacy_id', session('current_pharmacy_id'))
-                // if not remain
-                ->orderBy('created_at', 'desc')
+                ->where('pharmacy_id', $pharmacy_id);
+
+            if ($request->filled('start_date')) {
+                $stocks->whereDate('in_date', '>=', $request->start_date);
+            }
+            if ($request->filled('end_date')) {
+                $stocks->whereDate('in_date', '<=', $request->end_date);
+            }
+            if ($request->filled('medicine_name')) {
+                $name = $request->medicine_name;
+                $stocks->whereHas('item', function ($q) use ($name) {
+                    $q->where('name', 'LIKE', "%{$name}%");
+                });
+            }
+
+            $stocks->orderBy('created_at', 'desc')
                 ->orderBy('batch_number', 'desc');
 
             return DataTables::of($stocks)
@@ -336,6 +364,11 @@ class StockController extends Controller
                         $q->where('name', 'LIKE', "%{$keyword}%");
                     });
                 })
+                ->with([
+                    'availableStock' => number_format($availableStock),
+                    'expectedSales' => number_format($expectedSales),
+                    'expectedProfit' => number_format($expectedProfit),
+                ])
                 ->make(true);
         }
 

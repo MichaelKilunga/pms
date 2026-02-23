@@ -17,8 +17,37 @@
             </div>
         </div>
 
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <form action="{{ route("medicines") }}" class="row g-2 d-flex justify-content-between" method="GET">
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                            <input class="form-control" name="search" placeholder="Search medicine name..."
+                                type="text" value="{{ request("search") }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4 d-none">
+                        <select class="form-select" name="category_id">
+                            <option value="">All Categories</option>
+                            @foreach ($categories as $category)
+                                <option {{ request("category_id") == $category->id ? "selected" : "" }}
+                                    value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button class="btn btn-primary flex-grow-1" type="submit">Filter</button>
+                        @if (request()->has("search") || request()->has("category_id"))
+                            <a class="btn btn-outline-secondary" href="{{ route("medicines") }}">Reset</a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="table-responsive">
-            <table class="table-striped table-bordered table-hover small table" id="Table">
+            <table class="table-striped table-bordered table-hover small table">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -31,7 +60,7 @@
                 <tbody>
                     @foreach ($medicines as $medicine)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ ($medicines->currentPage() - 1) * $medicines->perPage() + $loop->iteration }}</td>
                             {{-- <td>{{ $medicine->id }}</td> --}}
                             <td>{{ $medicine->name }}</td>
                             <td>{{ $medicine->category->name }}</td>
@@ -138,6 +167,10 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+
+        <div class="d-flex justify-content-center mt-3">
+            {{ $medicines->links() }}
         </div>
     </div>
 

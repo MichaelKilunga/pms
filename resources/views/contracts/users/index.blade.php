@@ -582,7 +582,33 @@
                                 @endif
                             @endforeach
                         @else
-                            <p class="text-muted text-center">No Active Plan</p>
+                            <div class="text-center py-5">
+                                <div class="mb-4">
+                                    <i class="fas fa-rocket fa-4x text-primary opacity-25"></i>
+                                </div>
+                                <h4 class="fw-bold text-dark mb-3">Welcome to PILLPOINT!</h4>
+                                <p class="text-muted mb-4">You don't have an active subscription yet. Choose an option below to get started:</p>
+                                
+                                <div class="d-grid gap-3 col-lg-10 mx-auto">
+                                    <a href="{{ route('contracts.users.start_trial') }}" class="btn btn-primary rounded-pill py-3 fw-bold shadow-sm">
+                                        <i class="fas fa-play-circle me-2"></i> Start 14-Day Free Trial
+                                    </a>
+                                    
+                                    <div class="position-relative my-2">
+                                        <hr>
+                                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small fw-bold">OR</span>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-outline-primary rounded-pill py-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#billingCalculatorModal">
+                                        <i class="fas fa-calculator me-2"></i> Generate Custom Bill
+                                    </button>
+                                </div>
+                                
+                                <p class="mt-4 small text-muted">
+                                    <i class="fas fa-info-circle me-1"></i> 
+                                    Need help? Contact our support team or your assigned agent.
+                                </p>
+                            </div>
                         @endif
 
                         <hr class="my-4">

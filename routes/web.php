@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AuditController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PharmacyController;
@@ -78,6 +79,11 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::put('/superadmin/users/{id}', [SuperAdminController::class, 'updateUser'])->name('superadmin.users.update');
     Route::get('/superadmin/users/{id}', [SuperAdminController::class, 'showUser'])->name('superadmin.users.show');
     Route::delete('/superadmin/users/{id}', [SuperAdminController::class, 'deleteUser'])->name('superadmin.users.delete');
+
+    // Account Deletion Requests
+    Route::get('/superadmin/deletion-requests', [SuperAdminController::class, 'deletionRequests'])->name('superadmin.deletion_requests');
+    Route::post('/superadmin/deletion-requests/{id}/approve', [SuperAdminController::class, 'approveDeletionRequest'])->name('superadmin.deletion_requests.approve');
+    Route::post('/superadmin/deletion-requests/{id}/reject', [SuperAdminController::class, 'rejectDeletionRequest'])->name('superadmin.deletion_requests.reject');
 
     // Super Admin Notification Settings
     Route::get('/superadmin/settings/notifications', [SuperAdminNotificationController::class, 'index'])->name('superAdmin.notifications.index');
@@ -286,6 +292,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/contracts/{id}/notify-payment', [ContractController::class, 'notifyPayment'])->name('contracts.users.notify_payment');
     Route::post('/contracts/users/generate-bill', [ContractController::class, 'generateBill'])->name('contracts.users.generate_bill');
     Route::post('/contracts/users/request-upgrade', [ContractController::class, 'requestUpgrade'])->name('contracts.users.request_upgrade');
+    Route::get('/contracts/users/start-trial', [ContractController::class, 'startTrial'])->name('contracts.users.start_trial');
     Route::delete('/contracts/{id}', [ContractController::class, 'destroy'])->name('contracts.destroy');
 
     // Business Settings (Owner Configuration)
@@ -333,11 +340,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('agent/complete-registration', [AgentController::class, 'completeRegistration'])->name('agent.completeRegistration');
     Route::post('agent/complete-registration', [AgentController::class, 'completeRegistration']);
 
-    Route::middleware(['eligible:registered'])->group(function () {
+    // Address helper routes
+    Route::get('address/regions', [AddressController::class, 'getRegions'])->name('address.regions');
+    Route::get('address/districts/{region}', [AddressController::class, 'getDistricts'])->name('address.districts');
+    Route::get('address/wards/{region}/{district}', [AddressController::class, 'getWards'])->name('address.wards');
+    Route::get('address/streets/{region}/{district}/{ward}', [AddressController::class, 'getStreets'])->name('address.streets');
 
-        // Route::get('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
-        // Route::post('agent/messages', [AgentController::class, 'messages'])->name('agent.messages');
-        
+    Route::middleware(['eligible:registered'])->group(function () {
         // New Message Module Routes
         Route::get('agent/messages', [\App\Http\Controllers\MessageController::class, 'index'])->name('agent.messages');
         Route::prefix('agent/messages/api')->group(function () {

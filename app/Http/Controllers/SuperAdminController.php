@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Pharmacy;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\AccountDeletionRequest;
+use App\Actions\Jetstream\DeleteUser;
+use Illuminate\Support\Facades\Auth;
 
 use Spatie\Permission\Models\Role;
 
@@ -173,5 +176,66 @@ class SuperAdminController extends Controller
     {
         $user = User::with('roles')->findOrFail($id);
         return view('superAdmin.users.show', compact('user'));
+    }
+
+    /**
+     * List all account deletion requests.
+     */
+    public function deletionRequests()
+    {
+        $requests = AccountDeletionRequest::with('user')->latest()->get();
+        return view('superAdmin.deletion_requests.index', compact('requests'));
+    }
+
+    /**
+     * Approve an account deletion request.
+     */
+    public function approveDeletionRequest(Request $request, $id)
+    {
+        $deletionRequest = AccountDeletionRequest::findOrFail($id);
+        
+        if ($deletionRequest->status !== 'pending') {
+            return redirect()->back()->with('error', 'This request has already been processed.');
+        }
+
+        $user = $deletionRequest->user;
+
+        // Perform the deletion using Jetstream action
+        $deleter = new DeleteUser();
+        $deleter->delete($user);
+
+        // Clear the request (or mark as approved, though user is gone)
+        $deletionRequest->update([
+            'status' => 'approved',
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return redirect()->route('superadmin.deletion_requests')->with('success', 'User account deleted successfully.');
+    }
+
+    /**
+     * Reject an account deletion request.
+     */
+    public function rejectDeletionRequest(Request $request, $id)
+    {
+        $request->validate([
+            'rejection_reason' => 'required|string|max:1000',
+        ]);
+
+        $deletionRequest = AccountDeletionRequest::findOrFail($id);
+
+        if ($deletionRequest->status !== 'pending') {
+            return redirect()->back()->with('error', 'This request has already been processed.');
+        }
+
+        $deletionRequest->update([
+            'status' => 'rejected',
+            'rejection_reason' => $request->rejection_reason,
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return redirect()->route('superadmin.deletion_requests')->with('success', 'Deletion request rejected.');
     }
 }

@@ -18,13 +18,26 @@ class ItemsController extends Controller
     /**
      * Display a listing of the medicines
      */
-    public function index()
+    public function index(Request $request)
     {
-        $medicines = Items::with(['category', 'pharmacy'])->where('pharmacy_id', session('current_pharmacy_id'))->get();
-        //oder by items name ascending
-        $medicines = $medicines->sortBy('name');
-        $categories = Category::get();
-        // dd($medicines);
+        $query = Items::with(['category', 'pharmacy'])
+            ->where('pharmacy_id', session('current_pharmacy_id'));
+
+        // Filter by name
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'LIKE', '%' . $request->search . '%');
+        }
+
+        // Filter by category
+        if ($request->has('category_id') && $request->category_id != '') {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Order by name and paginate
+        $medicines = $query->orderBy('name', 'asc')->paginate(15)->withQueryString();
+
+        $categories = Category::orderBy('name', 'asc')->get();
+
         return view('medicines.index', compact('medicines', 'categories'));
     }
 

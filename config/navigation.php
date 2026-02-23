@@ -191,6 +191,7 @@ return [
             'children' => [
                 ['label' => 'System Users', 'route' => 'superadmin.users'],
                 ['label' => 'Agents Registration', 'route' => 'agent.completeRegistration', 'params' => ['action' => 'index']],
+                ['label' => 'Deletion Requests', 'route' => 'superadmin.deletion_requests'],
                 // ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
             ],
         ],

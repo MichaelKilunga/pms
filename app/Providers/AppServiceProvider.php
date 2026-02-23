@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\App;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,8 +35,6 @@ class AppServiceProvider extends ServiceProvider
             return $middleware->handle($request, function () {}, $action) === null;
         });
 
-        // login and logout events listeners
-        
-
+        Paginator::useBootstrapFive();
     }
 }

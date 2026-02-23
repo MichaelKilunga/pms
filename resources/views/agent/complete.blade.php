@@ -7,11 +7,21 @@
         <h1 class="text-primary h4 mt-4 text-center">Registration Pannel</h1>
         <!-- Progress Bar -->
         @if ($me && in_array($me->registration_status, ['step_1', 'incomplete', 'step_3']))
-            <div class="progress mx-auto mb-2" style="width: 70%;">
-                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="0"
-                    class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="progressBar" role="progressbar"
-                    style="width: 0%;">
-                    0%
+            <div class="container mb-4">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="progress" style="height: 10px; border-radius: 5px;">
+                            <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="0"
+                                class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="progressBar" role="progressbar"
+                                style="width: 0%;">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 small text-muted">
+                            <span>Step 1: Basic Info</span>
+                            <span>Step 2: Verification</span>
+                            <span>Step 3: Agreement</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         @endif
@@ -88,13 +98,40 @@
                                     </label>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label class="form-label" for="address">Address</label>
-                                    <textarea class="form-control required-field" id="address" name="address"
-                                        placeholder="Tanzania, Morogoro, Morogoro municipal, Chief Kingalu market, A115." rows="2">{{ old('address', $agent->address ?? '') }}</textarea>
-                                    <small class="text-danger d-none" id="addressError">Address must follow this format:
-                                        Country,
-                                        Region, District, Ward, Street, House number.</small>
+                                <div class="col-md-12">
+                                    <h5 class="mt-4 mb-3 border-bottom pb-2 text-primary"><i class="bi bi-geo-alt"></i> Your Address Location</h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label" for="region">Region</label>
+                                            <select class="form-select required-field" id="region" name="region" required>
+                                                <option disabled selected value="">Select Region</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label" for="district">District</label>
+                                            <select class="form-select required-field" disabled id="district" name="district" required>
+                                                <option disabled selected value="">Select District</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label" for="ward">Ward</label>
+                                            <select class="form-select required-field" disabled id="ward" name="ward" required>
+                                                <option disabled selected value="">Select Ward</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label" for="street">Street</label>
+                                            <select class="form-select required-field" disabled id="street" name="street" required>
+                                                <option disabled selected value="">Select Street</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="address_details">Full Address Details (House No, Building etc)</label>
+                                            <textarea class="form-control required-field" id="address_details" name="address_details"
+                                                placeholder="e.g. Chief Kingalu market, House A115." required rows="2">{{ old('address_details', $agent->address ?? '') }}</textarea>
+                                            <input id="combined_address" name="address" type="hidden">
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {{-- checkbox to accept that the endered documents are correct and accurate and accept the terms and conditions and is ready to be 
@@ -143,48 +180,36 @@
                 </div>
             </div>
         @elseif($me->registration_status == 'step_3')
-            {{-- Show a place to download aggreement document and a place to upload the signed agreement document --}}
-            {{-- <div class="container m-3 w-50 row"> --}}
             <center>
-                <div class="card mx-2">
-                    <div class="card-header">
-                        <h3>Step 2: Upload Agreement</h3>
+                <div class="card mx-auto shadow-sm" style="max-width: 800px;">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h4 class="mb-0"><i class="bi bi-file-earmark-text"></i> Step 3: Signed Agreement</h4>
                     </div>
-                    <div class="card-body text-start">
-                        <div class="row">
-                            <div class="col-md-5">
-                                <label class="form-label" for="agreement">Agreement</label> <br>
-                                <a class="btn btn-primary" href="{{ asset('storage/agreement_forms/agreement_form.pdf') }}"
-                                    target="_blank">Download Agreement</a>
-                                <br>
-                                <small class="text-danger">Please download the agreement and sign it before uploading
-                                    it.</small>
-                                <br>
+                    <div class="card-body text-start p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-5 text-center">
+                                <h6 class="fw-bold mb-3">1. Download Agreement</h6>
+                                <a class="btn btn-outline-primary btn-lg mb-2" href="{{ asset('storage/agreement_forms/agreement_form.pdf') }}" target="_blank">
+                                    <i class="bi bi-download"></i> Download PDF
+                                </a>
+                                <p class="small text-muted mt-2">Please print, sign, and scan the agreement before proceeding to upload.</p>
                             </div>
 
-                            {{-- draw vertical line --}}
-                            <div class="col-md-1 border-start border-primary"></div>
+                            <div class="col-md-1 d-none d-md-block">
+                                <div class="vr h-100 mx-auto"></div>
+                            </div>
 
                             <div class="col-md-6">
-                                <form action="{{ route('agent.completeRegistration') }}" enctype="multipart/form-data"
-                                    id="uploadSignedAgreement" method="POST">
+                                <h6 class="fw-bold mb-3">2. Upload Signed Copy</h6>
+                                <form action="{{ route('agent.completeRegistration') }}" enctype="multipart/form-data" id="uploadSignedAgreement" method="POST">
                                     @csrf
-                                    <input hidden name="action" type="text" value="upload_agreement_form">
-                                    {{-- agent is --}}
-                                    <input hidden name="agent_id" type="text" value="{{ $me->id }}">
-                                    <div class="col-md-12 row">
-                                        <div class="col-md-8">
-                                            <label class="form-label" for="signed_agreement_form">Signed Agreement
-                                                Form</label>
-                                            <input class="form-control required-field" id="signed_agreement_form"
-                                                name="signed_agreement_form" required type="file">
-                                        </div>
-                                        <div class="col-md-4 text-end">
-                                            <label for="form-label"> </label>
-                                            <button class="btn btn-success mt-2" disabled="true"
-                                                type="submit">Upload</button>
-                                        </div>
+                                    <input name="action" type="hidden" value="upload_agreement_form">
+                                    <div class="mb-3">
+                                        <input class="form-control required-field" id="signed_agreement_form" name="signed_agreement_form" required type="file">
                                     </div>
+                                    <button class="btn btn-success w-100 py-2 mt-2" disabled type="submit">
+                                        <i class="bi bi-cloud-upload"></i> Complete Registration
+                                    </button>
                                 </form>
                             </div>
                         </div>
@@ -192,82 +217,57 @@
                 </div>
             </center>
         @elseif($me->registration_status == 'incomplete')
-            {{-- display Agent informations in a table --}}
             <center>
-                <div class="card mx-2">
-                    <div class="card-header bg-danger w-100# text-light">
-                        <h3 class="">Step 3: Verification Process is in Progress</h3>
+                <div class="card mx-auto shadow-sm border-danger" style="max-width: 600px;">
+                    <div class="card-header bg-danger text-white py-3">
+                        <h4 class="mb-0"><i class="bi bi-x-circle"></i> Application Rejected</h4>
                     </div>
-                    <div class="card-body text-start">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <p class="text-center">
-                                    Your registration has been rejected!
-                                </p>
-                                {{-- check if not verified yet --}}
-                                @if ($me->status == 'unverified')
-                                    <div class="my-4 text-center">
-                                        <div class="text-success" role="status">
-                                            verification status: 100%
-                                        </div> <br>
-                                        <span class="text-danger"><i class="bi bi-sad"> Rejected! </i></span> <br>
-                                        <span class="text-danger"><i class="bi bi-sad"> Reason: </i> Incorect Data</span>
-                                    </div>
-                                    {{-- set route to go to next step --}}
-                                    <div class="my-4 text-center">
-                                        <a class="btn btn-primary"
-                                            href="{{ route('agent.completeRegistration', ['action' => 'restart_steps']) }}">Re-Apply</a>
-                                    </div>
-                                @endif
-                                <p class="text-warning text-center">
-                                    We apologize for the inconvenience.
-                                </p>
-                            </div>
+                    <div class="card-body p-5">
+                        <div class="mb-4">
+                            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="fw-bold text-danger">Verification Failed</h5>
+                        <p class="text-muted mt-3">We regret to inform you that your application has been rejected due to incorrect or incomplete information provided. Please review your details and try again.</p>
+                        
+                        <div class="mt-4">
+                            <a class="btn btn-primary btn-lg px-5" href="{{ route('agent.completeRegistration', ['action' => 'restart_steps']) }}">
+                                <i class="bi bi-arrow-repeat"></i> Re-Apply Now
+                            </a>
                         </div>
                     </div>
                 </div>
             </center>
         @elseif($me->registration_status == 'step_2')
-            {{-- Display a message and a loader to ask client to wait while her documents are being verified --}}
             <center>
-                <div class="card mx-2">
-                    <div class="card-header bg-success w-100# text-light">
-                        <h3 class="">Step 3: Verification Process is in Progress</h3>
+                <div class="card mx-auto shadow-sm" style="max-width: 600px;">
+                    <div class="card-header bg-warning text-dark py-3">
+                        <h4 class="mb-0"><i class="bi bi-hourglass-split"></i> Step 2: Verification Pending</h4>
                     </div>
-                    <div class="card-body text-start">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <p class="text-center">
-                                    Please wait while we verify your documents.
-                                    This may take a few minutes to 24 hours.
-                                </p>
-                                {{-- check if not verified yet --}}
-                                @if ($me->status == 'unverified')
-                                    <div class="my-4 text-center">
-                                        <div class="spinner-border text-primary" role="status">
-                                        </div> <br>
-                                        <span class="visually-hidden#">Verifying...</span>
-                                    </div>
-                                    {{-- set route to go to next step --}}
-                                    <div class="my-4 text-center">
-                                        <a class="btn btn-danger"
-                                            href="{{ route('agent.completeRegistration', ['action' => 'restart_steps']) }}"
-                                            onclick="confirm('Are you sure you want to cancel?')">Cancel to Process</a>
-                                    </div>
-                                @endif
-                                @if ($me->status == 'verified')
-                                    {{-- set route to go to next step --}}
-                                    <div class="my-4 text-center">
-                                        <h1 class="h5 text-success"><i class="bi bi-person-check"> Verified!</i></h1>
-                                        <a class="btn btn-primary"
-                                            href="{{ route('agent.completeRegistration', ['action' => 'next_step']) }}">Next</a>
-                                    </div>
-                                @endif
-                                <p class="text-success text-center">
-                                    Please You can close this page and come back later.
-                                </p>
+                    <div class="card-body p-5">
+                        <div class="mb-4">
+                            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Loading...</span>
                             </div>
                         </div>
+                        <h5>Processing Your Application</h5>
+                        <p class="text-muted mt-3">Please wait while our team verifies your documents. This process typically takes between 2 to 24 hours.</p>
+                        
+                        @if ($me->status == 'verified')
+                            <div class="alert alert-success mt-4">
+                                <h5 class="alert-heading text-success mb-2"><i class="bi bi-check-circle-fill"></i> Account Verified!</h5>
+                                <p class="mb-3">Your documents have been successfully verified. Click the button below to proceed to the next step.</p>
+                                <a class="btn btn-success btn-lg px-5" href="{{ route('agent.completeRegistration', ['action' => 'next_step']) }}">
+                                    Proceed to Agreement <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        @else
+                            <div class="mt-4">
+                                <a class="btn btn-outline-danger" href="{{ route('agent.completeRegistration', ['action' => 'restart_steps']) }}" 
+                                   onclick="return confirm('Are you sure you want to cancel and edit your details?')">
+                                    <i class="bi bi-pencil-square"></i> Edit Details
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </center>
@@ -317,224 +317,296 @@
 
         <script>
             $(document).ready(function() {
-                let maxOptionalDocs = 2; // Maximum number of optional documents
-                let currentDocs = 0; // Track added documents
-                let totalRequiredFields = $(".required-field").length;
+                let maxOptionalDocs = 2;
+                let currentDocs = 0;
+
+                // Initialize Select2 for address fields
+                $('#region, #district, #ward, #street').select2({
+                    width: '100%',
+                });
+
+                // Load initial regions
+                $.get("{{ route('address.regions') }}", function(data) {
+                    let regionSelect = $('#region');
+                    data.forEach(function(region) {
+                        regionSelect.append(`<option value="${region}">${region}</option>`);
+                    });
+                    // Trigger change for select2 if it's already initialized
+                    if (regionSelect.data('select2')) {
+                        regionSelect.trigger('change');
+                    }
+                });
+
+                // Cascading logic
+                $('#region').on('change', function() {
+                    let region = $(this).val();
+                    let districtSelect = $('#district');
+                    districtSelect.prop('disabled', false).html('<option disabled selected value="">Select District</option>');
+                    $('#ward').prop('disabled', true).html('<option disabled selected value="">Select Ward</option>');
+                    $('#street').prop('disabled', true).html('<option disabled selected value="">Select Street</option>');
+                    
+                    $.get(`/address/districts/${region}`, function(data) {
+                        data.forEach(function(district) {
+                            districtSelect.append(`<option value="${district}">${district}</option>`);
+                        });
+                        if (districtSelect.data('select2')) {
+                            districtSelect.trigger('change');
+                        }
+                        updateProgress();
+                    });
+                });
+
+                $('#district').on('change', function() {
+                    let region = $('#region').val();
+                    let district = $(this).val();
+                    let wardSelect = $('#ward');
+                    wardSelect.prop('disabled', false).html('<option disabled selected value="">Select Ward</option>');
+                    $('#street').prop('disabled', true).html('<option disabled selected value="">Select Street</option>');
+                    
+                    $.get(`/address/wards/${region}/${district}`, function(data) {
+                        data.forEach(function(ward) {
+                            wardSelect.append(`<option value="${ward}">${ward}</option>`);
+                        });
+                        if (wardSelect.data('select2')) {
+                            wardSelect.trigger('change');
+                        }
+                        updateProgress();
+                    });
+                });
+
+                $('#ward').on('change', function() {
+                    let region = $('#region').val();
+                    let district = $('#district').val();
+                    let ward = $(this).val();
+                    let streetSelect = $('#street');
+                    streetSelect.prop('disabled', false).html('<option disabled selected value="">Select Street</option>');
+                    
+                    $.get(`/address/streets/${region}/${district}/${ward}`, function(data) {
+                        data.forEach(function(street) {
+                            streetSelect.append(`<option value="${street}">${street}</option>`);
+                        });
+                        if (streetSelect.data('select2')) {
+                            streetSelect.trigger('change');
+                        }
+                        updateProgress();
+                    });
+                });
+
+                $('#street').on('change', function() {
+                    updateProgress();
+                });
 
                 function updateProgress() {
+                    let totalRequired = $(".required-field").length;
                     let filledFields = $(".required-field").filter(function() {
-                        // Check if the field is the address field
-                        if ($(this).attr("id") === "address") {
-                            return validateAddress();
-                        }
-                        // Check if the field is a checkbox
                         if ($(this).attr("type") === "checkbox") {
                             return $(this).is(":checked");
                         }
-                        return $(this).val() !== "";
+                        if ($(this).is("select")) {
+                            return $(this).val() !== null && $(this).val() !== "";
+                        }
+                        return $(this).val().trim() !== "";
                     }).length;
 
-                    let percentage = Math.round((filledFields / totalRequiredFields) * 100);
-                    percentage = percentage > 100 ? 100 : percentage;
+                    let percentage = Math.round((filledFields / totalRequired) * 100);
+                    percentage = Math.min(percentage, 100);
 
-                    if (percentage == 100) {
-                        // Enable all submit buttons
+                    $("#progressBar")
+                        .css("width", percentage + "%")
+                        .attr("aria-valuenow", percentage)
+                        .text(percentage + "%");
+                    
+                    if (percentage === 100) {
                         $("button[type='submit']").prop("disabled", false);
                     } else {
-                        // Disable all submit buttons
                         $("button[type='submit']").prop("disabled", true);
                     }
-
-                    $("#progressBar").css("width", percentage + "%").attr("aria-valuenow", percentage).text(percentage +
-                        "%");
                 }
 
                 // Track input changes
-                $(".required-field").on("input change", function() {
+                $(document).on("input change", ".required-field, .form-check-input", function() {
                     updateProgress();
                 });
 
-                // Track checkbox changes
-                $(".form-check-input").on("change", function() {
-                    updateProgress();
-                });
-
-                // Add More Documents functionality
+                // Add More Documents
                 $("#addMoreDocuments").on("click", function() {
                     if (currentDocs < maxOptionalDocs) {
-                        let docIndex = currentDocs + 2; // Start from document_attachment_2
-
+                        let docIndex = currentDocs + 2;
                         let docHtml = `
-                        <div class="col-md-6 mt-4">
-                            <label for="document_attachment_${docIndex}_name" class="form-label">Optional Document ${currentDocs + 1} Name</label>
-                            <select class="form-select optional-document" id="document_attachment_${docIndex}_name" name="document_attachment_${docIndex}_name">
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label">Optional Document ${currentDocs + 1} Name</label>
+                            <select class="form-select" name="document_attachment_${docIndex}_name">
                                 <option selected disabled value="">Select Document</option>
                                 @foreach ($optionalDocuments as $option)
                                     <option value="{{ $option }}">{{ $option }}</option>
                                 @endforeach
                             </select>
                         </div>
-
-                        <div class="col-md-6 mt-4">
-                            <label for="document_attachment_${docIndex}" class="form-label">Upload Optional Document ${currentDocs + 1}</label>
-                            <input type="file" class="form-control optional-document" id="document_attachment_${docIndex}" name="document_attachment_${docIndex}">
-                        </div>
-                    `;
-
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label">Upload Optional Document ${currentDocs + 1}</label>
+                            <input type="file" class="form-control" name="document_attachment_${docIndex}">
+                        </div>`;
                         $("#optionalDocumentsContainer").append(docHtml);
                         currentDocs++;
-
                         if (currentDocs >= maxOptionalDocs) {
-                            $("#addMoreDocuments").prop("disabled", true).text("Max Documents Reached");
+                            $(this).prop("disabled", true).text("Max Documents Reached");
                         }
-
-                        updateProgress();
                     }
-                });
-
-                // Update file input label when a file is selected
-                $(document).on("change", "input[type='file']", function() {
-                    let fileName = $(this).val().split("\\").pop();
-                    $(this).siblings("label").text(fileName || "Choose file...");
-                    updateProgress();
-                });
-
-                updateProgress();
-
-                function validateAddress() {
-                    let address = $("#address").val().trim();
-                    let pattern =
-                        /^[A-Za-z\s]+,\s*[A-Za-z\s]+,\s*[A-Za-z\s]+,\s*[A-Za-z\s]+,\s*[A-Za-z\s]+,\s*\S+$/;
-                    let isValid = pattern.test(address);
-
-                    if (address === "") {
-                        $("#addressError").addClass("d-none");
-                        return false;
-                    } else if (!isValid) {
-                        $("#addressError").removeClass("d-none");
-                        return false;
-                    } else {
-                        $("#addressError").addClass("d-none");
-                        return true;
-                    }
-                }
-
-                // Update progress when address is typed
-                $("#address").on("keyup", function() {
-                    validateAddress();
-                    updateProgress();
                 });
 
                 $("form").on("submit", function(e) {
-                    e.preventDefault();
-                    // check if the form is id="uploadSignedAgreement" and if so, submit it
-                    if (this.id === "uploadSignedAgreement") {
-                        this.submit();
-                    }
-
-                    validateAddress();
-                    if (!$("#addressError").hasClass("d-none")) {
-                        e.preventDefault();
-                        alert("Please enter a valid address.");
-                    } else {
-                        this.submit(); // If all is valid, submit the form
-                    }
+                    if (this.id === "uploadSignedAgreement") return;
+                    
+                    // Combine address components
+                    let region = $('#region').val();
+                    let district = $('#district').val();
+                    let ward = $('#ward').val();
+                    let street = $('#street').val();
+                    let details = $('#address_details').val();
+                    let country = $('#country').val();
+                    
+                    let fullAddress = `${country}, ${region}, ${district}, ${ward}, ${street}, ${details}`;
+                    $('#combined_address').val(fullAddress);
                 });
+
+                updateProgress();
             });
         </script>
     @endhasrole
     {{-- check if user is admin --}}
     @hasrole('Superadmin')
-        {{-- List all agents data in a table, alow super admin to preview their documents and approve/reject them --}}
-
-        <div class="container mt-4">
-            <div class="table-responsive">
-                <table class="table-bordered table-striped table" id="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Address</th>
-                            <th>Status</th>
-                            <th>Documents</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($agents as $agent)
-                            <tr class="small">
-                                <td>{{ $agent->name }} <br> <span class="text-danger">
-                                        {{ $agent->isAgent && $agent->isAgent->agent_code != null ? 'Code: ' . $agent->isAgent->agent_code : '' }}</span>
-                                </td>
-                                <td>{{ $agent->email }}</td>
-                                <td>{{ $agent->phone }}</td>
-                                <td>{{ $agent->isAgent != null ? $agent->isAgent->address : '-' }}</td>
-                                <td>{{ $agent->isAgent != null ? ($agent->isAgent->registration_status == 'incomplete' ? 'Rejected' : $agent->isAgent->status) : 'unverified' }}
-                                </td>
-                                <td>
-                                    @if ($agent->isAgent != null)
-                                        {{-- display a document name as a link to open the document in a new tab --}}
-                                        <a href="{{ asset('storage/' . $agent->isAgent->document_attachment_1) }}"
-                                            target="_blank">
-                                            <small
-                                                class="text-primary smallest">{{ $agent->isAgent->document_attachment_1 ? $agent->isAgent->document_attachment_1_name : '' }}</small>
-                                        </a><br>
-                                        <a href="{{ asset('storage/' . $agent->isAgent->signed_agreement_form) }}"
-                                            target="_blank">
-                                            <small
-                                                class="text-primary smallest">{{ $agent->isAgent->signed_agreement_form ? 'Agreement Form' : '' }}</small>
-                                        </a> <br>
-                                        <a href="{{ asset('storage/' . $agent->isAgent->document_attachment_2) }}"
-                                            target="_blank">
-                                            <small
-                                                class="text-primary smallest">{{ $agent->isAgent->document_attachment_2 ? $agent->isAgent->document_attachment_2_name : '' }}</small>
-                                        </a> <br>
-                                        <a href="{{ asset('storage/' . $agent->isAgent->document_attachment_3) }}"
-                                            target="_blank">
-                                            <small
-                                                class="text-primary smallest">{{ $agent->isAgent->document_attachment_3 ? $agent->isAgent->document_attachment_3_name : '' }}</small>
-                                        </a>
-                                    @else
-                                        N/A
-                                    @endif
-                                </td>
-                                <td class="">
-                                    <div class="d-flex justify-content-center">
-                                        @if ($agent->isAgent != null)
-                                            <a class="{{ $agent->isAgent->registration_status == 'step_2' ? '' : 'hidden' }} text-success"
-                                                href="{{ route('agent.completeRegistration', ['action' => 'verify', 'set_status' => 'accepted', 'id' => $agent->isAgent->id]) }}"><small
-                                                    class="smallest"><i class="bi bi-check"> Verify</i></small></a> <br>
-                                            <a class="{{ $agent->isAgent->registration_status == 'step_2' ? '' : 'hidden' }} text-danger"
-                                                href="{{ route('agent.completeRegistration', ['action' => 'verify', 'set_status' => 'rejected', 'id' => $agent->isAgent->id]) }}"><small
-                                                    class="smallest"><i class="bi bi-x"> Reject</i></small></a>
-                                            <a class="{{ $agent->isAgent->registration_status == 'complete' ? '' : 'hidden' }} {{ $agent->isAgent->agent_code != null ? 'hidden' : '' }} text-primary"
-                                                href="{{ route('agent.completeRegistration', ['action' => 'generateAgentCode', 'id' => $agent->isAgent->id]) }}"><small
-                                                    class="smallest"><i class="bi bi-gear"> Generate code</small></i></a>
-                                            {{-- <form action="" method="POST" style="display: inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">Delete</button>
-                                            </form> --}}
-                                    </div>
-                                @else
-                                    N/A
-                        @endif
-                        </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        <div class="container mt-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4 class="mb-0 text-primary fw-bold"><i class="bi bi-people"></i> Agent Applications</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="agentTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Agent Information</th>
+                                    <th>Address & Location</th>
+                                    <th>Documents</th>
+                                    <th>Progress Status</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($agents as $agent)
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ $agent->name }}</div>
+                                            <div class="small text-muted"><i class="bi bi-envelope"></i> {{ $agent->email }}</div>
+                                            <div class="small text-muted"><i class="bi bi-telephone"></i> {{ $agent->phone }}</div>
+                                            @if($agent->isAgent && $agent->isAgent->agent_code)
+                                                <span class="badge bg-info mt-1">Code: {{ $agent->isAgent->agent_code }}</span>
+                                            @endif
+                                        </td>
+                                        <td class="small">
+                                            @if($agent->isAgent)
+                                                {{ $agent->isAgent->address }}
+                                                <div class="text-muted mt-1 small"><i class="bi bi-geo"></i> {{ $agent->isAgent->country }}</div>
+                                            @else
+                                                <span class="text-muted italic">No address provided</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($agent->isAgent)
+                                                <div class="d-flex flex-column gap-1">
+                                                    @if($agent->isAgent->document_attachment_1)
+                                                        <a href="{{ asset('storage/' . $agent->isAgent->document_attachment_1) }}" target="_blank" class="btn btn-sm btn-outline-primary text-start">
+                                                            <i class="bi bi-file-earmark-pdf"></i> {{ Str::limit($agent->isAgent->document_attachment_1_name, 15) }}
+                                                        </a>
+                                                    @endif
+                                                    @if($agent->isAgent->signed_agreement_form)
+                                                        <a href="{{ asset('storage/' . $agent->isAgent->signed_agreement_form) }}" target="_blank" class="btn btn-sm btn-outline-success text-start">
+                                                            <i class="bi bi-file-check"></i> Agreement Form
+                                                        </a>
+                                                    @endif
+                                                    @if($agent->isAgent->document_attachment_2)
+                                                        <a href="{{ asset('storage/' . $agent->isAgent->document_attachment_2) }}" target="_blank" class="btn btn-sm btn-outline-secondary text-start">
+                                                            <i class="bi bi-file-earmark"></i> {{ Str::limit($agent->isAgent->document_attachment_2_name, 15) }}
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="badge bg-light text-muted">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($agent->isAgent)
+                                                @php
+                                                    $statusClass = [
+                                                        'step_1' => 'bg-secondary',
+                                                        'step_2' => 'bg-warning text-dark',
+                                                        'step_3' => 'bg-info',
+                                                        'complete' => 'bg-success',
+                                                        'incomplete' => 'bg-danger'
+                                                    ][$agent->isAgent->registration_status] ?? 'bg-secondary';
+                                                    
+                                                    $statusLabel = [
+                                                        'step_1' => 'Incomplete Form',
+                                                        'step_2' => 'Pending Verification',
+                                                        'step_3' => 'Pending Agreement',
+                                                        'complete' => 'Active Agent',
+                                                        'incomplete' => 'Rejected'
+                                                    ][$agent->isAgent->registration_status] ?? $agent->isAgent->registration_status;
+                                                @endphp
+                                                <span class="badge {{ $statusClass }} px-3 py-2">{{ ucfirst($statusLabel) }}</span>
+                                                <div class="mt-1 small">
+                                                    @if($agent->isAgent->status == 'verified')
+                                                        <span class="text-success"><i class="bi bi-patch-check-fill"></i> Documents Verified</span>
+                                                    @else
+                                                        <span class="text-muted"><i class="bi bi-clock"></i> Not Verified</span>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="badge bg-light text-muted">No Record</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            @if ($agent->isAgent)
+                                                <div class="btn-group">
+                                                    @if ($agent->isAgent->registration_status == 'step_2' && $agent->isAgent->status != 'verified')
+                                                        <a class="btn btn-sm btn-success" href="{{ route('agent.completeRegistration', ['action' => 'verify', 'set_status' => 'accepted', 'id' => $agent->isAgent->id]) }}" title="Approve Verification">
+                                                            <i class="bi bi-check-lg"></i>
+                                                        </a>
+                                                        <a class="btn btn-sm btn-danger" href="{{ route('agent.completeRegistration', ['action' => 'verify', 'set_status' => 'rejected', 'id' => $agent->isAgent->id]) }}" title="Reject Application">
+                                                            <i class="bi bi-x-lg"></i>
+                                                        </a>
+                                                    @endif
+                                                    
+                                                    @if ($agent->isAgent->registration_status == 'complete' && !$agent->isAgent->agent_code)
+                                                        <a class="btn btn-sm btn-primary" href="{{ route('agent.completeRegistration', ['action' => 'generateAgentCode', 'id' => $agent->isAgent->id]) }}" title="Generate Agent Code">
+                                                            <i class="bi bi-gear-fill"></i>
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="text-muted small">No actions</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
         <script>
             $(document).ready(function() {
-                // initialize dataTable
-                $('#Table').DataTable({
+                $('#agentTable').DataTable({
                     "lengthMenu": [10, 25, 50, "All"],
                     "pageLength": 10,
-                    "order": [0, "asc"]
+                    "order": [[3, "desc"]],
+                    "responsive": true
                 });
             });
         </script>

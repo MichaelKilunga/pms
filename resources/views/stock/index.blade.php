@@ -21,17 +21,40 @@
             </div>
         </div>
 
+        <div class="row align-items-center mb-3">
+            <div class="col-md-3">
+                <label class="form-label fw-bold" for="medicineName">Medicine Name</label>
+                <input class="form-control shadow-sm" id="medicineName" placeholder="Search name..." type="text">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold" for="startDate">Start Date</label>
+                <input class="form-control shadow-sm" id="startDate" type="date">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold" for="endDate">End Date</label>
+                <input class="form-control shadow-sm" id="endDate" type="date">
+            </div>
+            <div class="col-md-3 d-flex align-items-end mt-4 mt-md-0 gap-2">
+                <button class="btn btn-primary flex-grow-1 shadow-sm mt-md-4" id="filterBtn">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+                <button class="btn btn-outline-secondary flex-grow-1 shadow-sm mt-md-4" id="resetBtn">
+                    <i class="bi bi-arrow-clockwise"></i> Reset
+                </button>
+            </div>
+        </div>
+
         {{-- Check if the user is an owner and define the data display container --}}
         @hasrole('Owner')
             <div class="privateData" hidden>
                 {{-- Display available stock's value in currency --}}
                 <div class="d-flex justify-content-between gap-2">
                     <p class="text-secondary"><strong class="fw-bold">Total Stock Value: </strong>
-                        {{ number_format($availableStock) }} {{ session('currency') ?? 'TZS' }}</p>
+                        <span id="totalStockValue">{{ number_format($availableStock) }}</span> {{ session('currency') ?? 'TZS' }}</p>
                     <p class="text-secondary"><strong class="fw-bold">Expected Total Sales: </strong>
-                        {{ number_format($expectedSales) }} {{ session('currency') ?? 'TZS' }}</p>
+                        <span id="expectedTotalSales">{{ number_format($expectedSales) }}</span> {{ session('currency') ?? 'TZS' }}</p>
                     <p class="text-secondary"><strong class="fw-bold">Expected Total Profit: </strong>
-                        {{ number_format($expectedProfit) }} {{ session('currency') ?? 'TZS' }}</p>
+                        <span id="expectedTotalProfit">{{ number_format($expectedProfit) }}</span> {{ session('currency') ?? 'TZS' }}</p>
                 </div>
                 <hr><br>
             </div>
@@ -487,10 +510,17 @@
         });
 
         $(document).ready(function() {
-            $('#tableOfStocks').DataTable({
+            const table = $('#tableOfStocks').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('stock') }}", // Laravel route
+                ajax: {
+                    url: "{{ route('stock') }}",
+                    data: function(d) {
+                        d.medicine_name = $('#medicineName').val();
+                        d.start_date = $('#startDate').val();
+                        d.end_date = $('#endDate').val();
+                    }
+                },
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -536,7 +566,26 @@
                 ],
                 order: [
                     [1, 'asc']
-                ] // Default sorting by Batch Number
+                ], // Default sorting by Batch Number
+                drawCallback: function(settings) {
+                    if (settings.json) {
+                        const json = settings.json;
+                        $('#totalStockValue').text(json.availableStock);
+                        $('#expectedTotalSales').text(json.expectedSales);
+                        $('#expectedTotalProfit').text(json.expectedProfit);
+                    }
+                }
+            });
+
+            $('#filterBtn').click(function() {
+                table.ajax.reload();
+            });
+
+            $('#resetBtn').click(function() {
+                $('#medicineName').val('');
+                $('#startDate').val('');
+                $('#endDate').val('');
+                table.ajax.reload();
             });
         });
 

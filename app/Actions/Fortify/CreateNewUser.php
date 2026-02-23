@@ -42,7 +42,7 @@ class CreateNewUser implements CreatesNewUsers
         ]);
 
         if ($input['role'] == 'agent') {
-            
+            $user->assignRole('Agent');
             $this->notify(
                 $user,
                 'Welcome on board! Follow the instructions to continue.',
@@ -57,9 +57,14 @@ class CreateNewUser implements CreatesNewUsers
         }
 
         if ($input['role'] == 'owner') {
+            $user->assignRole('Owner');
+            $message = Auth::check() 
+                ? 'Welcome to PILLPOINT, Contact Your Agent '.Auth::user()->name.', '.Auth::user()->phone.', to assign you to a subscription package.'
+                : 'Welcome to PILLPOINT! You can now initiate a 14-day free trial or generate a custom bill to get started.';
+
             $this->notify(
                 $user,
-                'Welcome to PILLPOINT, Contact Your Agent '.Auth::user()->name.', '.Auth::user()->phone.', to assign you to a subscription package.',
+                $message,
                 'success'
             );
         }

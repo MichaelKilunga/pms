@@ -16,8 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements Auditable
 {
     use HasApiTokens;
-    use  AuditingTrait;
-
+    use AuditingTrait;
     use HasRoles;
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
@@ -70,7 +69,7 @@ class User extends Authenticatable implements Auditable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Get the attributes that should be attributes to cast.
      *
      * @return array<string, string>
      */

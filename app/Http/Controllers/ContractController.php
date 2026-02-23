@@ -628,4 +628,41 @@ class ContractController extends Controller
 
         return redirect()->back()->with('success', 'Bill generated successfully. Please proceed to payment or notify admin.');
     }
+    public function startTrial(Request $request)
+    {
+        $owner = Auth::user();
+
+        // Check if owner already has any contracts
+        $hasContracts = Contract::where('owner_id', $owner->id)->exists();
+
+        if ($hasContracts) {
+            return redirect()->back()->with('error', 'Free trial is only available for new owners without existing contracts.');
+        }
+
+        $trialPackage = Package::where('price', 0)->where('duration', 14)->first();
+
+        if (!$trialPackage) {
+            $trialPackage = Package::find(1);
+        }
+
+        if (!$trialPackage) {
+            return redirect()->back()->with('error', 'Trial package not found. Please contact support.');
+        }
+
+        Contract::create([
+            'owner_id' => $owner->id,
+            'package_id' => $trialPackage->id,
+            'start_date' => now(),
+            'end_date' => now()->addDays(14),
+            'status' => 'active',
+            'payment_status' => 'payed',
+            'is_current_contract' => 1,
+            'amount' => 0,
+            'pricing_strategy' => 'standard',
+            'details' => ['is_trial' => true],
+            'agent_markup' => 0,
+        ]);
+
+        return redirect()->route('myContracts')->with('success', '14-day Free Trial started successfully!');
+    }
 }
