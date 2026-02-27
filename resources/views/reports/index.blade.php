@@ -752,6 +752,7 @@
                     language: {
                         search: "_INPUT_",
                         searchPlaceholder: "Search...",
+                        emptyTable: "No data available",
                         paginate: {
                             previous: '<i class="bi bi-chevron-left"></i>',
                             next: '<i class="bi bi-chevron-right"></i>'
@@ -804,7 +805,7 @@
             `;
                 });
                 if ($.fn.DataTable.isDataTable('#fastMovingDataTable')) $('#fastMovingDataTable').DataTable().destroy();
-                $('#fastMovingTable').html(fastHtml || '<tr><td colspan="4" class="text-center text-muted">No data</td></tr>');
+                $('#fastMovingTable').html(fastHtml);
                 initDataTable('#fastMovingDataTable');
 
                 // Slow Moving
@@ -822,7 +823,7 @@
                     });
                 }
                 if ($.fn.DataTable.isDataTable('#slowMovingDataTable')) $('#slowMovingDataTable').DataTable().destroy();
-                $('#slowMovingTable').html(slowHtml || '<tr><td colspan="4" class="text-center text-muted">No data</td></tr>');
+                $('#slowMovingTable').html(slowHtml);
                 initDataTable('#slowMovingDataTable');
 
                 // Urgent Restock
@@ -840,7 +841,7 @@
                     });
                 }
                 if ($.fn.DataTable.isDataTable('#urgentRestockDataTable')) $('#urgentRestockDataTable').DataTable().destroy();
-                $('#urgentRestockTable').html(urgentHtml || '<tr><td colspan="4" class="text-center text-success">No urgent restocks needed</td></tr>');
+                $('#urgentRestockTable').html(urgentHtml);
                 initDataTable('#urgentRestockDataTable');
 
                 // Overstocked
@@ -858,7 +859,7 @@
                     });
                 }
                 if ($.fn.DataTable.isDataTable('#overstockedDataTable')) $('#overstockedDataTable').DataTable().destroy();
-                $('#overstockedTable').html(overstockHtml || '<tr><td colspan="4" class="text-center text-success">No overstocked items</td></tr>');
+                $('#overstockedTable').html(overstockHtml);
                 initDataTable('#overstockedDataTable');
             }
 
@@ -918,7 +919,7 @@
             `;
                 });
                 if ($.fn.DataTable.isDataTable('#highMarginDataTable')) $('#highMarginDataTable').DataTable().destroy();
-                $('#highMarginTable').html(marginHtml || '<tr><td colspan="2" class="text-center text-muted">No data</td></tr>');
+                $('#highMarginTable').html(marginHtml);
                 initDataTable('#highMarginDataTable');
             }
 
@@ -1082,7 +1083,7 @@
             `;
                 });
                 if ($.fn.DataTable.isDataTable('#staffPerformanceDataTable')) $('#staffPerformanceDataTable').DataTable().destroy();
-                $('#staffPerformanceTable').html(staffHtml || '<tr><td colspan="4" class="text-center text-muted">No data available</td></tr>');
+                $('#staffPerformanceTable').html(staffHtml);
                 initDataTable('#staffPerformanceDataTable');
             }
         });

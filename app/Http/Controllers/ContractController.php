@@ -122,6 +122,17 @@ class ContractController extends Controller
             'status' => 'active',
         ]);
 
+        $owner = \App\Models\User::find($contract->owner_id);
+        if ($owner) {
+            $notificationData = [
+                'title' => 'Contract Activated',
+                'message' => "Your contract for {$contract->package->name} has been successfully activated by the admin.",
+                'type' => 'success',
+                'action_url' => route('myContracts'),
+            ];
+            \Illuminate\Support\Facades\Notification::send($owner, new \App\Notifications\InAppNotification($notificationData));
+        }
+
         return redirect()->back()->with('success', 'Contract initiated and activated successfully.');
     }
 
@@ -540,6 +551,10 @@ class ContractController extends Controller
     public function activate(Request $request)
     {
         $contractId = $request->query('contract_id');
+        // We shouldn't restrict to Auth::id() if admins also activate contracts for users.
+        // Assuming admin might activate this, let's fetch by ID and verify.
+        // Currently it has `Contract::where('owner_id', Auth::id())->findOrFail(...)`
+        // Let's keep existing logic but just add notification. Wait, if it's strictly Auth::id(), it's the owner themselves.
         $contract = Contract::where('owner_id', Auth::id())->findOrFail($contractId);
 
         if ($contract->payment_status !== 'payed') {
@@ -559,6 +574,17 @@ class ContractController extends Controller
             'is_current_contract' => 1,
             'status' => 'active',
         ]);
+
+        $owner = \App\Models\User::find($contract->owner_id);
+        if ($owner) {
+            $notificationData = [
+                'title' => 'Contract Activated',
+                'message' => "Your contract for {$contract->package->name} has been successfully activated and is valid until {$contract->end_date->format('M d, Y')}.",
+                'type' => 'success',
+                'action_url' => route('myContracts'),
+            ];
+            \Illuminate\Support\Facades\Notification::send($owner, new \App\Notifications\InAppNotification($notificationData));
+        }
 
         return redirect()->back()->with('success', 'Contract activated successfully.');
     }
