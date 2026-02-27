@@ -60,10 +60,10 @@ class ContractUpdaterService
                         'type' => 'App\Notifications\BillingNotification',
                         'notifiable_type' => 'App\Models\User',
                         'notifiable_id' => $owner->id,
-                        'data' => json_encode([
+                        'data' => [
                             'title' => 'New Billing Generated',
                             'message' => "Your contract has expired. A new bill (TZS " . number_format($newContract->amount) . ") has been generated for the next period.",
-                        ]),
+                        ],
                         'read_at' => null,
                     ]);
                 }

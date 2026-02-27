@@ -191,7 +191,7 @@
 
                 <!-- Contracts -->
                 <div class="col-6 col-md-4 col-lg-3">
-                    <a href="{{ route('contracts') }}" class="card quick-card bg-gradient-danger shadow-sm h-100">
+                    <a href="{{ route('contracts.admin.index') }}" class="card quick-card bg-gradient-danger shadow-sm h-100">
                         <div class="card-body">
                             <i class="bi bi-file-earmark-text"></i>
                             <h5>Contracts</h5>

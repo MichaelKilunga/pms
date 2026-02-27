@@ -39,12 +39,10 @@
                 <a class="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
                     href="{{ route('notifications') }}">
                     <i class="bi bi-bell text-xl"></i>
-                    @if (Auth::user()->unreadNotifications->count() > 0)
-                        <div
-                            class="absolute -right-1 -top-1 inline-flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 text-xs font-bold text-white dark:border-gray-900">
-                            {{ Auth::user()->unreadNotifications->count() }}
-                        </div>
-                    @endif
+                    <div id="notifyBellWrapper"
+                        class="{{ Auth::user()->unreadNotifications->count() > 0 ? '' : 'hidden' }} absolute -right-1 -top-1 inline-flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 text-xs font-bold text-white dark:border-gray-900">
+                        <span id="notifyBell">{{ Auth::user()->unreadNotifications->count() }}</span>
+                    </div>
                 </a>
 
                 <!-- Settings Dropdown -->

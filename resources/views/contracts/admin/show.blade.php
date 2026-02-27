@@ -1,122 +1,111 @@
-{{-- Display all package's detail actions for edit, delete and back to the list. 
-Database columns are here;
-$request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'duration' => 'required|string',
-            'status' => 'required|boolean',
-            'number_of_pharmacies' => 'required|numeric',
-            'number_of_pharmacists' => 'required|numeric',
-            'number_of_medicines' => 'required|numeric',
-            'in_app_notification' => 'required|boolean',
-            'email_notification' => 'required|boolean',
-            'sms_notifications' => 'required|boolean',
-            'online_support' => 'required|boolean',
-            'number_of_owner_accounts' => 'required|numeric',
-            'number_of_admin_accounts' => 'required|numeric',
-            'reports' => 'required|boolean',
-            'stock_transfer' => 'required|boolean',
-            'stock_management' => 'required|boolean',
-            'staff_management' => 'required|boolean',
-            'receipts' => 'required|boolean',
-            'analytics' => 'required|boolean',
-            'whatsapp_chats' => 'required|boolean',
-        ]); --}}
-@extends('packages.app')
+@extends('contracts.app')
 
 @section('content')
-<div class="container">
-    <h1>Package Details</h1>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="form-group">
-                <strong>Name:</strong>
-                {{ $package->name }}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-primary fw-bold mb-0">Contract Details</h1>
+        <div>
+            <a href="{{ route('contracts.admin.index') }}" class="btn btn-outline-secondary rounded-pill me-2">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
+            <a href="{{ route('contracts.admin.edit', $contract->id) }}" class="btn btn-warning rounded-pill shadow-sm">
+                <i class="bi bi-pencil me-1"></i> Edit Contract
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Contract Basic Info -->
+        <div class="col-md-6">
+            <div class="card rounded-4 border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom p-3">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-0"><i class="bi bi-file-earmark-text me-2"></i> Information</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between p-3">
+                            <span class="text-muted">Owner:</span>
+                            <span class="fw-bold text-dark">{{ $contract->owner->name }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between p-3">
+                            <span class="text-muted">Package:</span>
+                            <span class="badge bg-primary rounded-pill px-3">{{ $contract->package->name }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between p-3">
+                            <span class="text-muted">Amount:</span>
+                            <span class="fw-bold text-success">TZS {{ number_format($contract->amount) }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between p-3">
+                            <span class="text-muted">Pricing Strategy:</span>
+                            <span class="text-capitalize">{{ str_replace('_', ' ', $contract->pricing_strategy) }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between p-3">
+                            <span class="text-muted">Current Contract:</span>
+                            @if($contract->is_current_contract)
+                                <span class="badge bg-success rounded-pill px-3">Yes</span>
+                            @else
+                                <span class="badge bg-light text-muted border px-3">No</span>
+                            @endif
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <divi class="form-group">
-                <strong>Price:</strong>
-                {{ $package->price }}
+        </div>
+
+        <!-- Status & Dates -->
+        <div class="col-md-6">
+            <div class="card rounded-4 border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom p-3">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-0"><i class="bi bi-calendar-event me-2"></i> Status & Timeline</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between p-3">
+                            <span class="text-muted">Status:</span>
+                            <span class="badge bg-{{ $contract->status == 'active' ? 'success' : ($contract->status == 'inactive' ? 'secondary' : 'warning') }} rounded-pill px-3 text-capitalize">
+                                {{ $contract->status }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between p-3">
+                            <span class="text-muted">Payment Status:</span>
+                            <span class="badge bg-{{ $contract->payment_status == 'payed' ? 'success' : 'warning' }} rounded-pill px-3 text-capitalize">
+                                {{ $contract->payment_status }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between p-3">
+                            <span class="text-muted">Start Date:</span>
+                            <span>{{ \Carbon\Carbon::parse($contract->start_date)->format('M d, Y') }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between p-3">
+                            <span class="text-muted">End Date:</span>
+                            <span class="{{ \Carbon\Carbon::parse($contract->end_date)->isPast() ? 'text-danger fw-bold' : '' }}">
+                                {{ \Carbon\Carbon::parse($contract->end_date)->format('M d, Y') }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between p-3">
+                            <span class="text-muted">Days Remained:</span>
+                            @if(\Carbon\Carbon::parse($contract->end_date)->isFuture())
+                                <span class="text-primary fw-bold">{{ \Carbon\Carbon::parse($contract->end_date)->diffInDays(now()) }} Days</span>
+                            @else
+                                <span class="text-danger">Expired</span>
+                            @endif
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="form-group">
-                <strong>Duration:</strong>
-                {{ $package->duration }}
+        </div>
+
+        <!-- Details / JSON View -->
+        <div class="col-12 mt-4">
+            <div class="card rounded-4 border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom p-3">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-0"><i class="bi bi-code-square me-2"></i> Configuration Details</h6>
+                </div>
+                <div class="card-body">
+                    <pre class="bg-light p-3 rounded-3 mb-0" style="font-size: 0.85rem;">{{ json_encode($contract->details, JSON_PRETTY_PRINT) }}</pre>
+                </div>
             </div>
-            <div class="form-group">
-                <strong>Status:</strong>
-                {{ $package->status }}
-            </div>
-            <div class="form-group">
-                <strong>Number of Pharmacies:</strong>
-                {{ $package->number_of_pharmacies }}
-            </div>
-            <div class="form-group">
-                <strong>Number of Pharmacists:</strong>
-                {{ $package->number_of_pharmacists }}
-            </div>
-            <div class="form-group">
-                <strong>Number of Medicines:</strong>
-                {{ $package->number_of_medicines }}
-            </div>
-            <div class="form-group">
-                <strong>In App Notification:</strong>
-                {{ $package->in_app_notification }}
-            </div> 
-            <div class="form-group">
-                <strong>Email Notification:</strong>
-                {{ $package->email_notification }}
-            </div>
-            <div class="form-group">
-                <strong>SMS Notifications:</strong>
-                {{ $package->sms_notifications }}
-            </div> 
-            <div class="form-group">
-                <strong>Online Support:</strong>
-                {{ $package->online_support }}
-            </div>
-            <div class="form-group">
-                <strong>Number of Owner Accounts:</strong>
-                {{ $package->number_of_owner_accounts }}
-            </div>
-            <div class="form-group">
-                <strong>Number of Admin Accounts:</strong>
-                {{ $package->number_of_admin_accounts }}
-            </div>
-            <div class="form-group">
-                <strong>Reports:</strong>
-                {{ $package->reports }}
-            </div>
-            <div class="form-group">
-                <strong>Stock Transfer:</strong>
-                {{ $package->stock_transfer }}
-            </div>
-            <div class="form-group">
-                <strong>Stock Management:</strong>
-                {{ $package->stock_management }}
-            </div>
-            <div class="form-group">
-                <strong>Staff Management:</strong>
-                {{ $package->staff_management }}
-            </div>
-            <div class="form-group">
-                <strong>Receipts:</strong>
-                {{ $package->receipts }}
-            </div>
-            <div class="form-group">
-                <strong>Analytics:</strong>
-                {{ $package->analytics }}
-            </div>
-            <div class="form-group">
-                <strong>Whatsapp Chats:</strong>
-                {{ $package->whatsapp_chats }}
-            </div>
-            <div class="form-group">
-                <a href="{{ route('packages') }}" class="btn btn-primary">Back</a>
-                <a href="{{ route('packages.edit', $package->id) }}" class="btn btn-warning">Edit</a>
-                <form action="{{ route('packages.destroy', $package->id) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger {{$package->id==1? 'disabled':''}}">Delete</button>
-                </form>
-            </div>
+        </div>
+    </div>
 </div>
 @endsection

@@ -214,7 +214,7 @@ return [
             'label' => 'Contracts',
             'icon' => 'bi bi-file-earmark-text',
             'children' => [
-                ['label' => 'Contracts', 'route' => 'contracts'],
+                ['label' => 'Contracts', 'route' => 'contracts.admin.index'],
                 ['label' => "Agent's Contracts", 'route' => 'agent.packages', 'params' => ['action' => 'index']],
                 ['label' => 'Schedules', 'route' => 'update.contracts'],
                 ['label' => 'Pharmacies (Agent)', 'route' => 'agent.pharmacies', 'params' => ['action' => 'index']],

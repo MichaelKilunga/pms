@@ -273,7 +273,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/sales/filter/{duration}', [DashboardController::class, 'filterSales'])->name('sales.filter');
 
 
-    Route::get('/contracts', [ContractController::class, 'indexSuperAdmin'])->name('contracts');
+    Route::get('/contracts', [ContractController::class, 'indexSuperAdmin'])->name('contracts.admin.index');
     Route::get('/contracts/create', [ContractController::class, 'createSuperAdmin'])->name('contracts.admin.create');
     Route::post('/contracts', [ContractController::class, 'storeSuperAdmin'])->name('contracts.admin.store');
     Route::get('/contracts/{id}', [ContractController::class, 'showSuperAdmin'])->name('contracts.admin.show');

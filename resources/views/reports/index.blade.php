@@ -740,7 +740,7 @@
                 if ($.fn.DataTable.isDataTable(selector)) {
                     $(selector).DataTable().destroy();
                 }
-                $(selector).DataTable({
+                return $(selector).DataTable({
                     paging: true,
                     pageLength: 5,
                     lengthMenu: [5, 10, 25, 50],
@@ -748,6 +748,7 @@
                     ordering: true,
                     info: false,
                     responsive: true,
+                    autoWidth: false,
                     language: {
                         search: "_INPUT_",
                         searchPlaceholder: "Search...",
@@ -802,58 +803,62 @@
                 </tr>
             `;
                 });
-                $('#fastMovingTable').html(fastHtml ||
-                    '<tr><td colspan="4" class="text-center text-muted">No data</td></tr>');
+                if ($.fn.DataTable.isDataTable('#fastMovingDataTable')) $('#fastMovingDataTable').DataTable().destroy();
+                $('#fastMovingTable').html(fastHtml || '<tr><td colspan="4" class="text-center text-muted">No data</td></tr>');
+                initDataTable('#fastMovingDataTable');
 
                 // Slow Moving
                 let slowHtml = '';
-                data.slow_moving.forEach(item => {
-                    slowHtml += `
-                <tr>
-                    <td class="fw-bold">${item.item_name}</td>
-                    <td>${item.avg_daily_sales}</td>
-                    <td>${item.current_stock}</td>
-                    <td>${item.days_until_depletion} days</td>
-                </tr>
-            `;
-                });
-                $('#slowMovingTable').html(slowHtml ||
-                    '<tr><td colspan="4" class="text-center text-muted">No data</td></tr>');
+                if (data.slow_moving) {
+                    data.slow_moving.forEach(item => {
+                        slowHtml += `
+                    <tr>
+                        <td class="fw-bold">${item.item_name}</td>
+                        <td>${item.avg_daily_sales}</td>
+                        <td>${item.current_stock}</td>
+                        <td>${item.days_until_depletion} days</td>
+                    </tr>
+                `;
+                    });
+                }
+                if ($.fn.DataTable.isDataTable('#slowMovingDataTable')) $('#slowMovingDataTable').DataTable().destroy();
+                $('#slowMovingTable').html(slowHtml || '<tr><td colspan="4" class="text-center text-muted">No data</td></tr>');
+                initDataTable('#slowMovingDataTable');
 
                 // Urgent Restock
                 let urgentHtml = '';
-                data.urgent_restock.forEach(item => {
-                    urgentHtml += `
-                <tr class="table-danger">
-                    <td class="fw-bold">${item.item_name}</td>
-                    <td>${item.current_stock}</td>
-                    <td class="text-danger fw-bold">${item.days_until_depletion} days</td>
-                    <td class="text-success">${item.suggested_reorder_qty} units</td>
-                </tr>
-            `;
-                });
-                $('#urgentRestockTable').html(urgentHtml ||
-                    '<tr><td colspan="4" class="text-center text-success">No urgent restocks needed</td></tr>');
+                if (data.urgent_restock) {
+                    data.urgent_restock.forEach(item => {
+                        urgentHtml += `
+                    <tr class="table-danger">
+                        <td class="fw-bold">${item.item_name}</td>
+                        <td>${item.current_stock}</td>
+                        <td class="text-danger fw-bold">${item.days_until_depletion} days</td>
+                        <td class="text-success">${item.suggested_reorder_qty} units</td>
+                    </tr>
+                `;
+                    });
+                }
+                if ($.fn.DataTable.isDataTable('#urgentRestockDataTable')) $('#urgentRestockDataTable').DataTable().destroy();
+                $('#urgentRestockTable').html(urgentHtml || '<tr><td colspan="4" class="text-center text-success">No urgent restocks needed</td></tr>');
+                initDataTable('#urgentRestockDataTable');
 
                 // Overstocked
                 let overstockHtml = '';
-                data.overstocked.forEach(item => {
-                    overstockHtml += `
-                <tr>
-                    <td class="fw-bold">${item.item_name}</td>
-                    <td>${item.current_stock}</td>
-                    <td>${Math.round(item.days_until_depletion)} days</td>
-                    <td><span class="badge bg-warning">Reduce Orders</span></td>
-                </tr>
-            `;
-                });
-                $('#overstockedTable').html(overstockHtml ||
-                    '<tr><td colspan="4" class="text-center text-success">No overstocked items</td></tr>');
-
-                // Initialize DataTables
-                initDataTable('#fastMovingDataTable');
-                initDataTable('#slowMovingDataTable');
-                initDataTable('#urgentRestockDataTable');
+                if (data.overstocked) {
+                    data.overstocked.forEach(item => {
+                        overstockHtml += `
+                    <tr>
+                        <td class="fw-bold">${item.item_name}</td>
+                        <td>${item.current_stock}</td>
+                        <td>${Math.round(item.days_until_depletion)} days</td>
+                        <td><span class="badge bg-warning">Reduce Orders</span></td>
+                    </tr>
+                `;
+                    });
+                }
+                if ($.fn.DataTable.isDataTable('#overstockedDataTable')) $('#overstockedDataTable').DataTable().destroy();
+                $('#overstockedTable').html(overstockHtml || '<tr><td colspan="4" class="text-center text-success">No overstocked items</td></tr>');
                 initDataTable('#overstockedDataTable');
             }
 
@@ -912,9 +917,8 @@
                 </tr>
             `;
                 });
-                $('#highMarginTable').html(marginHtml ||
-                    '<tr><td colspan="2" class="text-center text-muted">No data</td></tr>');
-
+                if ($.fn.DataTable.isDataTable('#highMarginDataTable')) $('#highMarginDataTable').DataTable().destroy();
+                $('#highMarginTable').html(marginHtml || '<tr><td colspan="2" class="text-center text-muted">No data</td></tr>');
                 initDataTable('#highMarginDataTable');
             }
 
@@ -1077,9 +1081,8 @@
                 </tr>
             `;
                 });
-                $('#staffPerformanceTable').html(staffHtml ||
-                    '<tr><td colspan="4" class="text-center text-muted">No data available</td></tr>');
-
+                if ($.fn.DataTable.isDataTable('#staffPerformanceDataTable')) $('#staffPerformanceDataTable').DataTable().destroy();
+                $('#staffPerformanceTable').html(staffHtml || '<tr><td colspan="4" class="text-center text-muted">No data available</td></tr>');
                 initDataTable('#staffPerformanceDataTable');
             }
         });

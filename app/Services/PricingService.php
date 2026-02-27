@@ -17,7 +17,7 @@ class PricingService
      * @param int|null $packageId
      * @return array
      */
-    public function calculatePrice(User $user, int $months, ?int $packageId = null): array
+    public function calculatePrice(User $user, int $months, ?int $packageId = null, array $customCounts = []): array
     {
         // 1. Determine Strategy
         // If packageId is provided, we might be in Standard mode (unless overridden).
@@ -36,7 +36,7 @@ class PricingService
         if ($pricingMode === 'standard') {
             return $this->calculateStandardPrice($months, $packageId);
         } elseif ($pricingMode === 'dynamic') {
-            return $this->calculateDynamicPrice($user, $months);
+            return $this->calculateDynamicPrice($user, $months, $customCounts);
         } elseif ($pricingMode === 'profit_share') {
             return $this->calculateProfitSharePrice($user, $months);
         }
@@ -73,21 +73,30 @@ class PricingService
         ];
     }
 
-    protected function calculateDynamicPrice(User $user, int $months): array
+    protected function calculateDynamicPrice(User $user, int $months, array $customCounts = []): array
     {
         $rates = $this->getUpgradeRates();
         $res = $rates['resources'];
         
-        $branchesCount = $user->pharmacies()->count(); 
+        // Use custom counts if provided, else fallback to current DB state
+        $branchesCount = $customCounts['branches_count'] ?? $user->pharmacies()->count(); 
         
-        $staffCount = 1; // Start with owner
-        foreach($user->pharmacies as $pharmacy){
-            $staffCount += $pharmacy->staff()->count();
+        if (isset($customCounts['staff_count'])) {
+            $staffCount = $customCounts['staff_count'];
+        } else {
+            $staffCount = 1; // Start with owner
+            foreach($user->pharmacies as $pharmacy){
+                $staffCount += $pharmacy->staff()->count();
+            }
         }
         
-        $itemsCount = 0;
-        foreach($user->pharmacies as $pharmacy){
-             $itemsCount += $pharmacy->item()->count(); 
+        if (isset($customCounts['items_count'])) {
+            $itemsCount = $customCounts['items_count'];
+        } else {
+            $itemsCount = 0;
+            foreach($user->pharmacies as $pharmacy){
+                 $itemsCount += $pharmacy->item()->count(); 
+            }
         }
 
         $baseAmount = ($branchesCount * $res['pharmacy']) + 

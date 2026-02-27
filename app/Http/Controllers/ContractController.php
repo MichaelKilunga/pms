@@ -176,7 +176,7 @@ class ContractController extends Controller
 
         $pricingData = [
             'mode' => $pricingResult['strategy'], // This comes from system/user setting inside service
-            'base_amount' => $pricingResult['amount'], // Verification: This is 1 month amount
+            'amount' => $pricingResult['amount'], // Verification: This is 1 month amount
             'details' => $pricingResult['details'],
             'upgrade_rates' => $this->pricingService->getUpgradeRates(),
             'agent_markup' => Pharmacy::where('owner_id', $user->id)->sum('agent_extra_charge'), // Separate markup if needed specifically
@@ -200,6 +200,19 @@ class ContractController extends Controller
         }
 
         $contract->update(['payment_notified' => true]);
+
+        // Notify Superadmins
+        $superadmins = User::role('Superadmin')->get();
+        $owner = Auth::user();
+        
+        $notificationData = [
+            'title' => 'Contract Payment Notified',
+            'message' => "Payment notified by {$owner->name} for contract #{$contract->id} (" . number_format($contract->amount) . " TZS)",
+            'type' => 'info',
+            'action_url' => route('contracts.admin.show', $contract->id),
+        ];
+
+        \Illuminate\Support\Facades\Notification::send($superadmins, new \App\Notifications\InAppNotification($notificationData));
 
         return redirect()->back()->with('success', 'Admin notified of your payment. Please wait for confirmation.');
     }
@@ -589,11 +602,17 @@ class ContractController extends Controller
         $months = $request->input('months', 1);
         $owner = Auth::user();
 
+        // Ensure we have a valid package ID to satisfy the foreign key constraint
+        $packageId = $request->input('package_id');
+        if (!$packageId) {
+            // Check if user has a current contract to inherit package_id from
+            $currentContract = Contract::where('owner_id', $owner->id)->where('is_current_contract', 1)->first();
+            $packageId = $currentContract ? $currentContract->package_id : (Package::where('status', 'active')->first()->id ?? 1);
+        }
+
         // Calculate pricing
-        // If dynamic mode is active, the service will handle it, 
-        // but we might want to pass the intended counts if the user is inactive.
-        // For active users, service usually fetches from current DB state.
-        $pricingResult = $this->pricingService->calculatePrice($owner, $months, null);
+        // We pass $request->all() so the service can use intended counts for dynamic pricing
+        $pricingResult = $this->pricingService->calculatePrice($owner, $months, $packageId, $request->all());
 
         $amount = $pricingResult['amount'];
         $strategy = $pricingResult['strategy'];
@@ -614,7 +633,7 @@ class ContractController extends Controller
 
         Contract::create([
             'owner_id' => Auth::id(),
-            'package_id' => 3, // Default to a standard package ID
+            'package_id' => $packageId,
             'start_date' => now(),
             'end_date' => now()->addDays($months * 30),
             'status' => 'inactive',

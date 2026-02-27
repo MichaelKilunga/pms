@@ -40,6 +40,7 @@ class GeneralNotification extends BaseNotification
     public function toArray(object $notifiable): array
     {
         return [
+            'type' => $this->notification['type'] ?? 'info',
             'title' => $this->notification['subject'],
             'body' => $this->notification['body'],
             'action_url' => url('/'.$this->notification['path']),

@@ -16,28 +16,30 @@ class BaseNotification extends Notification
      */
     public function via($notifiable)
     {
-        $channels = ['database']; // Always in-app by default? Or make configurable?
+        $channels = [];
 
-        // Check if method exists to avoid errors if notification doesn't support the channel
-        
+        // Database (In-App)
+        if ($this->checkUserChannelPreference($notifiable, 'database')) {
+            $channels[] = 'database';
+        }
+
         // SMS
         if (method_exists($this, 'toSms')) {
-            // Check preferences
-            if ($this->shouldSend($notifiable, 'sms')) {
+            if ($this->checkUserChannelPreference($notifiable, 'sms')) {
                 $channels[] = SmsChannel::class;
             }
         }
 
         // WhatsApp
         if (method_exists($this, 'toWhatsapp')) {
-            if ($this->shouldSend($notifiable, 'whatsapp')) {
+            if ($this->checkUserChannelPreference($notifiable, 'whatsapp')) {
                 $channels[] = WhatsAppChannel::class;
             }
         }
 
         // Mail
         if (method_exists($this, 'toMail')) {
-             if ($this->shouldSend($notifiable, 'mail')) {
+             if ($this->checkUserChannelPreference($notifiable, 'mail')) {
                 $channels[] = 'mail';
             }
         }
@@ -45,7 +47,7 @@ class BaseNotification extends Notification
         return $channels;
     }
 
-    protected function shouldSend($notifiable, $channel)
+    protected function checkUserChannelPreference($notifiable, $channel)
     {
         if (method_exists($notifiable, 'wantsNotificationChannel')) {
             return $notifiable->wantsNotificationChannel($channel);

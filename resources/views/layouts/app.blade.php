@@ -329,13 +329,19 @@
                     url: '/notifications/unread_count', // Replace with your route to fetch unread notifications count
                     method: 'GET',
                     success: function(response) {
+                        const previousCount = parseInt($('#notifyBell').text()) || 0;
                         $('#notifyBell').text(response.unreadCount);
                         $('#notifyBellPhone').text(response.unreadCount);
+                        
                         if (response.unreadCount > 0) {
-                            // Play the notification sound
-                            $('#notification-sound')[0].play();
-                            // showBrowserNotification(
-                            //     `You have ${response.unreadCount} unread notifications.`);
+                            $('#notifyBellWrapper').removeClass('hidden');
+                            $('#notifyBellPhoneWrapper').removeClass('hidden');
+                            if (response.unreadCount > previousCount) {
+                                $('#notification-sound')[0].play();
+                            }
+                        } else {
+                            $('#notifyBellWrapper').addClass('hidden');
+                            $('#notifyBellPhoneWrapper').addClass('hidden');
                         }
                     },
                     complete: function() {

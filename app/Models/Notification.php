@@ -12,7 +12,23 @@ class Notification extends Model implements Auditable
     use HasFactory;
     use AuditingTrait;
 
-    protected $fillable = ['title', 'message', 'type', 'status', 'user_id'];
+    protected $fillable = [
+        'id',
+        'type',
+        'notifiable_type',
+        'notifiable_id',
+        'data',
+        'read_at'
+    ];
+
+    protected $casts = [
+        'data' => 'array',
+        'read_at' => 'datetime',
+    ];
+
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $auditEvents = [
         'created',
         'updated',

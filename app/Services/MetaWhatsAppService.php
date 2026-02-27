@@ -59,16 +59,19 @@ class MetaWhatsAppService
 
     public function isEnabled($pharmacyId = null)
     {
-        $pid = $pharmacyId ?? $this->pharmacyId;
-
         // 1. Core platform check (is it configured correctly?)
         if (!$this->isGlobalEnabled || !$this->phoneNumberId || !$this->accessToken) {
             return false;
         }
 
-        // 2. Subscription/Contract Check
-        if (!$pid) return false;
+        $pid = $pharmacyId ?? $this->pharmacyId;
 
+        // 2. If no pharmacy context, follow global setting (System Level)
+        if (!$pid) {
+            return true;
+        }
+
+        // 3. Subscription/Contract Check
         $pharmacy = \App\Models\Pharmacy::find($pid);
         if (!$pharmacy) return false;
 
