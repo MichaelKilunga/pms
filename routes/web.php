@@ -93,6 +93,11 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::get('/superadmin/users/{id}/notifications', [SuperAdminNotificationController::class, 'manageUser'])->name('superAdmin.users.notifications');
     Route::post('/superadmin/users/{id}/notifications', [SuperAdminNotificationController::class, 'updateUser'])->name('superAdmin.users.notifications.update');
 
+    // Advanced Manual Broadcast Notifications
+    Route::get('/superadmin/notifications/history', [\App\Http\Controllers\SuperAdmin\ManualNotificationController::class, 'index'])->name('superAdmin.notifications.history');
+    Route::get('/superadmin/notifications/compose', [\App\Http\Controllers\SuperAdmin\ManualNotificationController::class, 'create'])->name('superAdmin.notifications.compose');
+    Route::post('/superadmin/notifications/store', [\App\Http\Controllers\SuperAdmin\ManualNotificationController::class, 'store'])->name('superAdmin.notifications.store');
+
     //PHARMACIES
     Route::get('/superadmin/pharmacies', [SuperAdminController::class, 'managePharmacies'])->name('superadmin.pharmacies');
     Route::post('/superadmin/pharmacies', [SuperAdminController::class, 'storePharmacy'])->name('superadmin.pharmacies.store');

@@ -231,6 +231,17 @@
                         </div>
                     </a>
                 </div>
+
+                <!-- Manual Broadcasts -->
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="{{ route('superAdmin.notifications.history') }}" class="card quick-card bg-dark shadow-sm h-100" style="background: #e83e8c;">
+                        <div class="card-body">
+                            <i class="bi bi-broadcast"></i>
+                            <h5>Broadcasts</h5>
+                            <small class="opacity-75">Notify Users</small>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
     @endhasrole

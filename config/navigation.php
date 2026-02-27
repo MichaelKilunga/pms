@@ -233,7 +233,8 @@ return [
             'children' => [
                 ['label' => 'Messages', 'route' => 'agent.messages', 'params' => ['action' => 'index']],
                 ['label' => 'Notifications', 'route' => 'notifications'],
-                ['label' => 'Global Notifications', 'route' => 'superAdmin.notifications.index'],
+                ['label' => 'Manual Broadcasts', 'route' => 'superAdmin.notifications.history'],
+                ['label' => 'Channel Settings', 'route' => 'superAdmin.notifications.index'],
             ],
         ],
         [

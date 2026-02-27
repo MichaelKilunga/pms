@@ -8,6 +8,14 @@ use App\Channels\SmsChannel;
 
 class BaseNotification extends Notification
 {
+    public $forcedChannels = null;
+
+    public function withChannels(array $channels)
+    {
+        $this->forcedChannels = $channels;
+        return $this;
+    }
+
     /**
      * Get the notification's delivery channels.
      *
@@ -16,35 +24,46 @@ class BaseNotification extends Notification
      */
     public function via($notifiable)
     {
-        $channels = [];
+        $potentialChannels = [];
 
         // Database (In-App)
         if ($this->checkUserChannelPreference($notifiable, 'database')) {
-            $channels[] = 'database';
+            $potentialChannels['database'] = 'database';
         }
 
         // SMS
         if (method_exists($this, 'toSms')) {
             if ($this->checkUserChannelPreference($notifiable, 'sms')) {
-                $channels[] = SmsChannel::class;
+                $potentialChannels['sms'] = SmsChannel::class;
             }
         }
 
         // WhatsApp
         if (method_exists($this, 'toWhatsapp')) {
             if ($this->checkUserChannelPreference($notifiable, 'whatsapp')) {
-                $channels[] = WhatsAppChannel::class;
+                $potentialChannels['whatsapp'] = WhatsAppChannel::class;
             }
         }
 
         // Mail
         if (method_exists($this, 'toMail')) {
              if ($this->checkUserChannelPreference($notifiable, 'mail')) {
-                $channels[] = 'mail';
+                $potentialChannels['mail'] = 'mail';
             }
         }
 
-        return $channels;
+        // If forcedChannels is set, filter the potentials
+        if (is_array($this->forcedChannels)) {
+            $finalChannels = [];
+            foreach ($this->forcedChannels as $forced) {
+                if (isset($potentialChannels[$forced])) {
+                    $finalChannels[] = $potentialChannels[$forced];
+                }
+            }
+            return $finalChannels;
+        }
+
+        return array_values($potentialChannels);
     }
 
     protected function checkUserChannelPreference($notifiable, $channel)
