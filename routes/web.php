@@ -161,6 +161,7 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
         Route::get('stock', [StockController::class, 'index'])->name('stock');
         Route::get('stock/create', [StockController::class, 'create'])->name('stock.create');
         Route::post('stock', [StockController::class, 'store'])->name('stock.store');
+        Route::post('stock/bulk-update-low-stock', [StockController::class, 'bulkUpdateLowStock'])->name('stock.bulkUpdateLowStock');
         Route::get('stock/{id}', [StockController::class, 'show'])->name('stock.show');
         Route::put('stock', [StockController::class, 'update'])->name('stock.update');
         Route::put('stock/updateSBP', [StockController::class, 'updateSBP'])->name('stock.updateSBP');

@@ -65,6 +65,9 @@ class StockController extends Controller
 
             return DataTables::of($stocks)
                 ->addIndexColumn() // Adds auto-incrementing column
+                ->addColumn('select', function ($stock) {
+                    return '<input type="checkbox" class="stock-checkbox" value="'.$stock->id.'">';
+                })
                 ->editColumn('medicine_name', function ($stock) {
                     return \Illuminate\Support\Str::words($stock->item->name, 3, '...');
                 })
@@ -358,7 +361,7 @@ class StockController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['status', 'actions']) // Allow HTML rendering
+                ->rawColumns(['select', 'status', 'actions']) // Allow HTML rendering
                 ->filterColumn('medicine_name', function ($query, $keyword) {
                     $query->whereHas('item', function ($q) use ($keyword) {
                         $q->where('name', 'LIKE', "%{$keyword}%");
@@ -1034,5 +1037,30 @@ class StockController extends Controller
         return response()->json(['success' => true]);
         // return redirect()->back()->with('success', 'Stock check saved successfully.');
 
+    }
+
+    public function bulkUpdateLowStock(Request $request)
+    {
+        try {
+            $request->validate([
+                'stock_ids' => 'required|array',
+                'stock_ids.*' => 'exists:stocks,id',
+                'low_stock_percentage' => 'required|integer|min:1',
+            ]);
+
+            Stock::whereIn('id', $request->stock_ids)
+                ->where('pharmacy_id', session('current_pharmacy_id'))
+                ->update(['low_stock_percentage' => $request->low_stock_percentage]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Low stock percentage updated successfully for ' . count($request->stock_ids) . ' stocks.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
     }
 }

@@ -12,6 +12,7 @@
                     class="bi {{ Auth::user()->hasRole('Owner') ? '' : 'hidden' }} text-secondary bi-eye"
                     id="togglePrivateData" style="cursor: pointer;"></i></h1>
             <div>
+                <button class="btn btn-warning" id="bulkEditBtn" disabled data-bs-toggle="modal" data-bs-target="#bulkEditModal">Bulk Edit Low Stock %</button>
                 <a class="btn btn-success" data-bs-target="#createStockModal" data-bs-toggle="modal" href="#">Add New
                     Stock</a>
                 <a class="btn btn-success" data-bs-target="#createMedicineStockModal" data-bs-toggle="modal"
@@ -91,6 +92,7 @@
             <table class="table-striped table-bordered table-hover small table" id="tableOfStocks">
                 <thead>
                     <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
                         <th>#</th>
                         <th>Batch Number</th>
                         <th>Supplier</th>
@@ -302,6 +304,29 @@
                             <i class="bi bi-upload"></i> Import
                         </button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Edit Low Stock Modal -->
+    <div class="modal fade" id="bulkEditModal" tabindex="-1" aria-labelledby="bulkEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="bulkEditModalLabel">Bulk Edit Low Stock Percentage</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bulk_low_stock_percentage" class="form-label fw-bold">New Low Stock Percentage (%)</label>
+                        <input type="number" class="form-control shadow-sm" id="bulk_low_stock_percentage" min="1" placeholder="Enter percentage, e.g., 20">
+                        <small class="text-muted">This will update the low stock threshold for all selected stocks.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveBulkLowStockBtn">Save Changes</button>
                 </div>
             </div>
         </div>
@@ -522,6 +547,12 @@
                     }
                 },
                 columns: [{
+                        data: 'select',
+                        name: 'select',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
@@ -586,6 +617,80 @@
                 $('#startDate').val('');
                 $('#endDate').val('');
                 table.ajax.reload();
+            });
+        });
+
+        $(document).ready(function() {
+            const $selectAll = $('#selectAll');
+            const $bulkEditBtn = $('#bulkEditBtn');
+            const $table = $('#tableOfStocks');
+
+            $selectAll.on('change', function() {
+                $('.stock-checkbox').prop('checked', this.checked);
+                updateBulkEditButton();
+            });
+
+            $table.on('change', '.stock-checkbox', function() {
+                updateBulkEditButton();
+                if (!this.checked) {
+                    $selectAll.prop('checked', false);
+                } else if ($('.stock-checkbox:checked').length === $('.stock-checkbox').length) {
+                    $selectAll.prop('checked', true);
+                }
+            });
+
+            function updateBulkEditButton() {
+                const count = $('.stock-checkbox:checked').length;
+                $bulkEditBtn.prop('disabled', count === 0);
+                if (count > 0) {
+                    $bulkEditBtn.text(`Bulk Edit Low Stock % (${count})`);
+                } else {
+                    $bulkEditBtn.text('Bulk Edit Low Stock %');
+                }
+            }
+
+            $('#saveBulkLowStockBtn').on('click', function() {
+                const stockIds = $('.stock-checkbox:checked').map(function() {
+                    return $(this).val();
+                }).get();
+                const lowStockPct = $('#bulk_low_stock_percentage').val();
+
+                if (!lowStockPct || lowStockPct < 1) {
+                    alert('Please enter a valid low stock percentage (min 1).');
+                    return;
+                }
+
+                $(this).prop('disabled', true).text('Updating...');
+
+                $.ajax({
+                    url: "{{ route('stock.bulkUpdateLowStock') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        stock_ids: stockIds,
+                        low_stock_percentage: lowStockPct
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#bulkEditModal').modal('hide');
+                            $('#bulk_low_stock_percentage').val('');
+                            $selectAll.prop('checked', false);
+                            $('.stock-checkbox').prop('checked', false);
+                            updateBulkEditButton();
+                            $('#tableOfStocks').DataTable().ajax.reload();
+                            alert(response.message);
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        const response = xhr.responseJSON;
+                        alert('Error: ' + (response.message || 'Verification failed.'));
+                    },
+                    complete: function() {
+                        $('#saveBulkLowStockBtn').prop('disabled', false).text('Save Changes');
+                    }
+                });
             });
         });
 
