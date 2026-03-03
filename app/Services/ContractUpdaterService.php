@@ -23,20 +23,18 @@ class ContractUpdaterService
         $today = Carbon::now();
 
         try {
-            // 1. Identify active contracts that just ended
+            // 1. Identify ALL active contracts that just ended
             $expiredContracts = Contract::where('end_date', '<', $today)
-                ->where('is_current_contract', true)
                 ->where('status', 'active')
-                ->where('payment_status', 'payed')
                 ->get();
 
             foreach ($expiredContracts as $contract) {
                 // Deactivate current
                 $contract->update(['status' => 'inactive', 'is_current_contract' => false]);
 
-                // 2. Auto-generate new bill for the next period
+                // 2. Auto-generate new bill for the next period (Only if it was a paid current contract)
                 $owner = $contract->owner;
-                if ($owner) {
+                if ($owner && $contract->payment_status === 'payed') {
                     $pricingResult = $this->pricingService->calculatePrice($owner, 1, $contract->package_id);
                     
                     $newContract = Contract::create([
@@ -65,13 +63,12 @@ class ContractUpdaterService
                 }
             }
 
+            // Deactivate graced contracts that have reached their grace end date
             $contractGrace = Contract::where('grace_end_date', '<', $today)
-                ->where('is_current_contract', 1)
                 ->where('status', 'graced')
-                ->where('payment_status', 'payed')
                 ->update(['status' => 'inactive', 'is_current_contract' => 0]);
 
-            // Delete all contracts with pending payments where the start date exceeds 30 days (extended from 3)
+            // Delete all contracts with pending payments where the start date exceeds 30 days
             $pendingRemoved = Contract::where('payment_status', 'pending')
                 ->where('start_date', '<', $today->copy()->subDays(30))
                 ->delete();
