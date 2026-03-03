@@ -100,6 +100,11 @@ class StaffController extends Controller
                 'pharmacy_id' => $request->pharmacy_id,
             ]);
 
+            // Assign Add Stock Permission if checked
+            if ($request->has('add_stock')) {
+                $user->givePermissionTo('add stock');
+            }
+
             return redirect()->route('staff')->with('success', 'Staff added successfully!');
         } catch (\Exception $e) {
             // Handle any errors during user or staff creation
@@ -158,6 +163,13 @@ class StaffController extends Controller
             $user->syncRoles(['Manager']);
         } else {
             $user->syncRoles(['Staff']);
+        }
+
+        // Sync Add Stock Permission
+        if ($request->has('add_stock')) {
+            $user->givePermissionTo('add stock');
+        } else {
+            $user->revokePermissionTo('add stock');
         }
 
         return redirect()->route('staff')->with('success', 'Staff updated successfully.');

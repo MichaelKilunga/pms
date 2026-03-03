@@ -21,6 +21,7 @@
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Role</th>
+                        <th>Permissions</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -33,6 +34,13 @@
                             <td>{{ $staff->user->email }}</td>
                             <td>{{ $staff->user->phone }}</td>
                             <td>{{ $staff->user->role == 'Staff' ? 'Pharmacist' : 'Pharmacist' }}</td>
+                            <td>
+                                @if ($staff->user->hasPermissionTo('add stock'))
+                                    <span class="badge bg-info text-dark">Add Stock</span>
+                                @else
+                                    <span class="badge bg-secondary">Basic</span>
+                                @endif
+                            </td>
                             <td>{{ $staff->status == 'active' ? 'Active' : 'Inactive' }}</td>
                             <td>
                                 <a class="btn btn-primary btn-sm" data-bs-target="#viewStaffModal{{ $staff->id }}"
@@ -132,6 +140,15 @@
                                                         </select>
                                                     </div>
 
+                                                    <div class="mb-3 form-check">
+                                                        <input class="form-check-input" id="add_stock{{ $staff->id }}"
+                                                            name="add_stock" type="checkbox" value="1"
+                                                            {{ $staff->user->hasPermissionTo('add stock') ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="add_stock{{ $staff->id }}">
+                                                            Allow Adding Stock
+                                                        </label>
+                                                    </div>
+
                                                     <div class="mb-3">
                                                         <input name="pharmacy_id" type="hidden"
                                                             value="{{ session('current_pharmacy_id') }}">
@@ -204,6 +221,13 @@
                                 {{-- <option value="admin">Manager (Admin)</option> --}}
                                 <option value="staff">Pharmacist</option>
                             </select>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input class="form-check-input" id="add_stock" name="add_stock" type="checkbox"
+                                value="1">
+                            <label class="form-check-label" for="add_stock">
+                                Allow Adding Stock
+                            </label>
                         </div>
                         <button class="btn btn-primary" type="submit">Add Pharmacist</button>
                     </form>

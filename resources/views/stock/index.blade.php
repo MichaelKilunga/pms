@@ -12,13 +12,17 @@
                     class="bi {{ Auth::user()->hasRole('Owner') ? '' : 'hidden' }} text-secondary bi-eye"
                     id="togglePrivateData" style="cursor: pointer;"></i></h1>
             <div>
-                <button class="btn btn-warning" id="bulkEditBtn" disabled data-bs-toggle="modal" data-bs-target="#bulkEditModal">Bulk Edit Low Stock %</button>
-                <a class="btn btn-success" data-bs-target="#createStockModal" data-bs-toggle="modal" href="#">Add New
-                    Stock</a>
-                <a class="btn btn-success" data-bs-target="#createMedicineStockModal" data-bs-toggle="modal"
-                    href="#">Medicine + Stock</a>
-                <a class="btn btn-danger" data-bs-target="#importMedicineStockModal" data-bs-toggle="modal"
-                    href="#">Import CSV</a>
+                @can('manage stock')
+                    <button class="btn btn-warning" id="bulkEditBtn" disabled data-bs-toggle="modal" data-bs-target="#bulkEditModal">Bulk Edit Low Stock %</button>
+                @endcan
+                @can('add stock')
+                    <a class="btn btn-success" data-bs-target="#createStockModal" data-bs-toggle="modal" href="#">Add New
+                        Stock</a>
+                    <a class="btn btn-success" data-bs-target="#createMedicineStockModal" data-bs-toggle="modal"
+                        href="#">Medicine + Stock</a>
+                    <a class="btn btn-danger" data-bs-target="#importMedicineStockModal" data-bs-toggle="modal"
+                        href="#">Import CSV</a>
+                @endcan
             </div>
         </div>
 

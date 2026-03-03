@@ -68,6 +68,14 @@ class StockController extends Controller
                 ->addColumn('select', function ($stock) {
                     return '<input type="checkbox" class="stock-checkbox" value="'.$stock->id.'">';
                 })
+                ->orderColumn('status', function ($query, $order) {
+                    $query->orderByRaw("(CASE 
+                        WHEN expire_date < NOW() THEN 1 
+                        WHEN remain_Quantity < 1 THEN 2 
+                        WHEN low_stock_percentage > remain_Quantity THEN 3 
+                        ELSE 4 
+                    END) $order");
+                })
                 ->editColumn('medicine_name', function ($stock) {
                     return \Illuminate\Support\Str::words($stock->item->name, 3, '...');
                 })
@@ -91,6 +99,7 @@ class StockController extends Controller
                                 data-bs-target="#viewStockModal'.$stock->id.'">
                                 <i class="bi bi-eye"></i>
                             </a>
+                            '.(auth()->user()->can('manage stock') ? '
                             <a href="#" class="btn btn-success btn-sm ms-1" data-bs-toggle="modal"
                                 data-bs-target="#editStockModal'.$stock->id.'">
                                 <i class="bi bi-pencil"></i>
@@ -107,7 +116,7 @@ class StockController extends Controller
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>'
-                    ).'
+                            ) : '').'
                             '.($stock->selling_price < $stock->buying_price ?
                         '<button class="btn btn-warning btn-sm ms-1" data-bs-toggle="modal"
                                     data-bs-target="#editBuyingSellingPrice'.$stock->id.'">
@@ -383,6 +392,9 @@ class StockController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->can('add stock')) {
+            abort(403, 'Unauthorized action. You do not have permission to add stock.');
+        }
         $pharmacies = Pharmacy::where('owner_id', auth::id())->get();
         $items = Items::all();
         $staff = Staff::whereIn('pharmacy_id', $pharmacies->pluck('id'))->get();
@@ -392,6 +404,9 @@ class StockController extends Controller
 
     public function store(Request $request)
     {
+        if (!Auth::user()->can('add stock')) {
+            abort(403, 'Unauthorized action. You do not have permission to add stock.');
+        }
         $request->validate([
             'item_id' => 'required|array',
             'item_id.*' => 'required|exists:items,id',
@@ -450,6 +465,9 @@ class StockController extends Controller
     // add stock and medicines at a time
     public function MS_store(Request $request)
     {
+        if (!Auth::user()->can('add stock')) {
+            abort(403, 'Unauthorized action. You do not have permission to add stock.');
+        }
         try {
             $request->validate([
                 'item_name' => 'required|array',
@@ -535,6 +553,9 @@ class StockController extends Controller
      */
     public function update(Request $request, Stock $stock)
     {
+        if (!Auth::user()->can('manage stock')) {
+            abort(403, 'Unauthorized action. You do not have permission to edit stock.');
+        }
         try {
             $message = null;
             $stock = Stock::find($request->id);
@@ -668,6 +689,9 @@ class StockController extends Controller
      */
     public function destroy(Request $request)
     {
+        if (!Auth::user()->can('manage stock')) {
+            abort(403, 'Unauthorized action. You do not have permission to delete stock.');
+        }
         $stock = Stock::destroy($request->id);
 
         return redirect()->route('stock')->with('success', 'Stock deleted successfully.');
@@ -678,6 +702,9 @@ class StockController extends Controller
      */
     public function import(Request $request)
     {
+        if (!Auth::user()->can('add stock')) {
+            abort(403, 'Unauthorized action. You do not have permission to import stock.');
+        }
         // dd($request->all());
         try {
             $request->validate([
@@ -978,6 +1005,9 @@ class StockController extends Controller
 
     public function updateSBP(Request $request)
     {
+        if (!Auth::user()->can('manage stock')) {
+            abort(403, 'Unauthorized action. You do not have permission to edit stock prices.');
+        }
         try {
             DB::beginTransaction();
             $request->validate([
