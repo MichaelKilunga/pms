@@ -55,17 +55,13 @@ class ContractUpdaterService
                     ]);
 
                     // 3. Notify Owner
-                    Notification::create([
-                        'id' => \Illuminate\Support\Str::uuid(),
-                        'type' => 'App\Notifications\BillingNotification',
-                        'notifiable_type' => 'App\Models\User',
-                        'notifiable_id' => $owner->id,
-                        'data' => [
-                            'title' => 'New Billing Generated',
-                            'message' => "Your contract has expired. A new bill (TZS " . number_format($newContract->amount) . ") has been generated for the next period.",
-                        ],
-                        'read_at' => null,
-                    ]);
+                    $owner->notify(new \App\Notifications\BillingNotification($newContract));
+
+                    // 4. Notify Super Admins
+                    $superAdmins = \App\Models\User::where('role', 'super')->get();
+                    foreach ($superAdmins as $admin) {
+                        $admin->notify(new \App\Notifications\BillingNotification($newContract));
+                    }
                 }
             }
 

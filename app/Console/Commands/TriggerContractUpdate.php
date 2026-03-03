@@ -50,21 +50,44 @@ class TriggerContractUpdate extends Command
                     ->where('is_current_contract', true)
                     ->get();
                 
+                if ($expiringContracts->count() > 0) {
+                    $this->info("Found {$expiringContracts->count()} contracts expiring in {$days} days.");
+                }
+
                 foreach ($expiringContracts as $contract) {
                     try {
                         if ($contract->owner) {
-                            // Assuming the notification class exists and is configured
-                            // If not, we could fall back to our custom Notification model like in the service
-                            // $contract->owner->notify(new \App\Notifications\ContractExpiringNotification($contract, $days));
+                            // Smart Overlap Check: Check if owner has ANY other active contract that ends LATER
+                            $hasOverlap = Contract::where('owner_id', $contract->owner_id)
+                                ->where('id', '!=', $contract->id)
+                                ->where('status', 'active')
+                                ->where('end_date', '>', $contract->end_date)
+                                ->exists();
+
+                            if ($hasOverlap) {
+                                $this->line(" - Skipped owner notification for contract #{$contract->id} (Found overlapping active contract)");
+                                continue;
+                            }
+
+                            $contract->owner->notify(new \App\Notifications\ContractExpiringNotification($contract, $days));
+                            $this->line(" - Notified owner of contract #{$contract->id} ({$days} days remaining)");
+
+                            // Notify Super Admins
+                            $superAdmins = \App\Models\User::where('role', 'super')->get();
+                            foreach ($superAdmins as $admin) {
+                                $admin->notify(new \App\Notifications\ContractExpiringNotification($contract, $days));
+                            }
                         }
                     } catch (\Exception $e) {
                          \Log::error("Failed to notify contract expiry for contract {$contract->id}: " . $e->getMessage());
+                         $this->error("Failed to notify contract expiry for contract #{$contract->id}");
                     }
                 }
             }
 
         } catch (\Exception $e) {
             $this->error("Update failed: " . $e->getMessage());
+            \Log::error("Console Command contracts:auto-update failed: " . $e->getMessage());
             return 1;
         }
         
