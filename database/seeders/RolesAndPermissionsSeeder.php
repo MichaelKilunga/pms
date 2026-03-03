@@ -31,6 +31,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage pharmacy',
             'manage subscriptions',
             'manage agents',
+            'add stock',
         ];
 
         foreach ($permissions as $permission) {
@@ -49,11 +50,11 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Owner
         $ownerRole = Role::firstOrCreate(['name' => 'Owner']);
-        $ownerRole->givePermissionTo(['view dashboard', 'manage sales', 'manage stock', 'manage staff', 'manage settings', 'view reports', 'manage pharmacy']);
+        $ownerRole->givePermissionTo(['view dashboard', 'manage sales', 'manage stock', 'manage staff', 'manage settings', 'view reports', 'manage pharmacy', 'add stock']);
         
         // Pharmacy Manager (Admin)
         $managerRole = Role::firstOrCreate(['name' => 'Manager']);
-        $managerRole->givePermissionTo(['view dashboard', 'manage sales', 'manage stock', 'manage staff', 'view reports']);
+        $managerRole->givePermissionTo(['view dashboard', 'manage sales', 'manage stock', 'manage staff', 'view reports', 'add stock']);
 
         // Staff
         $staffRole = Role::firstOrCreate(['name' => 'Staff']);
