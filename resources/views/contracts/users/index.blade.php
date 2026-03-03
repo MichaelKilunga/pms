@@ -361,9 +361,9 @@
                                         const currStaff = document.getElementById('modalStaff').value;
                                         const currBranches = document.getElementById('modalBranches').value;
 
-                                        if (currItems !== defaults.items ||
-                                            currStaff !== defaults.staff ||
-                                            currBranches !== defaults.branches) {
+                                        if (currItems < defaults.items ||
+                                            currStaff < defaults.staff ||
+                                            currBranches < defaults.branches) {
                                             isMatch = false;
                                         }
 
