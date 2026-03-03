@@ -20,6 +20,7 @@ return [
             'label' => 'Stock',
             'icon' => 'bi bi-box-seam',
             'children' => [
+                ['label' => 'Stock', 'route' => 'stock'],
                 ['label' => 'Stock Balance', 'route' => 'stocks.balance'],
             ],
         ],

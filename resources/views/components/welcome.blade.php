@@ -45,6 +45,7 @@
         @hasanyrole('Owner|Manager')
             {{-- Quick Actions Section --}}
             <div class="row g-4 justify-content-center mb-4 text-center">
+                @can('add stock')
                 <div class="col-6 col-md-4 col-lg-3">
                     <button class="card bg-primary text-decoration-none text-white shadow-sm w-100 border-0 h-100"
                         data-bs-target="#quickAccessModal" data-bs-toggle="modal">
@@ -55,6 +56,7 @@
                         </div>
                     </button>
                 </div>
+                @endcan
                 <div class="col-6 col-md-4 col-lg-3">
                     <a class="card bg-success text-decoration-none text-white shadow-sm w-100 border-0 h-100"
                         href="{{ route('stocks.balance') }}">
@@ -73,6 +75,7 @@
                         </div>
                     </a>
                 </div>
+                @can('manage stock')
                 <div class="col-6 col-md-4 col-lg-3">
                     <a class="card bg-danger text-decoration-none text-white shadow-sm w-100 border-0 h-100"
                         href="{{ route('stockTransfers.index') }}">
@@ -82,6 +85,7 @@
                         </div>
                     </a>
                 </div>
+                @endcan
             </div>
 
             <div class="row g-4 justify-content-center mb-4 text-center">
@@ -605,6 +609,23 @@
                     <div class="card-body">
                         <h6><i class="bi bi-cart-plus fs-1#"></i> Create new Sales</h6>
 
+                    </div>
+                </a>
+            </div>
+            @can('add stock')
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button class="card bg-primary text-decoration-none text-white shadow" data-bs-target="#quickAccessModal"
+                        data-bs-toggle="modal">
+                        <div class="card-body">
+                            <h6><i class="bi bi-plus-circle fs-1#"></i> Add Stock</h6>
+                        </div>
+                    </button>
+                </div>
+            @endcan
+            <div class="col-6 col-md-4 col-lg-2">
+                <a class="card bg-warning text-dark text-decoration-none shadow" href="{{ route('stock') }}">
+                    <div class="card-body">
+                        <h6><i class="bi bi-box-seam fs-1#"></i> Stock List</h6>
                     </div>
                 </a>
             </div>
