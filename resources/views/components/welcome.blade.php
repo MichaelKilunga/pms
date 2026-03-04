@@ -621,14 +621,14 @@
                         </div>
                     </button>
                 </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <a class="card bg-warning text-dark text-decoration-none shadow" href="{{ route('stock') }}">
+                        <div class="card-body">
+                            <h6><i class="bi bi-box-seam fs-1#"></i> Stock List</h6>
+                        </div>
+                    </a>
+                </div>
             @endcan
-            <div class="col-6 col-md-4 col-lg-2">
-                <a class="card bg-warning text-dark text-decoration-none shadow" href="{{ route('stock') }}">
-                    <div class="card-body">
-                        <h6><i class="bi bi-box-seam fs-1#"></i> Stock List</h6>
-                    </div>
-                </a>
-            </div>
             <div class="col-6 col-md-4 col-lg-2">
                 <button class="card bg-info text-decoration-none text-white shadow" data-bs-target="#createSalesNoteModal"
                     data-bs-toggle="modal">
