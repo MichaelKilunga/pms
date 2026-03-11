@@ -5,12 +5,13 @@
         </h2>
     </x-slot> --}}
 
-    <div class="py-12#">
+    <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-xl sm:rounded-lg dark:bg-gray-800">
                 <x-welcome :filter="$filter" :filteredTotalSales="$filteredTotalSales" :lowStockCount="$lowStockCount" :medicineNames="$medicineNames" :medicineSales="$medicineSales"
                     :medicineStock="$medicineStock" :medicines="$medicines" :sellMedicines="$sellMedicines" :stockExpired="$stockExpired" :totalMedicines="$totalMedicines"
-                    :totalPharmacies="$totalPharmacies" :totalSales="$totalSales" :totalStaff="$totalStaff" />
+                    :totalPharmacies="$totalPharmacies" :totalSales="$totalSales" :totalStaff="$totalStaff" :config="$config" 
+                    :shortDatedCount="$shortDatedCount" :pendingDisposalCount="$pendingDisposalCount" />
             </div>
         </div>
         <!-- Suggested Stock Section -->

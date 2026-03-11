@@ -31,7 +31,27 @@ class Sidebar extends Component
         }
 
         $navigation = config('navigation');
-        $this->menu = $navigation[$role] ?? [];
+        $menu = $navigation[$role] ?? [];
+
+        // Apply dynamic filters for Staff
+        if ($role === 'staff' || $role === 'admin') {
+            $pharmacyId = session('current_pharmacy_id');
+            $pharmacy = \App\Models\Pharmacy::find($pharmacyId);
+            $config = $pharmacy->config ?? [];
+            $allowStaffViewStock = $config['allow_staff_view_stock'] ?? false;
+
+            if (!$allowStaffViewStock && !Auth::user()->hasRole('Owner')) {
+                foreach ($menu as &$item) {
+                    if ($item['label'] === 'Stock' && isset($item['children'])) {
+                        $item['children'] = array_filter($item['children'], function($child) {
+                            return $child['label'] !== 'Stock';
+                        });
+                    }
+                }
+            }
+        }
+
+        $this->menu = $menu;
     }
 
     /**

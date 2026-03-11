@@ -16,10 +16,11 @@ class BusinessSettingsController extends Controller
         // For this task, let's assume we configure the primary pharmacy or iterate.
         // The prompt says "Fetches the current authenticated owner's business."
         
-        $pharmacy = Pharmacy::where('owner_id', Auth::id())->first();
+        $pharmacyId = session('current_pharmacy_id');
+        $pharmacy = $pharmacyId ? Pharmacy::find($pharmacyId) : Pharmacy::where('owner_id', Auth::id())->first();
         
         if (!$pharmacy) {
-             return redirect()->back()->with('error', 'No business found.');
+             return redirect()->back()->with('error', 'No active business/pharmacy found.');
         }
 
         $config = $pharmacy->config ?? [];
@@ -29,7 +30,8 @@ class BusinessSettingsController extends Controller
 
     public function update(Request $request)
     {
-        $pharmacy = Pharmacy::where('owner_id', Auth::id())->first();
+        $pharmacyId = session('current_pharmacy_id');
+        $pharmacy = $pharmacyId ? Pharmacy::find($pharmacyId) : Pharmacy::where('owner_id', Auth::id())->first();
 
         if (!$pharmacy) {
             abort(404, 'Business not found');
@@ -45,7 +47,10 @@ class BusinessSettingsController extends Controller
             'email_notification',
             'sms_notification',
             'whatsapp_notification',
-            'in_app_notification'
+            'in_app_notification',
+            'allow_staff_edit_delete_stock',
+            'allow_staff_add_stock',
+            'allow_staff_view_stock'
         ];
         
         $newConfig = $pharmacy->config ?? [];
@@ -58,6 +63,10 @@ class BusinessSettingsController extends Controller
         // Update other keys (thresholds, etc)
         if ($request->has('low_stock_alert_level')) {
             $newConfig['low_stock_alert_level'] = $request->input('low_stock_alert_level');
+        }
+        
+        if ($request->has('short_dated_stock_duration')) {
+            $newConfig['short_dated_stock_duration'] = $request->input('short_dated_stock_duration');
         }
 
         $pharmacy->config = $newConfig;

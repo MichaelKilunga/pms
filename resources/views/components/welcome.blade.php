@@ -45,7 +45,7 @@
         @hasanyrole('Owner|Manager')
             {{-- Quick Actions Section --}}
             <div class="row g-4 justify-content-center mb-4 text-center">
-                @can('add stock')
+                @if(Auth::user()->can('add stock') && (Auth::user()->hasRole('Owner') || ($config['allow_staff_add_stock'] ?? false)))
                 <div class="col-6 col-md-4 col-lg-3">
                     <button class="card bg-primary text-decoration-none text-white shadow-sm w-100 border-0 h-100"
                         data-bs-target="#quickAccessModal" data-bs-toggle="modal">
@@ -56,7 +56,7 @@
                         </div>
                     </button>
                 </div>
-                @endcan
+                @endif
                 <div class="col-6 col-md-4 col-lg-3">
                     <a class="card bg-success text-decoration-none text-white shadow-sm w-100 border-0 h-100"
                         href="{{ route('stocks.balance') }}">
@@ -66,6 +66,7 @@
                         </div>
                     </a>
                 </div>
+                @if(Auth::user()->hasRole('Owner') || ($config['allow_staff_view_stock'] ?? false))
                 <div class="col-6 col-md-4 col-lg-3">
                     <a class="card bg-warning text-dark text-decoration-none shadow-sm w-100 border-0 h-100"
                         href="{{ route('stock') }}">
@@ -75,6 +76,8 @@
                         </div>
                     </a>
                 </div>
+                @endif
+                @if(Auth::user()->hasRole('Owner') || ($config['allow_staff_view_stock'] ?? false))
                 @can('manage stock')
                 <div class="col-6 col-md-4 col-lg-3">
                     <a class="card bg-danger text-decoration-none text-white shadow-sm w-100 border-0 h-100"
@@ -86,6 +89,7 @@
                     </a>
                 </div>
                 @endcan
+                @endif
             </div>
 
             <div class="row g-4 justify-content-center mb-4 text-center">
@@ -139,13 +143,43 @@
                 </div>
             </div>
 
+            <div class="row g-4 justify-content-center mb-4 text-center">
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a class="card bg-danger text-white text-decoration-none shadow-sm w-100 border-0 h-100"
+                        href="{{ route('shelf-life.expired') }}">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-calendar-x fs-1 mb-2"></i>
+                            <h6 class="mb-0">Expired Stock</h6>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a class="card bg-warning text-dark text-decoration-none shadow-sm w-100 border-0 h-100"
+                        href="{{ route('shelf-life.short-dated') }}">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-hourglass-split fs-1 mb-2"></i>
+                            <h6 class="mb-0">Short-dated Stock</h6>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a class="card bg-info text-white text-decoration-none shadow-sm w-100 border-0 h-100"
+                        href="{{ route('shelf-life.disposed') }}">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-trash fs-1 mb-2"></i>
+                            <h6 class="mb-0">Disposed Stock</h6>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
             {{-- Summary Section --}}
             <div class="row g-4 justify-content-center mb-4 text-center">
                 <div class="col-6 col-md-4 col-lg-2">
                     <div class="card bg-primary text-white shadow">
                         <div class="card-body">
                             <h6>
-                                <i class="bi bi-capsule fs-3# me-2"></i>Medicines
+                                <i class="bi bi-capsule fs-3 me-2"></i>Medicines
                             </h6>
                             <p class="fs-5 fw-bold">{{ $totalMedicines }}</p>
                         </div>
@@ -155,7 +189,7 @@
                     <div class="card bg-success text-white shadow">
                         <div class="card-body">
                             <h6>
-                                <i class="bi bi-people-fill fs-3# me-2"></i>Pharmacists
+                                <i class="bi bi-people-fill fs-3 me-2"></i>Pharmacists
                             </h6>
                             <p class="fs-5 fw-bold">{{ $totalStaff }}</p>
                         </div>
@@ -165,7 +199,7 @@
                     <div class="card bg-warning text-dark shadow">
                         <div class="card-body">
                             <h6>
-                                <i class="bi bi-hospital fs-2# me-2"></i>Pharmacies
+                                <i class="bi bi-hospital fs-2 me-2"></i>Pharmacies
                             </h6>
                             <p class="fs-5 fw-bold">{{ $totalPharmacies }}</p>
                         </div>
@@ -175,7 +209,7 @@
                     <div class="card bg-danger text-white shadow">
                         <div class="card-body">
                             <h6>
-                                <i class="bi bi-exclamation-triangle fs-3# me-2"></i>Expired
+                                <i class="bi bi-exclamation-triangle fs-3 me-2"></i>Expired
                             </h6>
                             <p class="fs-5 fw-bold">{{ $stockExpired }}</p>
                         </div>
@@ -185,7 +219,7 @@
                     <div class="card bg-info text-white shadow">
                         <div class="card-body">
                             <h6>
-                                <i class="bi bi-currency-exchange fs-3# me-2"></i>Today Sales
+                                <i class="bi bi-currency-exchange fs-3 me-2"></i>Today Sales
                             </h6>
                             <p class="fs-5 fw-bold">{{ number_format($totalSales, 2) }}</p>
                         </div>
@@ -195,9 +229,29 @@
                     <div class="card bg-secondary text-light shadow">
                         <div class="card-body">
                             <h6>
-                                <i class="bi bi-box-seam fs-3# me-2"></i>Low Stock
+                                <i class="bi bi-box-seam fs-3 me-2"></i>Low Stock
                             </h6>
                             <p class="fs-5 fw-bold">{{ $lowStockCount }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card bg-warning text-dark shadow">
+                        <div class="card-body">
+                            <h6>
+                                <i class="bi bi-hourglass-split fs-3 me-2"></i>Short Dated
+                            </h6>
+                            <p class="fs-5 fw-bold">{{ $shortDatedCount }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card bg-info text-white shadow">
+                        <div class="card-body">
+                            <h6>
+                                <i class="bi bi-trash fs-3 me-2"></i>To Dispose
+                            </h6>
+                            <p class="fs-5 fw-bold">{{ $pendingDisposalCount }}</p>
                         </div>
                     </div>
                 </div>
@@ -607,43 +661,77 @@
                 <a class="card bg-primary text-decoration-none text-white shadow" data-bs-target="#createSalesModal"
                     data-bs-toggle="modal" href="">
                     <div class="card-body">
-                        <h6><i class="bi bi-cart-plus fs-1#"></i> Create new Sales</h6>
+                        <h6><i class="bi bi-cart-plus fs-1"></i> Create new Sales</h6>
 
                     </div>
                 </a>
             </div>
-            @can('add stock')
+            @if(Auth::user()->hasRole('Owner') || ($config['allow_staff_add_stock'] ?? false))
                 <div class="col-6 col-md-4 col-lg-2">
                     <button class="card bg-primary text-decoration-none text-white shadow" data-bs-target="#quickAccessModal"
                         data-bs-toggle="modal">
                         <div class="card-body">
-                            <h6><i class="bi bi-plus-circle fs-1#"></i> Add Stock</h6>
+                            <h6><i class="bi bi-plus-circle fs-1"></i> Add Stock</h6>
                         </div>
                     </button>
                 </div>
+            @endif
+            @if(Auth::user()->hasRole('Owner') || ($config['allow_staff_view_stock'] ?? false))
                 <div class="col-6 col-md-4 col-lg-2">
                     <a class="card bg-warning text-dark text-decoration-none shadow" href="{{ route('stock') }}">
                         <div class="card-body">
-                            <h6><i class="bi bi-box-seam fs-1#"></i> Stock List</h6>
+                            <h6><i class="bi bi-box-seam fs-1"></i> Stock List</h6>
                         </div>
                     </a>
                 </div>
-            @endcan
+            @endif
             <div class="col-6 col-md-4 col-lg-2">
                 <button class="card bg-info text-decoration-none text-white shadow" data-bs-target="#createSalesNoteModal"
                     data-bs-toggle="modal">
                     <div class="card-body">
-                        <h6><i class="bi bi-plus-circle fs-1#"></i> Create Sales Notebook</h6>
+                        <h6><i class="bi bi-plus-circle fs-1"></i> Create Sales Notebook</h6>
                         {{-- <p class="fs-5 fw-bold">{{ $totalMedicines }}</p> --}}
                     </div>
                 </button>
             </div>
-            {{-- Summary Section --}}
+        </div>
+
+        <div class="row g-4 justify-content-center mb-4 text-center">
+            <div class="col-6 col-md-4 col-lg-3">
+                <a class="card bg-danger text-white text-decoration-none shadow-sm w-100 border-0 h-100"
+                    href="{{ route('shelf-life.expired') }}">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                        <i class="bi bi-calendar-x fs-1 mb-2"></i>
+                        <h6 class="mb-0">Expired Stock</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-3">
+                <a class="card bg-warning text-dark text-decoration-none shadow-sm w-100 border-0 h-100"
+                    href="{{ route('shelf-life.short-dated') }}">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                        <i class="bi bi-hourglass-split fs-1 mb-2"></i>
+                        <h6 class="mb-0">Short-dated Stock</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-3">
+                <a class="card bg-info text-white text-decoration-none shadow-sm w-100 border-0 h-100"
+                    href="{{ route('shelf-life.disposed') }}">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                        <i class="bi bi-trash fs-1 mb-2"></i>
+                        <h6 class="mb-0">Disposed Stock</h6>
+                    </div>
+                </a>
+            </div>
+        </div>
+        {{-- Summary Section --}}
+        <div class="row g-4 justify-content-center mb-4 text-center">
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="card bg-secondary text-white shadow">
                     <div class="card-body">
                         <h6>
-                            <i class="bi bi-capsule fs-3# me-2"></i>Medicines
+                            <i class="bi bi-capsule fs-3 me-2"></i>Medicines
                         </h6>
                         <p class="fs-5 fw-bold">{{ $totalMedicines }}</p>
                     </div>
@@ -653,7 +741,7 @@
                 <div class="card bg-danger text-white shadow">
                     <div class="card-body">
                         <h6>
-                            <i class="bi bi-exclamation-triangle fs-3# me-2"></i>Expired
+                            <i class="bi bi-exclamation-triangle fs-3 me-2"></i>Expired
                         </h6>
                         <p class="fs-5 fw-bold">{{ $stockExpired }}</p>
                     </div>
@@ -664,9 +752,19 @@
                 <div class="card bg-success text-white shadow">
                     <div class="card-body">
                         <h6>
-                            <i class="bi bi-currency-exchange fs-3# me-2"></i>Today Sales
+                            <i class="bi bi-currency-exchange fs-3 me-2"></i>Today Sales
                         </h6>
                         <p class="fs-5 fw-bold">{{ number_format($totalSales, 2) }} TZS</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="card bg-secondary text-light shadow">
+                    <div class="card-body">
+                        <h6>
+                            <i class="bi bi-box-seam fs-3 me-2"></i>Low Stock
+                        </h6>
+                        <p class="fs-5 fw-bold">{{ $lowStockCount }}</p>
                     </div>
                 </div>
             </div>
@@ -674,9 +772,19 @@
                 <div class="card bg-warning text-dark shadow">
                     <div class="card-body">
                         <h6>
-                            <i class="bi bi-box-seam fs-3# me-2"></i>Low Stock
+                            <i class="bi bi-hourglass-split fs-3 me-2"></i>Short Dated
                         </h6>
-                        <p class="fs-5 fw-bold">{{ $lowStockCount }}</p>
+                        <p class="fs-5 fw-bold">{{ $shortDatedCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="card bg-info text-white shadow">
+                    <div class="card-body">
+                        <h6>
+                            <i class="bi bi-trash fs-3 me-2"></i>To Dispose
+                        </h6>
+                        <p class="fs-5 fw-bold">{{ $pendingDisposalCount }}</p>
                     </div>
                 </div>
             </div>

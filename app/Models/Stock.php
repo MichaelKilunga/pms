@@ -64,6 +64,11 @@ class Stock extends Model implements Auditable
         return $this->hasManyThrough(Installment::class, Debt::class);
     }
 
+    public function disposedStocks()
+    {
+        return $this->hasMany(DisposedStock::class, 'stock_id');
+    }
+
     public function latestStockCheck()
     {
         return $this->hasOne(\App\Models\StockCheck::class, 'item_id', 'item_id')

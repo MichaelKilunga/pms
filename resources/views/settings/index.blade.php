@@ -1,4 +1,4 @@
-@extends('dashboard.app')
+@extends('layouts.app')
 
 @section('content')
     <div class="row">
@@ -10,7 +10,7 @@
                     <form action="{{ route('settings.update') }}" method="POST">
                         @csrf
 
-                        <h5 class="fw-bold text-primary mb-3">General Configuration</h5>
+                        {{-- <h5 class="fw-bold text-primary mb-3">General Configuration</h5>
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <div class="form-check form-switch p-3 bg-light rounded-3 border">
@@ -31,9 +31,9 @@
                                     <div class="text-muted small mt-1">Mandatory expiry date field for medicines.</div>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
 
-                        <h5 class="fw-bold text-primary mb-3">Feature Management</h5>
+                        {{-- <h5 class="fw-bold text-primary mb-3">Feature Management</h5>
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
                                 <div class="form-check form-switch p-3 bg-light rounded-3 border h-100">
@@ -59,19 +59,25 @@
                                     <div class="text-muted small mt-1">Allow moving stock between branches.</div>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
 
                         <h5 class="fw-bold text-primary mb-3">Inventory</h5>
                         <div class="row g-3 mb-4">
-                            <div class="col-md-6">
+                            {{-- <div class="col-md-6">
                                 <label class="form-label fw-bold">Low Stock Alert Level</label>
                                 <input type="number" class="form-control" name="low_stock_alert_level"
                                     value="{{ $config['low_stock_alert_level'] ?? 10 }}">
                                 <div class="form-text">Notify when item quantity falls below this number.</div>
+                            </div> --}}
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Short-Dated Stock Threshold (Days)</label>
+                                <input type="number" class="form-control" name="short_dated_stock_duration"
+                                    value="{{ $config['short_dated_stock_duration'] ?? 90 }}">
+                                <div class="form-text">Days before expiry to flag as short-dated (e.g., 90 for 3 months).</div>
                             </div>
                         </div>
 
-                        <h5 class="fw-bold text-primary mb-3">Notifications</h5>
+                        {{-- <h5 class="fw-bold text-primary mb-3">Notifications</h5>
                         <div class="row g-3 mb-4">
                             <div class="col-md-3">
                                 <div class="form-check form-switch">
@@ -102,9 +108,42 @@
                                     <label class="form-check-label" for="in_app_notification">In-App</label>
                                 </div>
                             </div>
+                        </div> --}}
+
+                        <h5 class="fw-bold text-primary mb-3">Staff Permissions</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch p-3 bg-light rounded-3 border">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="allow_staff_edit_delete_stock"
+                                        name="allow_staff_edit_delete_stock" @checked($config['allow_staff_edit_delete_stock'] ?? false)>
+                                    <label class="form-check-label fw-bold" for="allow_staff_edit_delete_stock">Allow Staff to Edit/Delete Stock</label>
+                                    <div class="text-muted small mt-1">If enabled, staff with stock management permissions can edit or delete stock records.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch p-3 bg-light rounded-3 border h-100">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="allow_staff_view_stock"
+                                        name="allow_staff_view_stock" @checked($config['allow_staff_view_stock'] ?? false)>
+                                    <label class="form-check-label fw-bold" for="allow_staff_view_stock">Allow Staff to View Stock</label>
+                                    <div class="text-muted small mt-1">If enabled, staff with stock management permissions can view the stock list and balance.</div>
+                                </div>
+                            </div>
+                            </div>
+                            <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch p-3 bg-light rounded-3 border h-100">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="allow_staff_add_stock"
+                                        name="allow_staff_add_stock" @checked($config['allow_staff_add_stock'] ?? false)>
+                                    <label class="form-check-label fw-bold" for="allow_staff_add_stock">Allow Staff to Add Stock</label>
+                                    <div class="text-muted small mt-1">If enabled, staff members can add new stock records to the system.</div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="text-end">
+                        <div class="text-end mb-2 mx-2">
                             <button type="submit" class="btn btn-primary rounded-pill px-5 shadow fw-bold">
                                 <i class="bi bi-save me-2"></i> Save Settings
                             </button>

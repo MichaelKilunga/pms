@@ -2,27 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Pharmacy;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use  Illuminate\Support\Carbon;
-use App\Models\Staff;
+use App\Models\Contract;
 use App\Models\Items;
 use App\Models\Package;
+use App\Models\Pharmacy;
 use App\Models\PrinterSetting;
 use App\Models\Sales;
+use App\Models\Staff;
 use App\Models\Stock;
 use App\Models\User;
-use App\Models\Contract;
 use App\Notifications\InAppNotification;
-use App\Notifications\WelcomeNotification;
 use App\Notifications\SmsNotification;
+use App\Notifications\WelcomeNotification;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
-use function Pest\Laravel\get;
-use function PHPUnit\Framework\isEmpty;
 
 class DashboardController extends Controller
 {
@@ -38,7 +36,7 @@ class DashboardController extends Controller
         // // Send the SMS
         // Notification::send($user, new SmsNotification($phoneNumber, $message));
 
-        // $user = User::whereId(Auth::user()->id)->first(); 
+        // $user = User::whereId(Auth::user()->id)->first();
         // $notification = [
         //     'message'=>'Final trial message!',
         //     'type'=>'success',
@@ -59,7 +57,7 @@ class DashboardController extends Controller
                 'agent' => 'Agent',
                 'owner' => 'Owner',
                 'admin' => 'Manager',
-                'staff' => 'Staff'
+                'staff' => 'Staff',
             ];
             $roleToAssign = $roleMap[$user->role] ?? null;
             if ($roleToAssign) {
@@ -78,22 +76,22 @@ class DashboardController extends Controller
             })->count();
             // dd($countactivepharmacies);
 
-            //call all users
+            // call all users
             $users = User::all()->count();
 
-            //call all users with role agent
+            // call all users with role agent
             $agents = User::role('Agent')->count();
 
-            //active contracts
+            // active contracts
             $activeContracts = Contract::where('is_current_contract', 1)->count();
             $expiredContracts = Contract::where('is_current_contract', 0)->count();
 
-            //all packages
+            // all packages
             $packages = Package::all()->count();
             $activePackages = Package::where('status', '1')->count();
             $inactivePackages = Package::where('status', '0')->count();
 
-            //notifications
+            // notifications
             // $notifications = Notification::where('user_id', Auth::user()->id)->count();
             // dd($notifications);
 
@@ -112,7 +110,7 @@ class DashboardController extends Controller
             $totalPharmacies = Pharmacy::where('agent_id', Auth::user()->id)->count();
             $totalPackages = Package::count();
 
-            $activePharmacies  = Pharmacy::where('agent_id', Auth::user()->id)
+            $activePharmacies = Pharmacy::where('agent_id', Auth::user()->id)
                 ->whereHas('owner', function ($query) {
                     $query->whereHas('contracts', function ($query) {
                         $query->where('is_current_contract', 1)
@@ -132,15 +130,19 @@ class DashboardController extends Controller
 
         if (Auth::user()->hasRole('Staff') || Auth::user()->hasRole('Manager')) {
             $staff = Staff::where('user_id', Auth::user()->id)->first();
-            $pharmacy = Pharmacy::where('id', $staff->pharmacy_id)->first();
-            session(['current_pharmacy_id' => $pharmacy->id]);
+            if ($staff) {
+                $pharmacy = Pharmacy::find($staff->pharmacy_id);
+                if ($pharmacy) {
+                    session(['current_pharmacy_id' => $pharmacy->id]);
+                }
+            }
         }
 
         $sellMedicines = Stock::select(
             // generate a new id for each row by concatenating item_id and selling_price
             DB::raw("CONCAT(item_id, '-', selling_price) as id"),
             'item_id',
-            DB::raw("SUM(remain_Quantity) as remain_Quantity"),
+            DB::raw('SUM(remain_Quantity) as remain_Quantity'),
             'selling_price'
         )
             ->where('pharmacy_id', session('current_pharmacy_id'))
@@ -150,7 +152,6 @@ class DashboardController extends Controller
             ->with('item')
             ->get();
 
-
         // dd($sellMedicines);
 
         $totalMedicines = Items::where('pharmacy_id', session('current_pharmacy_id'))->count();
@@ -159,17 +160,39 @@ class DashboardController extends Controller
 
         if (Auth::user()->hasRole('Staff')) {
             $staff = Staff::where('user_id', Auth::user()->id)->first();
-            $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id', $staff->id)->sum(DB::raw('total_price * quantity'));
+            if ($staff) {
+                $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))
+                    ->where('staff_id', $staff->id)
+                    ->sum(DB::raw('total_price * quantity'));
+            } else {
+                $totalSales = 0;
+            }
         }
 
         $totalStaff = Staff::where('pharmacy_id', session('current_pharmacy_id'))->count(); // Adjust as needed
         $lowStockCount = Stock::whereColumn('low_stock_percentage', '>', 'remain_Quantity')->where('pharmacy_id', session('current_pharmacy_id'))->count(); // Low stock threshold
-        $stockExpired = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '<', now())->count();
-        // dd($lowStockCount);
+        // $stockExpired = Stock::where('pharmacy_id', session('current_pharmacy_id'))->where('expire_date', '<', now())->count();
+        $stockExpired = Stock::where('pharmacy_id', session('current_pharmacy_id'))
+            ->where('expire_date', '<', now())
+            ->where('remain_Quantity', '>', 0)
+            ->count();
+
+        $shortDatedDays = (int) ($config['short_dated_stock_duration'] ?? 90);
+        $shortDatedCount = Stock::where('pharmacy_id', session('current_pharmacy_id'))
+            ->where('expire_date', '>=', Carbon::today())
+            ->where('expire_date', '<=', Carbon::today()->addDays($shortDatedDays))
+            ->where('remain_Quantity', '>', 0)
+            ->count();
+
+        $pendingDisposalCount = DB::table('disposed_stocks')
+            ->where('pharmacy_id', session('current_pharmacy_id'))
+            ->where('status', 'pending')
+            ->count();
 
         $pharmacyId = session('current_pharmacy_id');
-        session(['pharmacy_name' => Pharmacy::where('id', session('current_pharmacy_id'))->value('name')]);
-        session(['location' => Pharmacy::where('id', session('current_pharmacy_id'))->value('location')]);
+        session(['pharmacy_name' => Pharmacy::where('id', $pharmacyId)->value('name')]);
+        session(['location' => Pharmacy::where('id', $pharmacyId)->value('location')]);
+        $config = Pharmacy::where('id', $pharmacyId)->value('config') ?? [];
 
         $itemsSummary = DB::table('items')
             ->leftJoin('sales', function ($join) use ($pharmacyId) {
@@ -188,8 +211,6 @@ class DashboardController extends Controller
             ->groupBy('items.id', 'items.name')
             ->havingRaw('SUM(sales.quantity) > 0') // Exclude items with no sales
             ->get();
-
-
 
         if (Auth::user()->hasRole('Staff')) {
             $itemsSummary = DB::table('items')
@@ -217,7 +238,6 @@ class DashboardController extends Controller
 
         $medicines = $itemsSummary;
 
-
         $filter = 'day';
         $query = Sales::where('pharmacy_id', session('current_pharmacy_id'))->whereDate('created_at', Carbon::today());
 
@@ -228,7 +248,6 @@ class DashboardController extends Controller
             $filteredTotalSales = $query->where('staff_id', Auth::user()->id)->sum(DB::raw('total_price * quantity'));
             // dd($filteredTotalSales);
         }
-
 
         if (Auth::user()->hasRole('Owner') || Auth::user()->role === 'owner' || Pharmacy::where('owner_id', Auth::user()->id)->exists()) {
 
@@ -248,7 +267,7 @@ class DashboardController extends Controller
                     session(['agentData' => $agent]);
                     // dd(session('agentData'));
                     if (Auth::user()->contracts->where('is_current_contract', 1)->count() < 1) {
-                        return redirect()->route('myContracts')->with('info', "Contact your agent to subscribe you first!");
+                        return redirect()->route('myContracts')->with('info', 'Contact your agent to subscribe you first!');
                     }
                 } else {
                     // clear session
@@ -257,15 +276,14 @@ class DashboardController extends Controller
                 }
             }
 
-
             if (Auth::user()->contracts->where('is_current_contract', 1)->count() < 1) {
                 // Check if user is on dynamic pricing
                 $pricingMode = Auth::user()->pricing_mode ?? \App\Models\SystemSetting::where('key', 'pricing_mode')->value('value') ?? 'standard';
-                
-                // If standard/profit share, enforce subscription. 
+
+                // If standard/profit share, enforce subscription.
                 // If dynamic, we allow them to pass (Middleware will handle specific route blocking)
                 if ($pricingMode != 'dynamic') {
-                     return redirect()->route('myContracts')->with('info', 'Welcome on board! Subscribe first to continue using our products!');
+                    return redirect()->route('myContracts')->with('info', 'Welcome on board! Subscribe first to continue using our products!');
                 }
                 // If dynamic, we let them proceed to dashboard so they can add items.
             }
@@ -284,32 +302,37 @@ class DashboardController extends Controller
                     'totalStaff',
                     'totalPharmacies',
                     'stockExpired',
+                    'shortDatedCount',
+                    'pendingDisposalCount',
                     'filteredTotalSales',
                     'filter',
-                    'sellMedicines'
+                    'sellMedicines',
+                    'config'
                 ));
             } else {
                 session(['guest-owner' => true]);
+
                 return view('guest-dashboard');
             }
         } else {
             $staff = Staff::where('user_id', Auth::user()->id)->first();
-            
-            if (!isset($pharmacy)) {
+
+            if (! isset($pharmacy)) {
                 if ($staff) {
-                     $pharmacy = Pharmacy::find($staff->pharmacy_id);
-                     if ($pharmacy) {
-                         session(['current_pharmacy_id' => $pharmacy->id]);
-                     }
+                    $pharmacy = Pharmacy::find($staff->pharmacy_id);
+                    if ($pharmacy) {
+                        session(['current_pharmacy_id' => $pharmacy->id]);
+                    }
                 }
             }
 
-            if (!isset($pharmacy) || !$pharmacy) {
+            if (! isset($pharmacy) || ! $pharmacy) {
                 // Return 403 Forbidden to stop login loop but deny access
                 abort(403, 'Account configuration incomplete. Please contact the administrator to assign a pharmacy or role.');
             }
 
-            $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id',  Auth::user()->id)->whereDate('created_at', Carbon::today())->sum(DB::raw('total_price * quantity'));
+            $totalSales = Sales::where('pharmacy_id', session('current_pharmacy_id'))->where('staff_id', Auth::user()->id)->whereDate('created_at', Carbon::today())->sum(DB::raw('total_price * quantity'));
+
             return view('dashboard', compact(
                 'pharmacy',
                 'totalMedicines',
@@ -324,7 +347,10 @@ class DashboardController extends Controller
                 'filteredTotalSales',
                 'filter',
                 'stockExpired',
-                'sellMedicines'
+                'shortDatedCount',
+                'pendingDisposalCount',
+                'sellMedicines',
+                'config'
             ));
         }
     }
@@ -412,17 +438,15 @@ class DashboardController extends Controller
                 'message' => 'fetched successfully',
                 'filteredTotalSales' => $filteredTotalSales ?? 0,
                 'medicineNames' => $filteredSales->pluck('medicine_name'),
-                'medicineSales' => $filteredSales->pluck('total_sales')
+                'medicineSales' => $filteredSales->pluck('total_sales'),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }
-
-
 
     /**
      * Show the form for creating a new resource.
@@ -479,7 +503,7 @@ class DashboardController extends Controller
                 'printer' => 'required|string',
                 'ip_address' => 'required|ip',
                 'computer_name' => 'required|string',
-                'port' => 'nullable|numeric'
+                'port' => 'nullable|numeric',
             ]);
 
             // Save printer configuration (e.g., in the database)
@@ -497,10 +521,11 @@ class DashboardController extends Controller
                     'name' => $printerName,
                     'ip_address' => $ipAddress,
                     'computer_name' => $computer_name,
-                    'port' => $port
+                    'port' => $port,
                 ]);
                 // Example logic for updating or logging printer details
                 Log::info("Printer updated: $printerName by IP: $ipAddress");
+
                 return redirect()->back()->with('success', 'Printer configuration updated successfully.');
             } else {
                 // Save printer configuration
@@ -509,7 +534,7 @@ class DashboardController extends Controller
                     'ip_address' => $ipAddress,
                     'computer_name' => $computer_name,
                     'port' => $port,
-                    'pharmacy_id' => session('current_pharmacy_id')
+                    'pharmacy_id' => session('current_pharmacy_id'),
                 ]);
 
                 // set printer configuration session
@@ -519,6 +544,7 @@ class DashboardController extends Controller
 
                 // Example logic for storing or logging printer details
                 Log::info("Printer selected: $printerName by IP: $ipAddress");
+
                 return redirect()->back()->with('success', 'Printer configuration saved successfully.');
             }
         } catch (\Exception $e) {
@@ -545,7 +571,7 @@ class DashboardController extends Controller
             redirect()->route('sales');
             // ->with('error', 'No printer configuration found.');
         }
-        return;
+
     }
 
     // function to update printer use status
@@ -556,12 +582,12 @@ class DashboardController extends Controller
         try {
             $request->validate([
                 'new_status' => 'required|boolean',
-                'current_status' => 'required|boolean'
+                'current_status' => 'required|boolean',
             ]);
 
             $printer = PrinterSetting::where('pharmacy_id', session('current_pharmacy_id'))->first();
             if ($request->input('new_status')) {
-                if (!$printer) {
+                if (! $printer) {
                     session(['use_printer' => true]);
 
                     // use factory to create fake data and store in  database
@@ -571,12 +597,12 @@ class DashboardController extends Controller
                         'computer_name' => 'Computer Name',
                         'port' => 9100,
                         'pharmacy_id' => session('current_pharmacy_id'),
-                        'use_printer' => true
+                        'use_printer' => true,
                     ]);
 
                     return response()->json([
                         'status' => 'success',
-                        'message' => 'successfully enabled!'
+                        'message' => 'successfully enabled!',
                     ]);
                 }
                 if ($printer) {
@@ -587,16 +613,16 @@ class DashboardController extends Controller
                     session(['use_printer' => true]);
 
                     $printer->update([
-                        'use_printer' => $request->input('new_status')
+                        'use_printer' => $request->input('new_status'),
                     ]);
 
                     return response()->json([
                         'status' => 'success',
-                        'message' => 'successfully enabled!'
+                        'message' => 'successfully enabled!',
                     ]);
                 }
             } else {
-                if (!$printer) {
+                if (! $printer) {
                     session(['printer' => null]);
                     session(['printer_ip_address' => null]);
                     session(['computer_name' => null]);
@@ -610,13 +636,13 @@ class DashboardController extends Controller
                         'computer_name' => 'Computer Name',
                         'port' => 9100,
                         'pharmacy_id' => session('current_pharmacy_id'),
-                        'use_printer' => true
+                        'use_printer' => true,
                     ]);
 
                     // return json response
                     return response()->json([
                         'status' => 'success',
-                        'message' => 'Disabled successfully!'
+                        'message' => 'Disabled successfully!',
                     ]);
                 }
                 if ($printer) {
@@ -627,12 +653,12 @@ class DashboardController extends Controller
                     session(['use_printer' => false]);
 
                     $printer->update([
-                        'use_printer' => $request->input('new_status')
+                        'use_printer' => $request->input('new_status'),
                     ]);
 
                     return response()->json([
                         'status' => 'success',
-                        'message' => 'successfully disabled!'
+                        'message' => 'successfully disabled!',
                     ]);
                 }
             }
@@ -640,7 +666,7 @@ class DashboardController extends Controller
             // return json response
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }

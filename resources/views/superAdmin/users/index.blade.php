@@ -44,6 +44,41 @@
                                             title="Notification Settings">
                                             <i class="bi bi-bell"></i>
                                         </a>
+
+                                        <button type="button" class="btn btn-secondary" 
+                                            data-bs-toggle="modal" data-bs-target="#resetPasswordModal{{ $user->id }}"
+                                            title="Reset Password">
+                                            <i class="bi bi-key"></i>
+                                        </button>
+
+                                        <!-- Reset Password Modal -->
+                                        <div class="modal fade" id="resetPasswordModal{{ $user->id }}" tabindex="-1" aria-labelledby="resetPasswordModalLabel{{ $user->id }}" aria-hidden="true">
+                                          <div class="modal-dialog">
+                                            <form action="{{ route('superadmin.users.reset-password', $user->id) }}" method="POST">
+                                                @csrf
+                                                <div class="modal-content text-start">
+                                                  <div class="modal-header">
+                                                    <h5 class="modal-title fw-bold text-danger" id="resetPasswordModalLabel{{ $user->id }}">
+                                                        <i class="bi bi-exclamation-triangle"></i> Reset Password
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                  </div>
+                                                  <div class="modal-body text-dark">
+                                                    <p>Are you sure you want to reset the password for <strong>{{ $user->name }}</strong>?</p>
+                                                    <p>This will set their password to the default <code>password</code> and force them to change it upon their next login.</p>
+                                                    <div class="mb-3">
+                                                        <label for="email{{ $user->id }}" class="form-label">Please confirm by entering their email address (<strong>{{ $user->email }}</strong>):</label>
+                                                        <input type="email" class="form-control border-danger" id="email{{ $user->id }}" name="email" required autocomplete="off" placeholder="Enter user email">
+                                                    </div>
+                                                  </div>
+                                                  <div class="modal-footer border-0">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-danger">Reset Password</button>
+                                                  </div>
+                                                </div>
+                                            </form>
+                                          </div>
+                                        </div>
                                     @else
                                         <p class="text-primary text-center">You!</p>
                                     @endif

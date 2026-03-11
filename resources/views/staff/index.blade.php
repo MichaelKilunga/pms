@@ -35,10 +35,20 @@
                             <td>{{ $staff->user->phone }}</td>
                             <td>{{ $staff->user->role == 'Staff' ? 'Pharmacist' : 'Pharmacist' }}</td>
                             <td>
+                                @if ($staff->user->hasPermissionTo('manage sales'))
+                                    <span class="badge bg-primary">Sales</span>
+                                @endif
+                                @if ($staff->user->hasPermissionTo('manage stock'))
+                                    <span class="badge bg-success">Stock</span>
+                                @endif
                                 @if ($staff->user->hasPermissionTo('add stock'))
                                     <span class="badge bg-info text-dark">Add Stock</span>
-                                @else
-                                    <span class="badge bg-secondary">Basic</span>
+                                @endif
+                                @if ($staff->user->hasPermissionTo('view reports'))
+                                    <span class="badge bg-warning text-dark">Reports</span>
+                                @endif
+                                @if ($staff->user->permissions->count() == 0)
+                                    <span class="badge bg-secondary">No Permissions</span>
                                 @endif
                             </td>
                             <td>{{ $staff->status == 'active' ? 'Active' : 'Inactive' }}</td>
@@ -140,13 +150,32 @@
                                                         </select>
                                                     </div>
 
-                                                    <div class="mb-3 form-check">
-                                                        <input class="form-check-input" id="add_stock{{ $staff->id }}"
-                                                            name="add_stock" type="checkbox" value="1"
-                                                            {{ $staff->user->hasPermissionTo('add stock') ? 'checked' : '' }}>
-                                                        <label class="form-check-label" for="add_stock{{ $staff->id }}">
-                                                            Allow Adding Stock
-                                                        </label>
+
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Permissions</label>
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="manage sales" id="perm_sales{{ $staff->id }}" @checked($staff->user->hasPermissionTo('manage sales'))>
+                                                                    <label class="form-check-label" for="perm_sales{{ $staff->id }}">Manage Sales</label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="manage stock" id="perm_stock{{ $staff->id }}" @checked($staff->user->hasPermissionTo('manage stock'))>
+                                                                    <label class="form-check-label" for="perm_stock{{ $staff->id }}">Manage Stock</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="add stock" id="perm_add{{ $staff->id }}" @checked($staff->user->hasPermissionTo('add stock'))>
+                                                                    <label class="form-check-label" for="perm_add{{ $staff->id }}">Add Stock</label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="view reports" id="perm_reports{{ $staff->id }}" @checked($staff->user->hasPermissionTo('view reports'))>
+                                                                    <label class="form-check-label" for="perm_reports{{ $staff->id }}">View Reports</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
 
                                                     <div class="mb-3">
@@ -222,13 +251,33 @@
                                 <option value="staff">Pharmacist</option>
                             </select>
                         </div>
-                        <div class="mb-3 form-check">
-                            <input class="form-check-input" id="add_stock" name="add_stock" type="checkbox"
-                                value="1">
-                            <label class="form-check-label" for="add_stock">
-                                Allow Adding Stock
-                            </label>
+
+                        <div class="mb-3">
+                            <label class="form-label">Permissions</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="permissions[]" value="manage sales" id="add_perm_sales">
+                                        <label class="form-check-label" for="add_perm_sales">Manage Sales</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="permissions[]" value="manage stock" id="add_perm_stock">
+                                        <label class="form-check-label" for="add_perm_stock">Manage Stock</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="permissions[]" value="add stock" id="add_perm_add">
+                                        <label class="form-check-label" for="add_perm_add">Add Stock</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="permissions[]" value="view reports" id="add_perm_reports">
+                                        <label class="form-check-label" for="add_perm_reports">View Reports</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
                         <button class="btn btn-primary" type="submit">Add Pharmacist</button>
                     </form>
                 </div>

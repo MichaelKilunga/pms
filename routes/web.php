@@ -40,6 +40,7 @@ use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\SuperAdminNotificationController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\BusinessSettingsController;
+use App\Http\Controllers\ShelfLifeController;
 
 Route::get('/', function () {
     // Fetch global settings
@@ -79,6 +80,7 @@ Route::middleware(['auth', 'eligible:hasContract'])->group(function () {
     Route::put('/superadmin/users/{id}', [SuperAdminController::class, 'updateUser'])->name('superadmin.users.update');
     Route::get('/superadmin/users/{id}', [SuperAdminController::class, 'showUser'])->name('superadmin.users.show');
     Route::delete('/superadmin/users/{id}', [SuperAdminController::class, 'deleteUser'])->name('superadmin.users.delete');
+    Route::post('/superadmin/users/{id}/reset-password', [SuperAdminController::class, 'resetPassword'])->name('superadmin.users.reset-password');
 
     // Account Deletion Requests
     Route::get('/superadmin/deletion-requests', [SuperAdminController::class, 'deletionRequests'])->name('superadmin.deletion_requests');
@@ -304,6 +306,16 @@ Route::middleware(['auth'])->group(function () {
     // Business Settings (Owner Configuration)
     Route::get('/settings', [BusinessSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [BusinessSettingsController::class, 'update'])->name('settings.update');
+
+    // Shelf Life Management
+    Route::prefix('shelf-life')->group(function () {
+        Route::get('/', [ShelfLifeController::class, 'index'])->name('shelf-life.index');
+        Route::get('/expired', [ShelfLifeController::class, 'expired'])->name('shelf-life.expired');
+        Route::get('/short-dated', [ShelfLifeController::class, 'shortDated'])->name('shelf-life.short-dated');
+        Route::get('/disposed', [ShelfLifeController::class, 'disposed'])->name('shelf-life.disposed');
+        Route::post('/dispose', [ShelfLifeController::class, 'dispose'])->name('shelf-life.dispose');
+        Route::post('/approve-disposal/{id}', [ShelfLifeController::class, 'approveDisposal'])->name('shelf-life.approve-disposal');
+    });
 
     Route::get('/update-contracts', [ContractUpdateController::class, 'updateContracts'])->name('update.contracts');
 

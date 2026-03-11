@@ -23,6 +23,16 @@ class StockController extends Controller
     {
         $pharmacy_id = session('current_pharmacy_id');
 
+        $pharmacy = Pharmacy::find($pharmacy_id);
+        $config = $pharmacy->config ?? [];
+        $allowStaffViewStock = $config['allow_staff_view_stock'] ?? false;
+
+        if (!Auth::user()->hasRole('Owner') && !$allowStaffViewStock) {
+            abort(403, 'Stock viewing is currently disabled for staff by the administrator.');
+        }
+
+        $allowStaffEditDelete = $config['allow_staff_edit_delete_stock'] ?? false;
+
         // compute the total value of available stock as sum of (buying_price * remain_Quantity)
         $totalsQuery = Stock::where('pharmacy_id', $pharmacy_id);
 
@@ -80,7 +90,7 @@ class StockController extends Controller
                     return \Illuminate\Support\Str::words($stock->item->name, 3, '...');
                 })
                 ->editColumn('status', function ($stock) {
-                    if ($stock->expire_date < now()) {
+                    if ($stock->expire_date < now() && $stock->remain_Quantity > 0) {
                         return '<span class="text-danger">Expired</span>';
                     }
                     if ($stock->remain_Quantity < 1) {
@@ -92,14 +102,14 @@ class StockController extends Controller
 
                     return '<span class="text-success"><i class="bi bi-check fs-3"></i>Fine</span>';
                 })
-                ->addColumn('actions', function ($stock) {
+                ->addColumn('actions', function ($stock) use ($allowStaffEditDelete) {
                     return '
                         <div class="d-flex">
                             <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal"
                                 data-bs-target="#viewStockModal'.$stock->id.'">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            '.(auth()->user()->can('manage stock') ? '
+                            '.(auth()->user()->hasRole('Owner') || ($allowStaffEditDelete && (auth()->user()->can('manage stock') || auth()->user()->can('add stock'))) ? '
                             <a href="#" class="btn btn-success btn-sm ms-1" data-bs-toggle="modal"
                                 data-bs-target="#editStockModal'.$stock->id.'">
                                 <i class="bi bi-pencil"></i>
@@ -116,8 +126,8 @@ class StockController extends Controller
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>'
-                            ) : '').'
-                            '.($stock->selling_price < $stock->buying_price ?
+                    ) : '').'
+                            '.($stock->selling_price < $stock->buying_price && (auth()->user()->hasRole('Owner') || ($allowStaffEditDelete && (auth()->user()->can('manage stock') || auth()->user()->can('add stock')))) ?
                         '<button class="btn btn-warning btn-sm ms-1" data-bs-toggle="modal"
                                     data-bs-target="#editBuyingSellingPrice'.$stock->id.'">
                                     <i class="bi bi-recycle"></i>
@@ -384,7 +394,10 @@ class StockController extends Controller
                 ->make(true);
         }
 
-        return view('stock.index', compact('availableStock', 'expectedSales', 'expectedProfit'));
+        $pharmacy = Pharmacy::find($pharmacy_id);
+        $config = $pharmacy->config ?? [];
+
+        return view('stock.index', compact('availableStock', 'expectedSales', 'expectedProfit', 'config'));
     }
 
     /**
@@ -392,8 +405,16 @@ class StockController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->can('add stock')) {
+        if (! Auth::user()->can('add stock')) {
             abort(403, 'Unauthorized action. You do not have permission to add stock.');
+        }
+
+        // Check global config if not owner
+        if (! Auth::user()->hasRole('Owner')) {
+            $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
+            if (!($pharmacy->config['allow_staff_add_stock'] ?? false)) {
+                abort(403, 'Stock addition is currently disabled for staff by administrator.');
+            }
         }
         $pharmacies = Pharmacy::where('owner_id', auth::id())->get();
         $items = Items::all();
@@ -404,8 +425,16 @@ class StockController extends Controller
 
     public function store(Request $request)
     {
-        if (!Auth::user()->can('add stock')) {
+        if (! Auth::user()->can('add stock')) {
             abort(403, 'Unauthorized action. You do not have permission to add stock.');
+        }
+
+        // Check global config if not owner
+        if (! Auth::user()->hasRole('Owner')) {
+            $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
+            if (!($pharmacy->config['allow_staff_add_stock'] ?? false)) {
+                abort(403, 'Stock addition is currently disabled for staff by administrator.');
+            }
         }
         $request->validate([
             'item_id' => 'required|array',
@@ -465,8 +494,16 @@ class StockController extends Controller
     // add stock and medicines at a time
     public function MS_store(Request $request)
     {
-        if (!Auth::user()->can('add stock')) {
+        if (! Auth::user()->can('add stock')) {
             abort(403, 'Unauthorized action. You do not have permission to add stock.');
+        }
+
+        // Check global config if not owner
+        if (! Auth::user()->hasRole('Owner')) {
+            $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
+            if (!($pharmacy->config['allow_staff_add_stock'] ?? false)) {
+                abort(403, 'Stock addition is currently disabled for staff by administrator.');
+            }
         }
         try {
             $request->validate([
@@ -553,8 +590,17 @@ class StockController extends Controller
      */
     public function update(Request $request, Stock $stock)
     {
-        if (!Auth::user()->can('manage stock')) {
+        if (! Auth::user()->can('manage stock')) {
             abort(403, 'Unauthorized action. You do not have permission to edit stock.');
+        }
+
+        if (! Auth::user()->hasRole('Owner')) {
+            $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
+            $allowStaffEditDelete = $pharmacy->config['allow_staff_edit_delete_stock'] ?? false;
+            $hasStockPerm = Auth::user()->can('manage stock') || Auth::user()->can('add stock');
+            if (!$allowStaffEditDelete || !$hasStockPerm) {
+                abort(403, 'Action disabled by administrator or insufficient permissions.');
+            }
         }
         try {
             $message = null;
@@ -689,8 +735,17 @@ class StockController extends Controller
      */
     public function destroy(Request $request)
     {
-        if (!Auth::user()->can('manage stock')) {
+        if (! Auth::user()->can('manage stock')) {
             abort(403, 'Unauthorized action. You do not have permission to delete stock.');
+        }
+
+        if (! Auth::user()->hasRole('Owner')) {
+            $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
+            $allowStaffEditDelete = $pharmacy->config['allow_staff_edit_delete_stock'] ?? false;
+            $hasStockPerm = Auth::user()->can('manage stock') || Auth::user()->can('add stock');
+            if (!$allowStaffEditDelete || !$hasStockPerm) {
+                abort(403, 'Action disabled by administrator or insufficient permissions.');
+            }
         }
         $stock = Stock::destroy($request->id);
 
@@ -702,8 +757,16 @@ class StockController extends Controller
      */
     public function import(Request $request)
     {
-        if (!Auth::user()->can('add stock')) {
+        if (! Auth::user()->can('add stock')) {
             abort(403, 'Unauthorized action. You do not have permission to import stock.');
+        }
+
+        // Check global config if not owner
+        if (! Auth::user()->hasRole('Owner')) {
+            $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
+            if (!($pharmacy->config['allow_staff_add_stock'] ?? false)) {
+                abort(403, 'Stock import is currently disabled for staff by administrator.');
+            }
         }
         // dd($request->all());
         try {
@@ -795,7 +858,6 @@ class StockController extends Controller
     public function viewStockBalances()
     {
         $pharmacyId = session('current_pharmacy_id');
-
         $stockBalances = Stock::select(
             'stocks.item_id',
             DB::raw('SUM(stocks.quantity) as quantity'),
@@ -1005,8 +1067,17 @@ class StockController extends Controller
 
     public function updateSBP(Request $request)
     {
-        if (!Auth::user()->can('manage stock')) {
+        if (! Auth::user()->can('manage stock')) {
             abort(403, 'Unauthorized action. You do not have permission to edit stock prices.');
+        }
+
+        if (! Auth::user()->hasRole('Owner')) {
+            $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
+            $allowStaffEditDelete = $pharmacy->config['allow_staff_edit_delete_stock'] ?? false;
+            $hasStockPerm = Auth::user()->can('manage stock') || Auth::user()->can('add stock');
+            if (!$allowStaffEditDelete || !$hasStockPerm) {
+                abort(403, 'Action disabled by administrator or insufficient permissions.');
+            }
         }
         try {
             DB::beginTransaction();
@@ -1071,6 +1142,18 @@ class StockController extends Controller
 
     public function bulkUpdateLowStock(Request $request)
     {
+        if (! Auth::user()->can('manage stock')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
+        }
+
+        if (! Auth::user()->hasRole('Owner')) {
+            $pharmacy = Pharmacy::find(session('current_pharmacy_id'));
+            $allowStaffEditDelete = $pharmacy->config['allow_staff_edit_delete_stock'] ?? false;
+            $hasStockPerm = Auth::user()->can('manage stock') || Auth::user()->can('add stock');
+            if (!$allowStaffEditDelete || !$hasStockPerm) {
+                return response()->json(['success' => false, 'message' => 'Action disabled by administrator or insufficient permissions.'], 403);
+            }
+        }
         try {
             $request->validate([
                 'stock_ids' => 'required|array',
@@ -1084,12 +1167,12 @@ class StockController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Low stock percentage updated successfully for ' . count($request->stock_ids) . ' stocks.'
+                'message' => 'Low stock percentage updated successfully for '.count($request->stock_ids).' stocks.',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }

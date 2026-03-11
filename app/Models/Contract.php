@@ -33,6 +33,9 @@ class Contract extends Model implements Auditable
         'details' => 'array',
         'amount' => 'decimal:2',
         'agent_markup' => 'decimal:2',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'grace_end_date' => 'datetime',
     ];
     protected $auditEvents = [
         'created',

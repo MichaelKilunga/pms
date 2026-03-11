@@ -579,7 +579,7 @@ class ContractController extends Controller
         if ($owner) {
             $notificationData = [
                 'title' => 'Contract Activated',
-                'message' => "Your contract for {$contract->package->name} has been successfully activated and is valid until {$contract->end_date->format('M d, Y')}.",
+                'message' => "Your contract for {$contract->package->name} has been successfully activated and is valid until " . \Carbon\Carbon::parse($contract->end_date)->format('M d, Y') . ".",
                 'type' => 'success',
                 'action_url' => route('myContracts'),
             ];

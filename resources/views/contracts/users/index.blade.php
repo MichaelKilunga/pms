@@ -464,16 +464,22 @@
                                         <p class="mb-1">
                                             <strong>Amount Paid:</strong>
                                             <span class="text-success fw-bold">
-                                                TZS
-                                                {{ number_format((\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) * $contract->package->price) }}
+                                                TZS {{ number_format($contract->amount) }}
                                             </span>
                                         </p>
                                     @endif
 
                                     <p class="mb-1"><strong>Package Price:</strong> TZS
-                                        {{ number_format($contract->package->price) }} /
-                                        {{ $contract->package->duration }}
-                                        days</p>
+                                        @if($contract->pricing_strategy == 'dynamic')
+                                            {{ number_format($contract->amount) }} / 
+                                            {{ \Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) }} days 
+                                            <span class="badge bg-secondary ms-1">Dynamic</span>
+                                        @else
+                                            {{ number_format($contract->package->price) }} /
+                                            {{ $contract->package->duration }} days
+                                            <span class="badge bg-secondary ms-1">Standard</span>
+                                        @endif
+                                    </p>
 
                                     <p class="mb-1">
                                         <strong>Duration:</strong>
@@ -512,6 +518,17 @@
                                         @php
                                             $pkg = $contract->package;
                                             $det = $contract->details ?? [];
+                                            
+                                            if ($contract->pricing_strategy == 'dynamic') {
+                                                $baseBranches = $det['branches_count'] ?? ($pkg->number_of_pharmacies ?? 0);
+                                                $baseStaff = $det['staff_count'] ?? ($pkg->number_of_pharmacists ?? 0);
+                                                $baseItems = $det['items_count'] ?? ($pkg->number_of_medicines ?? 0);
+                                            } else {
+                                                $baseBranches = $pkg->number_of_pharmacies ?? 0;
+                                                $baseStaff = $pkg->number_of_pharmacists ?? 0;
+                                                $baseItems = $pkg->number_of_medicines ?? 0;
+                                            }
+
                                             $extraBranches = $det['extra_pharmacies'] ?? 0;
                                             $extraStaff = $det['extra_pharmacists'] ?? 0;
                                             $extraItems = $det['extra_medicines'] ?? 0;
@@ -520,17 +537,17 @@
                                         <ul class="list-unstyled small mb-0">
                                             <li class="mb-2">
                                                 <i class="fas fa-hospital text-info me-2"></i> 
-                                                <strong>{{ ($pkg->number_of_pharmacies ?? 0) + $extraBranches }}</strong> Pharmacy Branches
+                                                <strong>{{ $baseBranches + $extraBranches }}</strong> Pharmacy Branches
                                                 @if($extraBranches > 0) <span class="badge bg-success shadow-sm ms-1">+{{ $extraBranches }} Upgraded</span> @endif
                                             </li>
                                             <li class="mb-2">
                                                 <i class="fas fa-users text-info me-2"></i> 
-                                                <strong>{{ ($pkg->number_of_pharmacists ?? 0) + $extraStaff }}</strong> Staff Members
+                                                <strong>{{ $baseStaff + $extraStaff }}</strong> Staff Members
                                                 @if($extraStaff > 0) <span class="badge bg-success shadow-sm ms-1">+{{ $extraStaff }} Upgraded</span> @endif
                                             </li>
                                             <li class="mb-2">
                                                 <i class="fas fa-pills text-info me-2"></i> 
-                                                <strong>{{ ($pkg->number_of_medicines ?? 0) + $extraItems }}</strong> Medicine Items
+                                                <strong>{{ $baseItems + $extraItems }}</strong> Medicine Items
                                                 @if($extraItems > 0) <span class="badge bg-success shadow-sm ms-1">+{{ $extraItems }} Upgraded</span> @endif
                                             </li>
                                             
@@ -689,10 +706,7 @@
                                                 </td>
 
                                                 <td class="fw-bold text-success">
-                                                    {{ number_format(
-                                                        (\Carbon\Carbon::parse($contract->start_date)->diffInDays(\Carbon\Carbon::parse($contract->end_date)) / 30) *
-                                                            $contract->package->price,
-                                                    ) }}
+                                                    {{ number_format($contract->amount) }}
                                                 </td>
 
                                                 <td>

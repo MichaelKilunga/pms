@@ -179,6 +179,36 @@ class SuperAdminController extends Controller
     }
 
     /**
+     * Reset a user's password.
+     */
+    public function resetPassword(Request $request, $id)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        if ($user->email !== $request->email) {
+            return redirect()->back()->with('error', 'Email does not match the user.');
+        }
+
+        $user->password = \Illuminate\Support\Facades\Hash::make('password');
+        $user->is_password_changed = false;
+        $user->save();
+
+        $notificationData = [
+            'title' => 'Password Reset',
+            'message' => 'Your password has been reset to the default "password" by the administrator.',
+            'type' => 'info',
+            'action_url' => route('login'),
+        ];
+        \Illuminate\Support\Facades\Notification::send($user, new \App\Notifications\InAppNotification($notificationData));
+
+        return redirect()->route('superadmin.users')->with('success', 'User password has been reset to default.');
+    }
+
+    /**
      * List all account deletion requests.
      */
     public function deletionRequests()

@@ -25,6 +25,15 @@ return [
             ],
         ],
         [
+            'label' => 'Shelf Life',
+            'icon' => 'bi bi-hourglass-split',
+            'children' => [
+                ['label' => 'Expired Stock', 'route' => 'shelf-life.expired'],
+                ['label' => 'Short-dated Stock', 'route' => 'shelf-life.short-dated'],
+                ['label' => 'Disposed Stock', 'route' => 'shelf-life.disposed'],
+            ],
+        ],
+        [
             'label' => 'Communication',
             'icon' => 'bi bi-chat-dots',
             'children' => [
@@ -67,6 +76,15 @@ return [
             ],
         ],
         [
+            'label' => 'Shelf Life',
+            'icon' => 'bi bi-hourglass-split',
+            'children' => [
+                ['label' => 'Expired Stock', 'route' => 'shelf-life.expired'],
+                ['label' => 'Short-dated Stock', 'route' => 'shelf-life.short-dated'],
+                ['label' => 'Disposed Stock', 'route' => 'shelf-life.disposed'],
+            ],
+        ],
+        [
             'label' => 'Admin',
             'icon' => 'bi bi-shield-lock',
             'children' => [
@@ -74,6 +92,7 @@ return [
                 // ['label' => 'Category', 'route' => 'category'],
                 ['label' => 'Pharmacies', 'route' => 'pharmacies'],
                 ['label' => 'Contracts', 'route' => 'myContracts'],
+                ['label' => 'Settings', 'route' => 'settings.index'],
             ],
         ],
 
@@ -143,6 +162,15 @@ return [
             ],
         ],
         [
+            'label' => 'Shelf Life',
+            'icon' => 'bi bi-hourglass-split',
+            'children' => [
+                ['label' => 'Expired Stock', 'route' => 'shelf-life.expired'],
+                ['label' => 'Short-dated Stock', 'route' => 'shelf-life.short-dated'],
+                ['label' => 'Disposed Stock', 'route' => 'shelf-life.disposed'],
+            ],
+        ],
+        [
             'label' => 'Admin',
             'icon' => 'bi bi-shield-lock',
             'children' => [
@@ -150,6 +178,7 @@ return [
                 ['label' => 'Category', 'route' => 'category'],
                 ['label' => 'Pharmacies', 'route' => 'pharmacies'],
                 ['label' => 'Contracts', 'route' => 'myContracts'],
+                ['label' => 'Settings', 'route' => 'settings.index'],
             ],
         ],
         [
