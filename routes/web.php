@@ -427,3 +427,26 @@ Route::post('/checkPassword', function (Request $request) {
         return response()->json(['success' => false, 'message' => $e->getMessage(), 'password' => $request->input('password')]);
     }
 })->name('checkPassword');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/force-password-change', function () {
+        return view('auth.force-password-change');
+    })->name('password.force-change');
+
+    Route::post('/force-password-change', function (Request $request) {
+        $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed', function ($attribute, $value, $fail) {
+                if (strtolower($value) === 'password') {
+                    $fail('The new password cannot be the default "password".');
+                }
+            }],
+        ]);
+
+        $user = auth()->user();
+        $user->password = Hash::make($request->password);
+        $user->is_password_changed = true;
+        $user->save();
+
+        return redirect()->route('dashboard')->with('success', 'Password updated successfully. You can now access the system.');
+    })->name('password.force-change.store');
+});

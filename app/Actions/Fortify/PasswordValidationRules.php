@@ -13,6 +13,10 @@ trait PasswordValidationRules
      */
     protected function passwordRules(): array
     {
-        return ['required', 'string', Password::default(), 'confirmed'];
+        return ['required', 'string', \Illuminate\Validation\Rules\Password::min(8), 'confirmed', function ($attribute, $value, $fail) {
+            if (strtolower($value) === 'password') {
+                $fail('The new password cannot be the default "password".');
+            }
+        }];
     }
 }

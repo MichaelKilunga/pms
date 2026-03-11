@@ -20,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
             '/contact-us',
         ]);
 
+        $middleware->web(append: [
+            \App\Http\Middleware\ForcePasswordChange::class,
+        ]);
+
         $middleware->alias([
             'eligible' => \App\Http\Middleware\Eligible::class,
             'show' => \App\Http\Middleware\Show::class,

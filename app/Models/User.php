@@ -37,6 +37,7 @@ class User extends Authenticatable implements Auditable
         'password',
         'pricing_mode',
         'notification_preferences',
+        'is_password_changed',
     ];
 
     protected $auditEvents = [
