@@ -144,30 +144,33 @@
             </div>
 
             <div class="row g-4 justify-content-center mb-4 text-center">
-                <div class="col-6 col-md-4 col-lg-3">
+                <div class="col-6 col-md-4 col-lg-2">
                     <a class="card bg-danger text-white text-decoration-none shadow-sm w-100 border-0 h-100"
                         href="{{ route('shelf-life.expired') }}">
                         <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-calendar-x fs-1 mb-2"></i>
+                            <i class="bi bi-calendar-x fs-3 mb-1"></i>
                             <h6 class="mb-0">Expired Stock</h6>
+                            <p class="fs-5 fw-bold">{{ $stockExpired }}</p>
                         </div>
                     </a>
                 </div>
-                <div class="col-6 col-md-4 col-lg-3">
+                <div class="col-6 col-md-4 col-lg-2">
                     <a class="card bg-warning text-dark text-decoration-none shadow-sm w-100 border-0 h-100"
                         href="{{ route('shelf-life.short-dated') }}">
                         <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-hourglass-split fs-1 mb-2"></i>
+                            <i class="bi bi-hourglass-split fs-3 mb-1"></i>
                             <h6 class="mb-0">Short-dated Stock</h6>
+                            <p class="fs-5 fw-bold">{{ $shortDatedCount }}</p>
                         </div>
                     </a>
                 </div>
-                <div class="col-6 col-md-4 col-lg-3">
+                <div class="col-6 col-md-4 col-lg-2">
                     <a class="card bg-info text-white text-decoration-none shadow-sm w-100 border-0 h-100"
                         href="{{ route('shelf-life.disposed') }}">
                         <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-trash fs-1 mb-2"></i>
+                            <i class="bi bi-trash fs-3 mb-1"></i>
                             <h6 class="mb-0">Disposed Stock</h6>
+                            <p class="fs-5 fw-bold">{{ $pendingDisposalCount }}</p>
                         </div>
                     </a>
                 </div>
@@ -205,16 +208,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card bg-danger text-white shadow">
-                        <div class="card-body">
-                            <h6>
-                                <i class="bi bi-exclamation-triangle fs-3 me-2"></i>Expired
-                            </h6>
-                            <p class="fs-5 fw-bold">{{ $stockExpired }}</p>
-                        </div>
-                    </div>
-                </div>
+
                 <div class="col-6 col-md-4 col-lg-2">
                     <div class="card bg-info text-white shadow">
                         <div class="card-body">
@@ -235,26 +229,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card bg-warning text-dark shadow">
-                        <div class="card-body">
-                            <h6>
-                                <i class="bi bi-hourglass-split fs-3 me-2"></i>Short Dated
-                            </h6>
-                            <p class="fs-5 fw-bold">{{ $shortDatedCount }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card bg-info text-white shadow">
-                        <div class="card-body">
-                            <h6>
-                                <i class="bi bi-trash fs-3 me-2"></i>To Dispose
-                            </h6>
-                            <p class="fs-5 fw-bold">{{ $pendingDisposalCount }}</p>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         @endhasanyrole
     </div>
@@ -656,8 +631,8 @@
     </script>
     @hasrole('Staff')
         {{-- Quick Actions Section --}}
-        <div class="row g-4 justify-content-center mb-4 text-center">
-            <div class="col-6 col-md-4 col-lg-2">
+        <div class="row g-4 justify-content-center mb-4 mx-1 text-center">
+            <div class="col-6 col-md-4 col-lg-3">
                 <a class="card bg-primary text-decoration-none text-white shadow" data-bs-target="#createSalesModal"
                     data-bs-toggle="modal" href="">
                     <div class="card-body">
@@ -667,17 +642,17 @@
                 </a>
             </div>
             @if(Auth::user()->hasRole('Owner') || ($config['allow_staff_add_stock'] ?? false))
-                <div class="col-6 col-md-4 col-lg-2">
+                <div class="col-6 col-md-4 col-lg-3">
                     <button class="card bg-primary text-decoration-none text-white shadow" data-bs-target="#quickAccessModal"
                         data-bs-toggle="modal">
                         <div class="card-body">
-                            <h6><i class="bi bi-plus-circle fs-1"></i> Add Stock</h6>
+                            <h6><i class="bi bi-plus-circle fs-1"></i> Add New Stock</h6>
                         </div>
                     </button>
                 </div>
             @endif
             @if(Auth::user()->hasRole('Owner') || ($config['allow_staff_view_stock'] ?? false))
-                <div class="col-6 col-md-4 col-lg-2">
+                <div class="col-6 col-md-4 col-lg-3">
                     <a class="card bg-warning text-dark text-decoration-none shadow" href="{{ route('stock') }}">
                         <div class="card-body">
                             <h6><i class="bi bi-box-seam fs-1"></i> Stock List</h6>
@@ -685,7 +660,7 @@
                     </a>
                 </div>
             @endif
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg-3">
                 <button class="card bg-info text-decoration-none text-white shadow" data-bs-target="#createSalesNoteModal"
                     data-bs-toggle="modal">
                     <div class="card-body">
@@ -695,40 +670,44 @@
                 </button>
             </div>
         </div>
-
-        <div class="row g-4 justify-content-center mb-4 text-center">
-            <div class="col-6 col-md-4 col-lg-3">
+        <div class="row g-4 justify-content-center mb-4 mx-2 text-center">
+            <div class="col-6 col-md-4 col-lg-2">
                 <a class="card bg-danger text-white text-decoration-none shadow-sm w-100 border-0 h-100"
                     href="{{ route('shelf-life.expired') }}">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                        <i class="bi bi-calendar-x fs-1 mb-2"></i>
+                        <i class="bi bi-calendar-x fs-3 mb-1"></i>
                         <h6 class="mb-0">Expired Stock</h6>
+                        <p class="fs-5 fw-bold">{{ $stockExpired }}</p>
                     </div>
                 </a>
             </div>
-            <div class="col-6 col-md-4 col-lg-3">
+            <div class="col-6 col-md-4 col-lg-2">
                 <a class="card bg-warning text-dark text-decoration-none shadow-sm w-100 border-0 h-100"
                     href="{{ route('shelf-life.short-dated') }}">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                        <i class="bi bi-hourglass-split fs-1 mb-2"></i>
+                        <i class="bi bi-hourglass-split fs-3 mb-1"></i>
                         <h6 class="mb-0">Short-dated Stock</h6>
+                        <p class="fs-5 fw-bold">{{ $shortDatedCount }}</p>
                     </div>
                 </a>
             </div>
-            <div class="col-6 col-md-4 col-lg-3">
+            <div class="col-6 col-md-4 col-lg-2">
                 <a class="card bg-info text-white text-decoration-none shadow-sm w-100 border-0 h-100"
                     href="{{ route('shelf-life.disposed') }}">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                        <i class="bi bi-trash fs-1 mb-2"></i>
+                        <i class="bi bi-trash fs-3 mb-1"></i>
                         <h6 class="mb-0">Disposed Stock</h6>
+                        <p class="fs-5 fw-bold">{{ $pendingDisposalCount }}</p>
                     </div>
                 </a>
             </div>
         </div>
+
+     
         {{-- Summary Section --}}
-        <div class="row g-4 justify-content-center mb-4 text-center">
+        <div class="row g-4 justify-content-center mb-4 mx-2 text-center">
             <div class="col-6 col-md-4 col-lg-2">
-                <div class="card bg-secondary text-white shadow">
+                <div class="card bg-primary text-white shadow">
                     <div class="card-body">
                         <h6>
                             <i class="bi bi-capsule fs-3 me-2"></i>Medicines
@@ -737,16 +716,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="card bg-danger text-white shadow">
-                    <div class="card-body">
-                        <h6>
-                            <i class="bi bi-exclamation-triangle fs-3 me-2"></i>Expired
-                        </h6>
-                        <p class="fs-5 fw-bold">{{ $stockExpired }}</p>
-                    </div>
-                </div>
-            </div>
+
             <!-- Locked sales card (hidden initially) -->
             <div class="col-6 col-md-4 col-lg-2" id="totalSalesCard" style="display: none;">
                 <div class="card bg-success text-white shadow">
@@ -765,26 +735,6 @@
                             <i class="bi bi-box-seam fs-3 me-2"></i>Low Stock
                         </h6>
                         <p class="fs-5 fw-bold">{{ $lowStockCount }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="card bg-warning text-dark shadow">
-                    <div class="card-body">
-                        <h6>
-                            <i class="bi bi-hourglass-split fs-3 me-2"></i>Short Dated
-                        </h6>
-                        <p class="fs-5 fw-bold">{{ $shortDatedCount }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="card bg-info text-white shadow">
-                    <div class="card-body">
-                        <h6>
-                            <i class="bi bi-trash fs-3 me-2"></i>To Dispose
-                        </h6>
-                        <p class="fs-5 fw-bold">{{ $pendingDisposalCount }}</p>
                     </div>
                 </div>
             </div>

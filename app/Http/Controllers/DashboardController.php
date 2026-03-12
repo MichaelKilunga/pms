@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
-
 class DashboardController extends Controller
 {
     /**
@@ -186,7 +185,7 @@ class DashboardController extends Controller
 
         $pendingDisposalCount = DB::table('disposed_stocks')
             ->where('pharmacy_id', session('current_pharmacy_id'))
-            ->where('status', 'pending')
+            ->where('status', 'approved')
             ->count();
 
         $pharmacyId = session('current_pharmacy_id');
