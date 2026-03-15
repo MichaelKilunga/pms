@@ -17,6 +17,8 @@ class Pharmacy extends Model implements Auditable
         'user_id',
         'name',
         'location',
+        'pharmacy_phone',
+        'pharmacy_email',
         'status',
         'owner_id',
         'package_id',

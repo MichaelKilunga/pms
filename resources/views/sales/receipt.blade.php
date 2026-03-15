@@ -55,11 +55,14 @@
         <h2 class="text-center h5 text-dark">Medicine Purchase Receipt</h2>
         <hr>
 
+        @php
+            $pharmacy = APP\Models\Pharmacy::find(session('current_pharmacy_id'));
+        @endphp
         <div class="fs-20">
             <span class="d-flex justify-content-between">
                 <strong>Pharmacy:</strong>
                 <span>
-                    {{ APP\Models\Pharmacy::where('id', session('current_pharmacy_id'))->first()->name }}
+                    {{ $pharmacy->name }}
                 </span>
             </span>
             <span class="d-flex justify-content-between">
@@ -69,6 +72,14 @@
             <span class="d-flex justify-content-between">
                 <strong>Pharmacist:</strong>
                 <span>{{ $staff->name }}</span>
+            </span>
+            <span class="d-flex justify-content-between">
+                <strong>Location:</strong>
+                <span>{{ $pharmacy->location }}</span>
+            </span>
+            <span class="d-flex justify-content-between">
+                <strong>Contact:</strong>
+                <span>{{ $pharmacy->pharmacy_phone }}</span>
             </span>
         </div>
         <br>

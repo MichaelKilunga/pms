@@ -20,6 +20,8 @@
                         <th>#</th>
                         <th>Pharmacy Name</th>
                         <th>Pharmacy Location</th>
+                        <th>Contact Phone</th>
+                        <th>Email</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -29,6 +31,8 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $pharmacy->name }}</td>
                             <td>{{ $pharmacy->location }}</td>
+                            <td>{{ $pharmacy->pharmacy_phone }}</td>
+                            <td>{{ $pharmacy->pharmacy_email }}</td>
                             <!-- <td class="d-flex justify-content-between"> -->
                             <td>
                                 <a class="btn btn-primary btn-sm" href="#"><i class="bi bi-eye"
@@ -52,6 +56,14 @@
                                                 <div class="mb-3">
                                                     <strong>Location:</strong>
                                                     {{ $pharmacy->location ?? "No description available" }}
+                                                </div>
+                                                <div class="mb-3">
+                                                    <strong>Contact Phone:</strong>
+                                                    {{ $pharmacy->pharmacy_phone ?? "N/A" }}
+                                                </div>
+                                                <div class="mb-3">
+                                                    <strong>Email:</strong>
+                                                    {{ $pharmacy->pharmacy_email ?? "N/A" }}
                                                 </div>
                                                 <div class="mb-3">
                                                     <strong>Created At:</strong>
@@ -96,6 +108,18 @@
                                                         <label class="form-label"
                                                             for="location{{ $pharmacy->id }}">Pharmacy Location</label>
                                                         <textarea class="form-control" id="location{{ $pharmacy->id }}" name="location">{{ $pharmacy->location }}</textarea>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label" for="pharmacy_phone{{ $pharmacy->id }}">Pharmacy Contact Number</label>
+                                                        <input class="form-control" id="pharmacy_phone{{ $pharmacy->id }}"
+                                                            name="pharmacy_phone" type="text"
+                                                            value="{{ $pharmacy->pharmacy_phone }}">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label" for="pharmacy_email{{ $pharmacy->id }}">Pharmacy Email</label>
+                                                        <input class="form-control" id="pharmacy_email{{ $pharmacy->id }}"
+                                                            name="pharmacy_email" type="email"
+                                                            value="{{ $pharmacy->pharmacy_email }}">
                                                     </div>
                                                     <div class="mb-3">
                                                         <input name="pharmacy_id" type="hidden"
@@ -143,6 +167,14 @@
                         <div class="mb-3">
                             <label class="form-label" for="location">Pharmacy Location</label>
                             <textarea class="form-control" id="location" name="location"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="pharmacy_phone">Pharmacy Contact Number</label>
+                            <input class="form-control" id="pharmacy_phone" name="pharmacy_phone" type="text">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="pharmacy_email">Pharmacy Email</label>
+                            <input class="form-control" id="pharmacy_email" name="pharmacy_email" type="email">
                         </div>
                         <div class="mb-3">
                             <input name="pharmacy_id" type="hidden" value="{{ session("current_pharmacy_id") }}">

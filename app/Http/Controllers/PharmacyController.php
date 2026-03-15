@@ -40,11 +40,15 @@ class PharmacyController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'location' => 'nullable|string|max:1000',
+            'pharmacy_phone' => 'nullable|string|max:20',
+            'pharmacy_email' => 'nullable|email|max:255',
         ]);
 
         $pharmacy = Pharmacy::create([
             'name' => $request->name,
             'location' => $request->location,
+            'pharmacy_phone' => $request->pharmacy_phone,
+            'pharmacy_email' => $request->pharmacy_email,
             'owner_id' => Auth::id(),
             'status' => 'active',
             'package_id' => 1,
@@ -105,10 +109,12 @@ class PharmacyController extends Controller
             'pharmacy_id' => 'required|exists:pharmacies,id',
             'name' => 'required|string|max:255',
             'location' => 'nullable|string|max:1000',
+            'pharmacy_phone' => 'nullable|string|max:20',
+            'pharmacy_email' => 'nullable|email|max:255',
         ]);
         // dd($request->id);
         $pharmacy = Pharmacy::where('id',$request->id);
-        $pharmacy->update($request->only(['name', 'location']));
+        $pharmacy->update($request->only(['name', 'location', 'pharmacy_phone', 'pharmacy_email']));
 
 
         return redirect()->route('pharmacies')->with('success', 'Pharmacy updated successfully.');
