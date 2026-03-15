@@ -6,7 +6,7 @@
         use Illuminate\Support\Facades\DB;
 
         $medicines = Stock::select(
-            DB::raw("CONCAT(item_id, '-', selling_price) as id"), // safe MySQL concat
+            DB::raw("CONCAT(item_id, '-', selling_price) as id"),
             "item_id",
             DB::raw("SUM(remain_Quantity) as remain_Quantity"),
             "selling_price",
@@ -96,10 +96,9 @@
                                     <select class="salesChosen form-select" name="item_id[]" required>
                                         <option selected value="">Select medicine</option>
                                         @foreach ($medicines as $medicine)
-                                            <option value="{{ $medicine->id . "-" . $medicine->selling_price }}">
+                                            <option value="{{ $medicine->id }}">
                                                 {{ $medicine->item->name }}
-                                                <br><strong
-                                                    class="text-danger">({{ number_format($medicine->selling_price) }}Tsh)</strong>
+                                                ({{ number_format($medicine->selling_price) }}Tsh)
                                             </option>
                                         @endforeach
                                     </select>
@@ -196,9 +195,10 @@
         </div>
     @endif
 
-    <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Pre-load medicines data for instant offline lookup
+            const medicinesData = @json($medicines);
             // Intercept Sales Form
             $('#salesForm').on('submit', async function(e) {
                 e.preventDefault();
@@ -299,36 +299,46 @@
                 updateTotalAmount();
             }
 
-            async function tellPrice(row) {
-                if (!window.db) return;
-                
-                const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
-                const medicineId = selectedMedicineId.split('-')[0];
+            function tellPrice(row) {
+                const selectedKey = row.querySelector('[name="item_id[]"]').value;
+                if (!selectedKey) return;
 
-                const selectedMedicine = await window.db.stocks.get(parseInt(medicineId));
+                // Split the ID (e.g., "5-500")
+                const parts = selectedKey.split('-');
+                const itemId = parts[0];
+                const price = parts[1];
+
+                // Lookup in pre-loaded data
+                const selectedMedicine = medicinesData.find(m => 
+                    m.item_id == itemId && m.selling_price == price
+                );
+                
                 if (!selectedMedicine) return;
 
-                // We need the item name too, which is in the items table
-                const item = await window.db.items.get(selectedMedicine.item_id);
+                // Set price and stock ID
+                const priceInput = row.querySelector('[name="total_price[]"]');
+                if (priceInput) priceInput.value = selectedMedicine.selling_price;
 
-                row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
+                const stockInput = row.querySelector('[name="stock_id[]"]');
+                if (stockInput) stockInput.value = selectedMedicine.item_id;
 
-                if (selectedMedicine) {
-                    row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price}`;
-                    row.querySelector('[name="quantity[]"]').setAttribute('max', `${selectedMedicine.remain_Quantity}`);
-
-                    const labelElement = row.querySelector('[for="label[]"]');
-                    labelElement.innerHTML = '';
-                    const appendedText = document.createElement('small');
-                    appendedText.innerHTML = 'In stock (&darr;' + selectedMedicine.remain_Quantity + ')';
-                    
-                    if (selectedMedicine.remain_Quantity < 5) { // Assuming a default low stock threshold
-                        appendedText.classList.add('text-danger');
-                    } else {
-                        appendedText.classList.add('text-success');
-                    }
-                    labelElement.appendChild(appendedText);
+                // Set max quantity and update label
+                const quantityInput = row.querySelector('[name="quantity[]"]');
+                if (quantityInput) {
+                    quantityInput.setAttribute('max', selectedMedicine.remain_Quantity);
                 }
+
+                const labelElement = row.querySelector('[for="label[]"]');
+                if (labelElement) {
+                    labelElement.innerHTML = '';
+                    const text = document.createElement('small');
+                    const qty = selectedMedicine.remain_Quantity;
+                    text.innerHTML = ' (Available: ' + qty + ')';
+                    text.className = qty < 5 ? 'text-danger fw-bold' : 'text-success fw-bold';
+                    labelElement.appendChild(text);
+                }
+
+                calculateAmount(row);
             }
 
             function updateTotalAmount() {
@@ -418,9 +428,9 @@
                                 <select name="item_id[]" data-row-id="item_id[]" class="form-select salesChosen" required>
                                     <option selected disabled value="">Select medicine</option>
                                     @foreach ($medicines as $medicine)
-                                        <option value="{{ $medicine->id }}-{{ $medicine->selling_price }}">
-                                                {{ $medicine->item->name }} <br><strong
-                                                class="text-danger">({{ number_format($medicine->selling_price) }}Tsh)</strong>
+                                        <option value="{{ $medicine->id }}">
+                                                {{ $medicine->item->name }}
+                                                ({{ number_format($medicine->selling_price) }}Tsh)
                                             </option>
                                     @endforeach
                                 </select>
