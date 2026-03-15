@@ -15,7 +15,7 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0d6efd">
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <!-- Service Worker Registration -->
     <script>

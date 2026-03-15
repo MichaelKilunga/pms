@@ -1,11 +1,12 @@
-const CACHE_NAME = 'pms-v1';
+const CACHE_NAME = 'pms-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/manifest.json',
     '/css/app.css',
     '/js/app.js',
     '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png'
+    '/icons/icon-512x512.png',
+    '/images/logo.png'
 ];
 
 // Install Event
