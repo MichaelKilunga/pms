@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pms-v2';
+const CACHE_NAME = 'pms-v3';
 const ASSETS_TO_CACHE = [
     '/',
     '/manifest.json',
@@ -6,6 +6,8 @@ const ASSETS_TO_CACHE = [
     '/js/app.js',
     '/icons/icon-192x192.png',
     '/icons/icon-512x512.png',
+    '/icons/maskable-icon.png',
+    '/icons/apple-touch-icon.png',
     '/images/logo.png'
 ];
 
@@ -35,16 +37,21 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event
 self.addEventListener('fetch', (event) => {
-    // skip non-GET requests for now (we'll handle sync later)
-    if (event.request.method !== 'GET') return;
-
-    const url = new URL(event.request.url);
-
     // API Request Interception (Network First)
-    if (url.pathname.startsWith('/api/')) {
+    if (event.request.url.includes('/api/')) {
         event.respondWith(
             fetch(event.request)
                 .catch(() => caches.match(event.request))
+        );
+        return;
+    }
+
+    // Navigation requests (HTML pages)
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request).catch(() => {
+                return caches.match('/') || caches.match('/index.php');
+            })
         );
         return;
     }
