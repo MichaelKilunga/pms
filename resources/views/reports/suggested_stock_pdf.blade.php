@@ -71,10 +71,11 @@
                 <tr>
                     <th>#</th>
                     <th>Medicine Name</th>
+                    <th>Current Stock</th>
+                    <th>Avg Daily Sales</th>
+                    <th>Days Left</th>
                     <th>Suggested Qty</th>
-                    <th>Unit Price</th>
-                    <th>Total Price</th>
-                    <th>Supplier</th>
+                    <th>Est. Cost</th>
                 </tr>
             </thead>
             <tbody>
@@ -83,18 +84,26 @@
                     @php $grandTotal += $stock->total_buying_price; @endphp
                     <tr>
                         <td>{{ $index + 1 }}</td>
-                        <td>{{ $stock->item->name ?? "N/A" }}</td>
-                        <td>{{ number_format($stock->suggested_quantity) }}</td>
-                        <td>{{ number_format($stock->unit_buying_price, 2) }}</td>
+                        <td><strong>{{ $stock->item->name ?? "N/A" }}</strong></td>
+                        <td>{{ number_format($stock->aggregated_remain) }}</td>
+                        <td>{{ number_format($stock->avg_daily_sales, 2) }}</td>
+                        <td>
+                            @php
+                                $badgeClass = '';
+                                if ($stock->days_left <= 1) $badgeClass = 'bg-danger';
+                                elseif ($stock->days_left <= 3) $badgeClass = 'bg-warning';
+                            @endphp
+                            <span class="badge {{ $badgeClass }}">{{ number_format($stock->days_left, 1) }} Days</span>
+                        </td>
+                        <td><strong>{{ number_format($stock->suggested_quantity) }}</strong></td>
                         <td>{{ number_format($stock->total_buying_price, 2) }}</td>
-                        <td>{{ $stock->supplier }}</td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr style="background-color: #f2f2f2; font-weight: bold;">
-                    <td colspan="4" style="text-align: right;">Grand Total Estimation:</td>
-                    <td colspan="2">{{ number_format($grandTotal, 2) }}</td>
+                    <td colspan="6" style="text-align: right;">Grand Total Estimation:</td>
+                    <td>{{ number_format($grandTotal, 2) }}</td>
                 </tr>
             </tfoot>
         </table>

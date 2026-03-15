@@ -60,27 +60,45 @@ class InventoryService
                 continue;
             }
 
-            // Use the low stock threshold from the latest batch
-            $threshold = $latestBatch->low_stock_percentage;
+            // 1. Calculate Average Daily Sales (Sales Velocity V)
+            $velocity = $totalSalesForName / $calculationDays;
 
-            if ($totalRemain < $threshold) {
-                // Determine suggested quantity: Use the latest batch's original quantity as a replenishment target
-                $suggestedQty = $latestBatch->quantity;
+            // 2. Dynamic Reorder Point (7-Day Supply)
+            $reorderPoint = $velocity * 7;
 
-                // Requirement: Only display medicines where the 'Suggested Qty' is greater than 0
+            // 3. Manual Threshold Value
+            $manualThreshold = ($latestBatch->quantity * $latestBatch->low_stock_percentage) / 100;
+
+            // 4. Trigger Point: Use the higher of the two
+            $triggerPoint = max($manualThreshold, $reorderPoint);
+
+            // 5. Check if we need to restock
+            if ($totalRemain < $triggerPoint) {
+                // Determine suggested quantity: to reach a 21-day stock buffer
+                $suggestedQty = ceil(($velocity * 21) - $totalRemain);
+
+                // Round up and ensure it's at least 1 if we're below trigger
                 if ($suggestedQty <= 0) {
-                    continue;
+                    $suggestedQty = 0; // Should ideally be positive if totalRemain < triggerPoint and velocity > 0
                 }
 
+                // Days of stock left (Runway)
+                $daysLeft = $velocity > 0 ? ($totalRemain / $velocity) : 0;
+
+                // Urgency Sorting helper
+                $latestBatch->avg_daily_sales = $velocity;
+                $latestBatch->days_left = $daysLeft;
                 $latestBatch->suggested_quantity = $suggestedQty;
                 $latestBatch->unit_buying_price = $latestBatch->buying_price;
                 $latestBatch->total_buying_price = $suggestedQty * $latestBatch->buying_price;
                 $latestBatch->aggregated_remain = $totalRemain;
+                $latestBatch->reorder_point = $reorderPoint;
 
                 $suggested->push($latestBatch);
             }
         }
 
-        return $suggested;
+        // Sort by Days of Stock Left (ascending) - most urgent first
+        return $suggested->sortBy('days_left')->values();
     }
 }

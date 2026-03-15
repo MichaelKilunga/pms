@@ -38,10 +38,10 @@
                         <thead>
                             <tr>
                                 <th>Medicine Name</th>
-                                <th>Suggested Qty</th>
-                                <th>Unit Price</th>
-                                <th>Total Price</th>
-                                <th>Supplier</th>
+                                <th>Current Stock</th>
+                                <th>Avg Daily Sales</th>
+                                <th>Days Left</th>
+                                <th>Suggested Restock</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -49,8 +49,8 @@
                         </tbody>
                         <tfoot class="fw-bold bg-light">
                             <tr>
-                                <td colspan="3" class="text-end">Grand Total Estimation:</td>
-                                <td colspan="2" id="grandTotalEstimation">-</td>
+                                <td colspan="4" class="text-end">Grand Total Estimation:</td>
+                                <td id="grandTotalEstimation">-</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -97,13 +97,22 @@
 
                         data.stocks.forEach(stock => {
                             grandTotal += stock.total_buying_price;
+
+                            // Badge logic for Days Left
+                            let badgeClass = 'bg-success';
+                            if (stock.days_left <= 1) {
+                                badgeClass = 'bg-danger';
+                            } else if (stock.days_left <= 3) {
+                                badgeClass = 'bg-warning text-dark';
+                            }
+
                             const row = `
                                     <tr>
-                                        <td>${stock.item.name}</td>
-                                        <td>${new Intl.NumberFormat().format(stock.suggested_quantity)}</td>
-                                        <td>${new Intl.NumberFormat(undefined, { minimumFractionDigits: 2 }).format(stock.unit_buying_price)}</td>
-                                        <td>${new Intl.NumberFormat(undefined, { minimumFractionDigits: 2 }).format(stock.total_buying_price)}</td>
-                                        <td>${stock.supplier || '-'}</td>
+                                        <td class="fw-bold">${stock.item.name}</td>
+                                        <td>${new Intl.NumberFormat().format(stock.aggregated_remain)}</td>
+                                        <td>${new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(stock.avg_daily_sales)}</td>
+                                        <td><span class="badge ${badgeClass}">${stock.days_left.toFixed(1)} Days</span></td>
+                                        <td class="fw-bold text-primary">${new Intl.NumberFormat().format(stock.suggested_quantity)}</td>
                                     </tr>
                                 `;
                             tbody.innerHTML += row;
@@ -123,8 +132,8 @@
                             pageLength: 10,
                             lengthMenu: [10, 25, 50, 100],
                             order: [
-                                [0, 'asc']
-                            ] // Sort by Medicine Name by default
+                                [3, 'asc']
+                            ] // Sort by Days Left by default
                         });
                     })
                     .catch(error => {
