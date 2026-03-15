@@ -46,6 +46,24 @@ class SyncController extends Controller
                         'last_updated' => $stock->updated_at->timestamp * 1000,
                     ];
                 }),
+            'sales' => Sales::where('pharmacy_id', session('current_pharmacy_id'))
+                ->where('updated_at', '>', $sinceDate)
+                ->with('item')
+                ->get()->map(function($sale) {
+                    return [
+                        'id' => $sale->id,
+                        'pharmacy_id' => $sale->pharmacy_id,
+                        'staff_id' => $sale->staff_id,
+                        'item_id' => $sale->item_id,
+                        'stock_id' => $sale->stock_id,
+                        'quantity' => $sale->quantity,
+                        'total_price' => $sale->total_price,
+                        'amount' => $sale->amount,
+                        'date' => $sale->date,
+                        'sales_name' => $sale->item ? $sale->item->name : 'Unknown',
+                        'last_updated' => $sale->updated_at->timestamp * 1000,
+                    ];
+                }),
         ];
 
         return response()->json([

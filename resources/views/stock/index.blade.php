@@ -542,15 +542,67 @@
             const table = $('#tableOfStocks').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: {
-                    url: "{{ route('stock') }}",
-                    data: function(d) {
-                        d.medicine_name = $('#medicineName').val();
-                        d.start_date = $('#startDate').val();
-                        d.end_date = $('#endDate').val();
+                ajax: async function(data, callback, settings) {
+                    if (navigator.onLine) {
+                        try {
+                            const response = await $.ajax({
+                                url: "{{ route('stock') }}",
+                                data: {
+                                    ...data,
+                                    medicine_name: $('#medicineName').val(),
+                                    start_date: $('#startDate').val(),
+                                    end_date: $('#endDate').val()
+                                }
+                            });
+                            callback(response);
+                            return;
+                        } catch (e) {
+                            console.warn('Network request failed, falling back to local DB');
+                        }
                     }
+
+                    // Offline or Failed Network Load
+                    if (!window.db) {
+                        callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+                        return;
+                    }
+
+                    let stocks = await window.db.stocks.toArray();
+                    
+                    // Basic filtering
+                    const nameFilter = $('#medicineName').val().toLowerCase();
+                    if (nameFilter) {
+                        const items = await window.db.items.toArray();
+                        const matchingItemIds = items.filter(i => i.name.toLowerCase().includes(nameFilter)).map(i => i.id);
+                        stocks = stocks.filter(s => matchingItemIds.includes(s.item_id));
+                    }
+
+                    // Format for Datatables
+                    const items = await window.db.items.toArray();
+                    const itemMap = Object.fromEntries(items.map(i => [i.id, i.name]));
+
+                    const formattedData = stocks.map((s, index) => ({
+                        select: `<input type="checkbox" class="stock-checkbox" value="${s.id}">`,
+                        DT_RowIndex: index + 1,
+                        batch_number: s.batch_number || 'N/A',
+                        supplier: s.supplier || 'N/A',
+                        medicine_name: itemMap[s.item_id] || 'Item #' + s.item_id,
+                        buying_price: new Intl.NumberFormat().format(s.buying_price || 0),
+                        selling_price: new Intl.NumberFormat().format(s.selling_price),
+                        remain_Quantity: s.remain_Quantity,
+                        status: s.remain_Quantity > 0 ? '<span class="badge bg-success">In Stock</span>' : '<span class="badge bg-danger">Out of Stock</span>',
+                        actions: '<span class="text-muted small">Update offline disabled</span>'
+                    }));
+
+                    callback({
+                        draw: data.draw,
+                        recordsTotal: formattedData.length,
+                        recordsFiltered: formattedData.length,
+                        data: formattedData
+                    });
                 },
-                columns: [{
+                columns: [
+                    {
                         data: 'select',
                         name: 'select',
                         orderable: false,

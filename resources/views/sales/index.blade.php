@@ -545,11 +545,54 @@
             var table = $('#salesTable').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: {
-                    url: "{{ route("sales") }}",
-                    data: function(d) {
-                        d.date = $('#saleDateFilter').val();
+                ajax: async function(data, callback, settings) {
+                    if (navigator.onLine) {
+                        try {
+                            const response = await $.ajax({
+                                url: "{{ route('sales') }}",
+                                data: {
+                                    ...data,
+                                    date: $('#saleDateFilter').val()
+                                }
+                            });
+                            callback(response);
+                            return;
+                        } catch (e) {
+                            console.warn('Network request failed, falling back to local DB');
+                        }
                     }
+
+                    // Offline or Failed Network Load
+                    if (!window.db) {
+                        callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+                        return;
+                    }
+
+                    const filterDate = $('#saleDateFilter').val();
+                    let sales = await window.db.sales
+                        .where('date')
+                        .startsWith(filterDate) // Date might include time
+                        .toArray();
+                    
+                    // Sort and Format
+                    sales.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    const formattedData = sales.map((s, index) => ({
+                        DT_RowIndex: index + 1,
+                        sales_name: s.sales_name || 'Item #' + s.item_id,
+                        price: new Intl.NumberFormat().format(s.total_price),
+                        quantity: s.quantity,
+                        total_price: new Intl.NumberFormat().format(s.total_price * s.quantity),
+                        date: s.date,
+                        actions: s.sync_status === 1 ? '<span class="badge bg-warning">Pending Sync</span>' : '<span class="badge bg-success">Synced</span>'
+                    }));
+
+                    callback({
+                        draw: data.draw,
+                        recordsTotal: formattedData.length,
+                        recordsFiltered: formattedData.length,
+                        data: formattedData
+                    });
                 },
                 columns: [{
                         data: 'DT_RowIndex',

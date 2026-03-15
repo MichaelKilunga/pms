@@ -44,8 +44,8 @@ export const SyncEngine = {
             const response = await axios.get(`/api/sync/pull?since=${timestamp}`);
             const { updates, server_time } = response.data;
 
-            for (const table in updates) {
-                if (updates[table].length > 0) {
+            for (const table of ['items', 'stocks', 'sales']) {
+                if (updates[table] && updates[table].length > 0) {
                     await db[table].bulkPut(updates[table]);
                 }
             }

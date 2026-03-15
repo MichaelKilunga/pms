@@ -47,131 +47,71 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table-striped table-bordered table-hover small table">
+            <table class="table-striped table-bordered table-hover small table" id="medicinesTable">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>Medicine Name</th>
                         <th>Category</th>
-                        {{-- <th>Pharmacy</th> --}}
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($medicines as $medicine)
-                        <tr>
-                            <td>{{ ($medicines->currentPage() - 1) * $medicines->perPage() + $loop->iteration }}</td>
-                            {{-- <td>{{ $medicine->id }}</td> --}}
-                            <td>{{ $medicine->name }}</td>
-                            <td>{{ $medicine->category->name }}</td>
-                            {{-- <td>{{ $medicine->pharmacy->name }}</td> --}}
-                            <td>
-                                <a class="btn btn-primary btn-sm" data-bs-target="#viewMedicineModal{{ $medicine->id }}"
-                                    data-bs-toggle="modal" href="#"><i class="bi bi-eye"></i></a>
-                                <div aria-hidden="true" aria-labelledby="viewMedicineModalLabel{{ $medicine->id }}"
-                                    class="modal fade" id="viewMedicineModal{{ $medicine->id }}" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="viewMedicineModalLabel{{ $medicine->id }}">
-                                                    Medicine Details</h5>
-                                                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
-                                                    type="button"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div><strong>Name:</strong> {{ $medicine->name }}</div>
-                                                <div><strong>Category:</strong> {{ $medicine->category->name }}</div>
-                                                <div><strong>Pharmacy:</strong> {{ $medicine->pharmacy->name }}</div>
-                                                <div><strong>Created At:</strong>
-                                                    {{ $medicine->created_at->format("d M, Y") }}</div>
-                                                <div><strong>Updated At:</strong>
-                                                    {{ $medicine->updated_at->format("d M, Y") }}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <a class="btn btn-success btn-sm" data-bs-target="#editMedicineModal{{ $medicine->id }}"
-                                    data-bs-toggle="modal" href="#"><i class="bi bi-pencil"></i></a>
-                                <div aria-hidden="true" aria-labelledby="editMedicineModalLabel{{ $medicine->id }}"
-                                    class="modal fade" id="editMedicineModal{{ $medicine->id }}" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="editMedicineModalLabel{{ $medicine->id }}">Edit
-                                                    Medicine</h5>
-                                                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
-                                                    type="button"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="{{ route("medicines.update", $medicine->id) }}"
-                                                    method="POST">
-                                                    @csrf
-                                                    @method("PUT")
-                                                    <input hidden id="" name="id" type="number"
-                                                        value="{{ $medicine->id }}">
-                                                    <div class="mb-3">
-                                                        <label class="form-label" for="name">Medicine Name</label>
-                                                        <input class="form-control" name="name" required type="text"
-                                                            value="{{ $medicine->name }}">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label" for="category">Category</label>
-                                                        <select class="chosen form-select" name="category_id" required>
-                                                            @foreach ($categories as $category)
-                                                                <option
-                                                                    {{ $medicine->category_id == $category->id ? "selected" : "" }}
-                                                                    value="{{ $category->id }}">
-                                                                    {{ $category->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label" for="pharmacy">Pharmacy:
-                                                            {{ $medicine->pharmacy->name }}</label>
-                                                        <input hidden name="pharmacy_id" type="number"
-                                                            value="{{ $medicine->pharmacy_id }}">
-                                                    </div>
-                                                    <button class="btn btn-success" type="submit">Update Medicine</button>
-                                            </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- if medicine having stock, disable delete button --}}
-                                @php
-                                    //select * from stocks where item_id = $medicine->id
-                                    $hasStock = \App\Models\Stock::where("item_id", $medicine->id)->exists();
-                                    // dd($hasStock);
-                                @endphp
-                                @if ($hasStock)
-                                    <button class="btn btn-danger btn-sm" disabled><i class="bi bi-trash"></i></button>
-                                @else
-                                    {{-- enable delete button --}}
-                                    <form action="{{ route("medicines.destroy", $medicine->id) }}" method="POST"
-                                        style="display:inline;">
-                                        {{-- <form action="medicines/destroy" method="DELETE" style="display:inline;"> --}}
-                                        @csrf
-                                        @method("DELETE")
-                                        <input class="hidden" type="number" value="">
-                                        <button class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Do you want to delete this medicine?')"
-                                            type="submit"><i class="bi bi-trash"></i></button>
-                                    </form>
-                                @endif
-
-                            </td>
-                        </tr>
-                    @endforeach
                 </tbody>
             </table>
         </div>
 
-        <div class="d-flex justify-content-center mt-3">
-            {{ $medicines->links() }}
-        </div>
+        <script>
+            $(document).ready(function() {
+                const table = $('#medicinesTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: async function(data, callback, settings) {
+                        if (navigator.onLine) {
+                            try {
+                                const response = await $.ajax({
+                                    url: "{{ route('medicines') }}",
+                                    data: data
+                                });
+                                callback(response);
+                                return;
+                            } catch (e) {
+                                console.warn('Network request failed, falling back to local DB');
+                            }
+                        }
+
+                        // Offline Fallback
+                        if (!window.db) {
+                            callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+                            return;
+                        }
+
+                        let items = await window.db.items.toArray();
+                        const categories = @json($categories->pluck('name', 'id'));
+
+                        const formattedData = items.map((item, index) => ({
+                            DT_RowIndex: index + 1,
+                            name: item.name,
+                            category_name: categories[item.category_id] || 'N/A',
+                            actions: '<span class="text-muted small">Viewing offline</span>'
+                        }));
+
+                        callback({
+                            draw: data.draw,
+                            recordsTotal: formattedData.length,
+                            recordsFiltered: formattedData.length,
+                            data: formattedData
+                        });
+                    },
+                    columns: [
+                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                        { data: 'name', name: 'name' },
+                        { data: 'category_name', name: 'category_name', orderable: false },
+                        { data: 'actions', name: 'actions', orderable: false, searchable: false }
+                    ]
+                });
+            });
+        </script>
     </div>
 
     <!-- Create Medicine Modal -->

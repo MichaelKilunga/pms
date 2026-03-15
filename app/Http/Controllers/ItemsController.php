@@ -20,6 +20,25 @@ class ItemsController extends Controller
      */
     public function index(Request $request)
     {
+        if ($request->ajax()) {
+            $query = Items::with(['category', 'pharmacy'])
+                ->where('pharmacy_id', session('current_pharmacy_id'));
+            
+            return \Yajra\DataTables\Facades\DataTables::of($query)
+                ->addIndexColumn()
+                ->addColumn('category_name', function($item) {
+                    return $item->category->name;
+                })
+                ->addColumn('actions', function($item) {
+                    return '
+                        <a class="btn btn-primary btn-sm" data-bs-target="#viewMedicineModal'.$item->id.'" data-bs-toggle="modal" href="#"><i class="bi bi-eye"></i></a>
+                        <a class="btn btn-success btn-sm" data-bs-target="#editMedicineModal'.$item->id.'" data-bs-toggle="modal" href="#"><i class="bi bi-pencil"></i></a>
+                    ';
+                })
+                ->rawColumns(['actions'])
+                ->make(true);
+        }
+
         $query = Items::with(['category', 'pharmacy'])
             ->where('pharmacy_id', session('current_pharmacy_id'));
 

@@ -1,6 +1,11 @@
-const CACHE_NAME = 'pms-v5';
+const CACHE_NAME = 'pms-v8';
+const DYNAMIC_CACHE = 'pms-dynamic-v1';
 const ASSETS_TO_CACHE = [
     '/',
+    '/dashboard',
+    '/sales',
+    '/stocks',
+    '/items',
     '/offline.html',
     '/manifest.json',
     '/css/app.css',
@@ -10,29 +15,17 @@ const ASSETS_TO_CACHE = [
     '/icons/maskable-icon.png',
     '/icons/apple-touch-icon.png',
     '/images/logo.png',
-    // External CDNs
-    'https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap',
+    // Critical CDNs (Precache these immediately)
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css',
     'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css',
-    'https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css',
     'https://code.jquery.com/jquery-3.6.0.min.js',
-    'https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css',
-    'https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css',
-    'https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css',
-    'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js',
-    'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-    'https://cdn.jsdelivr.net/npm/sweetalert2@11',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js',
-    'https://cdn.jsdelivr.net/npm/chart.js',
-    'https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/vfs_fonts.js',
-    'https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js',
-    'https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js',
-    'https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js',
-    'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js'
+    'https://cdn.jsdelivr.net/npm/sweetalert2@11',
+    'https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css',
+    'https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js',
+    'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css',
+    'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
 // Install Event
@@ -50,7 +43,7 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cache) => {
-                    if (cache !== CACHE_NAME) {
+                    if (cache !== CACHE_NAME && cache !== DYNAMIC_CACHE) {
                         return caches.delete(cache);
                     }
                 })
@@ -61,30 +54,59 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event
 self.addEventListener('fetch', (event) => {
-    // API Request Interception (Network First)
-    if (event.request.url.includes('/api/')) {
+    const url = new URL(event.request.url);
+
+    // 1. Datatable AJAX Interception (Custom logic for offline data display)
+    if (url.searchParams.has('draw') && !navigator.onLine) {
+        // This looks like a Datatable request (contains 'draw' parameter)
+        // We'll let it fail or handle it in the .catch of the navigation/api block
+    }
+
+    // 2. API Request Interception (Network First, then Cache)
+    if (url.pathname.includes('/api/')) {
         event.respondWith(
             fetch(event.request)
+                .then(async (response) => {
+                    const cache = await caches.open(DYNAMIC_CACHE);
+                    cache.put(event.request, response.clone());
+                    return response;
+                })
                 .catch(() => caches.match(event.request))
         );
         return;
     }
 
-    // Navigation requests (HTML pages)
+    // 3. Navigation requests (HTML pages) - Network First, then Cache
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request).catch(() => {
-                // Try to serve the cached root shell first, then the offline page
-                return caches.match('/') || caches.match('/offline.html');
-            })
+            fetch(event.request)
+                .then(async (response) => {
+                    const cache = await caches.open(DYNAMIC_CACHE);
+                    cache.put(event.request, response.clone());
+                    return response;
+                })
+                .catch(async () => {
+                    const cachedResponse = await caches.match(event.request);
+                    // Fallback hierarchy: Exact page -> Dashboard -> Offline page
+                    return cachedResponse || caches.match('/dashboard') || caches.match('/') || caches.match('/offline.html');
+                })
         );
         return;
     }
 
-    // Static Assets (Cache First)
+    // 4. Static Assets & External CDNs (Cache First, then Network)
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
+        caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) return cachedResponse;
+
+            return fetch(event.request).then(async (networkResponse) => {
+                // Dynamic caching for fonts, icons, and CDNs
+                if (networkResponse.ok) {
+                    const cache = await caches.open(DYNAMIC_CACHE);
+                    cache.put(event.request, networkResponse.clone());
+                }
+                return networkResponse;
+            });
         })
     );
 });

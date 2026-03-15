@@ -454,6 +454,62 @@
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- PWA Offline Resilience Layer -->
+    <script>
+        (function() {
+            // 1. Prevent navigation to uncached routes when offline
+            window.addEventListener('click', function(e) {
+                if (!navigator.onLine) {
+                    const anchor = e.target.closest('a');
+                    if (anchor && anchor.href && !anchor.href.startsWith('javascript:') && !anchor.href.startsWith('#')) {
+                        const url = new URL(anchor.href);
+                        const precached = ['/', '/dashboard', '/sales', '/stocks', '/items', '/medicines'];
+                        if (!precached.some(p => url.pathname === p)) {
+                            e.preventDefault();
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Pocket Offline',
+                                text: 'This feature is only available online. We have saved your current work!',
+                                timer: 3000
+                            });
+                        }
+                    }
+                }
+            }, true);
+
+            // 2. Global AJAX Error Handling (Prevent session "bumps")
+            $(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
+                if (!navigator.onLine) {
+                    console.warn('Suppressing AJAX error redirect because we are offline:', ajaxSettings.url);
+                    return false; // Prevent global handlers from triggering redirects
+                }
+            });
+
+            // 3. Connectivity Toast
+            window.addEventListener('online', () => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    icon: 'success',
+                    title: 'Back Online! Syncing now...'
+                });
+            });
+
+            window.addEventListener('offline', () => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    icon: 'warning',
+                    title: 'You are Offline. Work will be saved locally.'
+                });
+            });
+        })();
+    </script>
 </body>
 
 </html>
