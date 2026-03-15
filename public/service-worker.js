@@ -1,6 +1,7 @@
-const CACHE_NAME = 'pms-v3';
+const CACHE_NAME = 'pms-v4';
 const ASSETS_TO_CACHE = [
     '/',
+    '/offline.html',
     '/manifest.json',
     '/css/app.css',
     '/js/app.js',
@@ -50,7 +51,7 @@ self.addEventListener('fetch', (event) => {
     if (event.request.mode === 'navigate') {
         event.respondWith(
             fetch(event.request).catch(() => {
-                return caches.match('/') || caches.match('/index.php');
+                return caches.match('/offline.html') || caches.match('/');
             })
         );
         return;
