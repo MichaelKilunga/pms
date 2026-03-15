@@ -133,6 +133,7 @@ class DashboardController extends Controller
                 $pharmacy = Pharmacy::find($staff->pharmacy_id);
                 if ($pharmacy) {
                     session(['current_pharmacy_id' => $pharmacy->id]);
+                    session(['pharmacy_name' => $pharmacy->name]);
                 }
             }
         }

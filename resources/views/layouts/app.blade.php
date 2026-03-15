@@ -12,6 +12,22 @@
     <meta name="keywords" content="@yield('meta_keywords')">
     <meta name="author" content="SKYLINK SOLUTIONS">
 
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registered', reg))
+                    .catch(err => console.log('Service Worker registration failed', err));
+            });
+        }
+    </script>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -144,6 +160,27 @@
                     // timer: 2000
                 });
             @endif
+
+            // Global PWA Sync Status
+            const updateOnlineStatus = async () => {
+                const isOnline = navigator.onLine;
+                const status = isOnline ? 'Online' : 'Offline';
+                const color = isOnline ? 'success' : 'danger';
+                
+                let pendingCount = 0;
+                if (window.db) {
+                    pendingCount = await window.db.sync_queue.count();
+                }
+
+                const pendingText = pendingCount > 0 ? ` (${pendingCount} pending)` : '';
+                $('#connectionStatus').html(`<span class="badge bg-${color}">${status}${pendingText}</span>`);
+                
+                if (isOnline && window.SyncEngine) window.SyncEngine.sync();
+            };
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus();
+            setInterval(updateOnlineStatus, 5000); // Check for pending items every 5s
 
             @if (session('error'))
                 Swal.fire({

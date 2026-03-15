@@ -26,6 +26,15 @@
                         <x-application-mark class="block h-9 w-auto" />
                         <span class="hidden md:block">PILLPOINTONE</span>
                     </a>
+
+                    @if (session('current_pharmacy_id'))
+                        <div class="ml-4 hidden items-center border-l border-gray-200 pl-4 dark:border-gray-700 md:flex">
+                            <span class="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400">
+                                <i class="bi bi-shop text-primary-600 dark:text-primary-400"></i>
+                                {{ session('pharmacy_name') ?? 'Pharmacy' }}
+                            </span>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -33,6 +42,11 @@
                 {{-- Clock & Notifications (Simplified) --}}
                 <div class="hidden items-center gap-3 md:flex">
                     <p class="font-mono text-sm font-medium text-gray-500 dark:text-gray-400" id="clock"></p>
+                </div>
+
+                <!-- Connection Status -->
+                <div id="connectionStatus" class="flex items-center">
+                    <span class="badge bg-secondary">Checking...</span>
                 </div>
 
                 <!-- Notification Bell -->

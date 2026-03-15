@@ -199,6 +199,66 @@
     <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Intercept Sales Form
+            $('#salesForm').on('submit', async function(e) {
+                e.preventDefault();
+                
+                if (!window.db || !window.addToSyncQueue) {
+                    console.error('PWA modules not loaded');
+                    return;
+                }
+
+                const formData = new FormData(this);
+                const sales = [];
+                const stockIds = formData.getAll('stock_id[]');
+                const itemIds = formData.getAll('item_id[]'); // Note: these are strings like "ID-PRICE"
+                const quantities = formData.getAll('quantity[]');
+                const totalPrices = formData.getAll('total_price[]');
+                const amounts = formData.getAll('amount[]');
+                const dates = formData.getAll('date[]');
+
+                for (let i = 0; i < itemIds.length; i++) {
+                    const saleData = {
+                        pharmacy_id: {{ session('current_pharmacy_id') }},
+                        staff_id: {{ Auth::id() }},
+                        item_id: itemIds[i].split('-')[0], // Extract item ID
+                        stock_id: stockIds[i],
+                        quantity: parseInt(quantities[i]),
+                        total_price: parseFloat(totalPrices[i]),
+                        amount: parseFloat(amounts[i]),
+                        date: dates[i],
+                        sync_status: 1
+                    };
+                    
+                    // Save to local sales table
+                    const localId = await window.db.sales.add(saleData);
+                    saleData.local_id = localId;
+
+                    // Add to sync queue
+                    await window.addToSyncQueue('create', 'sales', saleData);
+                    
+                    // Local Stock Adjustment
+                    const stock = await window.db.stocks.get(parseInt(stockIds[i]));
+                    if (stock) {
+                        await window.db.stocks.update(stock.id, {
+                            remain_Quantity: stock.remain_Quantity - saleData.quantity
+                        });
+                    }
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sale saved locally',
+                    text: navigator.onLine ? 'Synchronizing with server...' : 'Will sync once online.',
+                    timer: 2000
+                });
+
+                $('#createSalesModal').modal('hide');
+                this.reset();
+                if (navigator.onLine && window.SyncEngine) window.SyncEngine.sync();
+            });
+
+            // Original initialization logic
             // Initialize Chosen for dynamically added rows
             function initializeChosen() {
                 $(document).ready(function() {
@@ -239,38 +299,35 @@
                 updateTotalAmount();
             }
 
-            function tellPrice(row) {
-                let medicines = @json($medicines); // Convert medicines to a JS array
+            async function tellPrice(row) {
+                if (!window.db) return;
+                
                 const selectedMedicineId = row.querySelector('[name="item_id[]"]').value;
+                const medicineId = selectedMedicineId.split('-')[0];
 
-                const selectedMedicine = medicines.find(medicine => medicine.id + '-' + medicine.selling_price ==
-                    selectedMedicineId);
+                const selectedMedicine = await window.db.stocks.get(parseInt(medicineId));
+                if (!selectedMedicine) return;
+
+                // We need the item name too, which is in the items table
+                const item = await window.db.items.get(selectedMedicine.item_id);
 
                 row.querySelector('[name="stock_id[]"]').value = `${selectedMedicine.id}`;
-                // console.log(selectedMedicine.id);
 
-                // return;
                 if (selectedMedicine) {
-                    // Set the total price to the medicine price (formatted with "TZS")
                     row.querySelector('[name="total_price[]"]').value = `${selectedMedicine.selling_price}`;
-                    row.querySelector('[name="quantity[]"]').setAttribute('max',
-                        `${selectedMedicine.remain_Quantity}`);
+                    row.querySelector('[name="quantity[]"]').setAttribute('max', `${selectedMedicine.remain_Quantity}`);
 
                     const labelElement = row.querySelector('[for="label[]"]');
-                    // Clear any existing content in the labelElement
                     labelElement.innerHTML = '';
-                    // Create a span element to hold the appended text
                     const appendedText = document.createElement('small');
-                    // Set the text content and add the class
                     appendedText.innerHTML = 'In stock (&darr;' + selectedMedicine.remain_Quantity + ')';
-                    if (selectedMedicine.remain_Quantity < selectedMedicine.low_stock_percentage) {
+                    
+                    if (selectedMedicine.remain_Quantity < 5) { // Assuming a default low stock threshold
                         appendedText.classList.add('text-danger');
                     } else {
                         appendedText.classList.add('text-success');
                     }
-                    // Append the span to the label element
                     labelElement.appendChild(appendedText);
-
                 }
             }
 

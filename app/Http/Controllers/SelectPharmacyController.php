@@ -30,7 +30,11 @@ class SelectPharmacyController extends Controller
     public function set(Request $request)
     {
         // Store the selected business in session
-        session(['current_pharmacy_id' => $request->pharmacy_id]);
+        $pharmacy = Pharmacy::find($request->pharmacy_id);
+        if ($pharmacy) {
+            session(['current_pharmacy_id' => $pharmacy->id]);
+            session(['pharmacy_name' => $pharmacy->name]);
+        }
 
         return redirect()->route('dashboard');  // Redirect to the home page or dashboard
     }
